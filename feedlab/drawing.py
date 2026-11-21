@@ -99,6 +99,8 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
         lines += [f"• {n}" for n in (geo.notes or [])][:8]
         ax.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7)
         _title_block(fig, geo, title, material, "1/1")
+        from . import i18n
+        i18n.translate_figure_mpl(fig)
         pdf.savefig(fig); plt.close(fig)
     return path
 

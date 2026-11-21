@@ -1,0 +1,5 @@
+# FeedLab for Windows (desktop program): the web app's dependencies plus the native window and the
+# packages openEMS' Python bindings need (h5py). Used by windows/build.ps1.
+-r requirements.txt
+pywebview>=5.0
+h5py>=3.10

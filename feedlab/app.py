@@ -4,20 +4,28 @@ from __future__ import annotations
 import io
 import json
 import math
+import os
 import tempfile
 import time
 from pathlib import Path
 
 import numpy as np
 import plotly.graph_objects as go
-import streamlit as st
+import streamlit as _st
 
-from feedlab import (cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_sim, patterns,
+from feedlab import i18n
+
+st = i18n.wrap(_st)
+
+from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns,
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
-st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
 S = st.session_state
+if "lang" not in S:
+    S.lang = i18n.default_lang()
+i18n.set_lang(S.lang)
+st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"
 WORK.mkdir(exist_ok=True)
 
@@ -126,7 +134,17 @@ def section_fig(geo):
 
 
 # ---------------------------------------------------------------- sidebar
+def _set_lang():
+    i18n.set_lang(S.lang)
+    try:
+        openems_local.save_settings(language=S.lang)
+    except Exception:
+        pass
+
+
 with st.sidebar:
+    st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
+                 on_change=_set_lang)
     st.title("📡 FeedLab")
     st.subheader("Laboratorio di Progettazione di feed/illuminatori a microonde")
     st.caption("10–134 GHz · basato su W1GHZ Antenna Book, design guide OE2IGL e letteratura")
@@ -150,7 +168,12 @@ with st.sidebar:
     col_on = st.checkbox("Collare Ø40 mm per portaLNB commerciale", bool(geometry.COLLAR.get("diam")))
     geometry.COLLAR["diam"] = st.number_input("Ø collare (mm)", 20.0, 80.0, 40.0, 1.0) if col_on else None
     st.divider()
-    st.caption("openEMS: " + ("✅ installato" if openems_sim.openems_available() else "❌ non trovato (genera lo script)"))
+    if os.environ.get("FEEDLAB_DESKTOP") == "browser":
+        if st.button("⏻ Chiudi FeedLab", help="ferma il programma (le simulazioni openEMS in corso continuano)"):
+            st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
+            os._exit(0)
+    st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
+                                         "vedi scheda Full-wave openEMS"))
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
                 "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR", "🖥️ Full-wave openEMS"])
@@ -231,7 +254,10 @@ with tabs[0]:
         st.write(f"f/D {'equivalente vista dal feed' if dish.kind == 'offset' else ''}: **{dish.fD:.3f}**")
         st.write(f"Angolo di apertura (centro→bordo ×2): **{dish.opening_deg:.1f}°**")
         lam = wavelength_mm(S.f_ghz)
-        st.write(f"Diametro: **{dish.D_mm / lam:.0f} λ** — HPBW ≈ **{reflector.hpbw_deg(dish.D_mm, lam):.2f}°**")
+        st.write(f"Diametro: **{dish.D_mm / lam:.0f} λ** — HPBW ≈ **{reflector.hpbw_deg(dish.D_mm, lam, 10):.2f}°** "
+                 f"(taper al bordo 10 dB; {reflector.hpbw_deg(dish.D_mm, lam, 0):.2f}° con illuminazione uniforme)")
+        st.caption("L'HPBW reale dipende dall'illuminazione del feed: dopo la scelta del feed è calcolato dal suo lobo "
+                   "nella scheda Simulazione & S11.")
         st.write(f"Guadagno a 60%: **{reflector.gain_dbi(dish.D_mm, lam, 0.6):.1f} dBi**")
         rms = st.number_input("Precisione superficie RMS (mm)", 0.0, 5.0, 0.2, 0.01)
         st.write(f"Perdita Ruze: **{reflector.ruze_loss_db(rms, lam):.2f} dB**")
@@ -384,6 +410,13 @@ with tabs[3]:
         m2.metric("Taper al bordo", f"{here.edge_taper_db:.1f} dB")
         m3.metric("f/D ottimo del feed", f"{best.fD:.2f}", f"{100 * best.total:.1f} %")
         m4.metric("Centro di fase", f"{pc * lam:+.2f} mm", "davanti all'apertura" if pc > 0 else "dentro l'horn")
+        beam = efficiency.dish_beam(pat.shifted(pc), dish.fD, dish.D_mm, lam, blk)
+        b1, b2, b3 = st.columns(3)
+        b1.metric("HPBW della parabola", f"{beam.hpbw_deg:.3f}°",
+                  help="dal lobo reale del feed (integrazione sull'apertura, feed nel centro di fase)")
+        b2.metric("HPBW piano E / H", f"{beam.hpbw_E_deg:.3f}° / {beam.hpbw_H_deg:.3f}°")
+        b3.metric("Primo lobo laterale", f"{beam.first_sidelobe_db:.1f} dB",
+                  f"taper al bordo {beam.edge_taper_db:.1f} dB", delta_color="off")
         G = reflector.gain_dbi(dish.D_mm, lam, max(here.total, 1e-3))
         st.write(f"Guadagno teorico con questo feed: **{G:.1f} dBi** (reale ≈ {reflector.gain_dbi(dish.D_mm, lam, max(here.total - 0.13, 0.01)):.1f} dBi, −13 punti)")
         with st.expander("G/T (prime focus, modello W1GHZ 2014)"):
@@ -443,52 +476,9 @@ with tabs[6]:
         st.markdown(f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="620"></iframe>',
                     unsafe_allow_html=True)
 
-# ---------------------------------------------------------------- 7 openEMS
+# ---------------------------------------------------------------- 7 openEMS (optional deep analysis)
 with tabs[8]:
-    st.header("Simulazione full-wave con openEMS (FDTD)")
-    geo = current_geometry()
-    if isinstance(geo, geometry.RectHornGeometry):
-        st.warning("Lo script automatico copre per ora i feed a simmetria di rotazione.")
-    else:
-        q = st.select_slider("Risoluzione mesh (celle per λ)", [15, 20, 30, 40, 60], 20,
-                             help="20 = veloce; 60 = qualità OE2IGL (molta RAM)")
-        bw = st.slider("Banda ± %", 2, 20, 10, key="oems_bw")
-        out = WORK / f"openems_{geo.kind}_{S.f_ghz:g}".replace(".", "p")
-        if st.button("Genera script openEMS"):
-            S["oems_script"] = openems_sim.make_script(geo, out, S.f_ghz * (1 - bw / 100), S.f_ghz * (1 + bw / 100), q)
-        if S.get("oems_script"):
-            p = Path(S["oems_script"])
-            st.download_button("Scarica script Python", p.read_text(), file_name=p.name)
-            st.code(f"python {p.name}   # crea results.json da caricare qui sotto", language="bash")
-            if openems_sim.openems_available():
-                if st.button("▶️ Esegui ora su questo PC"):
-                    S["oems_proc"] = openems_sim.run(p)
-                if S.get("oems_proc") is not None:
-                    proc = S["oems_proc"]
-                    log = p.with_suffix(".log")
-                    st.text(log.read_text()[-3000:] if log.exists() else "…")
-                    if proc.poll() is None:
-                        st.info("Simulazione in corso… premi 'Aggiorna'.")
-                        st.button("Aggiorna")
-                    elif (p.parent / "results.json").exists():
-                        S.fullwave = openems_sim.load_results(p.parent / "results.json")
-                        st.success("Risultati caricati.")
-            else:
-                st.info("openEMS non è installato su questo PC: installalo (https://docs.openems.de) e riapri FeedLab, "
-                        "oppure esegui lo script altrove e carica qui `results.json`.")
-        up = st.file_uploader("Carica results.json di openEMS", type="json")
-        if up is not None:
-            tmp = WORK / "uploaded_results.json"
-            tmp.write_bytes(up.read())
-            S.fullwave = openems_sim.load_results(tmp)
-        if S.fullwave is not None:
-            fw = S.fullwave
-            fig = go.Figure(go.Scatter(x=fw["freq_ghz"], y=20 * np.log10(np.abs(fw["s11"]) + 1e-15)))
-            fig.update_layout(title="S11 full-wave (openEMS)", xaxis_title="GHz", yaxis_title="dB", height=330)
-            st.plotly_chart(fig, width="stretch")
-            st.write(f"Direttività massima: **{fw['Dmax_dbi']:.2f} dBi**")
-            st.plotly_chart(polar_fig(fw["pattern"], "Lobo full-wave"), width="stretch")
-
+    app_openems.render(S, current_geometry(), polar_fig)
 
 
 # ---------------------------------------------------------------- 3 laboratory
