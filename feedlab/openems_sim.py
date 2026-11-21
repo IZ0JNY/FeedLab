@@ -102,8 +102,9 @@ def mesh_estimate(geo: FeedGeometry, cfg: DeepConfig) -> dict:
     # Courant step of a uniform mesh, and the ~ pulse length + ringing: empirical 8-30k steps for feeds
     dt = res * 1e-3 / (C0 * 3 ** 0.5)
     bw = (c.f_hi - c.f_lo) * 1e9
-    ts = min(c.nr_ts, int(12.0 / (bw * dt) + 40 * (geo.z_aperture + 2 * pad) / res))
-    speed_mcs = 150.0                      # typical desktop CPU, MCells/s (openEMS prints the real one)
+    # Gaussian pulse (~18/(2*pi*fc) long) plus the ringing of the feed down to the end criterion
+    ts = min(c.nr_ts, int(3.0 * (18.0 / (2 * 3.14159 * 0.5 * bw * dt)) + 60 * (geo.z_aperture + 2 * pad) / res))
+    speed_mcs = 100.0                      # typical desktop CPU, MCells/s (openEMS prints the real one)
     t_s = cells * ts / (speed_mcs * 1e6)
     return {"cells": int(cells), "nx": int(nxy), "nz": int(nz), "res_mm": res, "timesteps_est": int(ts),
             "ram_mb": cells * 90 / 1e6 + 150, "time_min": t_s / 60.0}

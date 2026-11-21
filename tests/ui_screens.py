@@ -71,7 +71,13 @@ def main(out: Path):
             pg.screenshot(path=str(out / "02_openems_install.png"), full_page=True)
             for i, name in enumerate(["② Nuova analisi", "③ Simulazioni", "④ Risultati"], start=3):
                 pg.get_by_role("tab", name=name).click()
-                pg.wait_for_timeout(9000 if "Risultati" in name else 4000)
+                pg.wait_for_timeout(4000)
+                if "Risultati" in name:
+                    try:
+                        pg.wait_for_selector("text=Efficienza vs f/D", timeout=90000)
+                        pg.wait_for_timeout(3000)
+                    except Exception:
+                        pass
                 pg.screenshot(path=str(out / f"0{i}_{name[2:].replace(' ', '_')}.png"), full_page=True)
             b.close()
     finally:

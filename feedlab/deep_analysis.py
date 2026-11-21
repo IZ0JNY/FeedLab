@@ -385,7 +385,7 @@ def compare_fast_model(r: DeepResult) -> dict | None:
     g = r.geometry
     try:
         prof_secs = _sections_from_polys(g)
-        mm = modematch.simulate(prof_secs, r.freq_ghz[:: max(1, len(r.freq_ghz) // 41)], n_modes=14)
+        mm = modematch.simulate(prof_secs, np.linspace(r.freq_ghz[0], r.freq_ghz[-1], 21), n_modes=12)
         return {"freq_ghz": mm.f_ghz, "s11_db": mm.s11_db}
     except Exception:
         return None

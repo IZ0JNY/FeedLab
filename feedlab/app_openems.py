@@ -33,6 +33,38 @@ def _auto(run_every):
     return deco
 
 
+def _key(path):
+    p = Path(path)
+    p = p / "results.json" if p.is_dir() else p
+    return str(p), p.stat().st_mtime
+
+
+@st.cache_data(show_spinner="Analisi dei risultati…", max_entries=64)
+def _analyze_cached(path: str, mtime: float, spec: tuple):
+    return deep_analysis.analyze(deep_analysis.load(path), deep_analysis.DishSpec(*spec))
+
+
+@st.cache_data(show_spinner=False, max_entries=64)
+def _fast_cached(path: str, mtime: float):
+    return deep_analysis.compare_fast_model(deep_analysis.load(path))
+
+
+@st.cache_data(show_spinner=False, max_entries=256)
+def _dish_cached(path: str, mtime: float, f_ghz: float, spec: tuple):
+    r = deep_analysis.load(path)
+    return deep_analysis.dish_performance(r.ff_at(f_ghz).pattern(), f_ghz, deep_analysis.DishSpec(*spec))
+
+
+@st.cache_data(show_spinner="Confronto delle simulazioni…", max_entries=32)
+def _compare_cached(items: tuple, spec: tuple):
+    return deep_analysis.compare([(lab, deep_analysis.load(p)) for lab, p, _ in items], deep_analysis.DishSpec(*spec))
+
+
+def _spec_tuple(spec):
+    from dataclasses import astuple
+    return astuple(spec)
+
+
 def _fmt_time(s):
     if s is None:
         return "—"
@@ -262,9 +294,20 @@ def _new_section(S, geo, dish):
 
 
 # ================================================================== 3. jobs
-@_auto("3s")
 def _jobs_section(S):
     jobs = openems_local.list_jobs()
+    if any(j["state"] in ("running", "queued") for j in jobs):
+        _jobs_live(S)
+    else:
+        _jobs_list(jobs)
+
+
+@_auto("3s")
+def _jobs_live(S):
+    _jobs_list(openems_local.list_jobs())
+
+
+def _jobs_list(jobs):
     if not jobs:
         st.info("Nessuna simulazione. Avviane una da **Nuova analisi**.")
         return
@@ -347,22 +390,25 @@ def _results_section(S, geo, dish, polar_fig):
         _compare_view(results, spec)
         return
     label, r = results[0]
-    a = deep_analysis.analyze(r, spec)
+    rk = _key(r.path)
+    st_ = _spec_tuple(spec)
+    a = _analyze_cached(*rk, st_)
     for w in a["warnings"]:
         st.warning(w)
     s = a["s11"]
     d0 = a["f0_detail"]
-    c = st.columns(6)
+    c = st.columns(3)
     c[0].metric("S11 a f0", f"{s['s11_f0_db']:.1f} dB", help=f"VSWR {s['vswr_f0']:.2f}")
-    c[1].metric("Efficienza", f"{100 * d0['eta_total']:.1f} %")
-    c[2].metric("Guadagno", f"{d0['gain_dbi']:.2f} dBi")
-    c[3].metric("G/T", f"{d0['g_over_t_db']:.2f} dB/K")
-    c[4].metric("Centro di fase", f"{d0['phase_center']['d_mm']:+.2f} mm", help="+ = davanti all'apertura (verso il riflettore)")
+    c[1].metric("Efficienza sulla parabola", f"{100 * d0['eta_total']:.1f} %")
     sph = a.get("sphere") or {}
-    c[5].metric("Direttività feed", f"{sph.get('D_dbi', a['per_freq'][0]['D_bor_dbi']):.2f} dBi")
+    c[2].metric("Direttività del feed", f"{sph.get('D_dbi', a['per_freq'][0]['D_bor_dbi']):.2f} dBi")
+    c = st.columns(3)
+    c[0].metric("Guadagno", f"{d0['gain_dbi']:.2f} dBi")
+    c[1].metric("G/T", f"{d0['g_over_t_db']:.2f} dB/K")
+    c[2].metric("Centro di fase", f"{d0['phase_center']['d_mm']:+.2f} mm", help="+ = davanti all'apertura (verso il riflettore)")
 
     fig = go.Figure(go.Scatter(x=r.freq_ghz, y=r.s11_db, name="openEMS"))
-    fm = deep_analysis.compare_fast_model(r)
+    fm = _fast_cached(*rk)
     if fm:
         fig.add_trace(go.Scatter(x=fm["freq_ghz"], y=fm["s11_db"], name="FeedLab rapido", line=dict(dash="dash")))
     for lvl in (-15, -20):
@@ -389,7 +435,7 @@ def _results_section(S, geo, dish, polar_fig):
                                  line=dict(color=col, dash="dot")))
     fig.update_layout(title="Co/cross-polare (Ludwig-3)", xaxis_title="θ °", yaxis_title="dB", yaxis_range=[-50, 1], height=460)
     c[1].plotly_chart(fig, width="stretch")
-    dp = deep_analysis.dish_performance(pp, fsel, spec)
+    dp = _dish_cached(*rk, float(fsel), st_)
     ps = pp.shifted(dp["phase_center"]["d_lambda"])
     c = st.columns(2)
     fig = go.Figure()
@@ -439,7 +485,7 @@ def _results_section(S, geo, dish, polar_fig):
 
 
 def _compare_view(results, spec):
-    rows = deep_analysis.compare(results, spec)
+    rows = _compare_cached(tuple((lab, r.path, _key(r.path)[1]) for lab, r in results), _spec_tuple(spec))
     table = [{"Simulazione": r["label"].split(" · ")[1] if " · " in r["label"] else r["label"],
               "celle/λ": r["cells_per_lambda"], "M celle": round(r["cells_M"], 2), "min": round(r["time_min"], 1),
               "S11 f0 dB": round(r["s11_f0_db"], 1), "S11 peggiore dB": round(r["s11_max_band_db"], 1),
