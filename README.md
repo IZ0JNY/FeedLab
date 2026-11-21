@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald Ihninger, OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.2**. Interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e script openEMS. 22 test di validazione.
+> Stato: **v0.3**. Programma per Windows (installer), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -22,6 +22,20 @@ Le basi di conoscenza sono:
 | `cassegrain` | Progetto del subriflettore iperbolico (procedura W1GHZ verificata sul suo foglio di calcolo), sub ottimo di Kildal, profilo e G-code per tornio |
 | `noise` | T_sky (con correzione di Planck), T_rx, T_spillover, T_antenna integrata sul pattern, G/T, sun noise atteso |
 
+
+## FeedLab per Windows
+
+Scarica **`FeedLab-Setup-<versione>.exe`** dalla pagina [Releases](https://github.com/IZ0JNY/mwFeedDesign/releases) e avvialo: si installa per l'utente corrente, senza diritti di amministratore, con icona nel menu Start (e sul desktop, se vuoi). C'è anche lo zip *portable*: estrai e avvia `FeedLab.bat`.
+
+- È la stessa app della versione web, con tutte le schede, in una **finestra propria** (Microsoft Edge WebView2); funziona senza internet. Se WebView2 manca, si apre nel browser.
+- **openEMS è facoltativo.** Il simulatore rapido interno risponde in secondi; openEMS serve solo per l'analisi full-wave di riferimento, che richiede da minuti a ore. Si installa:
+  - dalla scheda **🖥️ Full-wave openEMS → ① Installazione**, con la procedura guidata: scarica l'ultima versione ufficiale per Windows, la estrae in `%LOCALAPPDATA%\Programs\openEMS`, imposta `OPENEMS_INSTALL_PATH`, installa i binding Python nel Python di FeedLab e fa una simulazione di prova;
+  - oppure spuntando l'opzione nell'installer di FeedLab.
+- **② Nuova analisi**: singola simulazione, **convergenza della mesh** (più risoluzioni) o **sweep di una quota**, con stima di celle, RAM e durata. Gli script openEMS sono generati in automatico dal feed corrente; puoi anche solo scaricarli per un altro PC.
+- **③ Simulazioni**: girano in background una dopo l'altra, con avanzamento (energia residua, tempo stimato), e continuano anche se chiudi FeedLab. Si trovano in `Documenti\FeedLab\openEMS`.
+- **④ Risultati (deep analysis)**: S11, VSWR, banda a −15/−20 dB, impedenza; lobi co/cross-polari (Ludwig-3) a più frequenze; direttività dalla sfera completa e verifica dell'ipotesi BOR1; potenza irradiata/accettata come controllo di convergenza; **centro di fase** (metodo PHASEPAT e formula W1GHZ) e sua deriva in banda; **efficienza vs f/D** scomposta; guadagno, T antenna e **G/T** sulla tua parabola; confronto con il modello rapido; confronto fra simulazioni; report HTML, CSV e file `.dat` W1GHZ. Il lobo full-wave si può usare anche nelle altre schede.
+
+Compilazione: GitHub Actions (`.github/workflows/windows.yml`) esegue i test su Windows e crea installer e zip; in locale `windows\build.ps1` (Python embedded + pacchetti + Inno Setup).
 
 ## Interfaccia grafica
 
@@ -41,7 +55,7 @@ Si apre nel browser (Windows, Linux, macOS). Schede:
 | 🧊 Modello 3D | Modello del feed con sezione |
 | 📄 Disegno & STEP | Disegno meccanico **PDF** (sezione quotata, tabella, cartiglio, tolleranze), **.stp** e **.stl** |
 | 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR, orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP |
-| 🖥️ Full-wave openEMS | Genera ed esegue la simulazione FDTD **openEMS** (S11 e lobo di riferimento); i risultati si ricaricano nell'app |
+| 🖥️ Full-wave openEMS | **Opzionale**: installazione guidata di openEMS, simulazioni FDTD in background (singola, convergenza, sweep) e **deep analysis** dei risultati |
 
 Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del feed** (rame, rame argentato, dorato, ottone, alluminio, stampa 3D metallizzata…), con calcolo delle perdite e del rumore, e il **collare Ø40 mm** per i portaLNB commerciali.
 
@@ -52,7 +66,7 @@ Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del fee
   - Feed con choke o anelli coassiali (VE4MA, Chaparral): non simulati qui, si stimano dalle design guide.
 - **Full-wave openEMS** (gratuito, https://openems.de): S11 e lobo di riferimento, per tutti i feed a simmetria di rotazione.
   - Lo script è generato sul modello del tutorial ufficiale "Conical Horn" (porta TE11 in guida circolare + nf2ff).
-  - Va eseguito sul PC dove openEMS è installato: in questo ambiente cloud non è stato possibile compilarlo.
+  - Va eseguito sul PC dove openEMS è installato (nella versione per Windows l'installazione è guidata).
 
 ## Metterlo online
 - **Streamlit Community Cloud** (gratuito): su https://share.streamlit.io accedi con GitHub, scegli il repository `mwfeeddesign`, il branch `main`, il file `streamlit_app.py`, Python 3.12, e premi Deploy. Usa `requirements.txt` e `packages.txt`.

@@ -319,17 +319,15 @@ def main():
         zin = port.uf_tot / port.if_tot
     except Exception:
         zin = np.full_like(s11, np.nan)
-    try:
-        pacc = np.real(port.P_acc)
-    except Exception:
-        pacc = 0.5 * np.real(port.uf_tot * np.conj(port.if_tot))
+    pacc = 0.5 * np.real(port.uf_tot * np.conj(port.if_tot))       # accepted power (incident - reflected)
 
     center = [0, 0, m["Z_AP"] * unit]
     theta = np.arange(0.0, 180.0 + C["theta_step"] / 2, C["theta_step"])
     phis = np.array(C["phi_cuts"], float)
     ffreqs = [f * 1e9 for f in C["ff_freqs"]]
     status("nf2ff", part="cuts", n=len(ffreqs))
-    r = nf2ff.CalcNF2FF(sim_path, ffreqs, theta, phis, center=center, outfile="nf2ff_cuts.h5")
+    r = nf2ff.CalcNF2FF(sim_path, ffreqs, theta, phis, center=center, outfile="nf2ff_cuts.h5",
+                         read_cached=False)
     ff = []
     for i, f in enumerate(ffreqs):
         Et, Ep = np.asarray(r.E_theta[i]), np.asarray(r.E_phi[i])
@@ -343,7 +341,8 @@ def main():
         st = float(C["sphere_step"])
         th_s = np.arange(0.0, 180.0 + st / 2, st)
         ph_s = np.arange(0.0, 360.0, st)
-        rs = nf2ff.CalcNF2FF(sim_path, f0, th_s, ph_s, center=center, outfile="nf2ff_sphere.h5")
+        rs = nf2ff.CalcNF2FF(sim_path, f0, th_s, ph_s, center=center, outfile="nf2ff_sphere.h5",
+                                read_cached=False)
         Et, Ep = np.asarray(rs.E_theta[0]), np.asarray(rs.E_phi[0])
         sphere = dict(f_ghz=f0 / 1e9, theta=_l(th_s), phi=_l(ph_s), Et_re=_l(Et.real), Et_im=_l(Et.imag),
                       Ep_re=_l(Ep.real), Ep_im=_l(Ep.imag), Prad=float(np.real(rs.Prad[0])),
