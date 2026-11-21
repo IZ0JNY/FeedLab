@@ -237,7 +237,10 @@ with tabs[0]:
         st.write(f"f/D {'equivalente vista dal feed' if dish.kind == 'offset' else ''}: **{dish.fD:.3f}**")
         st.write(f"Angolo di apertura (centro→bordo ×2): **{dish.opening_deg:.1f}°**")
         lam = wavelength_mm(S.f_ghz)
-        st.write(f"Diametro: **{dish.D_mm / lam:.0f} λ** — HPBW ≈ **{reflector.hpbw_deg(dish.D_mm, lam):.2f}°**")
+        st.write(f"Diametro: **{dish.D_mm / lam:.0f} λ** — HPBW ≈ **{reflector.hpbw_deg(dish.D_mm, lam, 10):.2f}°** "
+                 f"(taper al bordo 10 dB; {reflector.hpbw_deg(dish.D_mm, lam, 0):.2f}° con illuminazione uniforme)")
+        st.caption("L'HPBW reale dipende dall'illuminazione del feed: dopo la scelta del feed è calcolato dal suo lobo "
+                   "nella scheda Simulazione & S11.")
         st.write(f"Guadagno a 60%: **{reflector.gain_dbi(dish.D_mm, lam, 0.6):.1f} dBi**")
         rms = st.number_input("Precisione superficie RMS (mm)", 0.0, 5.0, 0.2, 0.01)
         st.write(f"Perdita Ruze: **{reflector.ruze_loss_db(rms, lam):.2f} dB**")
@@ -390,6 +393,13 @@ with tabs[3]:
         m2.metric("Taper al bordo", f"{here.edge_taper_db:.1f} dB")
         m3.metric("f/D ottimo del feed", f"{best.fD:.2f}", f"{100 * best.total:.1f} %")
         m4.metric("Centro di fase", f"{pc * lam:+.2f} mm", "davanti all'apertura" if pc > 0 else "dentro l'horn")
+        beam = efficiency.dish_beam(pat.shifted(pc), dish.fD, dish.D_mm, lam, blk)
+        b1, b2, b3 = st.columns(3)
+        b1.metric("HPBW della parabola", f"{beam.hpbw_deg:.3f}°",
+                  help="dal lobo reale del feed (integrazione sull'apertura, feed nel centro di fase)")
+        b2.metric("HPBW piano E / H", f"{beam.hpbw_E_deg:.3f}° / {beam.hpbw_H_deg:.3f}°")
+        b3.metric("Primo lobo laterale", f"{beam.first_sidelobe_db:.1f} dB",
+                  f"taper al bordo {beam.edge_taper_db:.1f} dB", delta_color="off")
         G = reflector.gain_dbi(dish.D_mm, lam, max(here.total, 1e-3))
         st.write(f"Guadagno teorico con questo feed: **{G:.1f} dBi** (reale ≈ {reflector.gain_dbi(dish.D_mm, lam, max(here.total - 0.13, 0.01)):.1f} dBi, −13 punti)")
         with st.expander("G/T (prime focus, modello W1GHZ 2014)"):

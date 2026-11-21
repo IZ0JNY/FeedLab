@@ -138,3 +138,71 @@ def feedpatt_classic(p: Pattern, fD: float, dish_diam_lambda: float = 10.0, feed
     ill = K * num ** 2 / deni
     return {"total": K * numb ** 2 / denom, "illumination": ill, "spillover": unbl / ill,
             "blockage": (K * numb ** 2 / denom) / unbl, "psi": psi}
+
+
+@dataclass
+class DishBeam:
+    hpbw_E_deg: float
+    hpbw_H_deg: float
+    edge_taper_db: float          # feed + space attenuation at the rim (average of E and H)
+    beam_factor: float            # HPBW = b * lambda / D (mean of the two planes)
+    first_sidelobe_db: float
+
+    @property
+    def hpbw_deg(self) -> float:
+        return 0.5 * (self.hpbw_E_deg + self.hpbw_H_deg)
+
+
+def dish_beam(p: Pattern, fD: float, D_mm: float, lam_mm: float, block_diam_ratio: float = 0.0,
+              n_u: int = 900) -> DishBeam:
+    """Secondary (dish) beam from the real illumination of the feed, by aperture integration.
+
+    Feed at the focus of a paraboloid (prime focus, or the equivalent paraboloid of an offset dish).
+    Aperture field at radius rho = 2 f tan(psi/2):  F(psi) / r(psi), r = 2f / (1 + cos psi) (space attenuation),
+    with the feed phase. For a BOR1 feed the co-polar aperture field is (A+B)/2 + (A-B)/2 cos 2phi, so the
+    far field in the E (phi=0) and H (phi=90°) planes is the Hankel transform
+        E(u) = int [ (A+B)/2 J0(u rho) -/+ (A-B)/2 J2(u rho) ] rho drho,   u = k sin(theta).
+    Central blockage (prime focus) removes rho < block/2. Replaces the fixed-taper Baars estimate.
+    """
+    from scipy.special import jv
+    psi0 = half_angle_from_fD(fD) * DEG
+    f = fD * D_mm
+    t = p.theta_deg * DEG
+    m = t <= psi0 + 1e-12
+    psi = np.linspace(0.0, psi0, 1201)
+    A = np.interp(psi, t[m], p.E[m].real) + 1j * np.interp(psi, t[m], p.E[m].imag)
+    B = np.interp(psi, t[m], p.H[m].real) + 1j * np.interp(psi, t[m], p.H[m].imag)
+    rho = 2 * f * np.tan(psi / 2)
+    r = 2 * f / (1 + np.cos(psi))
+    S = 0.5 * (A + B) / r
+    Dd = 0.5 * (A - B) / r
+    if block_diam_ratio > 0:
+        keep = rho >= 0.5 * block_diam_ratio * D_mm
+        S, Dd = S * keep, Dd * keep
+    k = 2 * math.pi / lam_mm
+    # search well past the main beam: u D/2 up to ~ 4 pi
+    u = np.linspace(0.0, 8 * math.pi / D_mm, n_u)
+    ur = np.outer(u, rho)
+    J0, J2 = jv(0, ur), jv(2, ur)
+    trap = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
+    IE = trap((S[None, :] * J0 - Dd[None, :] * J2) * rho[None, :], rho, axis=1)
+    IH = trap((S[None, :] * J0 + Dd[None, :] * J2) * rho[None, :], rho, axis=1)
+
+    def hp(I):
+        P = np.abs(I) ** 2
+        P = P / P[0]
+        i = int(np.argmax(P < 0.5))
+        u_h = np.interp(0.5, [P[i], P[i - 1]], [u[i], u[i - 1]])
+        # first null / sidelobe
+        rising = np.nonzero(np.diff(P[i:]) > 0)[0]
+        sl = 10 * math.log10(max(P[i + rising[0]:].max(), 1e-12)) if len(rising) else float("nan")
+        return 2 * math.degrees(math.asin(min(1.0, u_h / k))), sl
+
+    hE, slE = hp(IE)
+    hH, slH = hp(IH)
+    edge = []
+    for F in (A, B):
+        e = abs(F[-1]) / abs(F[0]) * (2 * f / (1 + 1.0)) / r[-1]
+        edge.append(-20 * math.log10(max(e, 1e-9)))
+    hmean = 0.5 * (hE + hH)
+    return DishBeam(hE, hH, 0.5 * (edge[0] + edge[1]), math.radians(hmean) * D_mm / lam_mm, max(slE, slH))

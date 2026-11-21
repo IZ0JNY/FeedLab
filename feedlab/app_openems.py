@@ -406,6 +406,10 @@ def _results_section(S, geo, dish, polar_fig):
     c[0].metric("Guadagno", f"{d0['gain_dbi']:.2f} dBi")
     c[1].metric("G/T", f"{d0['g_over_t_db']:.2f} dB/K")
     c[2].metric("Centro di fase", f"{d0['phase_center']['d_mm']:+.2f} mm", help="+ = davanti all'apertura (verso il riflettore)")
+    c = st.columns(3)
+    c[0].metric("HPBW della parabola", f"{d0['hpbw_deg']:.3f}°", help="dal lobo full-wave del feed, per integrazione sull'apertura")
+    c[1].metric("HPBW piano E / H", f"{d0['hpbw_E_deg']:.3f}° / {d0['hpbw_H_deg']:.3f}°")
+    c[2].metric("Primo lobo laterale", f"{d0['sidelobe_db']:.1f} dB")
 
     fig = go.Figure(go.Scatter(x=r.freq_ghz, y=r.s11_db, name="openEMS"))
     fm = _fast_cached(*rk)

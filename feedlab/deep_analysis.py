@@ -287,7 +287,9 @@ def dish_performance(p: Pattern, f_ghz: float, dish: DishSpec) -> dict:
     tsys = ta * line + (1 - line) * 290.0 + trx
     curve = efficiency.efficiency_vs_fD(pp, np.arange(0.25, 1.505, 0.01), blk)
     best = max(curve, key=lambda x: x.total)
-    return {"phase_center": pc, "eff": e.as_dict(), "eta_total": eta, "ruze": ruze, "gain_dbi": G, "t_sky": tsky,
+    beam = efficiency.dish_beam(pp, dish.fD, dish.D_mm, lam, blk)
+    return {"phase_center": pc, "eff": e.as_dict(), "eta_total": eta, "hpbw_deg": beam.hpbw_deg,
+            "hpbw_E_deg": beam.hpbw_E_deg, "hpbw_H_deg": beam.hpbw_H_deg, "sidelobe_db": beam.first_sidelobe_db, "ruze": ruze, "gain_dbi": G, "t_sky": tsky,
             "t_ant": ta, "t_rx": trx, "t_sys": tsys, "g_over_t_db": G - 10 * math.log10(tsys),
             "best_fD": best.fD, "best_eta": best.total,
             "curve": {"fD": [c.fD for c in curve], "total": [c.total for c in curve], "spill": [c.spillover for c in curve],
@@ -554,6 +556,8 @@ Spostamento nella banda: {f(a['pc_spread_mm'])} mm.</p>
 <tr><th class=k>Polarizzazione</th><td>{f(100 * e['polarization'], 1)} %</td><th class=k>Bloccaggio</th><td>{f(100 * e['blockage'], 1)} %</td></tr>
 <tr><th class=k>Taper al bordo</th><td>{f(e['edge_taper_db'], 1)} dB</td><th class=k>f/D ottimo</th><td>{f(d0['best_fD'])} (η {f(100 * d0['best_eta'], 1)} %)</td></tr>
 <tr><th class=k>Guadagno</th><td>{f(d0['gain_dbi'])} dBi</td><th class=k>T antenna</th><td>{f(d0['t_ant'], 1)} K (cielo {f(d0['t_sky'], 1)} K)</td></tr>
+<tr><th class=k>HPBW parabola (E / H)</th><td>{f(d0['hpbw_E_deg'], 3)}° / {f(d0['hpbw_H_deg'], 3)}°</td>
+<th class=k>Primo lobo laterale</th><td>{f(d0['sidelobe_db'], 1)} dB</td></tr>
 <tr><th class=k>T sistema</th><td>{f(d0['t_sys'], 1)} K</td><th class=k>G/T</th><td>{f(d0['g_over_t_db'])} dB/K</td></tr></table>
 <p style="color:#777;font-size:12px">Generato da FeedLab (mwFeedDesign). Simulazione FDTD openEMS; efficienza con il metodo
 Kildal/W1GHZ sui tagli E/H (ipotesi BOR1).</p></body></html>"""
