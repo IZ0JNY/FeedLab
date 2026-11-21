@@ -73,6 +73,7 @@ def main(out: Path):
                 pg.get_by_role("tab", name=name).click()
                 pg.wait_for_timeout(4000)
                 if "Risultati" in name:
+                    pg.set_viewport_size({"width": 1440, "height": 3400})
                     try:
                         pg.wait_for_selector("text=Efficienza vs f/D", timeout=90000)
                         pg.wait_for_timeout(3000)
