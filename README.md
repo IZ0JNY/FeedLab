@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald Ihninger, OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.3**. Programma per Windows (installer), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4**. Programma per Windows (installer e interfaccia in italiano, English, Deutsch, Français, Español), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -27,6 +27,7 @@ Le basi di conoscenza sono:
 
 Scarica **`FeedLab-Setup-<versione>.exe`** dalla pagina [Releases](https://github.com/IZ0JNY/mwFeedDesign/releases) e avvialo: si installa per l'utente corrente, senza diritti di amministratore, con icona nel menu Start (e sul desktop, se vuoi). C'è anche lo zip *portable*: estrai e avvia `FeedLab.bat`.
 
+- **Multilingua**: italiano, English, Deutsch, Français, Español, sia nell'installer sia nell'app (selettore nella barra laterale; la lingua scelta nell'installazione è quella iniziale). Disegni PDF e report seguono la lingua scelta.
 - È la stessa app della versione web, con tutte le schede, in una **finestra propria** (Microsoft Edge WebView2); funziona senza internet. Se WebView2 manca, si apre nel browser.
 - **openEMS è facoltativo.** Il simulatore rapido interno risponde in secondi; openEMS serve solo per l'analisi full-wave di riferimento, che richiede da minuti a ore. Si installa:
   - dalla scheda **🖥️ Full-wave openEMS → ① Installazione**, con la procedura guidata: scarica l'ultima versione ufficiale per Windows, la estrae in `%LOCALAPPDATA%\Programs\openEMS`, imposta `OPENEMS_INSTALL_PATH`, installa i binding Python nel Python di FeedLab e fa una simulazione di prova;

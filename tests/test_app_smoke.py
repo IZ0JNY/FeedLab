@@ -25,6 +25,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("FEEDLAB_CONFIG", str(tmp_path / "cfg"))
     monkeypatch.setenv("FEEDLAB_HOME", str(tmp_path / "home"))
     monkeypatch.delenv("OPENEMS_INSTALL_PATH", raising=False)
+    monkeypatch.setenv("FEEDLAB_LANG", "it")          # CI runners have an English locale
     monkeypatch.chdir(ROOT)
     return tmp_path
 
@@ -58,3 +59,13 @@ def test_app_with_openems_and_results(isolated, monkeypatch):
     assert "Binding Python funzionanti" in text
     labels = [m.label for m in at.metric]
     assert "Centro di fase" in labels and "G/T" in labels
+
+
+@pytest.mark.parametrize("lang", ["en", "de", "fr", "es"])
+def test_app_runs_in_every_language(isolated, lang):
+    at = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=600)
+    at.session_state["lang"] = lang
+    at.run()
+    assert not at.exception, _errors(at)
+    tabs = [t.label for t in at.tabs]
+    assert tabs and not any("Procedura guidata" in t or "Progetto feed" in t for t in tabs), tabs

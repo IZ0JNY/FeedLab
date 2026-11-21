@@ -118,14 +118,35 @@ CATALOG: list[DishModel] = [
               16.97, None, None, {12.0: 41.8, 14.3: 43.3}, "", "SMC/acciaio",
               "Skyware Global Type 123 Class II datasheet; offset 16.97° da manuale Andrew (citato su satsig)",
               "'long focal length optics'; focale non pubblicata"),
-    DishModel("Andrew / Channel Master / Skyware", "Type 243 2.4 m", "offset", 2460, 2664, 2400, None, None, None, "",
+    DishModel("Andrew / Channel Master / Skyware", "Type 243 2.4 m", "offset", 2460, 2664, 2400, None, 0.6, 1440,
+              "derivata dal manuale (bordo inclinato 22.62°, bordo inferiore sull'asse)",
               22.62, None, 60, {3.9: 38.0, 6.1: 42.0, 12.0: 47.4, 14.3: 48.9}, "", "SMC / vetroresina, 2 pezzi",
               "Channel Master 2.4 m Offset Tx/Rx manual (outline drawing App. A, purplesat.com) + Skyware Global "
               "Type 243 datasheet Ku Class III (REV 11/14) e C-band Linear (REV 03/15)",
               "riflettore 96.87\" × 104.87\" (2460 × 2664 mm), apertura efficace 2.4 m, offset 22.62° tra asse "
               "meccanico e asse del fascio (manuale); HPBW 0.71° @12 GHz, 0.59° @14.3 GHz; η ≈ 60% calcolata dal "
-              "guadagno; feed originale WR75 (Ku) / CPR-229 (C). Focale non pubblicata: misura la profondità al "
-              "centro e usa 'Misure sul campo' (asse lungo 2664, corto 2460)"),
+              "guadagno; feed originale WR75 (Ku) / CPR-229 (C). Focale non pubblicata dal costruttore: f = 1440 mm "
+              "(f/D 0.6 su 2.4 m) è la paraboloide madre con bordo inferiore sull'asse, che riproduce esattamente "
+              "l'inclinazione del bordo 22.62° del manuale (atan(D/4f)); bracci superiori 198 cm, inferiore 141 cm "
+              "(satellites.co.uk). Per conferma misura la profondità ('Ho misurato la mia parabola': asse lungo 2664, "
+              "corto 2460)"),
+    # --- Prodelin (General Dynamics SATCOM): datasheet gains; focal length not published ---
+    DishModel("Prodelin", "1.2 m Ku Series 1123/1125 (1132)", "offset", 1200, 1300, None, None, None, None, "", 22.6, None, None,
+              {11.85: 41.7, 14.25: 43.2}, "", "SMC (poliestere/fibra di vetro)",
+              "Prodelin 1.2M Ku-Band Rx/Tx Series 1123 & 1125 datasheet (tvcinc.com); offset 22.6° da satelliteguys.us "
+              "(non verificato su documento Prodelin); G8RWG (g8rwg.uk) sul modello 1132",
+              "focale non pubblicata: G8RWG ha trovato il fuoco con la prova delle stringhe a ~1200 mm dal riflettore "
+              "(braccio di serie troppo corto) e ottimizzato col rumore solare (Tsky/Tsun 9.13 dB a 10 GHz); asse lungo "
+              "1300 mm stimato (1200/cos 22.6°): misura assi e profondità"),
+    DishModel("Prodelin", "1.8 m C/Ku Series 1183/1184", "offset", 1800, 1950, None, None, None, None, "", None, None, None,
+              {3.9125: 35.5, 6.1375: 39.5, 11.85: 45.0, 14.25: 46.5}, "", "SMC (poliestere/fibra di vetro), un pezzo",
+              "Prodelin 1.8M C & Ku-Band Rx/Tx Series 1183 datasheet (newerasystems.net)",
+              "focale, f/D e angolo di offset non pubblicati; asse lungo 1950 mm stimato: misura assi e profondità"),
+    DishModel("Prodelin", "2.4 m C/Ku Series 1250/1251", "offset", 2400, 2594, None, None, None, None, "", 22.3, None, None,
+              {3.9125: 38.0, 6.1375: 42.0, 11.85: 47.6, 14.125: 49.2}, "", "SMC, due petali divisi lungo l'asse maggiore",
+              "Prodelin 2.4M Series 1251 datasheet (kusat.com); manuale Series 1250 (4096-663 rev. A, 2005): "
+              "'22.3° elevation offset angle'",
+              "focale e f/D non pubblicati; asse lungo 2594 mm stimato (2400/cos 22.3°): misura assi e profondità al centro"),
     DishModel("Channel Master", "1 m (W1GHZ)", "offset", 997, 1083, None, None, None, 604, "misurata W1GHZ (App.5A)", None,
               None, None, {}, "", "", "W1GHZ Antenna Book App. 5A", "tilt 67.5° dall'orizzontale, stringa sup. 1018 mm, f/D eq. 0.68"),
     # --- dishes measured by W1GHZ (App. 5A) ---

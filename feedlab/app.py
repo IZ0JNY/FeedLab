@@ -11,14 +11,21 @@ from pathlib import Path
 
 import numpy as np
 import plotly.graph_objects as go
-import streamlit as st
+import streamlit as _st
 
-from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_sim, patterns,
+from feedlab import i18n
+
+st = i18n.wrap(_st)
+
+from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns,
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
-st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
 S = st.session_state
+if "lang" not in S:
+    S.lang = i18n.default_lang()
+i18n.set_lang(S.lang)
+st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"
 WORK.mkdir(exist_ok=True)
 
@@ -127,7 +134,17 @@ def section_fig(geo):
 
 
 # ---------------------------------------------------------------- sidebar
+def _set_lang():
+    i18n.set_lang(S.lang)
+    try:
+        openems_local.save_settings(language=S.lang)
+    except Exception:
+        pass
+
+
 with st.sidebar:
+    st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
+                 on_change=_set_lang)
     st.title("📡 FeedLab")
     st.subheader("Laboratorio di Progettazione di feed/illuminatori a microonde")
     st.caption("10–134 GHz · basato su W1GHZ Antenna Book, design guide OE2IGL e letteratura")

@@ -157,8 +157,10 @@ def main(argv=None) -> int:
                 webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = True
             except Exception:
                 pass
-            window = webview.create_window("FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde",
-                                           html=LOADING, width=1440, height=920, min_size=(900, 600))
+            from . import i18n
+            i18n.set_lang(i18n.default_lang())
+            window = webview.create_window(i18n.tr("FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde"),
+                                           html=i18n.tr(LOADING), width=1440, height=920, min_size=(900, 600))
 
             def load():
                 if wait_ready(port, proc):

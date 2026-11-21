@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "feedlab"
-version = "0.3.0"
+version = "0.4.0"
 description = "Design and analysis of parabolic-dish feeds for 10-134 GHz (W1GHZ / OE2IGL methods)"
 readme = "README.md"
 requires-python = ">=3.10"

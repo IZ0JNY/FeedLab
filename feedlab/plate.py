@@ -125,6 +125,8 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
            "Metodo: design guide OE2IGL (openEMS), ottimizzazione HB9PZK.\n"
            "Verificare S11 con openEMS prima della produzione.")
     ax2.text(0, 1, txt, va="top", family="monospace", fontsize=9)
+    from . import i18n
+    i18n.translate_figure_mpl(fig)
     fig.savefig(path)
     plt.close(fig)
     return path

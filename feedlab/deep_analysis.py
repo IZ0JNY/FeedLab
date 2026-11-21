@@ -466,6 +466,8 @@ def export_dat(r: DeepResult, folder: str | Path) -> list[Path]:
 
 
 def _fig_png(fig) -> str:
+    from . import i18n
+    i18n.translate_figure_mpl(fig)
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
     import matplotlib.pyplot as plt
@@ -561,6 +563,8 @@ Spostamento nella banda: {f(a['pc_spread_mm'])} mm.</p>
 <tr><th class=k>T sistema</th><td>{f(d0['t_sys'], 1)} K</td><th class=k>G/T</th><td>{f(d0['g_over_t_db'])} dB/K</td></tr></table>
 <p style="color:#777;font-size:12px">Generato da FeedLab (mwFeedDesign). Simulazione FDTD openEMS; efficienza con il metodo
 Kildal/W1GHZ sui tagli E/H (ipotesi BOR1).</p></body></html>"""
+    from . import i18n
+    html = i18n.tr(html).replace('<html lang="it">', f'<html lang="{i18n.get_lang()}">')
     path = Path(path)
     path.write_text(html, encoding="utf-8")
     return path

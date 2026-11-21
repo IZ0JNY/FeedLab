@@ -18,7 +18,7 @@ FAKE = Path(__file__).resolve().parent / "fake_openems"
 
 def prepare(tmp: Path) -> dict:
     env = os.environ.copy()
-    env.update({"FEEDLAB_CONFIG": str(tmp / "cfg"), "FEEDLAB_HOME": str(tmp / "home"),
+    env.update({"FEEDLAB_CONFIG": str(tmp / "cfg"), "FEEDLAB_HOME": str(tmp / "home"), "FEEDLAB_LANG": "it",
                 "PYTHONPATH": os.pathsep.join([str(FAKE), str(ROOT)])})
     os.environ.update(env)
     sys.path[:0] = [str(ROOT)]
@@ -80,6 +80,17 @@ def main(out: Path):
                     except Exception:
                         pass
                 pg.screenshot(path=str(out / f"0{i}_{name[2:].replace(' ', '_')}.png"), full_page=True)
+            # English interface (language selector in the sidebar)
+            pg.goto(f"http://127.0.0.1:{port}")
+            pg.wait_for_selector("text=FeedLab", timeout=120000)
+            pg.wait_for_timeout(5000)
+            try:
+                pg.get_by_text("Italiano").first.click()
+                pg.get_by_role("option", name="English").click()
+                pg.wait_for_timeout(8000)
+                pg.screenshot(path=str(out / "06_english.png"), full_page=False)
+            except Exception as e:
+                print("language switch:", e)
             b.close()
     finally:
         srv.terminate()

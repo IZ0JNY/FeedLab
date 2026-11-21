@@ -13,15 +13,18 @@ from pathlib import Path
 
 import numpy as np
 import plotly.graph_objects as go
-import streamlit as st
+import streamlit as _st
 
+from feedlab import i18n
 from feedlab import deep_analysis, explore, geometry, materials, openems_local, openems_sim, wizard
 from feedlab.waveguide import wavelength_mm
+
+st = i18n.wrap(_st)
 
 STATE_IT = {"done": "✅ completata", "running": "⏳ in corso", "queued": "🕒 in coda", "error": "❌ errore",
             "stopped": "⏹️ fermata", "interrotto": "⚠️ interrotta", "nuovo": "📝 solo script"}
 
-_fragment = getattr(st, "fragment", None)
+_fragment = getattr(_st, "fragment", None)
 
 
 def _auto(run_every):
@@ -39,23 +42,23 @@ def _key(path):
     return str(p), p.stat().st_mtime
 
 
-@st.cache_data(show_spinner="Analisi dei risultati…", max_entries=64)
+@_st.cache_data(show_spinner="Analisi dei risultati…", max_entries=64)
 def _analyze_cached(path: str, mtime: float, spec: tuple):
     return deep_analysis.analyze(deep_analysis.load(path), deep_analysis.DishSpec(*spec))
 
 
-@st.cache_data(show_spinner=False, max_entries=64)
+@_st.cache_data(show_spinner=False, max_entries=64)
 def _fast_cached(path: str, mtime: float):
     return deep_analysis.compare_fast_model(deep_analysis.load(path))
 
 
-@st.cache_data(show_spinner=False, max_entries=256)
+@_st.cache_data(show_spinner=False, max_entries=256)
 def _dish_cached(path: str, mtime: float, f_ghz: float, spec: tuple):
     r = deep_analysis.load(path)
     return deep_analysis.dish_performance(r.ff_at(f_ghz).pattern(), f_ghz, deep_analysis.DishSpec(*spec))
 
 
-@st.cache_data(show_spinner="Confronto delle simulazioni…", max_entries=32)
+@_st.cache_data(show_spinner="Confronto delle simulazioni…", max_entries=32)
 def _compare_cached(items: tuple, spec: tuple):
     return deep_analysis.compare([(lab, deep_analysis.load(p)) for lab, p, _ in items], deep_analysis.DishSpec(*spec))
 
