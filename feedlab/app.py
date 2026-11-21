@@ -4,6 +4,7 @@ from __future__ import annotations
 import io
 import json
 import math
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -12,7 +13,7 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-from feedlab import (cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_sim, patterns,
+from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_sim, patterns,
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
@@ -150,7 +151,12 @@ with st.sidebar:
     col_on = st.checkbox("Collare Ø40 mm per portaLNB commerciale", bool(geometry.COLLAR.get("diam")))
     geometry.COLLAR["diam"] = st.number_input("Ø collare (mm)", 20.0, 80.0, 40.0, 1.0) if col_on else None
     st.divider()
-    st.caption("openEMS: " + ("✅ installato" if openems_sim.openems_available() else "❌ non trovato (genera lo script)"))
+    if os.environ.get("FEEDLAB_DESKTOP") == "browser":
+        if st.button("⏻ Chiudi FeedLab", help="ferma il programma (le simulazioni openEMS in corso continuano)"):
+            st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
+            os._exit(0)
+    st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
+                                         "vedi scheda Full-wave openEMS"))
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
                 "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR", "🖥️ Full-wave openEMS"])
@@ -443,52 +449,9 @@ with tabs[6]:
         st.markdown(f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="620"></iframe>',
                     unsafe_allow_html=True)
 
-# ---------------------------------------------------------------- 7 openEMS
+# ---------------------------------------------------------------- 7 openEMS (optional deep analysis)
 with tabs[8]:
-    st.header("Simulazione full-wave con openEMS (FDTD)")
-    geo = current_geometry()
-    if isinstance(geo, geometry.RectHornGeometry):
-        st.warning("Lo script automatico copre per ora i feed a simmetria di rotazione.")
-    else:
-        q = st.select_slider("Risoluzione mesh (celle per λ)", [15, 20, 30, 40, 60], 20,
-                             help="20 = veloce; 60 = qualità OE2IGL (molta RAM)")
-        bw = st.slider("Banda ± %", 2, 20, 10, key="oems_bw")
-        out = WORK / f"openems_{geo.kind}_{S.f_ghz:g}".replace(".", "p")
-        if st.button("Genera script openEMS"):
-            S["oems_script"] = openems_sim.make_script(geo, out, S.f_ghz * (1 - bw / 100), S.f_ghz * (1 + bw / 100), q)
-        if S.get("oems_script"):
-            p = Path(S["oems_script"])
-            st.download_button("Scarica script Python", p.read_text(), file_name=p.name)
-            st.code(f"python {p.name}   # crea results.json da caricare qui sotto", language="bash")
-            if openems_sim.openems_available():
-                if st.button("▶️ Esegui ora su questo PC"):
-                    S["oems_proc"] = openems_sim.run(p)
-                if S.get("oems_proc") is not None:
-                    proc = S["oems_proc"]
-                    log = p.with_suffix(".log")
-                    st.text(log.read_text()[-3000:] if log.exists() else "…")
-                    if proc.poll() is None:
-                        st.info("Simulazione in corso… premi 'Aggiorna'.")
-                        st.button("Aggiorna")
-                    elif (p.parent / "results.json").exists():
-                        S.fullwave = openems_sim.load_results(p.parent / "results.json")
-                        st.success("Risultati caricati.")
-            else:
-                st.info("openEMS non è installato su questo PC: installalo (https://docs.openems.de) e riapri FeedLab, "
-                        "oppure esegui lo script altrove e carica qui `results.json`.")
-        up = st.file_uploader("Carica results.json di openEMS", type="json")
-        if up is not None:
-            tmp = WORK / "uploaded_results.json"
-            tmp.write_bytes(up.read())
-            S.fullwave = openems_sim.load_results(tmp)
-        if S.fullwave is not None:
-            fw = S.fullwave
-            fig = go.Figure(go.Scatter(x=fw["freq_ghz"], y=20 * np.log10(np.abs(fw["s11"]) + 1e-15)))
-            fig.update_layout(title="S11 full-wave (openEMS)", xaxis_title="GHz", yaxis_title="dB", height=330)
-            st.plotly_chart(fig, width="stretch")
-            st.write(f"Direttività massima: **{fw['Dmax_dbi']:.2f} dBi**")
-            st.plotly_chart(polar_fig(fw["pattern"], "Lobo full-wave"), width="stretch")
-
+    app_openems.render(S, current_geometry(), polar_fig)
 
 
 # ---------------------------------------------------------------- 3 laboratory
