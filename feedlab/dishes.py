@@ -118,6 +118,14 @@ CATALOG: list[DishModel] = [
               16.97, None, None, {12.0: 41.8, 14.3: 43.3}, "", "SMC/acciaio",
               "Skyware Global Type 123 Class II datasheet; offset 16.97° da manuale Andrew (citato su satsig)",
               "'long focal length optics'; focale non pubblicata"),
+    DishModel("Andrew / Channel Master / Skyware", "Type 243 2.4 m", "offset", 2460, 2664, 2400, None, None, None, "",
+              22.62, None, 60, {3.9: 38.0, 6.1: 42.0, 12.0: 47.4, 14.3: 48.9}, "", "SMC / vetroresina, 2 pezzi",
+              "Channel Master 2.4 m Offset Tx/Rx manual (outline drawing App. A, purplesat.com) + Skyware Global "
+              "Type 243 datasheet Ku Class III (REV 11/14) e C-band Linear (REV 03/15)",
+              "riflettore 96.87\" × 104.87\" (2460 × 2664 mm), apertura efficace 2.4 m, offset 22.62° tra asse "
+              "meccanico e asse del fascio (manuale); HPBW 0.71° @12 GHz, 0.59° @14.3 GHz; η ≈ 60% calcolata dal "
+              "guadagno; feed originale WR75 (Ku) / CPR-229 (C). Focale non pubblicata: misura la profondità al "
+              "centro e usa 'Misure sul campo' (asse lungo 2664, corto 2460)"),
     DishModel("Channel Master", "1 m (W1GHZ)", "offset", 997, 1083, None, None, None, 604, "misurata W1GHZ (App.5A)", None,
               None, None, {}, "", "", "W1GHZ Antenna Book App. 5A", "tilt 67.5° dall'orizzontale, stringa sup. 1018 mm, f/D eq. 0.68"),
     # --- dishes measured by W1GHZ (App. 5A) ---
