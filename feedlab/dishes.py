@@ -114,11 +114,11 @@ CATALOG: list[DishModel] = [
               {11.2: 41.5, 12.1: 42.15, 12.6: 42.5}, "", "Alu", "Kathrein CAS 120/G datasheet (radiomuseum/zajadacz)",
               "HPBW < 1.43°; F/D/focale non pubblicati: misurare"),
     # --- Channel Master / Andrew / Skyware ---
-    DishModel("Channel Master / Skyware", "Type 123 1.2 m", "offset", 1200, 1300, 1200, None, None, None, "",
+    DishModel("Channel Master", "Type 123 1.2 m (Andrew / Skyware)", "offset", 1200, 1300, 1200, None, None, None, "",
               16.97, None, None, {12.0: 41.8, 14.3: 43.3}, "", "SMC/acciaio",
               "Skyware Global Type 123 Class II datasheet; offset 16.97° da manuale Andrew (citato su satsig)",
               "'long focal length optics'; focale non pubblicata"),
-    DishModel("Andrew / Channel Master / Skyware", "Type 243 2.4 m", "offset", 2460, 2664, 2400, None, 0.6, 1440,
+    DishModel("Channel Master", "Type 243 2.4 m (Andrew / Skyware)", "offset", 2460, 2664, 2400, None, 0.6, 1440,
               "derivata dal manuale (bordo inclinato 22.62°, bordo inferiore sull'asse)",
               22.62, None, 60, {3.9: 38.0, 6.1: 42.0, 12.0: 47.4, 14.3: 48.9}, "", "SMC / vetroresina, 2 pezzi",
               "Channel Master 2.4 m Offset Tx/Rx manual (outline drawing App. A, purplesat.com) + Skyware Global "
