@@ -67,7 +67,9 @@ class FarField:
     def pattern(self, name: str = "") -> Pattern:
         A, _ = self.ludwig3(0.0)
         B, _ = self.ludwig3(90.0)
-        return Pattern(self.theta, A, B, name or f"openEMS {self.f_ghz:g} GHz")
+        p = Pattern(self.theta, A, B, name or f"openEMS {self.f_ghz:g} GHz")
+        # fine angular grid: the efficiency integrals stop at the rim angle, a coarse grid makes them jagged
+        return p.resample(0.05)
 
     def xpol_peak_db(self, theta_max: float = 90.0) -> float:
         co0 = max(np.abs(self.ludwig3(0)[0]).max(), np.abs(self.ludwig3(90)[0]).max(), 1e-30)

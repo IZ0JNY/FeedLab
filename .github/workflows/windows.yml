@@ -39,16 +39,6 @@ jobs:
           name: screenshots
           path: screens/
           if-no-files-found: ignore
-      - name: Publish screenshots to branch ci-screenshots (review)
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        shell: bash
-        run: |
-          cd screens
-          git init -q && git checkout -q -b ci-screenshots
-          git -c user.name=ci -c user.email=ci@localhost add -A
-          git -c user.name=ci -c user.email=ci@localhost commit -q -m "screenshots ${{ github.sha }}"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-screenshots
 
   build:
     name: Build installer
