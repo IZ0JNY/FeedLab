@@ -21,7 +21,6 @@ from pathlib import Path
 import numpy as np
 from scipy.special import j0, j1, jvp
 
-from .waveguide import CHI_TE, CHI_TM
 
 DEG = math.pi / 180.0
 
@@ -126,10 +125,19 @@ def save_w1ghz_dat(p: Pattern, path_prefix: str | Path) -> None:
 
 
 # ---------------- aperture-integration models ----------------
+def _chi(mode: str) -> tuple[int, float]:
+    """Order n and Bessel root for names like 'TE11', 'TM12', 'TE13'."""
+    from scipy.special import jn_zeros, jnp_zeros
+    n, m = int(mode[2]), int(mode[3:])
+    if mode.startswith("TE"):
+        return n, float(jnp_zeros(n, m)[-1]) if n > 0 else float(jn_zeros(1, m)[-1])
+    return n, float(jn_zeros(n, m)[-1])
+
+
 def _circ_mode_field(mode: str, rho, phi, a):
     """Transverse E field (x-polarised orientation) of circular-guide mode, returns (Ex, Ey)."""
     if mode.startswith("TE"):
-        chi = CHI_TE[mode]; n = int(mode[2])
+        n, chi = _chi(mode)
         kc = chi / a
         x = kc * rho
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -137,7 +145,7 @@ def _circ_mode_field(mode: str, rho, phi, a):
         er = n * jn_over_x * np.cos(n * phi)       # E_rho ~ (n/kc rho) J_n cos(n phi)
         ep = -jvp(n, x) * np.sin(n * phi)          # E_phi ~ -J_n' sin(n phi)
     elif mode.startswith("TM"):
-        chi = CHI_TM[mode]; n = int(mode[2])
+        n, chi = _chi(mode)
         kc = chi / a
         x = kc * rho
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -162,7 +170,7 @@ def _jn(n, x):
 def _mode_beta_over_k(mode: str, a_lambda: float) -> float:
     if mode == "HE11":
         return 1.0
-    chi = CHI_TE.get(mode) or CHI_TM.get(mode)
+    _, chi = _chi(mode)
     kc_over_k = chi / (2 * math.pi * a_lambda)
     return math.sqrt(max(1 - kc_over_k ** 2, 0.0))
 
