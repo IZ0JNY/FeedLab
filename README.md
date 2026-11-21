@@ -54,6 +54,14 @@ Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del fee
   - Lo script è generato sul modello del tutorial ufficiale "Conical Horn" (porta TE11 in guida circolare + nf2ff).
   - Va eseguito sul PC dove openEMS è installato: in questo ambiente cloud non è stato possibile compilarlo.
 
+## Metterlo online
+- **Streamlit Community Cloud** (gratuito): su https://share.streamlit.io accedi con GitHub, scegli il repository `mwfeeddesign`, il branch `main`, il file `streamlit_app.py`, Python 3.12, e premi Deploy. Usa `requirements.txt` e `packages.txt`.
+- **Docker** (VPS, Render, Hugging Face Spaces): `docker build -t feedlab .` e `docker run -p 8501:8501 feedlab`.
+- **Pagina sul proprio sito**: inserisci l'app in un iframe:
+  `<iframe src="https://<nome-app>.streamlit.app/?embed=true" style="width:100%;height:1400px;border:0"></iframe>`
+
+La versione online non esegue openEMS: serve un PC con openEMS installato.
+
 ## Validazione (`pytest`)
 - Feed cos^n: η massima uguale all'integrazione analitica indipendente (scarto entro 0.3%).
 - W2IMU 1.63λ e 1.79λ: flare 27.4° e 24.9°, C 2.8λ e 3.52λ (W1GHZ, libro §6.5).
