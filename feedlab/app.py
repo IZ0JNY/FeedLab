@@ -16,7 +16,7 @@ from feedlab import (cad, dishes, drawing, efficiency, explore, materials, plate
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
-st.set_page_config(page_title="FeedLab — Design Feed per parabole a Microonde", page_icon="📡", layout="wide")
+st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
 S = st.session_state
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"
 WORK.mkdir(exist_ok=True)
@@ -128,7 +128,7 @@ def section_fig(geo):
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
     st.title("📡 FeedLab")
-    st.subheader("Design Feed per parabole a Microonde")
+    st.subheader("Laboratorio di Progettazione di feed/illuminatori a microonde")
     st.caption("10–134 GHz · basato su W1GHZ Antenna Book, design guide OE2IGL e letteratura")
     band = st.selectbox("Banda", list(BANDS) + ["Altra frequenza…"],
                         index=list(BANDS.values()).index(S.f_ghz) if S.f_ghz in BANDS.values() else len(BANDS))
