@@ -102,8 +102,21 @@ def _wall_polygon(profile, t, flange_r=None, flange_t=None):
     return np.array(poly)
 
 
+COLLAR = {"diam": None, "length": 25.0, "z0": 3.0}    # set COLLAR["diam"] = 40 for standard LNB holders
+
+
 def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=None, flange=True):
     lam = wavelength_mm(f)
+    if COLLAR.get("diam"):
+        rc = COLLAR["diam"] / 2
+        r_wall = profile[0][1] + t
+        L = profile[-1][0]
+        z0 = COLLAR.get("z0", 3.0)
+        z1 = min(z0 + COLLAR.get("length", 25.0), L - 1.0)
+        if rc > r_wall + 0.2 and z1 > z0 + 1:
+            extra_polys = list(extra_polys or []) + [[(r_wall, z0), (rc, z0), (rc, z1), (r_wall, z1)]]
+            # if the feed widens inside the collar, only fill where the horn is smaller (CAD union handles overlap)
+            notes = list(notes or []) + [f"collare Ø{COLLAR['diam']} mm × {z1 - z0:.0f} mm per portaLNB standard"]
     r_ap = profile[-1][1]
     outer = max(r for _, r in profile) + t
     polys = []

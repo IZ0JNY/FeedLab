@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from . import efficiency, geometry, modematch, noise, patterns, reflector
+from . import efficiency, geometry, materials, modematch, noise, patterns, reflector
 from .waveguide import wavelength_mm
 
 OBJECTIVES = {
@@ -56,6 +56,7 @@ class Scenario:
     surface_rms_mm: float = 0.1
     feedline_loss_db: float = 0.0   # loss between feed and LNA/PA
     offset_spill_ground_frac: float = 0.25   # offset feed points to the sky: small part of spillover sees ground
+    material: str = "Ottone CuZn39Pb3"
 
 
 @dataclass
@@ -73,6 +74,7 @@ class Result:
     g_over_t: float
     s11_db: float | None
     pc_mm: float
+    ohmic_db: float = 0.0
     pattern: patterns.Pattern = field(repr=False, default=None)
     modes: dict = field(default_factory=dict, repr=False)
 
@@ -118,7 +120,12 @@ def evaluate(kind: str, f_ghz: float, sc: Scenario, overrides: dict | None = Non
     e = efficiency.dish_efficiency(pat, sc.fD, blk)
     pc, _ = efficiency.phase_center_by_efficiency(pat, sc.fD, span_lambda=0.8, step=0.02, block_diam_ratio=blk)
     eta_tot = e.total * reflector.ruze(sc.surface_rms_mm, lam)
-    line = 10 ** (-sc.feedline_loss_db / 10)
+    mat = materials.MATERIALS.get(sc.material, materials.MATERIALS["Ottone CuZn39Pb3"])
+    if isinstance(geo, geometry.RectHornGeometry):
+        ohm = 0.0
+    else:
+        ohm = materials.feed_ohmic_loss_db(geo.staircase(lam / 10), f_ghz, mat)
+    line = 10 ** (-(sc.feedline_loss_db + ohm) / 10)
     G = reflector.gain_dbi(sc.D_mm, lam, max(eta_tot * line, 1e-6))
     tsky = noise.sky_temp(sc.elev_deg, sc.zenith_atten_db, f_ghz=f_ghz)
     if sc.dish_kind == "prime":
@@ -130,7 +137,7 @@ def evaluate(kind: str, f_ghz: float, sc: Scenario, overrides: dict | None = Non
     gt = G - 10 * math.log10(t_sys)
     params = {k: float(geo.params[PARAM_FROM_GEOM[k]]) for k, _, _ in TUNABLE.get(kind, [])}
     return Result(params, eta_tot * line, e.spillover, e.illumination, e.phase, e.polarization, e.blockage,
-                  e.edge_taper_db, G, ta, gt, s11, pc * lam, pat, modes)
+                  e.edge_taper_db, G, ta, gt, s11, pc * lam, ohm, pat, modes)
 
 
 def metric(res: Result, objective: str) -> float:

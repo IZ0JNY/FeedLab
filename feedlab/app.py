@@ -12,11 +12,11 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-from feedlab import (cad, drawing, efficiency, explore, geometry, modematch, noise, openems_sim, patterns,
+from feedlab import (cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_sim, patterns,
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
-st.set_page_config(page_title="FeedLab — progetto illuminatori 10-134 GHz", page_icon="📡", layout="wide")
+st.set_page_config(page_title="FeedLab — Design Feed per parabole a Microonde", page_icon="📡", layout="wide")
 S = st.session_state
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"
 WORK.mkdir(exist_ok=True)
@@ -128,8 +128,8 @@ def section_fig(geo):
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
     st.title("📡 FeedLab")
-    st.caption("Progetto e simulazione di illuminatori per parabole 10–134 GHz\n\n"
-               "Basato su W1GHZ Antenna Book e design guide OE2IGL")
+    st.subheader("Design Feed per parabole a Microonde")
+    st.caption("10–134 GHz · basato su W1GHZ Antenna Book, design guide OE2IGL e letteratura")
     band = st.selectbox("Banda", list(BANDS) + ["Altra frequenza…"],
                         index=list(BANDS.values()).index(S.f_ghz) if S.f_ghz in BANDS.values() else len(BANDS))
     if band == "Altra frequenza…":
@@ -142,39 +142,85 @@ with st.sidebar:
         st.markdown(f"**Parabola:** {'offset' if d.kind == 'offset' else 'prime focus'} · D {d.D_mm:.0f} mm · "
                     f"f/D{' eq.' if d.kind == 'offset' else ''} {d.fD:.3f} · apertura {d.opening_deg:.1f}°")
     st.markdown(f"**Feed:** {geometry.FEED_TYPES[S.feed_kind]}")
+    mats = list(materials.MATERIALS)
+    S.material = st.selectbox("Materiale del feed", mats, index=mats.index(S.get("material", "Ottone CuZn39Pb3")),
+                              help="conducibilità e rugosità → perdite ohmiche e rumore del feed")
+    m_ = materials.MATERIALS[S.material]
+    st.caption(f"σ = {m_.sigma / 1e7:.2f}·10⁷ S/m · δ = {materials.skin_depth_um(m_.sigma, S.f_ghz):.3f} µm · {m_.notes}")
+    col_on = st.checkbox("Collare Ø40 mm per portaLNB commerciale", bool(geometry.COLLAR.get("diam")))
+    geometry.COLLAR["diam"] = st.number_input("Ø collare (mm)", 20.0, 80.0, 40.0, 1.0) if col_on else None
     st.divider()
     st.caption("openEMS: " + ("✅ installato" if openems_sim.openems_available() else "❌ non trovato (genera lo script)"))
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
-                "🧊 Modello 3D", "📄 Disegno & STEP", "🖥️ Full-wave openEMS"])
+                "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR", "🖥️ Full-wave openEMS"])
 
 # ---------------------------------------------------------------- 1 wizard
 with tabs[0]:
     st.header("Scegli il feed migliore per la tua parabola")
     c1, c2, c3 = st.columns(3)
     with c1:
-        dk = st.radio("Tipo di parabola", ["Offset (TV/sat)", "Prime focus"], horizontal=True)
-        if dk.startswith("Offset"):
-            mode = st.radio("Dati disponibili", ["Misure del riflettore (assi + profondità)", "Diametro + focale"])
-            if mode.startswith("Misure"):
-                la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, 676.0)
-                sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, 630.0)
-                dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, 52.0)
-                dish = wizard.dish_from_offset_tv(la, sa, dp)
+        src = st.radio("Parabola", ["Catalogo commerciale (datasheet)", "Parabola custom"], horizontal=True)
+        dish = None
+        if src.startswith("Catalogo"):
+            cat = dishes.by_label()
+            makers = sorted({d.maker for d in dishes.CATALOG})
+            mk = st.selectbox("Costruttore", makers, index=makers.index("Gibertini"))
+            labs = [l for l, d in cat.items() if d.maker == mk]
+            dm = cat[st.selectbox("Modello", labs)]
+            f_cat, f_src = dm.focal()
+            st.caption(f"Fonte: {dm.source}" + (f" — {dm.notes}" if dm.notes else ""))
+            info = {"Tipo": dm.kind, "Dimensioni esterne (mm)": f"{dm.width_mm:.0f} × {dm.height_mm:.0f}",
+                    "Area attiva (mm)": f"{dm.active_w_mm:.0f} × {dm.active_h_mm:.0f}" if dm.active_w_mm and dm.active_h_mm else "—",
+                    "F/D costruttore": dm.fD_maker or "—", "Focale (mm)": f"{f_cat:.0f} ({f_src})" if f_cat else f_src,
+                    "Angolo offset": f"{dm.offset_deg}°" if dm.offset_deg else "—",
+                    "Illuminazione richiesta": f"{dm.illum_deg}°" if dm.illum_deg else "—",
+                    "Efficienza dichiarata": f"{dm.efficiency_pct}%" if dm.efficiency_pct else "—",
+                    "Guadagni": ", ".join(f"{g} dBi @{f:g} GHz" for f, g in dm.gain.items()) or "—",
+                    "Collare LNB": dm.collar_mm or "—", "Materiale": dm.material or "—"}
+            st.table({"Dato": list(info), "Valore": [str(v) for v in info.values()]})
+            if dm.opening_deg() is None or st.checkbox("Ho misurato la mia parabola (più preciso del datasheet)"):
+                st.info("Misura: assi del bordo e profondità massima (righello teso sul bordo lungo l'asse lungo).")
+                la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, float(dm.height_mm))
+                sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, float(dm.width_mm))
+                dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, float(round(sa * sa / (16 * (f_cat or 0.6 * sa)) * sa / la, 1)))
+                dish = wizard.dish_from_offset_tv(la, sa, dp) if dm.kind == "offset" else wizard.dish_from_prime(sa, depth=dp)
             else:
-                D = st.number_input("Diametro proiettato (mm)", 100.0, 5000.0, 600.0)
-                f = st.number_input("Focale del paraboloide madre (mm)", 50.0, 5000.0, 390.0)
-                h = st.number_input("Distanza asse → bordo inferiore (mm)", 0.0, 2000.0, 0.0)
-                dish = wizard.dish_from_offset_fD(D, f, h)
+                dish = wizard.dish_from_catalog(dm)
         else:
-            D = st.number_input("Diametro (mm)", 100.0, 20000.0, 1200.0)
-            mode = st.radio("Conosco", ["f/D", "Profondità al centro"], horizontal=True)
-            if mode == "f/D":
-                fD = st.number_input("f/D", 0.2, 2.0, 0.38, 0.01)
-                dish = wizard.dish_from_prime(D, fD)
+            dk = st.radio("Tipo di parabola", ["Offset (TV/sat)", "Prime focus"], horizontal=True)
+            if dk.startswith("Offset"):
+                mode = st.radio("Dati disponibili", ["Diametro + f/D (come nei datasheet)", "Misure del riflettore (assi + profondità)",
+                                                     "Diametro + focale", "Diametro + angolo di illuminazione"])
+                if mode.startswith("Diametro + f/D"):
+                    D = st.number_input("Diametro / larghezza (mm)", 100.0, 10000.0, 800.0)
+                    fdo = st.number_input("f/D offset (f / larghezza)", 0.3, 2.0, 0.66, 0.01,
+                                          help="convenzione dei costruttori di parabole TV (es. Gibertini 0.66, Triax 0.6)")
+                    dish = wizard.dish_from_offset_fD(D, fdo * D, 0.0)
+                elif mode.endswith("illuminazione"):
+                    D = st.number_input("Diametro proiettato (mm)", 100.0, 10000.0, 800.0)
+                    ang = st.number_input("Angolo di illuminazione richiesto (° totali)", 20.0, 170.0, 70.0, 0.5)
+                    dish = wizard.Dish("offset", D, reflector.fD_from_half_angle(ang / 2), None,
+                                       note="parabola custom definita dall'angolo di illuminazione")
+                elif mode.startswith("Misure"):
+                    la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, 676.0)
+                    sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, 630.0)
+                    dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, 52.0)
+                    dish = wizard.dish_from_offset_tv(la, sa, dp)
+                else:
+                    D = st.number_input("Diametro proiettato (mm)", 100.0, 5000.0, 600.0)
+                    f = st.number_input("Focale del paraboloide madre (mm)", 50.0, 5000.0, 390.0)
+                    h = st.number_input("Distanza asse → bordo inferiore (mm)", 0.0, 2000.0, 0.0)
+                    dish = wizard.dish_from_offset_fD(D, f, h)
             else:
-                dp = st.number_input("Profondità (mm)", 1.0, 5000.0, 197.0)
-                dish = wizard.dish_from_prime(D, depth=dp)
+                D = st.number_input("Diametro (mm)", 100.0, 20000.0, 1200.0)
+                mode = st.radio("Conosco", ["f/D", "Profondità al centro"], horizontal=True)
+                if mode == "f/D":
+                    fD = st.number_input("f/D", 0.2, 2.0, 0.38, 0.01)
+                    dish = wizard.dish_from_prime(D, fD)
+                else:
+                    dp = st.number_input("Profondità (mm)", 1.0, 5000.0, 197.0)
+                    dish = wizard.dish_from_prime(D, depth=dp)
     with c2:
         pol = st.radio("Polarizzazione", ["Lineare", "Circolare"], horizontal=True)
         prio = st.radio("Obiettivo", ["Massimo guadagno (TX/terrestre)", "Massimo G/T (RX, EME, sole)"])
@@ -370,7 +416,7 @@ with tabs[5]:
 with tabs[6]:
     st.header("Disegno meccanico (PDF) e file per la produzione")
     geo = current_geometry()
-    mat = st.text_input("Materiale", "Ottone CuZn39Pb3 (o Al 6082 T6), interno lucidato Ra ≤ 0.4 µm")
+    mat = st.text_input("Materiale", f"{S.material}, interno lucidato Ra ≤ {materials.MATERIALS[S.material].rq_um} µm")
     name = st.text_input("Titolo", f"{geometry.FEED_TYPES[geo.kind]} {S.f_ghz:g} GHz")
     base = WORK / f"{geo.kind}_{S.f_ghz:g}GHz".replace(".", "p")
     c1, c2, c3, c4 = st.columns(4)
@@ -398,7 +444,7 @@ with tabs[6]:
                     unsafe_allow_html=True)
 
 # ---------------------------------------------------------------- 7 openEMS
-with tabs[7]:
+with tabs[8]:
     st.header("Simulazione full-wave con openEMS (FDTD)")
     geo = current_geometry()
     if isinstance(geo, geometry.RectHornGeometry):
@@ -470,7 +516,8 @@ with tabs[2]:
             line = c[3].number_input("Perdita linea feed→LNA/PA (dB)", 0.0, 10.0, 0.1, 0.05)
             rms = c[4].number_input("RMS superficie (mm)", 0.0, 3.0, 0.1, 0.01)
             azen = c[5].number_input("Att. zenitale (dB)", 0.0, 10.0, 0.1 if S.f_ghz < 20 else 0.3 if S.f_ghz < 60 else 1.0, 0.05)
-        sc = explore.Scenario(dish.kind, dish.D_mm, dish.fD, max(elev, 1), noise.receiver_temp(nf), azen, 290.0, rms, line)
+        sc = explore.Scenario(dish.kind, dish.D_mm, dish.fD, max(elev, 1), noise.receiver_temp(nf), azen, 290.0, rms, line,
+                              material=S.material)
         sc_t = tuple(sc.__dict__.values())
         base_vals = explore.base_values(kind, S.f_ghz, dish.fD, S.wall)
         cur_over = dict(S.overrides.get(kind, {}))
@@ -498,6 +545,7 @@ with tabs[2]:
             col.metric(lab, f"{fmt.format(v)} {unit}", None if abs(d) < 1e-9 else f"{d:+.2f}",
                        delta_color="normal" if better_up else "inverse")
         snr = cur.snr_delta(base, objective)
+        st.caption(f"Perdita ohmica del feed ({S.material}): {cur.ohmic_db:.3f} dB → +{materials.noise_from_loss(cur.ohmic_db):.1f} K di rumore")
         m[0].metric("Δ S/N", f"{snr:+.2f} dB", help="TX: ΔG · RX: Δ(G/T) · EME: ΔG+Δ(G/T)")
         met(m[1], "Efficienza", 100 * cur.eta, 100 * base.eta, "{:.1f}", "%")
         met(m[2], "Guadagno", cur.gain_dbi, base.gain_dbi, "{:.2f}", "dBi")
@@ -590,3 +638,59 @@ with tabs[2]:
                 for k, v in over.items():
                     S[f"lab_{kind}_{k}"] = float(v)
                 st.rerun()
+
+
+# ---------------------------------------------------------------- matching plate
+with tabs[7]:
+    st.header("Piastrina λ/4 di adattamento: guida circolare del feed → guida rettangolare WR")
+    st.caption("Il feed a simmetria circolare irradia la polarizzazione lineare imposta dall'orientamento della guida WR: "
+               "il campo E è parallelo al lato corto 'b'. Metodo: design guide OE2IGL (openEMS), ottimizzazione HB9PZK.")
+    geo = current_geometry()
+    from feedlab.waveguide import RECT_WG, suggest_rect_wg
+    if isinstance(geo, geometry.RectHornGeometry):
+        st.info("L'horn rettangolare si collega direttamente alla guida WR: piastrina non necessaria.")
+    else:
+        c1, c2, c3, c4 = st.columns(4)
+        sugg = suggest_rect_wg(S.f_ghz) or list(RECT_WG)
+        wg = c1.selectbox("Guida rettangolare", list(RECT_WG), index=list(RECT_WG).index(sugg[0]))
+        pol_ = c2.radio("Polarizzazione", ["Verticale", "Orizzontale"], horizontal=True)
+        dcirc = c3.number_input("Ø guida circolare del feed (mm)", 0.5, 100.0, float(round(2 * geo.r_input, 3)), 0.001,
+                                format="%.3f")
+        rr = c4.number_input("Raggio angoli apertura (mm)", 0.0, 5.0, float(round(min(2.0, 0.08 * RECT_WG[wg].a_mm), 2)), 0.05,
+                             help="raggio della fresa: angoli arrotondati compensati sulla larghezza (HB9PZK)")
+        opt = st.checkbox("Versione ottimizzata (b e spessore corretti con openEMS)", True)
+        try:
+            pl = plate.design_plate(S.f_ghz, wg, dcirc, "V" if pol_ == "Verticale" else "H", rr, opt)
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Apertura a", f"{pl.a:.3f} mm"); m2.metric("Apertura b", f"{pl.b:.3f} mm")
+            m3.metric("Spessore", f"{pl.thickness:.3f} mm", f"± {pl.tolerance:.3f}", delta_color="off")
+            m4.metric("Z0 intermedia", f"{pl.z0:.0f} Ω")
+            w = RECT_WG[wg]
+            st.write(f"{wg}: {w.a_mm} × {w.b_mm} mm (fc TE10 {w.fc_te10_ghz:.2f} GHz) · guida circolare Ø{dcirc:.3f} mm "
+                     f"(fc TE11 {299.792458 / (1.706 * dcirc):.2f} GHz)")
+            base = WORK / f"plate_{wg}_{S.f_ghz:g}GHz_{pl.polarization}".replace(".", "p")
+            b1, b2 = st.columns(2)
+            if b1.button("📄 Disegno PDF piastrina"):
+                S["plate_pdf"] = Path(plate.drawing_pdf(pl, base.with_suffix(".pdf"), S.material)).read_bytes()
+            if S.get("plate_pdf"):
+                b1.download_button("Scarica PDF", S["plate_pdf"], file_name=base.name + ".pdf", mime="application/pdf")
+            if b2.button("🧊 STEP piastrina"):
+                S["plate_step"] = Path(plate.export_step(pl, base.with_suffix(".step"))).read_bytes()
+            if S.get("plate_step"):
+                b2.download_button("Scarica .stp", S["plate_step"], file_name=base.name + ".stp")
+            # front view preview
+            fig = go.Figure()
+            h = pl.outer / 2
+            fig.add_shape(type="rect", x0=-h, y0=-h, x1=h, y1=h, line=dict(color="black"), fillcolor="rgba(201,162,39,0.5)")
+            aa, bb = (pl.a, pl.b) if pl.polarization == "V" else (pl.b, pl.a)
+            fig.add_shape(type="rect", x0=-aa / 2, y0=-bb / 2, x1=aa / 2, y1=bb / 2, line=dict(color="black"), fillcolor="white")
+            fig.add_shape(type="circle", x0=-dcirc / 2, y0=-dcirc / 2, x1=dcirc / 2, y1=dcirc / 2, line=dict(dash="dash", color="gray"))
+            wa, wb = (w.a_mm, w.b_mm) if pl.polarization == "V" else (w.b_mm, w.a_mm)
+            fig.add_shape(type="rect", x0=-wa / 2, y0=-wb / 2, x1=wa / 2, y1=wb / 2, line=dict(dash="dot", color="blue"))
+            fig.add_annotation(x=0, y=0, ax=0 if pl.polarization == "V" else -40, ay=40 if pl.polarization == "V" else 0,
+                               text="E", showarrow=True, arrowcolor="red", arrowhead=2, arrowwidth=2)
+            fig.update_layout(height=420, xaxis=dict(range=[-h - 3, h + 3], title="mm"),
+                              yaxis=dict(range=[-h - 3, h + 3], scaleanchor="x"), title="Vista frontale (lato feed)")
+            st.plotly_chart(fig, width="stretch")
+        except ValueError as ex:
+            st.error(str(ex))

@@ -1,4 +1,6 @@
-# mwFeedDesign / FeedLab
+# FeedLab — Design Feed per parabole a Microonde
+
+*(repository: mwFeedDesign)*
 
 Software per **progettare e simulare illuminatori (feed) per parabole a microonde, da 10 a 134 GHz**.
 
@@ -7,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald Ihninger, OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.1, nucleo di calcolo**. Il codice ha una suite di test che riproduce numeri pubblicati. Non ha ancora interfaccia grafica né solutore full-wave.
+> Stato: **v0.2**. Interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e script openEMS. 22 test di validazione.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -19,6 +21,38 @@ Le basi di conoscenza sono:
 | `horns` | Calcolatori: W2IMU (Turrin/W1GHZ e OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter (OE2IGL), corrugato assiale a 8 gole (OE2IGL v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
 | `cassegrain` | Progetto del subriflettore iperbolico (procedura W1GHZ verificata sul suo foglio di calcolo), sub ottimo di Kildal, profilo e G-code per tornio |
 | `noise` | T_sky (con correzione di Planck), T_rx, T_spillover, T_antenna integrata sul pattern, G/T, sun noise atteso |
+
+
+## Interfaccia grafica
+
+```bash
+pip install -e .
+feedlab-gui          # oppure: streamlit run feedlab/app.py
+```
+Si apre nel browser (Windows, Linux, macOS). Schede:
+
+| Scheda | Cosa fa |
+|---|---|
+| 🧭 Procedura guidata | Scegli la parabola dal **catalogo commerciale** (Gibertini, Triax, Fracarro, Kathrein, Channel Master/Skyware, Edmund, dish misurati da W1GHZ, con fonte di ogni dato) oppure una **parabola custom** (offset o prime focus; da f/D, focale, misure o angolo di illuminazione). Indica polarizzazione, obiettivo (guadagno o G/T) e mezzi di costruzione: FeedLab confronta i feed adatti e li ordina per efficienza stimata |
+| 📐 Progetto feed | Quote del feed modificabili, sezione assiale, regola di progetto usata |
+| 🎛️ Laboratorio | **Cursori sulle quote** con ricalcolo immediato e confronto col progetto di partenza: Δ S/N, efficienza, guadagno, G/T, T antenna, S11, taper, perdite ohmiche del materiale. Obiettivo **TX / RX / EME**, consigli ragionati, **analisi di sensibilità** per ogni quota, **ottimizzazione automatica** |
+| 📈 Simulazione & S11 | S11 in banda e contenuto modale (mode matching), lobo polare e cartesiano con fase, efficienza vs f/D scomposta, centro di fase, G/T |
+| 🌐 Lobo 3D | Diagramma di irradiazione 3D del feed |
+| 🧊 Modello 3D | Modello del feed con sezione |
+| 📄 Disegno & STEP | Disegno meccanico **PDF** (sezione quotata, tabella, cartiglio, tolleranze), **.stp** e **.stl** |
+| 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR, orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP |
+| 🖥️ Full-wave openEMS | Genera ed esegue la simulazione FDTD **openEMS** (S11 e lobo di riferimento); i risultati si ricaricano nell'app |
+
+Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del feed** (rame, rame argentato, dorato, ottone, alluminio, stampa 3D metallizzata…), con calcolo delle perdite e del rumore, e il **collare Ø40 mm** per i portaLNB commerciali.
+
+### Simulatori e loro limiti
+- **Rapido (mode matching interno, secondi).**
+  - Feed a guida circolare con gradini e coni: open, W2IMU, Skobelev/Pickett-Potter, conico. Il bilancio energetico è verificato a 1.000.
+  - L'apertura è modellata come flangia: S11 è una stima, ottimistica per aperture sotto 1λ.
+  - Feed con choke o anelli coassiali (VE4MA, Chaparral): non simulati qui, si stimano dalle design guide.
+- **Full-wave openEMS** (gratuito, https://openems.de): S11 e lobo di riferimento, per tutti i feed a simmetria di rotazione.
+  - Lo script è generato sul modello del tutorial ufficiale "Conical Horn" (porta TE11 in guida circolare + nf2ff).
+  - Va eseguito sul PC dove openEMS è installato: in questo ambiente cloud non è stato possibile compilarlo.
 
 ## Validazione (`pytest`)
 - Feed cos^n: η massima uguale all'integrazione analitica indipendente (scarto entro 0.3%).
@@ -57,6 +91,9 @@ print(efficiency.best_fD(p))
 ## Documentazione
 - `docs/KNOWLEDGE_BASE.md`: sintesi strutturata di formule, regole e dati.
 - `docs/notes/`: appunti dettagliati per capitolo e articolo (W1GHZ, OE2IGL).
+
+## Altri riferimenti usati
+rusk2ua/offset-microwave-dish-comparisons (formule e test incrociati), Abraxas3d/122GHz (W2IMU e Cassegrain stampati 3D a 122 GHz), david-deboer/hera-cst (formato dei pattern CST/HFSS), IRNAS/SatelliteDishHeadHolder (portaLNB Ø40), diablowu/dish-fd-feed, vantalane/dual_band_LHCP_helical_feed (script openEMS).
 
 ## Crediti e licenze delle fonti
 - Algoritmi e dati da P. Wade W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.

@@ -48,6 +48,16 @@ def dish_from_offset_tv(long_axis: float, short_axis: float, depth: float) -> Di
                      f"illuminazione {g.psi_L:.1f}°…{g.psi_U:.1f}°, puntamento feed {g.feed_pointing():.1f}° dall'asse")
 
 
+def dish_from_catalog(dm) -> Dish:
+    """Dish from a catalogue entry (feedlab.dishes.DishModel) using the required illumination angle."""
+    f, src = dm.focal()
+    note = f"{dm.maker} {dm.model}: focale {f:.0f} mm ({src})" if f else f"{dm.maker} {dm.model}: focale ignota"
+    if dm.offset_deg:
+        note += f", angolo offset {dm.offset_deg}°"
+    note += f" — fonte: {dm.source}"
+    return Dish(dm.kind, dm.D_mm, dm.fD_equiv(), f, note=note)
+
+
 def dish_from_offset_fD(D: float, f: float, h: float = 0.0) -> Dish:
     g = reflector.offset_geometry(f, D, h)
     return Dish("offset", D, g.fD_equiv, f, note=f"illuminazione {g.psi_L:.1f}°…{g.psi_U:.1f}°")
