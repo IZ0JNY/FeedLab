@@ -19,7 +19,7 @@ from feedlab import i18n
 
 st = i18n.wrap(_st)
 
-from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns,
+from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns, tolerance,
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
@@ -465,7 +465,9 @@ with tabs[6]:
     base = WORK / f"{geo.kind}_{S.f_ghz:g}GHz".replace(".", "p")
     c1, c2, c3, c4 = st.columns(4)
     if c1.button("📄 Genera PDF"):
-        pth = drawing.drawing_pdf(geo, base.with_suffix(".pdf"), mat, name)
+        tt = S.get("tol_table")
+        pth = drawing.drawing_pdf(geo, base.with_suffix(".pdf"), mat, name,
+                                  tolerances=tt[1] if tt and tt[0] == geo.kind else None)
         S["pdf"] = pth.read_bytes()
     if S.get("pdf"):
         c1.download_button("Scarica disegno PDF", S["pdf"], file_name=base.name + ".pdf", mime="application/pdf")
@@ -639,6 +641,93 @@ with tabs[2]:
                 for k, v in over.items():
                     S[f"lab_{kind}_{k}"] = float(v)
                 st.rerun()
+
+        # ------------------------------------------------ fabrication tolerances
+        st.divider()
+        st.subheader("🎯 Tolleranze di lavorazione e resa")
+        if kind not in tolerance.TOL_KEYS:
+            st.info("L'analisi di tolleranza usa il simulatore rapido a guida circolare: non disponibile per l'horn rettangolare.")
+        else:
+            st.caption("Ogni quota lavorata varia dentro la sua tolleranza: FeedLab stima come si distribuiscono efficienza, "
+                       "guadagno, G/T e S11 dei pezzi prodotti (Monte Carlo), quali quote sono critiche e quale tolleranza "
+                       "serve davvero a ciascuna. Si analizza il progetto con le quote attuali del laboratorio.")
+            c = st.columns(4)
+            tol_in = c[0].number_input("Tolleranza di lavorazione ± (mm)", 0.001, 0.5, float(drawing.tolerance_mm(S.f_ghz)),
+                                       0.005, format="%.3f", key="tol_mm")
+            dist = c[1].selectbox("Distribuzione delle quote", ["uniform", "normal"], key="tol_dist",
+                                  format_func=lambda d: {"uniform": "Uniforme in ±t (prudente)",
+                                                         "normal": "Normale, ±t = 3σ (CNC capace)"}[d])
+            budget = c[2].number_input("Perdita ammessa (dB)", 0.01, 1.0, 0.1, 0.01, key="tol_budget",
+                                       help="un pezzo è 'buono' se perde al massimo questo rispetto al nominale")
+            s11t = c[3].slider("S11 massimo (dB)", -30, -10, -18, key="tol_s11")
+            if st.button("🎲 Analizza tolleranze (≈ 20 simulazioni rapide)", key="tol_go"):
+                bar = st.progress(0.0, "modello delle tolleranze…")
+                rep = tolerance.analyse(kind, S.f_ghz, sc, lab_over, objective, tol_in, dist, 5000, 6, budget, s11t, S.wall,
+                                        progress=lambda i, n: bar.progress(min(i / n, 1.0), f"simulazione {i}/{n}"))
+                bar.empty()
+                S["tol"] = (kind, objective, rep)
+            if S.get("tol") and S["tol"][0] == kind:
+                rep = S["tol"][2]
+                ylab = {"tx": "G", "rx": "G/T", "eme": "G + G/T"}[S["tol"][1]]
+                so, se, ss = rep.stats["objective"], rep.stats["eta"], rep.stats["s11_db"]
+                m = st.columns(4)
+                m[0].metric("Resa", f"{100 * rep.yield_frac:.1f} %",
+                            help=f"pezzi con perdita ≤ {rep.spec['loss_budget_db']} dB e S11 ≤ {rep.spec['s11_limit_db']} dB")
+                m[1].metric(f"Perdita media di {ylab}", f"{rep.nominal['objective'] - so['mean']:.3f} dB",
+                            help=f"dispersione σ = {so['std']:.3f} dB")
+                m[2].metric("Efficienza (5–95%)", f"{100 * se['p05']:.1f}–{100 * se['p95']:.1f} %")
+                if not math.isnan(ss["p95"]):
+                    m[3].metric("S11 peggiore (95%)", f"{ss['p95']:.1f} dB")
+                fig = go.Figure()
+                fig.add_trace(go.Histogram(x=rep.samples["objective"] - rep.nominal["objective"], nbinsx=60,
+                                           name=f"Δ {ylab} (dB)"))
+                fig.add_vline(x=-rep.spec["loss_budget_db"], line_dash="dot")
+                fig.update_layout(height=260, xaxis_title=f"Δ {ylab} rispetto al nominale (dB)", yaxis_title="pezzi",
+                                  margin=dict(t=20, b=30), showlegend=False)
+                st.plotly_chart(fig, width="stretch")
+                st.markdown("**Quote critiche** (in ordine di importanza)")
+                st.dataframe([{"Quota": cr["label"], "Nominale": f"{cr['nominal']:.3f} {cr['unit']}",
+                               "Tolleranza analizzata": f"±{cr['tol_now']:.3f} {cr['unit']}",
+                               "Quota di varianza": f"{100 * cr['share']:.0f} %",
+                               f"Perdita a ±t (dB)": f"{cr['d_obj']:.3f}",
+                               "ΔS11 a ±t (dB)": "" if math.isnan(cr["d_s11"]) else f"{cr['d_s11']:+.2f}",
+                               "Tolleranza consigliata": f"±{cr['tol_ok']:g} {cr['unit']}"} for cr in rep.critical],
+                             hide_index=True, width="stretch")
+                ver = ", ".join(f"{m_} {v:.3g}" for m_, v in rep.verify)
+                st.caption(f"{rep.n_runs} simulazioni rapide (modello quadratico + verifica diretta: scarto massimo {ver}). "
+                           "Tolleranza consigliata: la più larga classe d'officina che mantiene la perdita di quella quota "
+                           f"entro la sua parte del budget di {rep.spec['loss_budget_db']} dB. Il modello rapido non vede "
+                           "parete esterna e bordo: per le quote critiche verifica con openEMS.")
+                if st.button("📄 Usa queste tolleranze nel disegno PDF", key="tol_pdf"):
+                    S["tol_table"] = (kind, rep.critical)
+                    st.success("Le trovi nella tabella delle tolleranze del disegno (scheda Disegno & STEP).")
+            st.markdown("**Ottimizzazione robusta**: cerca le quote che danno il miglior risultato *medio meno k·σ* dentro "
+                        "le tolleranze, invece del picco nominale più stretto.")
+            c = st.columns(3)
+            rkeys = c[0].multiselect("Quote da ottimizzare", [k for k, _, _ in explore.TUNABLE[kind]],
+                                     default=[k for k, _, _ in explore.TUNABLE[kind]][:2], key="rob_keys",
+                                     format_func=lambda k: dict((a, b) for a, b, _ in explore.TUNABLE[kind])[k])
+            ks = c[1].slider("k (σ)", 0.0, 3.0, 2.0, 0.5, key="rob_k", help="2 ≈ il 97% dei pezzi fa almeno così")
+            rnev = c[2].slider("Valutazioni robuste", 6, 40, 16, key="rob_nev",
+                               help="ognuna costa 2N+1 simulazioni rapide (≈ 0.5 s l'una)")
+            if st.button("🛡️ Ottimizzazione robusta", key="rob_go") and rkeys:
+                bar = st.progress(0.0, "ottimo nominale, poi ricerca robusta…")
+                over_r, info = tolerance.robust_optimize(kind, S.f_ghz, sc, lab_over, objective, rkeys, tol_in, ks, rnev,
+                                                         s11t, S.wall,
+                                                         progress=lambda i, n, v: bar.progress(min(i / n, 1.0), f"valutazione {i}/{n}"))
+                bar.empty()
+                S["ropt"] = (kind, over_r, info)
+            if S.get("ropt") and S["ropt"][0] == kind:
+                _, over_r, info = S["ropt"]
+                ylab_r = {"tx": "G", "rx": "G/T", "eme": "G + G/T"}[objective]
+                st.success(f"Progetto robusto: {ylab_r} nominale {info['objective']:.2f} · medio {info['mean']:.2f} ± {info['sd']:.3f} dB · "
+                           f"garantito (media − k·σ) {info['score']:.2f} · η {100 * info['eta']:.1f}% · S11 {info['s11_db']:.1f} dB")
+                st.write({k: f"{v:.3f} ({100 * (v / base_vals[k] - 1):+.1f}%)" for k, v in over_r.items() if k in base_vals})
+                if st.button("Applica il progetto robusto", key="rob_apply"):
+                    S.overrides[kind] = {k: v for k, v in over_r.items() if k in base_vals}
+                    for k, v in S.overrides[kind].items():
+                        S[f"lab_{kind}_{k}"] = float(v)
+                    st.rerun()
 
 
 # ---------------------------------------------------------------- matching plate

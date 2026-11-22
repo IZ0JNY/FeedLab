@@ -75,7 +75,10 @@ def _section_axes(fig, geo: FeedGeometry):
     return ax
 
 
-def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 6082", title: str | None = None) -> Path:
+def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 6082", title: str | None = None,
+                tolerances: list | None = None) -> Path:
+    """tolerances: rows from tolerance.analyse(...).critical — printed as a table of the tolerance each
+    critical dimension needs (the general tolerance applies to all the others)."""
     path = Path(path)
     title = title or f"{FEED_TYPES.get(geo.kind, geo.kind)}"
     with PdfPages(path) as pdf:
@@ -98,6 +101,15 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
         lines.append("")
         lines += [f"• {n}" for n in (geo.notes or [])][:8]
         ax.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7)
+        if tolerances:
+            axt = fig.add_axes([0.05, 0.03, 0.55, 0.17]); axt.set_axis_off()
+            rows = [f"{'Quota':<22s}{'Nominale':>12s}{'Tolleranza':>13s}{'Varianza':>10s}"]
+            for c in tolerances:
+                u = c.get("unit", "mm")
+                rows.append(f"{c['label']:<22.22s}{c['nominal']:>10.3f} {u:<2s}{'±' + format(c['tol_ok'], 'g'):>10s} {u:<2s}"
+                            f"{100 * c['share']:>8.0f}%")
+            axt.text(0, 1, "TOLLERANZE PER QUOTA (analisi Monte Carlo FeedLab)\n" + "\n".join(rows),
+                     va="top", family="monospace", fontsize=6.5)
         _title_block(fig, geo, title, material, "1/1")
         from . import i18n
         i18n.translate_figure_mpl(fig)

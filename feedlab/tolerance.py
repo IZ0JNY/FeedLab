@@ -225,12 +225,17 @@ def robust_score(kind, f_ghz, sc, over, objective="rx", tol_mm=None, k_sigma=2.0
 
 
 def robust_optimize(kind, f_ghz, sc, start_over, objective="rx", keys=None, tol_mm=None, k_sigma=2.0,
-                    max_eval=25, s11_limit_db=-18.0, wall=None, fD_design=None, progress=None):
-    """Nelder-Mead on mean - k·σ (tolerance-aware) instead of the nominal peak. Each step costs 2N+1 runs."""
+                    max_eval=20, s11_limit_db=-18.0, wall=None, fD_design=None, progress=None, seed_nominal=True):
+    """Nelder-Mead on mean - k·σ (tolerance-aware) instead of the nominal peak. Each step costs 2N+1 runs.
+    With seed_nominal the search starts from the nominal optimum (evaluated first), so the result is never
+    less robust than the plain optimum."""
     from scipy.optimize import minimize
-    cur = {**explore.base_values(kind, f_ghz, fD_design or sc.fD, wall), **start_over}
     tun = {k: sp for k, _, sp in explore.TUNABLE[kind]}
     keys = keys or list(tun)[:2]
+    if seed_nominal:
+        start_over, _ = explore.optimize(kind, f_ghz, sc, start_over, objective, keys, 20, wall, fD_design,
+                                         s11_limit_db=s11_limit_db)
+    cur = {**explore.base_values(kind, f_ghz, fD_design or sc.fD, wall), **start_over}
     calls = {"n": 0, "best": None}
 
     def f_obj(x):

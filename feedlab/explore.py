@@ -116,6 +116,15 @@ def evaluate(kind: str, f_ghz: float, sc: Scenario, overrides: dict | None = Non
         modes = r.aperture_modes[0]
         pat = modematch.aperture_pattern(r, 0, f_ghz, n_rho=28 if fast else 48, n_phi=32 if fast else 60,
                                          n_theta=181 if fast else 361)
+    return performance(kind, f_ghz, sc, geo, pat, s11, modes)
+
+
+def performance(kind: str, f_ghz: float, sc: Scenario, geo, pat: patterns.Pattern, s11: float | None = None,
+                modes: dict | None = None) -> Result:
+    """Dish performance of a feed pattern (from the fast solver or from openEMS): the same formulas for both,
+    so that fast vs full-wave differences come only from the solvers."""
+    lam = wavelength_mm(f_ghz)
+    modes = modes or {}
     blk = geo.blockage_diameter() / sc.D_mm if sc.dish_kind == "prime" else 0.0
     e = efficiency.dish_efficiency(pat, sc.fD, blk)
     pc, _ = efficiency.phase_center_by_efficiency(pat, sc.fD, span_lambda=0.8, step=0.02, block_diam_ratio=blk)

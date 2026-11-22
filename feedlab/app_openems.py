@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 import streamlit as _st
 
 from feedlab import i18n
-from feedlab import deep_analysis, explore, geometry, materials, openems_local, openems_sim, wizard
+from feedlab import deep_analysis, explore, geometry, materials, openems_local, openems_sim, spacemap, wizard
 from feedlab.waveguide import wavelength_mm
 
 st = i18n.wrap(_st)
@@ -522,7 +522,7 @@ def render(S, geo, polar_fig):
                "gratuito) serve solo se vuoi un'analisi di riferimento: una simulazione richiede da alcuni minuti a ore, "
                "per questo la avvii tu, quando serve, e gira in background.")
     dish = S.dish or wizard.dish_from_prime(600, 0.6)
-    t = st.tabs(["① Installazione openEMS", "② Nuova analisi", "③ Simulazioni", "④ Risultati"])
+    t = st.tabs(["① Installazione openEMS", "② Nuova analisi", "③ Simulazioni", "④ Risultati", "⑤ Space mapping"])
     with t[0]:
         _install_section(S)
     with t[1]:
@@ -531,3 +531,133 @@ def render(S, geo, polar_fig):
         _jobs_section(S)
     with t[3]:
         _results_section(S, geo, dish, polar_fig)
+    with t[4]:
+        _spacemap_section(S, geo, dish)
+
+
+# ================================================================== 5. space mapping
+def _sm_cfg(f0, cells):
+    return openems_sim.DeepConfig(f_lo=f0 * 0.95, f_hi=f0 * 1.05, cells_per_lambda=int(cells), ff_freqs=[float(f0)],
+                                  sphere=False, n_freq=101)
+
+
+def _sm_launch(study: spacemap.SMStudy, pt: spacemap.SMPoint, env, cells: int):
+    g = geometry.build(study.kind, study.f_ghz, fD=study.fD_design or study.sc.fD, wall=study.wall, **pt.over)
+    i = study.points.index(pt)
+    jd = openems_local.create_job(g, _sm_cfg(study.f_ghz, cells), label=f"SM {study.id} #{i}",
+                                  study=f"space mapping {study.id}")
+    pt.job = str(jd)
+    study.save(openems_local.work_dir())
+    openems_local.start_batch([jd], env["py"]["python"], env["inst"])
+
+
+def _sm_fullwave(study):
+    def fw(p):
+        if not p.job:
+            return None
+        js = openems_local.job_state(p.job)
+        if js["state"] == "done":
+            return spacemap.fullwave_metrics(Path(p.job) / "results.json", study, p.over)
+        if js["state"] in ("error", "stopped", "interrotto"):
+            raise RuntimeError(f"simulazione {js['state']}: {js['error'][:200]}")
+        return None
+    return fw
+
+
+def _sm_advance(study, env, cells):
+    try:
+        pt = spacemap.step(study, fullwave=_sm_fullwave(study))
+    except RuntimeError as ex:
+        study.status, study.note = "errore", str(ex)
+        study.save(openems_local.work_dir())
+        return
+    study.save(openems_local.work_dir())
+    if pt is not None and env["py"]:
+        _sm_launch(study, pt, env, cells)
+
+
+def _spacemap_section(S, geo, dish):
+    st.markdown("Il **modello rapido** esplora, **openEMS** verifica pochi candidati e le differenze **correggono** il "
+                "modello rapido, che viene ottimizzato di nuovo. Si ripete finché il risultato full-wave smette di migliorare "
+                "(space mapping). Ogni iterazione è una simulazione openEMS in background.")
+    env = _env_state(S)
+    kind = geo.kind
+    if kind not in geometry.MODEMATCH_OK or kind not in explore.TUNABLE or isinstance(geo, geometry.RectHornGeometry):
+        st.info("Lo space mapping usa il modello rapido: disponibile per guida aperta, W2IMU, Skobelev, Pickett-Potter, conico.")
+    else:
+        c = st.columns(4)
+        objective = c[0].selectbox("Obiettivo", list(explore.OBJECTIVES), format_func=lambda k: explore.OBJECTIVES[k],
+                                   index=1, key="sm_obj")
+        keys = c[1].multiselect("Quote da ottimizzare", [k for k, _, _ in explore.TUNABLE[kind]],
+                                default=[k for k, _, _ in explore.TUNABLE[kind]][:2], key="sm_keys",
+                                format_func=lambda k: dict((a, b) for a, b, _ in explore.TUNABLE[kind])[k])
+        cells = c[2].select_slider("Celle per λ", [15, 20, 25, 30, 40], 20, key="sm_cells")
+        max_iter = c[3].slider("Simulazioni openEMS massime", 2, 8, 5, key="sm_max")
+        c = st.columns(3)
+        tol_mm = c[0].number_input("Convergenza: variazione quote < (mm)", 0.001, 0.2, 0.01, 0.005, format="%.3f", key="sm_tol")
+        s11_lim = c[1].slider("S11 massimo (dB)", -30, -10, -18, key="sm_s11")
+        auto = c[2].checkbox("Avanza da solo a fine simulazione", True, key="sm_auto",
+                             help="quando la scheda è aperta, FeedLab controlla ogni 10 s e lancia il candidato successivo")
+        est = openems_sim.mesh_estimate(geo, _sm_cfg(geo.f_ghz, cells))
+        st.caption(f"Ogni simulazione ≈ {_fmt_time(est['time_min'] * 60)}, RAM ≈ {est['ram_mb']:.0f} MB; "
+                   f"in totale al massimo {max_iter} simulazioni.")
+        if st.button("▶️ Avvia space mapping", type="primary", disabled=not env["py"] or not keys, key="sm_go"):
+            sc = explore.Scenario(dish.kind, dish.D_mm, dish.fD, material=S.get("material", "Ottone CuZn39Pb3"))
+            with st.spinner("Punto di partenza…"):
+                study = spacemap.new_study(kind, geo.f_ghz, sc, objective, keys, dict(S.overrides.get(kind, {})),
+                                           S.wall, None, s11_lim, tol_mm, max_iter)
+                study.note = "auto" if auto else ""
+                _sm_launch(study, study.points[0], env, cells)
+            st.success("Prima simulazione avviata: segui l'avanzamento qui sotto e in **Simulazioni**.")
+        if not env["py"]:
+            st.caption("Prima installa openEMS (sezione ①).")
+    st.divider()
+    _sm_studies(S, env)
+
+
+@_auto("10s")
+def _sm_studies(S, env):
+    studies = spacemap.list_studies(openems_local.work_dir())
+    if not studies:
+        st.info("Nessuno studio di space mapping.")
+        return
+    cells = S.get("sm_cells", 20)
+    for study in studies[:10]:
+        if study.status == "in corso" and study.note == "auto":
+            last = study.points[-1]
+            if last.job and openems_local.job_state(last.job)["state"] in ("done", "error", "stopped", "interrotto"):
+                _sm_advance(study, env, cells)
+        best = spacemap.best_point(study)
+        with st.expander(f"{study.kind} {study.f_ghz:g} GHz · {explore.OBJECTIVES[study.objective]} · {study.status} · "
+                         f"{sum(1 for p in study.points if p.fw)} simulazioni", expanded=study is studies[0]):
+            rows = []
+            x0 = study.x0()
+            for i, p in enumerate(study.points):
+                stt = openems_local.job_state(p.job)["state"] if p.job else "—"
+                r = {"#": i}
+                for k in study.keys:
+                    r[k] = f"{p.over.get(k, x0[k]):.3f}"
+                r["Obiettivo rapido"] = f"{p.fast['objective']:.2f}"
+                r["Obiettivo openEMS"] = f"{p.fw['objective']:.2f}" if p.fw else STATE_IT.get(stt, stt)
+                r["Δ openEMS − rapido"] = f"{p.fw['objective'] - p.fast['objective']:+.2f}" if p.fw else ""
+                r["η openEMS"] = f"{100 * p.fw['eta']:.1f} %" if p.fw else ""
+                r["S11 openEMS"] = f"{p.fw['s11_db']:.1f} dB" if p.fw else ""
+                rows.append(r)
+            st.dataframe(rows, hide_index=True, width="stretch")
+            if study.note and study.note != "auto":
+                st.warning(study.note)
+            c = st.columns(3)
+            if study.status == "in corso" and study.note != "auto":
+                last = study.points[-1]
+                ready = last.job and openems_local.job_state(last.job)["state"] == "done"
+                if c[0].button("➡️ Iterazione successiva", disabled=not ready, key="smn" + study.id):
+                    with st.spinner("Correzione del modello rapido e nuovo candidato…"):
+                        _sm_advance(study, env, cells)
+            if best is not None and c[1].button("✅ Applica il migliore al progetto", key="sma" + study.id):
+                S.overrides[study.kind] = {k: v for k, v in best.over.items()}
+                for k, v in best.over.items():
+                    S[f"lab_{study.kind}_{k}"] = float(v)
+                st.success("Quote applicate: le trovi in Progetto feed e Laboratorio.")
+            if best is not None:
+                c[2].caption(f"Migliore verificato full-wave: {best.fw['objective']:.2f} "
+                             f"(η {100 * best.fw['eta']:.1f}%, S11 {best.fw['s11_db']:.1f} dB)")
