@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('Alluminio 1050 puro', 'Aluminium 1050 (pure)'),
     ("guida d'ingresso portata a", 'input guide lengthened to'),
     ('Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL), 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D', 'Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL), 8 steps: 81-86% (v1.4 spreadsheet, openEMS), wide f/D range'),
     ('simulazione rapida non disponibile (scalini assiali): verifica con openEMS', 'fast simulation not available (axial steps): check with openEMS'),
@@ -125,7 +126,7 @@ ENTRIES = [
     ('tolleranza consigliata', 'recommended tolerance'),
     ('Dati della regola di progetto', 'Design rule data'),
     ('Sezione assiale', 'Axial section'),
-    ("Modello 3D (ottone) — z = 0 flangia d'ingresso", '3D model (brass) — z = 0 input flange'),
+    ("— z = 0 flangia d'ingresso", '— z = 0 input flange'),
     ('Simulazione rapida: S11, contenuto modale, lobo, efficienza', 'Fast simulation: S11, mode content, pattern, efficiency'),
     ('Per i feed con anelli/choke la simulazione rapida non è disponibile (regioni coassiali): usa la scheda **Full-wave openEMS**. Sotto: efficienza attesa dalle simulazioni W1GHZ/WD5AGO.', 'The fast simulation is not available for feeds with rings/chokes (coaxial regions): use the **Full-wave openEMS** tab. Below: efficiency expected from the W1GHZ/WD5AGO simulations.'),
     ('Banda di analisi ± %', 'Analysis band ± %'),

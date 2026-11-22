@@ -143,10 +143,10 @@ def model3d_fig(geo, cut: bool):
     else:
         v, f = cad.profile_mesh(geo, n_phi=64, cut_deg=90 if cut else 0)
     fig = go.Figure(go.Mesh3d(x=v[:, 0], y=v[:, 1], z=v[:, 2], i=f[:, 0], j=f[:, 1], k=f[:, 2],
-                              color="#c9a227", flatshading=False, lighting=dict(ambient=0.45, diffuse=0.8, specular=0.6),
+                              color=materials.color(S.get("material", "")), flatshading=False, lighting=dict(ambient=0.45, diffuse=0.8, specular=0.6),
                               opacity=1.0))
     fig.update_layout(height=600, scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm"),
-                      title="Modello 3D (ottone) — z = 0 flangia d'ingresso")
+                      title=f"Modello 3D ({S.get('material', 'Ottone CuZn39Pb3')}) — z = 0 flangia d'ingresso")
     return fig
 
 
@@ -158,7 +158,8 @@ def section_fig(geo):
         for s in (1, -1):
             P = np.vstack([poly, poly[:1]])
             fig.add_trace(go.Scatter(x=P[:, 1], y=s * P[:, 0], fill="toself", mode="lines",
-                                     line=dict(color="black", width=1), fillcolor="rgba(201,162,39,0.6)", showlegend=False))
+                                     line=dict(color="black", width=1), fillcolor=materials.rgba(S.get("material", ""), 0.75),
+                                     showlegend=False))
     fig.add_hline(y=0, line_dash="dashdot", line_color="gray")
     t = float(geo.params.get("wall", 0) or 0)
     feats = geometry.wall_features(geo.profile)

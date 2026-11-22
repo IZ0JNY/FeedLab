@@ -7,6 +7,7 @@
 | 1 | Pop-up BETA: il pulsante OK non funzionava; tolto, al suo posto il testo centrato "Chiudere questa finestra per continuare (✕ in alto a destra)"; si chiude con la ✕ | ✅ fatto (ramo `v0.4.9`) |
 | 2 | Tolta dalla barra laterale l'opzione "Collare Ø40 mm per portaLNB commerciale" | ✅ fatto (ramo `v0.4.9`) |
 | 3 | Axial Corrugated: "8 gole" diventa "8 scalini" (procedura guidata, note, manuali), con le traduzioni inglesi | ✅ fatto (ramo `v0.4.9`) |
+| 4 | Progetto feed e Modello 3D: il feed è colorato come il materiale scelto (rame, ottone, alluminio, argento, oro, inox, stampa 3D) | ✅ fatto (ramo `v0.4.9`) |
 
 ---
 

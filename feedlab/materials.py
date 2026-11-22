@@ -22,19 +22,20 @@ class Material:
     rq_um: float          # typical RMS roughness of the finished inner surface (µm)
     density: float        # g/cm3 (for weight)
     notes: str = ""
+    color: str = "#c9a227"   # display colour of the metal (section and 3D model)
 
 
 MATERIALS = {m.name: m for m in [
-    Material("Rame OFHC (Cu-ETP)", 5.80e7, 0.4, 8.94, "ottimo conduttore, si ossida: proteggere"),
-    Material("Rame argentato (Ag ≥ 3 µm)", 6.10e7, 0.3, 8.94, "argentatura ≥ 3-5 δ; migliore per RX a mm-wave"),
-    Material("Rame dorato (Au flash su Ni)", 4.10e7, 0.3, 8.94, "evitare il nichel sotto: è magnetico e dissipa"),
-    Material("Ottone CuZn39Pb3", 1.50e7, 0.4, 8.47, "ottima lavorabilità al tornio; perdite ~2× rame"),
-    Material("Ottone argentato", 6.10e7, 0.3, 8.47, "lavorabilità dell'ottone + perdite dell'argento"),
-    Material("Alluminio 6082/6061 T6", 2.50e7, 0.6, 2.70, "leggero; anodizzazione solo esterna"),
-    Material("Alluminio 1050 puro", 3.50e7, 0.6, 2.71, "più conduttivo ma tenero"),
-    Material("Acciaio inox AISI 304", 1.40e6, 0.4, 8.0, "solo strutture: perdite elevate"),
-    Material("Stampa 3D + vernice al rame", 1.0e6, 5.0, 1.3, "perdite alte, solo prototipi/bande basse"),
-    Material("Stampa 3D + elettrodeposizione rame", 5.0e7, 3.0, 2.0, "rugosità della stampa domina sopra 24 GHz"),
+    Material("Rame OFHC (Cu-ETP)", 5.80e7, 0.4, 8.94, "ottimo conduttore, si ossida: proteggere", "#b87333"),
+    Material("Rame argentato (Ag ≥ 3 µm)", 6.10e7, 0.3, 8.94, "argentatura ≥ 3-5 δ; migliore per RX a mm-wave", "#c0c0c0"),
+    Material("Rame dorato (Au flash su Ni)", 4.10e7, 0.3, 8.94, "evitare il nichel sotto: è magnetico e dissipa", "#d4af37"),
+    Material("Ottone CuZn39Pb3", 1.50e7, 0.4, 8.47, "ottima lavorabilità al tornio; perdite ~2× rame", "#c9a227"),
+    Material("Ottone argentato", 6.10e7, 0.3, 8.47, "lavorabilità dell'ottone + perdite dell'argento", "#c0c0c0"),
+    Material("Alluminio 6082/6061 T6", 2.50e7, 0.6, 2.70, "leggero; anodizzazione solo esterna", "#a8a9ad"),
+    Material("Alluminio 1050 puro", 3.50e7, 0.6, 2.71, "più conduttivo ma tenero", "#bfc1c2"),
+    Material("Acciaio inox AISI 304", 1.40e6, 0.4, 8.0, "solo strutture: perdite elevate", "#8c9196"),
+    Material("Stampa 3D + vernice al rame", 1.0e6, 5.0, 1.3, "perdite alte, solo prototipi/bande basse", "#9c5b34"),
+    Material("Stampa 3D + elettrodeposizione rame", 5.0e7, 3.0, 2.0, "rugosità della stampa domina sopra 24 GHz", "#b87333"),
 ]}
 
 
@@ -76,3 +77,15 @@ def feed_ohmic_loss_db(sections, f_ghz: float, material: Material, rq_um: float 
 
 def noise_from_loss(loss_db: float, t_phys: float = 290.0) -> float:
     return (1 - 10 ** (-loss_db / 10)) * t_phys
+
+
+def color(name: str) -> str:
+    """Display colour (hex) of a material, brass if unknown."""
+    m = MATERIALS.get(name)
+    return m.color if m else "#c9a227"
+
+
+def rgba(name: str, alpha: float) -> str:
+    h = color(name).lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha})"
