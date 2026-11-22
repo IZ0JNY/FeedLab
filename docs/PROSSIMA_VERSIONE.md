@@ -4,7 +4,9 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Disegno PDF: si vede quale quota è quale (Di, Ds, las, D_aperture, flare_length…); Axial Corrugated con d1…d8 dentro ogni scalino, w, pitch e delta; VE4MA/Chaparral con ring_width, ring_depth, ring_setback | ✅ fatto (ramo `v0.4.10`) |
+| 2 | Axial Corrugated: PDF su due fogli, mezza sezione a scala doppia e feed intero | ✅ fatto (ramo `v0.4.10`) |
+| 3 | PDF dei disegni tutti in una lingua: note dei feed in italiano nel codice con traduzione inglese completa; cartiglio tradotto | ✅ fatto (ramo `v0.4.10`) |
 
 ---
 

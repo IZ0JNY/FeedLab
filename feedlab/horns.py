@@ -67,7 +67,7 @@ def w2imu(f_ghz: float, B_lambda: float | None = None, fD: float | None = None,
         B_lambda = 2.35 * fD
     notes = []
     if not 1.22 <= B_lambda <= 1.9:
-        notes.append("B outside 1.22-1.9 λ: TM11 cut off or higher modes (TE12) propagate")
+        notes.append("B fuori da 1.22-1.9 λ: TM11 sotto il taglio o propagano modi superiori (TE12)")
     flare = flare_half_deg or 44.6 / B_lambda
     C = w2imu_phasing_length_lambda(B_lambda)
     A = input_lambda
@@ -75,7 +75,7 @@ def w2imu(f_ghz: float, B_lambda: float | None = None, fD: float | None = None,
     return Design("W2IMU dual-mode", f_ghz,
                   {"input_diam": A * lam, "aperture_diam_B": B_lambda * lam, "flare_half_deg": flare,
                    "flare_length": flare_len * lam, "phasing_length_C": C * lam},
-                  "Turrin 1967 / W1GHZ ch.6.5", notes + ["phase centre ≈ aperture", "narrowband (mode phasing)"])
+                  "Turrin 1967 / W1GHZ ch.6.5", notes + ["centro di fase ≈ apertura", "banda stretta (fasatura dei modi)"])
 
 
 def w2imu_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
@@ -94,7 +94,7 @@ def w2imu_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
                   {"input_diam_A": A, "aperture_diam_B": B, "length_C": C, "flare_half_deg": alpha,
                    "f_min_ghz": 1.15 * fc, "f_max_ghz": 1.57 * fc},
                   "OE2IGL DualModeHorn-design-guide 2024",
-                  ["η 77% (f/D 0.5) … 80% (f/D 0.8)", "use full dish opening angle, not f/D"])
+                  ["η 77% (f/D 0.5) … 80% (f/D 0.8)", "usa l'angolo di apertura completo della parabola, non l'f/D"])
 
 
 def large_w2imu_30deg(f_ghz: float, B_lambda: float = 1.78) -> Design:
@@ -107,7 +107,7 @@ def large_w2imu_30deg(f_ghz: float, B_lambda: float = 1.78) -> Design:
                   {"aperture_diam_B": B_lambda * lam, "length_C": C * lam, "flare_half_deg": 30.0,
                    "input_diam": 0.76 * lam},
                   "W1GHZ & W1FKF, MUD 2023 (Table 1)",
-                  ["C interpolated from published table", "thin the rim (45° chamfer)", "PC ≈ aperture"])
+                  ["C interpolata dalla tabella pubblicata", "assottigliare il bordo (smusso a 45°)", "centro di fase ≈ apertura"])
 
 
 # ---------------- Skobelev / Pickett-Potter ----------------
@@ -142,8 +142,8 @@ def skobelev(f_ghz: float, fD: float | None = None, D_lambda: float | None = Non
                    "flare_length": row[1] * lam, "best_fD": row[2], "eta_calc_pct": 100 * row[3],
                    "phase_center": row[4] * lam, "gain_dbi": row[7], "bw10_deg": row[8]},
                   "Skobelev et al. 2001; W1GHZ 'Optimized dual-mode feedhorns' 2006 (BEST table)",
-                  ["phase_center > 0 = in front of aperture", "needs matched transition to 1.016λ input",
-                   "nominal flare L ≈ 3.45 r - 0.35 (λ); best results often 10% shorter"])
+                  ["phase_center > 0 = davanti all'apertura", "serve una transizione adattata all'ingresso da 1.016λ",
+                   "flare nominale L ≈ 3.45 r - 0.35 (λ); spesso meglio il 10% più corto"])
 
 
 def pickett_potter_oe2igl(f_ghz: float, opening_angle_deg: float, length_corr: float = 0.0) -> Design:
@@ -154,7 +154,7 @@ def pickett_potter_oe2igl(f_ghz: float, opening_angle_deg: float, length_corr: f
                   {"input_diam_Di": 1.02 * lam, "step_diam_Ds": 1.30 * lam, "aperture_diam": 2 * R * lam,
                    "flare_length": L * lam},
                   "OE2IGL DualModeHorn-design-guide 2025 (Milligan + openEMS)",
-                  ["η 78% (f/D 0.6) … 81% (f/D > 1)", "good for offset f/D 0.58-0.8 and 76+ GHz"])
+                  ["η 78% (f/D 0.6) … 81% (f/D > 1)", "adatto a offset f/D 0.58-0.8 e oltre 76 GHz"])
 
 
 # ---------------- corrugated (OE2IGL axial) ----------------
@@ -206,29 +206,29 @@ def ve4ma(f_ghz: float, variant: str = "super") -> Design:
     """VE4MA/Kumar family (W1GHZ & WD5AGO 2006). Ring setback = behind horn rim."""
     lam = wavelength_mm(f_ghz)
     v = {
-        "original": (0.77, 0.50, 0.50, 0.15, "f/D 0.3-0.45 (move ring), ~69-71% calc"),
-        "super": (0.71, 0.60, 0.45, 0.15, "f/D 0.35-0.45, ~79% calc, 65% measured"),
-        "small": (0.71, 0.35, 0.35, 0.15, "lower blockage, ≈ original"),
-        "tiny_ct1dmk": (0.71, 0.12, 0.26, 0.15, "overall < 1λ, slightly lower η"),
+        "original": (0.77, 0.50, 0.50, 0.15, "f/D 0.3-0.45 (spostando l'anello), ~69-71% calcolato"),
+        "super": (0.71, 0.60, 0.45, 0.15, "f/D 0.35-0.45, ~79% calcolato, 65% misurato"),
+        "small": (0.71, 0.35, 0.35, 0.15, "meno blocking, ≈ originale"),
+        "tiny_ct1dmk": (0.71, 0.12, 0.26, 0.15, "ingombro < 1λ, η leggermente minore"),
     }[variant]
     horn, w, dpt, back, note = v
     return Design(f"VE4MA ({variant})", f_ghz,
                   {"horn_diam": horn * lam, "ring_width": w * lam, "ring_depth": dpt * lam,
                    "ring_setback": back * lam, "outer_diam": (horn + 2 * w) * lam},
                   "W1GHZ & WD5AGO, 'High-efficiency feedhorns for prime-focus dishes', MUD 2006",
-                  [note, "ring position: forward → larger f/D, back → smaller f/D", "≥6 contact points or λ/4-thick choke back"])
+                  [note, "posizione dell'anello: avanti → f/D maggiore, indietro → f/D minore", "≥6 punti di contatto o fondo del choke spesso λ/4"])
 
 
 def chaparral(f_ghz: float, variant: str = "best") -> Design:
     lam = wavelength_mm(f_ghz)
-    v = {"best": (0.71, 3, 0.20, 0.20, 0.40, "78% calc @ f/D 0.35 (63-64% measured)"),
-         "deep_dish": (0.71, 3, 0.17, 0.26, 0.40, "71% calc @ f/D 0.25"),
-         "septum_cp": (0.71, 3, 0.17, 0.30, 0.35, "with septum: 75% @ f/D 0.32")}[variant]
+    v = {"best": (0.71, 3, 0.20, 0.20, 0.40, "78% calcolato @ f/D 0.35 (63-64% misurato)"),
+         "deep_dish": (0.71, 3, 0.17, 0.26, 0.40, "71% calcolato @ f/D 0.25"),
+         "septum_cp": (0.71, 3, 0.17, 0.30, 0.35, "con septum: 75% @ f/D 0.32")}[variant]
     horn, n, w, dpt, back, note = v
     return Design(f"Chaparral 3-ring ({variant})", f_ghz,
                   {"horn_diam": horn * lam, "rings": n, "ring_width": w * lam, "ring_depth": dpt * lam,
                    "ring_setback": back * lam, "outer_diam": (horn + 2 * n * w) * lam},
-                  "W1GHZ & WD5AGO MUD 2006", [note, "uniform rings; walls between rings ignored"])
+                  "W1GHZ & WD5AGO MUD 2006", [note, "anelli uguali; pareti tra gli anelli trascurate"])
 
 
 # ---------------- rectangular / pyramidal ----------------
@@ -239,12 +239,12 @@ def rect_feedhorn_g3rpe(f_ghz: float, fD: float, wg_a_mm: float, wg_b_mm: float)
     AE = lam * (1.727 * fD - 0.129)
     notes = []
     if AH < wg_a_mm:
-        notes.append(f"H aperture smaller than waveguide: min f/D with this guide ≈ {(wg_a_mm / lam + 0.575) / 2.864:.2f}")
+        notes.append(f"apertura H più piccola della guida: f/D minimo con questa guida ≈ {(wg_a_mm / lam + 0.575) / 2.864:.2f}")
     L_apex = AH * AH / lam
     L = L_apex * (AH - wg_a_mm) / AH
     return Design("Rectangular feedhorn (G3RPE)", f_ghz,
                   {"aperture_H": AH, "aperture_E": AE, "axial_length": L, "wg_a": wg_a_mm, "wg_b": wg_b_mm},
-                  "G3RPE curves / W1GHZ HDL_ANT", notes + ["PC ≈ 0.1-0.2λ inside aperture"])
+                  "G3RPE curves / W1GHZ HDL_ANT", notes + ["centro di fase ≈ 0.1-0.2λ dentro l'apertura"])
 
 
 def pyramidal_phase_center(aperture_mm: float, guide_mm: float, axial_len_mm: float, f_ghz: float, plane: str) -> float:
@@ -287,7 +287,7 @@ def conical_optimum(f_ghz: float, gain_dbi: float, guide_diam_mm: float) -> Desi
     flare = math.asin(0.5 * D / l)
     L = 0.5 * (D - guide_diam_mm) / math.tan(flare)
     return Design("Optimum conical horn", f_ghz, {"aperture_diam": D, "slant_length": l, "flare_half_deg": flare / DEG,
-                  "axial_length": L}, "HDL_ANT (Jasik, η≈52%)", ["not a good dish feed (unequal E/H, edge currents)"])
+                  "axial_length": L}, "HDL_ANT (Jasik, η≈52%)", ["non è un buon illuminatore (E/H diversi, correnti sul bordo)"])
 
 
 def diagonal_horn_side(f_ghz: float, bw10_full_deg: float) -> Design:

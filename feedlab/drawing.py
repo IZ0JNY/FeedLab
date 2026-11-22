@@ -29,6 +29,71 @@ def _dim_v(ax, x, y0, y1, text):
     ax.text(x, (y0 + y1) / 2, text, ha="right", va="center", fontsize=6.5, rotation=90)
 
 
+_NOT_DIMS = ("wall", "outer_diam", "length", "rings")
+
+
+def _param_for(geo, value: float, diameter: bool) -> str:
+    """Name of the design dimension (geo.params) equal to `value` (mm), '' if none: lets the drawing say
+    which callout is Di, las, D_aperture… For radii the parameter can be a diameter or a radius."""
+    best = ""
+    for k, v in geo.params.items():
+        if not isinstance(v, (int, float)) or isinstance(v, bool) or k in _NOT_DIMS or k.endswith(("_deg", "_pct")):
+            continue
+        if geo.kind == "axial_corrugated" and k[:1] == "d" and k[1:].isdigit():
+            continue                                    # slot depths: dimensioned inside each step
+        if abs(v - value) < 0.006:
+            return k
+    return best
+
+
+def _corrugated_dims(ax, geo, half=True):
+    """Axial Corrugated: depth d1…d8 inside each of the 8 steps, step width w, pitch and delta (upper half)."""
+    p = geo.params
+    a_s = max(p["Ds"], p["Di"]) / 2
+    r_in = [a_s + p["delta"] + k * p["pitch"] for k in range(8)]
+    z_open = [p["las"] + k * p["axi"] for k in range(8)]
+    for k in range(8):
+        dk = p[f"d{k + 1}"]
+        y = r_in[k] + p["w"] / 2
+        ax.annotate("", (z_open[k] - dk, y), (z_open[k], y), arrowprops=dict(arrowstyle="<->", lw=0.5, color="tab:blue"))
+        ax.text(z_open[k] - dk / 2, y, f"d{k + 1}", ha="center", va="bottom", fontsize=6, color="tab:blue")
+    zk = z_open[7] + 0.25 * p["axi"]                    # w across the last step, pitch between steps 7 and 8
+    ax.annotate("", (zk, r_in[7]), (zk, r_in[7] + p["w"]), arrowprops=dict(arrowstyle="<->", lw=0.5, color="tab:blue"))
+    ax.text(zk + 0.3, r_in[7] + p["w"] / 2, "w", ha="left", va="center", fontsize=6, color="tab:blue")
+    zp = z_open[6] + 0.25 * p["axi"]
+    ax.annotate("", (zp, r_in[6]), (zp, r_in[7]), arrowprops=dict(arrowstyle="<->", lw=0.5, color="tab:blue"))
+    ax.text(zp + 0.3, (r_in[6] + r_in[7]) / 2, "pitch", ha="left", va="center", fontsize=6, color="tab:blue")
+    if p["delta"] > 1e-6:
+        zd = z_open[0] + 0.7 * p["axi"]
+        ax.annotate("", (zd, a_s), (zd, r_in[0]), arrowprops=dict(arrowstyle="<->", lw=0.5, color="tab:blue"))
+        ax.text(zd + 0.3, (a_s + r_in[0]) / 2, "delta", ha="left", va="center", fontsize=6, color="tab:blue")
+    ax.text(0, -geo.outer_radius * (0.2 if half else 1.42) - 3, "d1…d8 = profondità degli 8 scalini (in blu); w, pitch, delta come in tabella",
+            fontsize=6.5, color="tab:blue")
+
+
+def _ring_dims(ax, geo):
+    """VE4MA / Chaparral: ring_width, ring_depth and ring_setback on the first ring (upper half)."""
+    p = geo.params
+    t = float(p.get("wall", 0) or 0)
+    L = geo.z_aperture
+    r_in = p["horn_diam"] / 2 + t
+    r_out = r_in + p["ring_width"]
+    z_open = L - p["ring_setback"]
+    z_bot = z_open - p["ring_depth"]
+    kw = dict(arrowprops=dict(arrowstyle="<->", lw=0.5, color="tab:blue"))
+    tx = dict(fontsize=6, color="tab:blue")
+    zm = z_bot + 0.3 * p["ring_depth"]
+    ax.annotate("", (zm, r_in), (zm, r_out), **kw)
+    ax.text(zm + 0.3, (r_in + r_out) / 2, "ring_width", ha="left", va="center", **tx)
+    rm = r_in + 0.7 * p["ring_width"]
+    ax.annotate("", (z_bot, rm), (z_open, rm), **kw)
+    ax.text((z_bot + z_open) / 2, rm, "ring_depth", ha="center", va="bottom", **tx)
+    if p["ring_setback"] > 1e-6:
+        ys = r_in + 0.25 * p["ring_width"]               # in front of the ring, above the horn wall
+        ax.annotate("", (z_open, ys), (L, ys), **kw)
+        ax.text(L + 0.3, ys, "ring_setback", ha="left", va="center", **tx)
+
+
 def _title_block(fig, geo, title, material, sheet):
     ax = fig.add_axes([0.62, 0.03, 0.36, 0.17]); ax.set_axis_off()
     ax.add_patch(Rectangle((0, 0), 1, 1, fill=False, lw=1.0))
@@ -43,25 +108,36 @@ def _title_block(fig, geo, title, material, sheet):
         ax.text(0.30, y + 0.03, v, fontsize=7)
 
 
-def _section_axes(fig, geo: FeedGeometry):
+def _section_axes(fig, geo: FeedGeometry, half: bool = False):
+    """half=True: upper half only, at twice the scale (Axial Corrugated, sheet 1)."""
     ax = fig.add_axes([0.05, 0.25, 0.55, 0.68])
     for poly in geo.polygons:
-        for s in (1, -1):
+        for s in ((1,) if half else (1, -1)):
             pts = [(z, s * r) for r, z in poly]
             ax.add_patch(Polygon(pts, closed=True, facecolor="0.85", edgecolor="k", lw=0.8, hatch="////"))
     ax.axhline(0, color="k", lw=0.5, ls="-.")
     L = geo.z_aperture
     Rmax = geo.outer_radius
-    ax.set_xlim(-0.08 * L - 4, L * 1.08 + 4)
-    ax.set_ylim(-Rmax * 1.5 - 5, Rmax * 1.35 + 3)
+    n_d = len({round(r, 3) for _, r in geo.profile})
+    sp = 0.07 * Rmax                                  # half view: diameter callouts side by side, right of the part
+    side = geo.kind == "axial_corrugated"             # many close diameters: callouts side by side, right of the part
+    ax.set_xlim(-0.08 * L - 4, (L + (n_d + 1) * sp if side else L * 1.08) + 4)
+    ax.set_ylim(-Rmax * (0.25 if half else 1.5) - 5, Rmax * (1.5 if side else 1.35) + 3)
     ax.set_aspect("equal"); ax.set_axis_off()
-    ax.set_title("Sezione assiale (metà superiore = sezione, metà inferiore = specchio)", fontsize=8)
+    ax.set_title("Mezza sezione assiale, scala doppia (asse in basso)" if half else
+                 "Sezione assiale (metà superiore = sezione, metà inferiore = specchio)", fontsize=8)
     # dimensions along the inner profile
     prof = geo.profile
     zs = sorted({round(z, 4) for z, _ in prof})
     ytop = Rmax * 1.15 + 1
+    named = set()
     for i, (z0, z1) in enumerate(zip(zs[:-1], zs[1:])):
-        _dim_h(ax, z0, z1, ytop + (i % 2) * 0.08 * Rmax, f"{z1 - z0:.2f}")
+        k = _param_for(geo, z1 - z0, False)
+        if geo.kind == "axial_corrugated" and (not k or k in named):              # corrugated: one callout per named length (las, axi)
+            continue
+        lab = f"{z1 - z0:.2f}" + (f" = {k}" if k and k not in named else "")
+        named.add(k)
+        _dim_h(ax, z0, z1, ytop + (i % 2) * 0.08 * Rmax, lab)
     _dim_h(ax, 0, L, ytop + 0.25 * Rmax, f"L = {L:.2f}")
     # diameters
     seen = set()
@@ -70,9 +146,20 @@ def _section_axes(fig, geo: FeedGeometry):
         if key in seen:
             continue
         seen.add(key)
-        _dim_v(ax, z + 0.01 * L, -r, r, f"Ø{2 * r:.3f}")
-    ax.text(L, -Rmax * 1.3, f"Ø esterno max {2 * geo.outer_radius:.2f}", fontsize=6.5, ha="right")
+        k = _param_for(geo, 2 * r, True)
+        x = z + 0.01 * L
+        if side:
+            x = L + len(seen) * sp
+            ax.plot([z, x], [r, r], color="0.5", lw=0.3, ls=":")          # extension lines
+            if not half:
+                ax.plot([z, x], [-r, -r], color="0.5", lw=0.3, ls=":")
+        _dim_v(ax, x, 0 if half else -r, r, f"Ø{2 * r:.3f}" + (f" = {k}" if k else ""))
+    ax.text(L, -Rmax * (0.12 if half else 1.3), f"Ø esterno max {2 * geo.outer_radius:.2f}", fontsize=6.5, ha="right")
     _wall_dims(ax, geo)
+    if geo.kind == "axial_corrugated":
+        _corrugated_dims(ax, geo, half)
+    if geo.kind in ("ve4ma", "chaparral"):
+        _ring_dims(ax, geo)
     return ax
 
 
@@ -113,12 +200,18 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
     critical dimension needs (the general tolerance applies to all the others)."""
     path = Path(path)
     title = title or f"{FEED_TYPES.get(geo.kind, geo.kind)}"
+    from . import i18n
+    # Axial Corrugated: sheet 1 = half-section at double scale, sheet 2 = whole section
+    views = [True, False] if geo.kind == "axial_corrugated" else [False]
+    mnt = getattr(geo, "mount", None)
+    n_sheets = len(views) + (mnt is not None)
     with PdfPages(path) as pdf:
+      for i_view, half in enumerate(views):
         fig = plt.figure(figsize=(11.69, 8.27))  # A4 landscape
         if isinstance(geo, RectHornGeometry):
             _rect_views(fig, geo)
         else:
-            _section_axes(fig, geo)
+            _section_axes(fig, geo, half)
         # dimension table
         ax = fig.add_axes([0.62, 0.25, 0.36, 0.68]); ax.set_axis_off()
         ax.set_title("Quote di progetto", fontsize=9, loc="left")
@@ -142,19 +235,17 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
                             f"{100 * c['share']:>8.0f}%")
             axt.text(0, 1, "TOLLERANZE PER QUOTA (analisi Monte Carlo FeedLab)\n" + "\n".join(rows),
                      va="top", family="monospace", fontsize=6.5)
-        _title_block(fig, geo, title, material, "1/1")
-        from . import i18n
+        _title_block(fig, geo, title, material, f"{i_view + 1}/{n_sheets}")
         i18n.translate_figure_mpl(fig)
         pdf.savefig(fig); plt.close(fig)
-        mnt = getattr(geo, "mount", None)
-        if mnt is not None:
-            fig = _flange_sheet(geo, mnt, title, material)
+      if mnt is not None:
+            fig = _flange_sheet(geo, mnt, title, material, f"{n_sheets}/{n_sheets}")
             i18n.translate_figure_mpl(fig)
             pdf.savefig(fig); plt.close(fig)
     return path
 
 
-def _flange_sheet(geo, mnt, title, material):
+def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
     """Sheet 2: front view of the drilled input flange and the hole table."""
     from matplotlib.patches import Circle
     fig = plt.figure(figsize=(11.69, 8.27))
@@ -190,7 +281,7 @@ def _flange_sheet(geo, mnt, title, material):
         lines += textwrap.wrap(f"ATTENZIONE: {w}", 70)
     lines += ["", f"Fonte foratura: Flann, Waveguide and Flange Data; MIL-DTL-3922/67C"]
     ax2.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7.5)
-    _title_block(fig, geo, title, material, "2/2")
+    _title_block(fig, geo, title, material, sheet)
     return fig
 
 

@@ -244,7 +244,7 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
         L = kw.get("length", _input_len(f_ghz, d) * 1.5)
         prof = [(0.0, d / 2), (L, d / 2)]
         return _finish(kind, f_ghz, {"diam": d, "length": L, "wall": t}, prof, t,
-                       notes=["W1GHZ 6.3: 0.6-0.9λ → f/D 0.25-0.4; >0.95λ squint"])
+                       notes=["W1GHZ 6.3: 0.6-0.9λ → f/D 0.25-0.4; oltre 0.95λ squint"])
 
     if kind in ("w2imu", "w2imu_oe2igl", "large_w2imu"):
         if kind == "w2imu":
@@ -297,7 +297,7 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
         prof = [(0.0, d_in / 2), (Lin, d_in / 2), (Lin + Lf, D / 2)]
         return _finish(kind, f_ghz, {"d_input": d_in, "D_aperture": D, "flare_half_deg": alpha,
                                      "flare_length": Lf, "input_length": Lin, "wall": t}, prof, t,
-                       notes=["smooth conical: unequal E/H, edge currents (W1GHZ 6.4.1)"])
+                       notes=["conico liscio: E/H diversi, correnti sul bordo (W1GHZ 6.4.1)"])
 
     if kind in ("ve4ma", "chaparral"):
         if kind == "ve4ma":
