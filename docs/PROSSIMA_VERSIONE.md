@@ -1,11 +1,32 @@
-# Versione 0.4.6 (pubblicata) e prossime richieste
+# Modifiche per la prossima versione (0.4.7)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Un manuale per ogni lingua dell'installazione (IT, EN, DE, FR, ES), con gli screenshot dell'app in quella lingua | da fare |
+| 2 | Scelta delle viti piastrina → feed: M3/M4 a 10 GHz, M2.5/M3/M2 sopra; lunghezza = 3 × spessore piastrina arrotondata alla misura commerciale; equivalenti UNC | ✅ fatto su `main` |
+
+## 2. Viti piastrina → feed
+**Richiesta (IZ0JNY):** scegliere le viti più comuni per fissare la piastrina al feed: M3 o M4 per i 10 GHz, M3, M2.5 o M2 per le frequenze superiori. Lunghezza delle viti (e quindi dei fori filettati nel feed) = spessore della piastrina × 3, arrotondato alle lunghezze commerciali 10, 12, 14, 16, 18, 20, 25 mm. Conversione per le viti UNC.
+
+**Fatto:**
+- Scheda *Piastrina WR*: menu "Viti piastrina → feed" con le misure della banda (sotto 15 GHz: M3, M4; sopra: M2.5, M3, M2; la prima è quella proposta).
+- **Lunghezza:** 3 × spessore del corpo della piastrina, arrotondato alla lunghezza commerciale più vicina (a parità sceglie la più lunga; sotto 10 → 10 mm, sopra 25 → 25 mm).
+- **Foro filettato nel feed:** profondità del filetto = lunghezza vite − (spessore piastrina − lamatura) + 0.5 mm; il preforo è più profondo di 3 passi (min. 1 mm) per l'imbocco del maschio. La flangia del feed si ispessisce di conseguenza.
+- **Pollici (UNC), misura più vicina:** M2 → #2-56, M2.5 → #3-48 (meno diffusa del 4-40), M3 → #4-40, M4 → #8-32. Lunghezze ASME B18.3: 3/8", 1/2", 5/8", 3/4", 7/8", 1". Lamature per teste cilindriche ISO 4762 / ASME B18.3.
+- Vite e lunghezza compaiono nella foratura del PDF della piastrina, nei fori del feed (PDF e STEP) e nella scheda.
+- **Nota:** a 10 GHz la piastrina è spessa circa 8.9 mm, quindi la regola dà viti da 25 mm, circa 20 mm di filetto nel feed e una flangia del feed di circa 22 mm.
+- Test: `tests/test_flanges.py::test_plate_screw_choices_and_length`.
+
+---
+
+# Archivio: versione 0.4.6 (pubblicata)
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Gradino senza spessore (Pickett-Potter, Skobelev): la corona tra guida d'ingresso e flare aveva spessore assiale zero nel 2D, nel 3D, nello STEP e nel PDF | ✅ fatto su `main` |
 | 2 | Quote nei disegni: spessore del gradino, spessore parete e semiangolo del flare (PDF e sezione nell'app) | ✅ fatto su `main` |
 | 3 | Laboratorio: variare il semiangolo del flare (Pickett-Potter, Skobelev) e vedere cosa cambia | ✅ fatto su `main` |
-| 4 | Un manuale per ogni lingua dell'installazione (IT, EN, DE, FR, ES), con gli screenshot dell'app in quella lingua | da fare |
+| 4 | Manuali in 5 lingue | spostato alla 0.4.7 |
 
 ## 1. Spessore della parete
 La parete esterna era il profilo interno spostato solo in direzione radiale: dove il profilo è orizzontale (gradino) la corona aveva spessore zero e nei tratti conici la parete era più sottile del valore impostato. Ora lo spessore è costante e misurato perpendicolarmente alla parete, con spigoli vivi agli angoli; i bordi d'apertura e la flangia restano piani. Test: `tests/test_wall_thickness.py`.

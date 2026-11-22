@@ -51,7 +51,8 @@ def _zte(k, kc):
 
 
 def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str = "V",
-                 corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None) -> MatchingPlate:
+                 corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None,
+                 plate_screw: str | None = None) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
     (feedlab.flanges) — clearance holes for the screws and dowel holes."""
     w = RECT_WG[wg]
@@ -75,7 +76,10 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     mnt = None
     if holes:
         from .flanges import mount
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw)
+        body_t = round(max(t, mnt.plate_body_min()), 2)
+        # screw length depends on the plate thickness: drill again with it (same positions)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t)
         outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)
     body_t = max(t, mnt.plate_body_min()) if mnt else t
     return MatchingPlate(f_ghz, wg, circ_diam_mm, a_opt, b, r, t, lg / 200, z0, polarization, outer, basic, mnt,
@@ -184,6 +188,9 @@ def _holes_text(p: MatchingPlate) -> str:
     for h in m.plate_holes:
         lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {h.callout}")
     lines.append(f"  viti della guida: lunghezza ≤ flangia guida + {p.body_t:.1f} mm")
+    if m.screw_len:
+        lines.append(f"  viti piastra→feed: 4 × {m.plate_screw} × {m.screw_len_label} a testa cilindrica")
+        lines.append(f"  (3 × spessore {p.body_t:.2f} → {m.screw_len_label}); filetto nel feed prof. {m.tap_depth:.1f}")
     import textwrap
     for w in m.warnings:
         lines += ["  " + x for x in textwrap.wrap(w, 58)]

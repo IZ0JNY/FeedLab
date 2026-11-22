@@ -55,13 +55,48 @@ FLANGES = {f.wg: f for f in [
 # screws: major diameter, tap drill, clearance drill (normal fit)
 SCREWS = {
     "M2": (2.0, 1.6, 2.4), "2-56 UNC": (2.184, 1.78, 2.6),
-    "M2.5": (2.5, 2.05, 2.8), "M3": (3.0, 2.5, 3.2), "M4": (4.0, 3.3, 4.3),
+    "M2.5": (2.5, 2.05, 2.8), "3-48 UNC": (2.515, 1.99, 2.9), "M3": (3.0, 2.5, 3.2), "M4": (4.0, 3.3, 4.3),
     "4-40 UNC": (2.845, 2.26, 3.0), "6-32 UNC": (3.505, 2.70, 3.7), "8-32 UNC": (4.166, 3.45, 4.3),
 }
+PITCH = {"M2": 0.4, "M2.5": 0.45, "M3": 0.5, "M4": 0.7, "2-56 UNC": 25.4 / 56, "3-48 UNC": 25.4 / 48,
+         "4-40 UNC": 25.4 / 40, "6-32 UNC": 25.4 / 32, "8-32 UNC": 25.4 / 32}
+
+# ---- screws holding the λ/4 plate on the feed (user's choice, IZ0JNY) ----
+PLATE_SCREWS_10GHZ = ["M3", "M4"]              # 10 GHz band
+PLATE_SCREWS_HIGH = ["M2.5", "M3", "M2"]       # 24 GHz and up (first = default)
+TEN_GHZ_MAX = 15.0                             # below this the 10 GHz choices apply
+# imperial equivalents (nearest UNC size): M2→#2-56 (Ø2.18), M2.5→#3-48 (Ø2.51, less common than 4-40),
+# M3→#4-40 (Ø2.84), M4→#8-32 (Ø4.17)
+UNC_FOR_METRIC = {"M2": "2-56 UNC", "M2.5": "3-48 UNC", "M3": "4-40 UNC", "M4": "8-32 UNC"}
+# commercial lengths: metric (ISO 4762) and inch (ASME B18.3) socket head cap screws
+LENGTHS_MM = [10, 12, 14, 16, 18, 20, 25]
+LENGTHS_IN = [(3 / 8, '3/8"'), (1 / 2, '1/2"'), (5 / 8, '5/8"'), (3 / 4, '3/4"'), (7 / 8, '7/8"'), (1.0, '1"')]
+
+
+def plate_screw_options(f_ghz: float | None) -> list[str]:
+    """Metric sizes offered for the plate → feed screws at this frequency (first = default)."""
+    return PLATE_SCREWS_10GHZ if f_ghz is not None and f_ghz < TEN_GHZ_MAX else PLATE_SCREWS_HIGH
+
+
+def plate_screw_name(metric: str, system: str) -> str:
+    return UNC_FOR_METRIC[metric] if system == "imperial" else metric
+
+
+def screw_length(plate_t: float, system: str = "metric") -> tuple[float, str]:
+    """Plate → feed screw length: 3 × plate thickness rounded to the nearest commercial length
+    (10, 12, 14, 16, 18, 20, 25 mm; inch screws 3/8 … 1 inch). Returns (mm, label)."""
+    target = 3.0 * plate_t
+    if system == "imperial":
+        v, lab = min(LENGTHS_IN, key=lambda x: (abs(x[0] * 25.4 - target), -x[0]))
+        return v * 25.4, lab
+    v = min(LENGTHS_MM, key=lambda x: (abs(x - target), -x))
+    return float(v), f"{v} mm"
 # counterbores for the plate → feed screws: socket head cap screws ISO 4762 / ASME B18.3 (head Ø, height)
 # → counterbore Ø, depth. M2.5: Ø5.5 × 2.5 as in IZ0JNY's WR-42 plate. Check against the screws you buy.
-HEADS = {"M2": (3.8, 2.0), "M2.5": (4.5, 2.5), "M3": (5.5, 3.0), "2-56 UNC": (3.56, 2.18), "4-40 UNC": (4.65, 2.84)}
-CBORE = {"M2": (4.4, 2.1), "M2.5": (5.5, 2.5), "M3": (6.5, 3.1), "2-56 UNC": (4.2, 2.3), "4-40 UNC": (5.3, 3.0)}
+HEADS = {"M2": (3.8, 2.0), "M2.5": (4.5, 2.5), "M3": (5.5, 3.0), "M4": (7.0, 4.0), "2-56 UNC": (3.56, 2.18),
+         "3-48 UNC": (4.09, 2.51), "4-40 UNC": (4.65, 2.84), "8-32 UNC": (6.86, 4.17)}
+CBORE = {"M2": (4.4, 2.1), "M2.5": (5.5, 2.5), "M3": (6.5, 3.1), "M4": (8.0, 4.4), "2-56 UNC": (4.2, 2.3),
+         "3-48 UNC": (4.8, 2.7), "4-40 UNC": (5.3, 3.0), "8-32 UNC": (7.9, 4.4)}
 METRIC_FOR = {"4-40 UNC": "M3", "6-32 UNC": "M3", "8-32 UNC": "M4"}   # passes the standard's clearance holes (M3 on UG-595 as IZ0JNY)
 DOWEL_HOLE_ROUND = 1.65          # MIL round flanges, for Ø1.549/1.562 pins
 DOWEL_PIN_SQUARE = 2.0           # alignment pins added by FeedLab on square flanges (Ø2 m6, holes Ø2 H7)
@@ -89,6 +124,9 @@ class Mount:
     engagement: float = 0.0      # thread length in the feed flange
     warnings: list = field(default_factory=list)
     plate_screw: str = ""        # screws holding the plate on the feed (heads in counterbores, WR side)
+    screw_len: float = 0.0       # their length (mm), 0 = not set (plate thickness unknown)
+    screw_len_label: str = ""
+    tap_depth: float = 0.0       # threaded depth in the feed flange
 
     @property
     def plate_radius(self) -> float:
@@ -107,7 +145,8 @@ class Mount:
     def feed_flange_min(self) -> tuple[float, float]:
         """(diameter, thickness) the feed flange needs for these holes."""
         d_major = SCREWS[self.plate_screw or self.screw][0]
-        return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(self.engagement + 1.0, 3.0)
+        drill = max((h.depth or 0.0 for h in self.feed_holes if h.kind == "tap"), default=0.0)
+        return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(self.engagement + 1.0, drill + 0.8, 3.0)
 
 
 def screw_for(wg: str, system: str = "metric") -> str:
@@ -127,7 +166,7 @@ PIN_FROM_GHZ = 47.0             # alignment pins plate ↔ feed from 47 GHz up (
 
 
 def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_diam: float = 0.0,
-          f_ghz: float | None = None) -> Mount:
+          f_ghz: float | None = None, plate_screw: str | None = None, plate_t: float | None = None) -> Mount:
     """Hole patterns of the plate and of the feed flange for waveguide `wg` (see module docstring)."""
     if wg not in FLANGES:
         raise ValueError(f"nessuna flangia standard in tabella per {wg}")
@@ -155,7 +194,9 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         m.plate_holes.append(Hole(x, y, DOWEL_HOLE_ROUND, "dowel", f"Ø{DOWEL_HOLE_ROUND:g} passante, spine guida Ø1.56"))
         m.feed_holes.append(Hole(x, y, DOWEL_HOLE_ROUND, "dowel", f"Ø{DOWEL_HOLE_ROUND:g} prof. 3, punte spine guida",
                                  depth=3.0))
-    _plate_screws(m, system, feed_input_diam, wg)
+    choices = plate_screw_options(f_ghz)
+    metric = plate_screw if plate_screw in choices else choices[0]
+    _plate_screws(m, system, feed_input_diam, wg, screw=plate_screw_name(metric, system), plate_t=plate_t)
     if f_ghz is not None and f_ghz >= PIN_FROM_GHZ - 1e-9:
         _alignment_pins(m, feed_input_diam, wg)
     # interference with the feed's circular input guide
@@ -169,12 +210,13 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
     return m
 
 
-def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang: int = 36) -> None:
+def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang: int = 36,
+                  screw: str | None = None, plate_t: float | None = None) -> None:
     """Four screws holding the plate on the feed (θ + k·90°), heads sunk in counterbores on the WR side.
     Smallest radius whose counterbores keep ≥ 0.6 mm from every other hole, from the circular guide
     and from the WR aperture; θ = 0 (on the axes) is tried first, as in IZ0JNY's plate."""
     from .waveguide import RECT_WG
-    screw = "M2.5" if system != "imperial" else "2-56 UNC"
+    screw = screw or ("M2.5" if system != "imperial" else "2-56 UNC")
     d_major, tap, clear = SCREWS[screw]
     cb_d, cb_k = CBORE[screw]
     w = RECT_WG.get(wg)
@@ -192,6 +234,15 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
 
     r = feed_input_diam / 2 + cb_d / 2 + 0.6
     eng = max(2.0 * d_major, 4.0)
+    L, L_lab = 0.0, ""
+    if plate_t:
+        # screw length = 3 × plate thickness, commercial; it clamps the plate under the head (plate_t − counterbore)
+        L, L_lab = screw_length(plate_t, system)
+        eng = L - max(plate_t - cb_k, 0.0)
+        if eng < 1.5 * d_major:
+            m.warnings.append(f"vite {screw} × {L_lab}: solo {eng:.1f} mm di filetto nel feed (< 1.5 d)")
+    tap_d = eng + 0.5                                  # threaded depth: screw end + margin
+    drill_d = tap_d + max(1.0, 3 * PITCH.get(screw, 0.5))  # tap drill deeper than the thread (tap lead)
     for _ in range(600):
         for i in range(n_ang // 4):
             th = 0.5 * math.pi * i / (n_ang // 4)
@@ -199,12 +250,15 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
             if all(ok(x, y) for x, y in pts):
                 for x, y in pts:
                     m.plate_holes.append(Hole(x, y, clear, "cbore",
-                                              f"Ø{clear:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} ({screw})",
+                                              f"Ø{clear:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} ({screw}"
+                                              + (f" × {L_lab}" if L_lab else "") + ")",
                                               cb_dia=cb_d, cb_depth=cb_k))
-                    m.feed_holes.append(Hole(x, y, tap, "tap", f"{screw} filetto {eng:.1f} (preforo Ø{tap:g})",
-                                             depth=eng + 1.0))
+                    m.feed_holes.append(Hole(x, y, tap, "tap", f"{screw} filetto prof. {tap_d:.1f} "
+                                             f"(preforo Ø{tap:g} prof. {drill_d:.1f})", depth=drill_d))
                 m.plate_screw = screw
-                m.engagement = eng
+                m.engagement = tap_d
+                m.tap_depth = tap_d
+                m.screw_len, m.screw_len_label = L, L_lab
                 return
         r += 0.1
     m.warnings.append("nessuna posizione libera per le viti piastrina→feed")

@@ -792,15 +792,23 @@ with tabs[7]:
                                     "lamatura e spine di centraggio: nel PDF e nello STEP di piastrina e feed")
         system = c2.radio("Viti", ["metric", "imperial"], horizontal=True, key="mount_sys",
                           format_func=lambda x: {"metric": "Metriche (M)", "imperial": "Pollici (UNC)"}[x])
-        new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": "V" if pol_ == "Verticale" else "H"}
-        if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
-            S["mount_cfg"] = new_cfg
-            geometry.MOUNT.update(new_cfg)
-            for k in ("pdf", "step", "stl", "plate_pdf", "plate_step"):
-                S.pop(k, None)
+        opts = flanges.plate_screw_options(S.f_ghz)
+        pscrew = st.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}", disabled=not holes_on,
+                              format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
+                              help="lunghezza = 3 × spessore della piastrina, arrotondata alla misura commerciale "
+                                   "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
+                                   "seguono la lunghezza della vite")
+        pol_c = "V" if pol_ == "Verticale" else "H"
         try:
-            pl = plate.design_plate(S.f_ghz, wg, dcirc, "V" if pol_ == "Verticale" else "H", rr, opt,
-                                    holes=system if holes_on else None)
+            pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
+                                    plate_screw=pscrew)
+            new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
+                       "plate_t": pl.body_t if holes_on else None}
+            if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
+                S["mount_cfg"] = new_cfg
+                geometry.MOUNT.update(new_cfg)
+                for k in ("pdf", "step", "stl", "plate_pdf", "plate_step"):
+                    S.pop(k, None)
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Apertura a", f"{pl.a:.3f} mm"); m2.metric("Apertura b", f"{pl.b:.3f} mm")
             m3.metric("Spessore", f"{pl.thickness:.3f} mm", f"± {pl.tolerance:.3f}", delta_color="off")
@@ -811,7 +819,8 @@ with tabs[7]:
             if pl.mount is not None:
                 mm_ = pl.mount
                 st.info(f"Flangia {mm_.flange.wg} {mm_.flange.name}: le viti della guida ({mm_.screw}) si avvitano nella "
-                        f"piastra; 4 viti piastra→feed {mm_.plate_screw} con testa nella lamatura (lato guida)"
+                        f"piastra; 4 viti piastra→feed {mm_.plate_screw} × {mm_.screw_len_label} con testa nella lamatura "
+                        f"(lato guida), filetto nel feed prof. {mm_.tap_depth:.1f} mm"
                         + (", 2 spine di centraggio" if any(h.kind == "pin" for h in mm_.plate_holes) else "") + ". "
                         + (f"Corpo piastrina {pl.body_t:.2f} mm con tasca Ø{pl.circ_diam:.3f} × {pl.pocket_depth:.2f} mm sul lato "
                            "feed (prolunga la guida circolare; la parte λ/4 resta invariata). " if pl.pocket_depth > 1e-6 else "")

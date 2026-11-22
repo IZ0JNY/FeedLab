@@ -1187,4 +1187,21 @@ ENTRIES = [
     ("lunghezza flare", "flare length", "Flare-Länge", "longueur du flare", "longitud del flare"),
     ("lunghezza totale", "total length", "Gesamtlänge", "longueur totale", "longitud total"),
     ("semiangolo flare", "flare half-angle", "Flare-Halbwinkel", "demi-angle du flare", "semiángulo del flare"),
+    ("Viti piastrina → feed", "Plate → feed screws", "Schrauben Platte → Speisesystem", "Vis plaque → source",
+     "Tornillos placa → alimentador"),
+    ("lunghezza = 3 × spessore della piastrina, arrotondata alla misura commerciale (10, 12, 14, 16, 18, 20, 25 mm; in "
+     "pollici 3/8\" … 1\"); i fori filettati nel feed seguono la lunghezza della vite",
+     "length = 3 × plate thickness, rounded to the commercial size (10, 12, 14, 16, 18, 20, 25 mm; in inches 3/8\" … 1\"); "
+     "the threaded holes in the feed follow the screw length",
+     "Länge = 3 × Plattendicke, auf handelsübliche Länge gerundet (10, 12, 14, 16, 18, 20, 25 mm; in Zoll 3/8\" … 1\"); "
+     "die Gewindebohrungen im Speisesystem folgen der Schraubenlänge",
+     "longueur = 3 × épaisseur de la plaque, arrondie à la longueur du commerce (10, 12, 14, 16, 18, 20, 25 mm ; en pouces "
+     "3/8\" … 1\") ; les trous taraudés de la source suivent la longueur de la vis",
+     "longitud = 3 × espesor de la placa, redondeada a la medida comercial (10, 12, 14, 16, 18, 20, 25 mm; en pulgadas "
+     "3/8\" … 1\"); los agujeros roscados del alimentador siguen la longitud del tornillo"),
+    ("con testa nella lamatura", "with the head in the counterbore", "mit dem Kopf in der Senkung", "avec la tête dans le lamage",
+     "con la cabeza en el avellanado"),
+    ("filetto nel feed prof.", "thread depth in the feed", "Gewindetiefe im Speisesystem", "profondeur du filetage dans la source",
+     "profundidad de rosca en el alimentador"),
+    ("a testa cilindrica", "socket head cap screws", "Zylinderkopfschrauben", "à tête cylindrique", "de cabeza cilíndrica"),
 ]

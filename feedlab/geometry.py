@@ -161,7 +161,7 @@ def _wall_polygon(profile, t, flange_r=None, flange_t=None):
 
 COLLAR = {"diam": None, "length": 25.0, "z0": 3.0}    # set COLLAR["diam"] = 40 for standard LNB holders
 # bolted stack WR component | λ/4 plate | feed: set MOUNT["wg"] (e.g. "WR-28") to drill the feed flange
-MOUNT = {"wg": None, "system": "metric", "pol": "V"}
+MOUNT = {"wg": None, "system": "metric", "pol": "V", "plate_screw": None, "plate_t": None}
 
 
 def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=None, flange=True):
@@ -169,7 +169,8 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     mnt = None
     if flange and MOUNT.get("wg"):
         from .flanges import mount
-        mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f)
+        mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f,
+                    MOUNT.get("plate_screw"), MOUNT.get("plate_t"))
         d_need, t_need = mnt.feed_flange_min()
         # the thicker flange must sit on the straight input guide: lengthen it if needed (electrically benign)
         r0 = profile[0][1]

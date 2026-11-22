@@ -113,3 +113,26 @@ def test_pawlan_tm11_ratio_pickett_potter():
     r = explore.evaluate("pickett_potter", 24.048, explore.Scenario(D_mm=630, fD=0.79))
     q = explore.tm11_power_ratio(r.modes)
     assert explore.TM11_TARGET[0] <= q <= explore.TM11_TARGET[1]            # Pawlan WA6KBL: ≈ 15 %
+
+
+def test_plate_screw_choices_and_length():
+    from feedlab import flanges, plate
+    assert flanges.plate_screw_options(10.368) == ["M3", "M4"]
+    assert flanges.plate_screw_options(24.048) == ["M2.5", "M3", "M2"]
+    assert flanges.screw_length(3.67) == (12.0, "12 mm")          # 11.0 -> 12
+    assert flanges.screw_length(5.0)[0] == 16.0                   # 15 -> 16 (tie 14/16 goes up)
+    assert flanges.screw_length(9.0)[0] == 25.0                   # beyond the list: 25
+    assert flanges.screw_length(1.0)[0] == 10.0
+    assert flanges.screw_length(4.0, "imperial")[1] == '1/2"'
+    for f, wg, d in ((10.368, "WR-90", 21.0), (24.048, "WR-42", 9.2)):
+        for sc in flanges.plate_screw_options(f):
+            for system in ("metric", "imperial"):
+                p = plate.design_plate(f, wg, d, "V", None, True, holes=system, plate_screw=sc)
+                m = p.mount
+                assert m.plate_screw == (sc if system == "metric" else flanges.UNC_FOR_METRIC[sc])
+                assert m.screw_len == pytest.approx(flanges.screw_length(p.body_t, system)[0])
+                # the screw reaches the end of the thread minus margin: length = grip + thread
+                cb = flanges.CBORE[m.plate_screw][1]
+                assert m.tap_depth == pytest.approx(m.screw_len - (p.body_t - cb) + 0.5, abs=1e-6)
+                taps = [h for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout]
+                assert len(taps) == 4 and all(h.depth > m.tap_depth for h in taps)
