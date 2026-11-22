@@ -29,6 +29,12 @@ def _roots(n_te: int = 40, n_tm: int = 40):
     return sorted(modes, key=lambda t: t[2])
 
 
+@lru_cache(maxsize=8)
+def _gauss(n: int):
+    """Gauss-Legendre nodes and weights (cached: recomputing them was half of the solver time)."""
+    return np.polynomial.legendre.leggauss(n)
+
+
 def mode_list(radius: float, kc_max: float):
     return [(kind, m, chi) for kind, m, chi in _roots() if chi / radius <= kc_max]
 
@@ -45,7 +51,7 @@ def _radial(kind, chi, radius, rho):
 
 @lru_cache(maxsize=4096)
 def _norm(kind, chi, radius):
-    xg, wg = np.polynomial.legendre.leggauss(200)
+    xg, wg = _gauss(200)
     rho = 0.5 * radius * (xg + 1); w = 0.5 * radius * wg
     er, ep = _radial(kind, chi, radius, rho)
     return math.sqrt(math.pi * np.sum((er * er + ep * ep) * rho * w))
@@ -53,7 +59,7 @@ def _norm(kind, chi, radius):
 
 def coupling(modes_a, ra, modes_b, rb):
     """M_ij = int_{S_a} e_a,i . e_b,j dS (ra <= rb), unit-normalised modes."""
-    xg, wg = np.polynomial.legendre.leggauss(240)
+    xg, wg = _gauss(240)
     rho = 0.5 * ra * (xg + 1); w = 0.5 * ra * wg * rho
     A = []
     for kind, m, chi in modes_a:

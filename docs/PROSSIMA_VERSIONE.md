@@ -1,12 +1,14 @@
 # Modifiche per la prossima versione (0.4.3)
 
-Raccolta delle richieste. Quando ce ne sono 3 si implementano tutte insieme, si provano e si pubblica il nuovo installer Windows.
+Raccolta delle richieste. Si sviluppano sul ramo `v0.4.3`. Quando ce ne sono **5** si provano tutte insieme e si pubblica il nuovo installer Windows.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Balanis nelle equazioni di calcolo e nella bibliografia | da fare |
-| 2 | — | — |
-| 3 | — | — |
+| 2 | Analisi di tolleranza Monte Carlo, quote critiche, ottimizzazione robusta | in corso |
+| 3 | Validazione openEMS in the loop (space mapping) | da fare |
+| 4 | — | — |
+| 5 | — | — |
 
 ## 1. Balanis, *Antenna Theory: Analysis and Design*
 **Richiesta:** aggiungere il libro di C. A. Balanis alle equazioni di calcolo e alla bibliografia (Credits, README, base di conoscenza).
@@ -21,3 +23,21 @@ Raccolta delle richieste. Quando ce ne sono 3 si implementano tutte insieme, si 
 - **Riferimenti nel codice:** ogni funzione cita "Balanis, cap. X". Il capitolo si indica solo dove è certo; il numero di equazione non si inventa.
 
 **Nota sul PDF:** il link archive.org dato all'inizio è una copia del libro non autorizzata dall'editore, quindi non la scarico né la uso come fonte. Le equazioni del libro sono formule standard della teoria delle antenne e si possono implementare e citare senza il PDF. Se hai il libro, per controllare numero per numero bastano le pagine delle sezioni interessate.
+
+## 2. Tolleranze di lavorazione e progetto robusto
+**Origine:** commento di un utente: un buon progetto non vale nulla se le tolleranze di lavorazione non sono raggiungibili.
+
+**Cosa fa:**
+- **Monte Carlo** di tutte le quote lavorate, distribuite uniformemente in ±t oppure normali con ±t = 3σ. Le migliaia di campioni si calcolano su un modello quadratico ricavato da 1 + 2N + N(N−1)/2 run del solver rapido e verificato con alcuni run diretti.
+- **Resa:** percentuale di pezzi entro la perdita ammessa e con S11 sotto il limite.
+- **Quote critiche:** quota di varianza di ciascuna dimensione e tolleranza necessaria, arrotondata alle classi d'officina.
+- **Ottimizzazione robusta:** massimizza media − k·σ invece del picco nominale.
+- **Disegno PDF:** tabella delle tolleranze per quota.
+
+**Accelerazione del solver:** i punti di quadratura in cache portano una valutazione da 0.75 a 0.46 s.
+
+## 3. Space mapping con openEMS
+- Il modello rapido esplora; openEMS valida 3–5 candidati.
+- La differenza tra openEMS e il modello rapido (correzione costante, poi lineare nelle quote) corregge il modello rapido, che viene riottimizzato.
+- Il ciclo si ripete fino alla convergenza.
+- Tutto parte dalla scheda Full-wave openEMS, con il report dei passi.
