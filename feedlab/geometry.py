@@ -382,9 +382,9 @@ def _axial_corrugated(f_ghz, opening_deg, t, kw):
     notes = [f"efficienza secondo la design guide OE2IGL: {d['eta_pct']:.1f}% (spillover {d['spill_pct']:.1f}%, "
              f"illuminazione {d['illum_pct']:.1f}%)", *des.notes,
              "usa l'angolo di apertura della parabola, non l'f/D (OE2IGL)",
-             "simulazione rapida non disponibile (gole assiali): verifica con openEMS"]
+             "simulazione rapida non disponibile (scalini assiali): verifica con openEMS"]
     if not z_f == las:
-        notes.append(f"guida d'ingresso portata a {z_f:.2f} mm per contenere la gola più profonda")
+        notes.append(f"guida d'ingresso portata a {z_f:.2f} mm per contenere lo scalino più profondo")
     g = FeedGeometry("axial_corrugated", f_ghz, params, profile, [np.array(clean)], z_top, r_out[-1], ai, R,
                      notes, des)
     g.mount = None

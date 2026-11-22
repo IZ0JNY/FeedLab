@@ -81,7 +81,7 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 1296 MHz feeds (for example Zdeněk OK1DFC's septum) are outside FeedLab's range, which starts at 10 GHz.
 
 ## 6. Feed design
-Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. For the Axial Corrugated feed you edit pitch, slot width, step, diameters and depths d1…d8.
+Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. For the Axial Corrugated feed you edit pitch, step width, front step, diameters and depths d1…d8 of the 8 steps.
 
 ![Feed design]({IMG}/03_design.png)
 

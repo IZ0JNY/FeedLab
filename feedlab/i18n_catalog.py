@@ -6,6 +6,12 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ("guida d'ingresso portata a", 'input guide lengthened to'),
+    ('Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL), 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D', 'Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL), 8 steps: 81-86% (v1.4 spreadsheet, openEMS), wide f/D range'),
+    ('simulazione rapida non disponibile (scalini assiali): verifica con openEMS', 'fast simulation not available (axial steps): check with openEMS'),
+    ('sopra 47 GHz gli scalini diventano molto stretti', 'above 47 GHz the steps become very narrow'),
+    ('per contenere lo scalino più profondo', 'to hold the deepest step'),
+    ('facile al tornio fino a 47 GHz; da 76 GHz meglio Pickett-Potter o cavity feed', 'easy on the lathe up to 47 GHz; from 76 GHz Pickett-Potter or a cavity feed is better'),
     ('Chiudere questa finestra per continuare (✕ in alto a destra).', 'Close this window to continue (✕ at the top right).'),
     ('FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde', 'FeedLab — Microwave Feed/Illuminator Design Lab'),
     ('Laboratorio di Progettazione di feed/illuminatori a microonde', 'Microwave Feed/Illuminator Design Lab'),

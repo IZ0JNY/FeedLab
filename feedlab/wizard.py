@@ -151,10 +151,10 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                 c.warnings.append("dish > 40λ: valutare Cassegrain con feed dual-mode (vedi modulo Cassegrain)")
     # Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL v1.4): 10-76 GHz, prime f/D 0.33-0.9, offset-equivalent 0.33-0.8
     if 10 <= f_ghz <= 76 and 0.33 <= fD_feed <= (0.9 if dish.kind == "prime" else 0.8):
-        add("axial_corrugated", ["Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL), 8 gole: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D",
+        add("axial_corrugated", ["Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL), 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D",
                                  "facile al tornio fino a 47 GHz; da 76 GHz meglio Pickett-Potter o cavity feed"],
-            ["simulazione rapida non disponibile (gole assiali): verifica con openEMS"]
-            + (["sopra 47 GHz le gole diventano molto strette"] if f_ghz > 47 else []))
+            ["simulazione rapida non disponibile (scalini assiali): verifica con openEMS"]
+            + (["sopra 47 GHz gli scalini diventano molto stretti"] if f_ghz > 47 else []))
     # ---------- adjustments ----------
     for c in cands:
         if polarization == "circular":

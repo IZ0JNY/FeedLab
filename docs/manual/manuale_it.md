@@ -81,7 +81,7 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 I feed per 1296 MHz (per esempio il septum di Zdeněk OK1DFC) sono fuori dal campo di FeedLab, che parte da 10 GHz.
 
 ## 6. Progetto feed
-Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano. Per l'Axial Corrugated si modificano passo, larghezza delle gole, gradino, diametri e profondità d1…d8.
+Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano. Per l'Axial Corrugated si modificano passo, larghezza degli scalini, gradino, diametri e profondità d1…d8 degli 8 scalini.
 
 ![Progetto feed]({IMG}/03_design.png)
 

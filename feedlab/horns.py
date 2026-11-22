@@ -163,7 +163,7 @@ def _poly(c, x):
 
 
 def axial_corrugated_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
-    """OE2IGL v1.4 axial-corrugated 8-slot feed (base CT1DMK), 10-76 GHz; psi = half opening angle."""
+    """OE2IGL v1.4 axial-corrugated feed with 8 steps (base CT1DMK), 10-76 GHz; psi = half opening angle."""
     lam = wavelength_mm(f_ghz)
     psi = opening_angle_deg / 2
     step = 0.05 if f_ghz < 30 else 0.025 if f_ghz < 55 else 0.02 if f_ghz < 80 else 0.025
