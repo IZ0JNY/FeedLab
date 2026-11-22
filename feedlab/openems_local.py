@@ -390,8 +390,13 @@ class StatusFile:
     def _write(self):
         if self.path:
             tmp = self.path.with_suffix(".tmp")
-            tmp.write_text(json.dumps(self.d))
-            os.replace(tmp, self.path)
+            for i in range(40):
+                try:
+                    tmp.write_text(json.dumps(self.d))
+                    os.replace(tmp, self.path)
+                    break
+                except OSError:
+                    time.sleep(0.05)
 
 
 INSTALL_STEPS = ["release", "download", "extract", "env", "bindings", "verify", "test"]
@@ -481,7 +486,7 @@ def quick_test(python: str, inst: OpenEMSInstall, log=print, timeout: float = 90
     if r.returncode != 0 or not (d / "results.json").exists():
         log((r.stdout + r.stderr)[-2000:])
         raise RuntimeError("la simulazione di prova non è riuscita (vedi log)")
-    st = json.loads((d / "status.json").read_text())
+    st = read_json(d / "status.json")
     return {"seconds": time.time() - t0, "s11_db": st.get("s11_f0_db", float("nan")), "dir": str(d)}
 
 
@@ -503,10 +508,7 @@ def start_guided_install(target: str | Path | None = None, zip_path: str | None 
 
 
 def read_status(path: str | Path) -> dict | None:
-    try:
-        return json.loads(Path(path).read_text())
-    except Exception:
-        return None
+    return read_json(path) or None
 
 
 # ------------------------------------------------------------------ background jobs
@@ -522,7 +524,14 @@ def put(jd, **kw):
     except Exception:
         d = {}
     d.update(kw)
-    open(p + ".tmp", "w").write(json.dumps(d)); os.replace(p + ".tmp", p)
+    for i in range(40):                      # Windows: retry while the app is reading runner.json
+        try:
+            with open(p + ".tmp", "w") as fh:
+                fh.write(json.dumps(d))
+            os.replace(p + ".tmp", p)
+            break
+        except OSError:
+            time.sleep(0.05)
 for jd in q["jobs"]:
     put(jd, state="queued", runner_pid=os.getpid())
 for jd in q["jobs"]:
@@ -632,11 +641,24 @@ def _tail(p: Path, n: int = 40000) -> str:
         return ""
 
 
+def read_json(p: str | Path, default=None, tries: int = 20):
+    """Read a JSON file another process replaces atomically (on Windows the read can hit the replace)."""
+    p = Path(p)
+    for i in range(tries):
+        if not p.exists():
+            return {} if default is None else default
+        try:
+            return json.loads(p.read_text())
+        except (OSError, ValueError):
+            time.sleep(0.05)
+    return {} if default is None else default
+
+
 def job_state(jd: str | Path) -> dict:
     jd = Path(jd)
-    meta = json.loads((jd / "job.json").read_text()) if (jd / "job.json").exists() else {}
-    run = json.loads((jd / "runner.json").read_text()) if (jd / "runner.json").exists() else {}
-    stt = json.loads((jd / "status.json").read_text()) if (jd / "status.json").exists() else {}
+    meta = read_json(jd / "job.json")
+    run = read_json(jd / "runner.json")
+    stt = read_json(jd / "status.json")
     cfg = {}
     try:
         cfg = json.loads((jd / "feed.json").read_text())["config"]
@@ -690,7 +712,7 @@ def list_jobs() -> list[dict]:
 def stop_job(jd: str | Path) -> None:
     jd = Path(jd)
     (jd / "STOP").write_text("stop")
-    run = json.loads((jd / "runner.json").read_text()) if (jd / "runner.json").exists() else {}
+    run = read_json(jd / "runner.json")
     q = run.get("queue")
     if q:
         (work_dir() / f"STOP_{q}").write_text("stop")       # the rest of the queue is skipped

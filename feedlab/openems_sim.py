@@ -191,9 +191,16 @@ def status(stage, **kw):
     d = dict(stage=stage, time=time.time(), elapsed=time.time() - T_START, pid=os.getpid())
     d.update(kw)
     tmp = os.path.join(HERE, "status.json.tmp")
-    with open(tmp, "w") as fh:
-        json.dump(d, fh)
-    os.replace(tmp, os.path.join(HERE, "status.json"))
+    # Windows: the replace fails while FeedLab is reading status.json -> retry; a progress file must
+    # never stop the simulation
+    for i in range(40):
+        try:
+            with open(tmp, "w") as fh:
+                json.dump(d, fh)
+            os.replace(tmp, os.path.join(HERE, "status.json"))
+            break
+        except OSError:
+            time.sleep(0.05)
     print("FEEDLAB:STAGE %s %s" % (stage, json.dumps(kw)), flush=True)
 
 
