@@ -72,7 +72,7 @@ jobs:
         shell: pwsh
         working-directory: build/FeedLab/app
         run: |
-          ..\python\python.exe -c "from streamlit.testing.v1 import AppTest; at = AppTest.from_file('streamlit_app.py', default_timeout=600); at.run(); errs = [e.value for e in at.exception]; print('eccezioni:', errs); raise SystemExit(1 if errs else 0)"
+          ..\python\python.exe -c "from streamlit.testing.v1 import AppTest; at = AppTest.from_file('feedlab_main.py', default_timeout=600); at.run(); errs = [e.value for e in at.exception]; print('eccezioni:', errs); raise SystemExit(1 if errs else 0)"
       - name: Silent install + server smoke test + screenshot
         shell: pwsh
         run: |

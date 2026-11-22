@@ -43,7 +43,7 @@ def main(out: Path):
     tmp = Path(tempfile.mkdtemp())
     env = prepare(tmp)
     port = 8799
-    srv = subprocess.Popen([sys.executable, "-m", "streamlit", "run", str(ROOT / "streamlit_app.py"), "--server.port",
+    srv = subprocess.Popen([sys.executable, "-m", "streamlit", "run", str(ROOT / "feedlab_main.py"), "--server.port",
                             str(port), "--server.headless", "true", "--browser.gatherUsageStats", "false"],
                            cwd=ROOT, env=env)
     try:

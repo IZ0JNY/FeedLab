@@ -31,7 +31,7 @@ def isolated(tmp_path, monkeypatch):
 
 
 def test_app_runs_without_openems(isolated):
-    at = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=600)
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.run()
     assert not at.exception, _errors(at)
     text = " ".join(m.value for m in at.markdown) + " ".join(c.value for c in at.caption)
@@ -52,7 +52,7 @@ def test_app_with_openems_and_results(isolated, monkeypatch):
                        capture_output=True, text=True, env=os.environ.copy(), timeout=300)
     assert r.returncode == 0, r.stdout + r.stderr
     (jd / "runner.json").write_text(json.dumps({"state": "done"}))
-    at = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=600)
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.run()
     assert not at.exception, _errors(at)
     text = " ".join(m.value for m in at.markdown) + " ".join(str(s.value) for s in at.success)
@@ -63,7 +63,7 @@ def test_app_with_openems_and_results(isolated, monkeypatch):
 
 @pytest.mark.parametrize("lang", ["en", "de", "fr", "es"])
 def test_app_runs_in_every_language(isolated, lang):
-    at = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=600)
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.session_state["lang"] = lang
     at.run()
     assert not at.exception, _errors(at)

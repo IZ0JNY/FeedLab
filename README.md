@@ -28,7 +28,7 @@ Le basi di conoscenza sono:
 Scarica **`FeedLab-Setup-<versione>.exe`** dalla pagina [Releases](https://github.com/IZ0JNY/mwFeedDesign/releases) e avvialo: si installa per l'utente corrente, senza diritti di amministratore, con icona nel menu Start (e sul desktop, se vuoi). C'è anche lo zip *portable*: estrai e avvia `FeedLab.bat`.
 
 - **Multilingua**: italiano, English, Deutsch, Français, Español, sia nell'installer sia nell'app (selettore nella barra laterale; la lingua scelta nell'installazione è quella iniziale). Disegni PDF e report seguono la lingua scelta.
-- È la stessa app della versione web, con tutte le schede, in una **finestra propria** (Microsoft Edge WebView2); funziona senza internet. Se WebView2 manca, si apre nel browser.
+- Tutte le schede di FeedLab in una **finestra propria** (Microsoft Edge WebView2); funziona senza internet. Se WebView2 manca, si apre nel browser.
 - **openEMS è facoltativo.** Il simulatore rapido interno risponde in secondi; openEMS serve solo per l'analisi full-wave di riferimento, che richiede da minuti a ore. Si installa:
   - dalla scheda **🖥️ Full-wave openEMS → ① Installazione**, con la procedura guidata: scarica l'ultima versione ufficiale per Windows, la estrae in `%LOCALAPPDATA%\Programs\openEMS`, imposta `OPENEMS_INSTALL_PATH`, installa i binding Python nel Python di FeedLab e fa una simulazione di prova;
   - oppure spuntando l'opzione nell'installer di FeedLab.
@@ -42,7 +42,7 @@ Compilazione: GitHub Actions (`.github/workflows/windows.yml`) esegue i test su 
 
 ```bash
 pip install -e .
-feedlab-gui          # oppure: streamlit run feedlab/app.py
+feedlab-gui          # oppure: streamlit run feedlab_main.py
 ```
 Si apre nel browser (Windows, Linux, macOS). Schede:
 
@@ -69,13 +69,9 @@ Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del fee
   - Lo script è generato sul modello del tutorial ufficiale "Conical Horn" (porta TE11 in guida circolare + nf2ff).
   - Va eseguito sul PC dove openEMS è installato (nella versione per Windows l'installazione è guidata).
 
-## Metterlo online
-- **Streamlit Community Cloud** (gratuito): su https://share.streamlit.io accedi con GitHub, scegli il repository `mwfeeddesign`, il branch `main`, il file `streamlit_app.py`, Python 3.12, e premi Deploy. Usa `requirements.txt` e `packages.txt`.
-- **Docker** (VPS, Render, Hugging Face Spaces): `docker build -t feedlab .` e `docker run -p 8501:8501 feedlab`.
-- **Pagina sul proprio sito**: inserisci l'app in un iframe:
-  `<iframe src="https://<nome-app>.streamlit.app/?embed=true" style="width:100%;height:1400px;border:0"></iframe>`
-
-La versione online non esegue openEMS: serve un PC con openEMS installato.
+## Distribuzione
+FeedLab si distribuisce solo come **programma per Windows** (vedi sopra): non è pensato per essere pubblicato come app web e
+non si avvia su Streamlit Community Cloud. Per usarlo da sorgente sul proprio PC: `streamlit run feedlab_main.py`.
 
 ## Validazione (`pytest`)
 - Feed cos^n: η massima uguale all'integrazione analitica indipendente (scarto entro 0.3%).

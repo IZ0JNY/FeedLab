@@ -20,7 +20,7 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent           # folder with streamlit_app.py
+ROOT = Path(__file__).resolve().parent.parent           # folder with feedlab_main.py
 IS_WIN = os.name == "nt"
 NO_WINDOW = 0x08000000 if IS_WIN else 0
 
@@ -52,7 +52,7 @@ def start_server(port: int, address: str = "127.0.0.1", mode: str = "window") ->
     env["FEEDLAB_DESKTOP"] = mode
     env["MPLBACKEND"] = "Agg"
     env["PYTHONIOENCODING"] = "utf-8"
-    cmd = [python_exe(), "-m", "streamlit", "run", str(ROOT / "streamlit_app.py"),
+    cmd = [python_exe(), "-m", "streamlit", "run", str(ROOT / "feedlab_main.py"),
            "--server.port", str(port), "--server.address", address, "--server.headless", "true",
            "--browser.gatherUsageStats", "false", "--server.fileWatcherType", "none",
            "--global.developmentMode", "false", "--server.maxUploadSize", "200", "--theme.base", "light"]
