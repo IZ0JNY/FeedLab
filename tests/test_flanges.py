@@ -119,11 +119,11 @@ def test_plate_screw_choices_and_length():
     from feedlab import flanges, plate
     assert flanges.plate_screw_options(10.368) == ["M3", "M4"]
     assert flanges.plate_screw_options(24.048) == ["M2.5", "M3", "M2"]
-    assert flanges.screw_length(3.67) == (12.0, "12 mm")          # 11.0 -> 12
-    assert flanges.screw_length(5.0)[0] == 16.0                   # 15 -> 16 (tie 14/16 goes up)
-    assert flanges.screw_length(9.0)[0] == 25.0                   # beyond the list: 25
-    assert flanges.screw_length(1.0)[0] == 10.0
-    assert flanges.screw_length(4.0, "imperial")[1] == '1/2"'
+    assert flanges.screw_length(3.67) == (10.0, "10 mm")          # 7.3 -> 10 (shortest)
+    assert flanges.screw_length(7.5)[0] == 16.0                   # 15 -> 16 (tie 14/16 goes up)
+    assert flanges.screw_length(8.85)[0] == 18.0                  # 17.7 -> 18
+    assert flanges.screw_length(14.0)[0] == 25.0                  # beyond the list: 25
+    assert flanges.screw_length(6.0, "imperial")[1] == '1/2"'
     for f, wg, d in ((10.368, "WR-90", 21.0), (24.048, "WR-42", 9.2)):
         for sc in flanges.plate_screw_options(f):
             for system in ("metric", "imperial"):
@@ -136,6 +136,6 @@ def test_plate_screw_choices_and_length():
                 assert m.screw_in == pytest.approx(m.screw_len - (p.body_t - cb), abs=1e-6)
                 taps = [h for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout]
                 assert len(taps) == 4
-                for h in taps:          # blind hole: screw end + ≥ 5 mm, even whole millimetres
-                    assert h.depth % 2 == 0 and h.depth >= m.screw_in + 5 - 1e-9 and h.depth < m.screw_in + 7
-                    assert m.screw_in < m.tap_depth < h.depth
+                for h in taps:          # blind hole: even whole millimetres, thread reaches the screw end
+                    assert h.depth % 2 == 0 and m.screw_in <= m.tap_depth < h.depth
+                    assert h.depth - m.screw_in < 2 + max(1.0, 3 * flanges.PITCH[m.plate_screw]) + 1e-9

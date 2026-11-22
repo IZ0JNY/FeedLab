@@ -191,8 +191,8 @@ def _holes_text(p: MatchingPlate) -> str:
     if m.screw_len:
         lines.append(f"  viti piastra→feed: 4 × {m.plate_screw} × {m.screw_len_label} a testa cilindrica")
         drill = max(h.depth for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout)
-        lines.append(f"  (3 × spessore {p.body_t:.2f} → {m.screw_len_label}); nel feed: vite {m.screw_in:.1f},")
-        lines.append(f"  foro prof. {drill:.0f} (vite + 5, pari), filetto prof. {m.tap_depth:.1f}")
+        lines.append(f"  (2 × spessore {p.body_t:.2f} → {m.screw_len_label}); nel feed: vite {m.screw_in:.1f},")
+        lines.append(f"  foro prof. {drill:.0f} (pari), filetto prof. {m.tap_depth:.1f}")
     import textwrap
     for w in m.warnings:
         lines += ["  " + x for x in textwrap.wrap(w, 58)]

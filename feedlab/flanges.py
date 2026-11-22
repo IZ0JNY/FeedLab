@@ -65,7 +65,7 @@ PITCH = {"M2": 0.4, "M2.5": 0.45, "M3": 0.5, "M4": 0.7, "2-56 UNC": 25.4 / 56, "
 PLATE_SCREWS_10GHZ = ["M3", "M4"]              # 10 GHz band
 PLATE_SCREWS_HIGH = ["M2.5", "M3", "M2"]       # 24 GHz and up (first = default)
 TEN_GHZ_MAX = 15.0                             # below this the 10 GHz choices apply
-HOLE_MARGIN = 5.0                              # blind hole in the feed: depth beyond the screw end (mm)
+SCREW_FACTOR = 2.0                             # screw length = 2 × plate thickness, commercial (IZ0JNY)
 # imperial equivalents (nearest UNC size): M2→#2-56 (Ø2.18), M2.5→#3-48 (Ø2.51, less common than 4-40),
 # M3→#4-40 (Ø2.84), M4→#8-32 (Ø4.17)
 UNC_FOR_METRIC = {"M2": "2-56 UNC", "M2.5": "3-48 UNC", "M3": "4-40 UNC", "M4": "8-32 UNC"}
@@ -84,9 +84,9 @@ def plate_screw_name(metric: str, system: str) -> str:
 
 
 def screw_length(plate_t: float, system: str = "metric") -> tuple[float, str]:
-    """Plate → feed screw length: 3 × plate thickness rounded to the nearest commercial length
+    """Plate → feed screw length: SCREW_FACTOR × plate thickness rounded to the nearest commercial length
     (10, 12, 14, 16, 18, 20, 25 mm; inch screws 3/8 … 1 inch). Returns (mm, label)."""
-    target = 3.0 * plate_t
+    target = SCREW_FACTOR * plate_t
     if system == "imperial":
         v, lab = min(LENGTHS_IN, key=lambda x: (abs(x[0] * 25.4 - target), -x[0]))
         return v * 25.4, lab
@@ -238,15 +238,16 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
     eng = max(2.0 * d_major, 4.0)
     L, L_lab = 0.0, ""
     if plate_t:
-        # screw length = 3 × plate thickness, commercial; it clamps the plate under the head (plate_t − counterbore)
+        # screw length = 2 × plate thickness, commercial; it clamps the plate under the head (plate_t − counterbore)
         L, L_lab = screw_length(plate_t, system)
         eng = L - max(plate_t - cb_k, 0.0)
         if eng < 1.5 * d_major:
             m.warnings.append(f"vite {screw} × {L_lab}: solo {eng:.1f} mm di filetto nel feed (< 1.5 d)")
-    # hole in the feed (IZ0JNY): 5 mm beyond the screw end, rounded up to an even whole millimetre;
-    # the thread stops 3 pitches (≥ 1 mm) before the bottom of the blind hole (tap lead)
-    drill_d = float(2 * math.ceil((eng + HOLE_MARGIN) / 2 - 1e-9))
-    tap_d = drill_d - max(1.0, 3 * PITCH.get(screw, 0.5))
+    # hole in the feed (IZ0JNY): even whole millimetres; the thread must reach the screw end and stops
+    # 3 pitches (≥ 1 mm) before the bottom of the blind hole (tap lead)
+    lead = max(1.0, 3 * PITCH.get(screw, 0.5))
+    drill_d = float(2 * math.ceil((eng + lead) / 2 - 1e-9))
+    tap_d = drill_d - lead
     for _ in range(600):
         for i in range(n_ang // 4):
             th = 0.5 * math.pi * i / (n_ang // 4)

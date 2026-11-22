@@ -795,7 +795,7 @@ with tabs[7]:
         opts = flanges.plate_screw_options(S.f_ghz)
         pscrew = st.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}", disabled=not holes_on,
                               format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
-                              help="lunghezza = 3 × spessore della piastrina, arrotondata alla misura commerciale "
+                              help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale "
                                    "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
                                    "seguono la lunghezza della vite")
         pol_c = "V" if pol_ == "Verticale" else "H"
