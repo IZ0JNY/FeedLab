@@ -58,7 +58,7 @@ Si apre nel browser (Windows, Linux, macOS). Schede:
 | 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR, orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP. Opzione **fori di fissaggio** (viti metriche o in pollici): foratura della flangia standard (Flann/MIL) filettata nella piastra, 4 viti piastra→feed con testa in lamatura, spine di centraggio da 47 GHz; riportata in PDF e STEP di piastra e feed |
 | 🖥️ Full-wave openEMS | **Opzionale**: installazione guidata di openEMS, simulazioni FDTD in background (singola, convergenza, sweep) e **deep analysis** dei risultati. **⑤ Space mapping**: openEMS verifica pochi candidati e corregge il modello rapido, fino alla convergenza |
 
-Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del feed** (rame, rame argentato, dorato, ottone, alluminio, stampa 3D metallizzata…), con calcolo delle perdite e del rumore, e il **collare Ø40 mm** per i portaLNB commerciali.
+Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del feed** (rame, rame argentato, dorato, ottone, alluminio, stampa 3D metallizzata…), con calcolo delle perdite e del rumore.
 
 ### Simulatori e loro limiti
 - **Rapido (mode matching interno, secondi).**

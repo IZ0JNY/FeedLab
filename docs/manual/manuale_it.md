@@ -49,7 +49,6 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 | **λ** | lunghezza d'onda corrispondente |
 | **Parabola / Feed** | riepilogo della scelta fatta nella procedura guidata |
 | **Materiale del feed** | rame, rame argentato, ottone, alluminio, stampa 3D metallizzata…: FeedLab calcola perdite e rumore aggiunto |
-| **Collare Ø40 mm** | aggiunge al feed il collare per i portaLNB commerciali |
 | **ℹ️ Credits** | autore, versione e tutte le fonti |
 | **📖 Manuale** | scarica questo manuale in PDF |
 | **🐞 Segnala un problema** | apre la pagina GitHub delle segnalazioni con versione e progetto già compilati |

@@ -49,7 +49,6 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 | **λ** | corresponding wavelength |
 | **Dish / Feed** | summary of the choice made in the wizard |
 | **Feed material** | copper, silver-plated copper, brass, aluminium, metallised 3D print…: FeedLab computes losses and added noise |
-| **Ø40 mm collar** | adds the collar for commercial LNB holders |
 | **ℹ️ Credits** | author, version and all sources |
 | **📖 Manual** | downloads this manual as PDF |
 | **🐞 Report a problem** | opens the GitHub issues page with version and design already filled in |

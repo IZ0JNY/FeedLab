@@ -214,8 +214,7 @@ with st.sidebar:
                               help="conducibilità e rugosità → perdite ohmiche e rumore del feed")
     m_ = materials.MATERIALS[S.material]
     st.caption(f"σ = {m_.sigma / 1e7:.2f}·10⁷ S/m · δ = {materials.skin_depth_um(m_.sigma, S.f_ghz):.3f} µm · {m_.notes}")
-    col_on = st.checkbox("Collare Ø40 mm per portaLNB commerciale", bool(geometry.COLLAR.get("diam")))
-    geometry.COLLAR["diam"] = st.number_input("Ø collare (mm)", 20.0, 80.0, 40.0, 1.0) if col_on else None
+    geometry.COLLAR["diam"] = None                   # LNB collar option removed from the interface (0.4.9)
     geometry.MOUNT.update(S.get("mount_cfg") or {"wg": None})
     st.divider()
     if os.environ.get("FEEDLAB_DESKTOP") == "browser":

@@ -5,6 +5,7 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Pop-up BETA: il pulsante OK non funzionava; tolto, al suo posto il testo centrato "Chiudere questa finestra per continuare (✕ in alto a destra)"; si chiude con la ✕ | ✅ fatto (ramo `v0.4.9`) |
+| 2 | Tolta dalla barra laterale l'opzione "Collare Ø40 mm per portaLNB commerciale" | ✅ fatto (ramo `v0.4.9`) |
 
 ---
 
