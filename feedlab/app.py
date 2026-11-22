@@ -131,8 +131,17 @@ def section_fig(geo):
             fig.add_trace(go.Scatter(x=P[:, 1], y=s * P[:, 0], fill="toself", mode="lines",
                                      line=dict(color="black", width=1), fillcolor="rgba(201,162,39,0.6)", showlegend=False))
     fig.add_hline(y=0, line_dash="dashdot", line_color="gray")
+    t = float(geo.params.get("wall", 0) or 0)
+    feats = geometry.wall_features(geo.profile)
+    ann = dict(showarrow=True, arrowhead=0, arrowwidth=1, ax=0, ay=-28, font=dict(size=11), bgcolor="rgba(255,255,255,0.8)")
+    for z, ra, rb in feats["steps"]:
+        z0 = z - t if rb > ra else z
+        fig.add_annotation(x=z0 + t / 2, y=(min(ra, rb) + t + max(ra, rb)) / 2, text=f"gradino {t:.2f} mm", **ann)
+    for z0, r0, z1, r1, a in feats["flares"]:
+        fig.add_annotation(x=(z0 + z1) / 2, y=-(r0 + r1) / 2, text=f"flare α = {abs(a):.2f}°",
+                           **{**ann, "ay": 28})
     fig.update_layout(height=330, yaxis=dict(scaleanchor="x"), xaxis_title="z (mm)", yaxis_title="r (mm)",
-                      title="Sezione assiale", margin=dict(t=40, b=10))
+                      title=f"Sezione assiale · parete {t:.2f} mm", margin=dict(t=40, b=10))
     return fig
 
 
@@ -337,7 +346,15 @@ with tabs[1]:
                 newv[map_keys[k]] = nv
         cc1, cc2 = st.columns(2)
         if cc1.button("Applica modifiche"):
-            S.overrides.setdefault(S.feed_kind, {}).update(newv)
+            ov = S.overrides.setdefault(S.feed_kind, {})
+            # flare: angle and length are the same quantity seen two ways -> the one just edited wins
+            if "alpha" in newv and "flare_length" in newv:
+                newv.pop("flare_length")
+            if "alpha" in newv:
+                ov.pop("flare_length", None)
+            if "flare_length" in newv:
+                ov.pop("alpha", None)
+            ov.update(newv)
             st.rerun()
         if cc2.button("Ripristina progetto"):
             S.overrides[S.feed_kind] = {}
@@ -551,6 +568,11 @@ with tabs[2]:
             col.caption(f"{v / lam:.3f} λ · {100 * (v / x0 - 1):+.1f}%" if unit == "mm" else f"{100 * (v / x0 - 1):+.1f}%")
             if abs(v - x0) > 1e-9:
                 lab_over[key] = v
+        if any(k == "alpha" for k, _, _ in explore.TUNABLE[kind]):
+            g_lab = geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **lab_over)
+            p_lab = g_lab.params
+            st.caption(f"Flare: semiangolo {p_lab['flare_half_deg']:.2f}° → lunghezza flare {p_lab['flare_length']:.3f} mm "
+                       f"({p_lab['flare_length'] / lam:.3f} λ), lunghezza totale {g_lab.z_aperture:.2f} mm")
         with st.spinner("Calcolo…"):
             base = lab_eval(kind, S.f_ghz, sc_t, tuple(sorted({}.items())), S.wall)
             cur = lab_eval(kind, S.f_ghz, sc_t, tuple(sorted(lab_over.items())), S.wall)

@@ -30,8 +30,9 @@ TUNABLE = {
     "w2imu_oe2igl": [("B", "Ø apertura B", 0.15), ("C", "Lunghezza C", 0.2), ("alpha", "Semiangolo flare", 0.3),
                      ("A", "Ø ingresso A", 0.08)],
     "large_w2imu": [("B", "Ø apertura B", 0.12), ("C", "Lunghezza C", 0.2), ("alpha", "Semiangolo flare", 0.3)],
-    "skobelev": [("Dap", "Ø apertura", 0.2), ("flare_length", "Lunghezza flare", 0.25), ("Ds", "Ø dopo il gradino", 0.08)],
-    "pickett_potter": [("Dap", "Ø apertura", 0.2), ("flare_length", "Lunghezza flare", 0.25), ("Ds", "Ø dopo il gradino", 0.08)],
+    # flare given by its half-angle (the length follows, with the aperture fixed)
+    "skobelev": [("Dap", "Ø apertura", 0.2), ("alpha", "Semiangolo flare", 0.5), ("Ds", "Ø dopo il gradino", 0.08)],
+    "pickett_potter": [("Dap", "Ø apertura", 0.2), ("alpha", "Semiangolo flare", 0.5), ("Ds", "Ø dopo il gradino", 0.08)],
     "conical": [("D", "Ø apertura", 0.3), ("alpha", "Semiangolo flare", 0.5)],
     "rect_horn": [("aperture_H", "Apertura piano H", 0.25), ("aperture_E", "Apertura piano E", 0.25),
                   ("axial_length", "Lunghezza", 0.4)],

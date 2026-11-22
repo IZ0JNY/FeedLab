@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.patches import Polygon, Rectangle
 
-from .geometry import FEED_TYPES, FeedGeometry, RectHornGeometry
+from .geometry import FEED_TYPES, FeedGeometry, RectHornGeometry, wall_features
 
 
 def tolerance_mm(f_ghz: float) -> float:
@@ -53,7 +53,7 @@ def _section_axes(fig, geo: FeedGeometry):
     L = geo.z_aperture
     Rmax = geo.outer_radius
     ax.set_xlim(-0.08 * L - 4, L * 1.08 + 4)
-    ax.set_ylim(-Rmax * 1.35 - 3, Rmax * 1.35 + 3)
+    ax.set_ylim(-Rmax * 1.5 - 5, Rmax * 1.35 + 3)
     ax.set_aspect("equal"); ax.set_axis_off()
     ax.set_title("Sezione assiale (metà superiore = sezione, metà inferiore = specchio)", fontsize=8)
     # dimensions along the inner profile
@@ -72,7 +72,36 @@ def _section_axes(fig, geo: FeedGeometry):
         seen.add(key)
         _dim_v(ax, z + 0.01 * L, -r, r, f"Ø{2 * r:.3f}")
     ax.text(L, -Rmax * 1.3, f"Ø esterno max {2 * geo.outer_radius:.2f}", fontsize=6.5, ha="right")
+    _wall_dims(ax, geo)
     return ax
+
+
+def _wall_dims(ax, geo):
+    """On the lower (mirrored) half, outside the part: wall thickness, axial thickness of every step
+    (dimension between extension lines) and flare half-angles (leader to the flare)."""
+    t = float(geo.params.get("wall", 0) or 0)
+    feats = wall_features(geo.profile)
+    L = geo.z_aperture
+    Rmax = geo.outer_radius
+    y_dim = -Rmax * 1.12 - 1.0                           # dimension line below the part
+    if t > 0:                                            # wall at the aperture rim
+        r_ap = geo.profile[-1][1]
+        ax.annotate("", (L + 0.02 * L, -r_ap), (L + 0.02 * L, -r_ap - t), arrowprops=dict(arrowstyle="<->", lw=0.6))
+        ax.text(L + 0.035 * L, -r_ap - t / 2, f"parete {t:.2f}", fontsize=6.5, va="center", ha="left")
+    for z, ra, rb in feats["steps"]:                     # annular step wall: t thick along z
+        z0 = z - t if rb > ra else z
+        y_top = -(max(ra, rb) + t)
+        for zz in (z0, z0 + t):                          # extension lines
+            ax.plot([zz, zz], [y_top - 0.3, y_dim - 0.8], color="k", lw=0.4)
+        w = max(1.2 * t, 0.025 * L)
+        ax.annotate("", (z0, y_dim), (z0 - w, y_dim), arrowprops=dict(arrowstyle="<-", lw=0.6))
+        ax.annotate("", (z0 + t, y_dim), (z0 + t + w, y_dim), arrowprops=dict(arrowstyle="<-", lw=0.6))
+        ax.text(z0 + t + w + 0.3, y_dim, f"{t:.2f} (gradino)", fontsize=6.5, ha="left", va="center")
+    for i, (z0, r0, z1, r1, a) in enumerate(feats["flares"]):   # flare half-angle with leader
+        zm, rm = z0 + 0.55 * (z1 - z0), r0 + 0.55 * (r1 - r0)
+        rr = rm + t / math.cos(math.radians(a))          # outer surface of the wall at zm
+        ax.annotate(f"semiangolo flare α = {abs(a):.2f}°", xy=(zm, -rr), xytext=(zm, y_dim - 0.09 * Rmax * (i + 1) - 2),
+                    fontsize=6.5, ha="center", va="top", arrowprops=dict(arrowstyle="->", lw=0.6))
 
 
 def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 6082", title: str | None = None,

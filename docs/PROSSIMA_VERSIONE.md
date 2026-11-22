@@ -1,4 +1,27 @@
-# Modifiche per la prossima versione (0.4.3)
+# Modifiche per la prossima versione (0.4.6)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Gradino senza spessore (Pickett-Potter, Skobelev): la corona tra guida d'ingresso e flare aveva spessore assiale zero nel 2D, nel 3D, nello STEP e nel PDF | ✅ fatto su `main` |
+| 2 | Quote nei disegni: spessore del gradino, spessore parete e semiangolo del flare (PDF e sezione nell'app) | ✅ fatto su `main` |
+| 3 | Laboratorio: variare il semiangolo del flare (Pickett-Potter, Skobelev) e vedere cosa cambia | ✅ fatto su `main` |
+| 4 | Un manuale per ogni lingua dell'installazione (IT, EN, DE, FR, ES), con gli screenshot dell'app in quella lingua | da fare |
+
+## 1. Spessore della parete
+La parete esterna era il profilo interno spostato solo in direzione radiale: dove il profilo è orizzontale (gradino) la corona aveva spessore zero e nei tratti conici la parete era più sottile del valore impostato. Ora lo spessore è costante e misurato perpendicolarmente alla parete, con spigoli vivi agli angoli; i bordi d'apertura e la flangia restano piani. Test: `tests/test_wall_thickness.py`.
+
+## 3. Semiangolo del flare nel Laboratorio
+Per Pickett-Potter e Skobelev il flare si regola con il semiangolo α (Ø apertura fisso, la lunghezza del flare segue). Il semiangolo compare anche tra le quote modificabili; se si modificano sia angolo sia lunghezza vale l'ultimo valore inserito.
+
+## 4. Manuali in 5 lingue con screenshot
+**Piano:**
+- Manuale (Markdown → PDF con `docs/manual/build_manual.py`) per italiano, inglese, tedesco, francese e spagnolo, ciascuno con gli screenshot dell'app nella stessa lingua.
+- Screenshot generati in automatico in CI su Windows (Playwright + Edge): per ogni lingua si apre l'app, si sceglie la lingua e si fotografano le schede principali, così le immagini restano aggiornate a ogni versione.
+- Il pulsante 📖 Manuale apre il manuale della lingua scelta; l'installer installa tutti i manuali.
+
+---
+
+# Archivio: versione 0.4.3
 
 Raccolta delle richieste. Si sviluppano sul ramo `v0.4.3`. Quando ce ne sono **5** si provano tutte insieme e si pubblica il nuovo installer Windows.
 

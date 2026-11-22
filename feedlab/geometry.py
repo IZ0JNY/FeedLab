@@ -88,17 +88,74 @@ class FeedGeometry:
         return out
 
 
+def _offset_outer(inner, t):
+    """Outer surface of a wall of constant thickness t (measured normal to the wall) around the inner
+    profile [(r, z)] that runs from the input (z = 0) to the aperture. Each segment is moved by t along its
+    outward normal and consecutive offset lines meet in a sharp (mitred) corner, so a radial step (a flat
+    annulus at constant z) gets an annular wall t thick between the guide below and the one above —
+    a purely radial offset gives that annulus zero thickness. The two ends stay on the input and aperture
+    planes, so the rim and the flange face remain flat."""
+    pts = [inner[0]]
+    for q in inner[1:]:                                   # drop zero-length segments
+        if math.hypot(q[0] - pts[-1][0], q[1] - pts[-1][1]) > 1e-9:
+            pts.append(q)
+    segs = []
+    for (r0, z0), (r1, z1) in zip(pts[:-1], pts[1:]):
+        L = math.hypot(r1 - r0, z1 - z0)
+        dr, dz = (r1 - r0) / L, (z1 - z0) / L
+        nr, nz = dz, -dr                                  # outward normal (right of the direction of travel)
+        segs.append(((r0 + t * nr, z0 + t * nz), (dr, dz)))
+    merged = [segs[0]]                                    # collinear neighbours: one line
+    for sg in segs[1:]:
+        (_, d0), (_, d1) = merged[-1], sg
+        if abs(d0[0] * d1[1] - d0[1] * d1[0]) < 1e-9 and d0[0] * d1[0] + d0[1] * d1[1] > 0:
+            continue
+        merged.append(sg)
+
+    def cross(a, b):
+        (p, d), (q, e) = a, b
+        den = d[0] * e[1] - d[1] * e[0]
+        k = ((q[0] - p[0]) * e[1] - (q[1] - p[1]) * e[0]) / den
+        return (p[0] + k * d[0], p[1] + k * d[1])
+
+    def at_z(line, z):
+        (p, d) = line
+        if abs(d[1]) < 1e-12:                             # flat line: cannot reach the end plane
+            return (p[0], z)
+        k = (z - p[1]) / d[1]
+        return (p[0] + k * d[0], z)
+
+    z_in, z_ap = pts[0][1], pts[-1][1]
+    out = [at_z(merged[0], z_in)]
+    out += [cross(a, b) for a, b in zip(merged[:-1], merged[1:])]
+    out.append(at_z(merged[-1], z_ap))
+    return out
+
+
+def wall_features(profile, tol: float = 1e-6) -> dict:
+    """Radial steps and flares of an inner profile [(z, r)], for dimensioning drawings.
+    steps: [(z, r_from, r_to)]; flares: [(z0, r0, z1, r1, half_angle_deg)] (taper segments)."""
+    steps, flares = [], []
+    for (z0, r0), (z1, r1) in zip(profile[:-1], profile[1:]):
+        if abs(z1 - z0) < tol and abs(r1 - r0) > tol:
+            steps.append((z0, r0, r1))
+        elif abs(z1 - z0) > tol and abs(r1 - r0) > tol:
+            flares.append((z0, r0, z1, r1, math.degrees(math.atan2(r1 - r0, z1 - z0))))
+    return {"steps": steps, "flares": flares}
+
+
 def _wall_polygon(profile, t, flange_r=None, flange_t=None):
     """Metal cross-section of a horn wall of thickness t following the inner profile (r, z).
-    Outer surface is the inner profile offset radially by t (simple, machinable).
+    Outer surface: the inner profile offset by t normal to the wall (constant thickness, steps included).
     Optional input flange (disk) at z=0."""
     inner = [(r, z) for z, r in profile]
-    outer = [(r + t, z) for z, r in profile][::-1]
+    outer = _offset_outer(inner, t)[::-1]
     # rim at aperture is flat; at input add flange if requested
     poly = inner + outer
     if flange_r and flange_t:
         r_in = profile[0][1]
-        poly = inner + outer[:-1] + [(profile[0][1] + t, flange_t), (flange_r, flange_t), (flange_r, 0.0), (r_in, 0.0)]
+        r_out0 = outer[-1][0]
+        poly = inner + outer[:-1] + [(r_out0, flange_t), (flange_r, flange_t), (flange_r, 0.0), (r_in, 0.0)]
     return np.array(poly)
 
 
@@ -216,10 +273,16 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
             des = horns.pickett_potter_oe2igl(f_ghz, opening_deg)
             Di, Ds, Dap, Lf = (des.dims_mm[k] for k in ("input_diam_Di", "step_diam_Ds", "aperture_diam", "flare_length"))
         Di = kw.get("Di", Di); Ds = kw.get("Ds", Ds); Dap = kw.get("Dap", Dap); Lf = kw.get("flare_length", Lf)
+        if kw.get("alpha") is not None:
+            # flare given by its half-angle (aperture kept): length follows; a flat flare is not a horn
+            a = min(max(float(kw["alpha"]), 0.5), 60.0)
+            if Dap - Ds > 1e-6:
+                Lf = (Dap - Ds) / 2 / math.tan(a * DEG)
+        alpha = math.degrees(math.atan2((Dap - Ds) / 2, Lf)) if Lf > 0 else 90.0
         Lin = kw.get("input_length", lam)
         prof = [(0.0, Di / 2), (Lin, Di / 2), (Lin, Ds / 2), (Lin + Lf, Dap / 2)]
         return _finish(kind, f_ghz, {"Di_input": Di, "Ds_step": Ds, "D_aperture": Dap, "flare_length": Lf,
-                                     "input_length": Lin, "wall": t}, prof, t,
+                                     "flare_half_deg": alpha, "input_length": Lin, "wall": t}, prof, t,
                        notes=des.notes + ["ingresso Ø≈1.02λ: propagano anche TM01/TE21, non eccitati dal TE11 in "
                                           "struttura simmetrica — raccordare con taper dolce dalla guida monomodo"], design=des)
 

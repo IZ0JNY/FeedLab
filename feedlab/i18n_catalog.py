@@ -1181,4 +1181,10 @@ ENTRIES = [
     ('feed dual-mode con ingresso diretto in guida rettangolare', 'dual-mode feeds with direct rectangular waveguide input', 'Dual-Mode-Speisesysteme mit direktem Rechteckhohlleiter-Eingang', 'sources bimodes à entrée directe en guide rectangulaire', 'alimentadores bimodo con entrada directa en guía rectangular'),
     ('📖 Manuale', '📖 Manual', '📖 Handbuch', '📖 Manuel', '📖 Manual'),
     ("manuale d'uso in PDF (italiano o inglese secondo la lingua scelta)", 'PDF user manual (Italian or English depending on the language)', 'PDF-Handbuch (Italienisch oder Englisch je nach Sprache)', 'manuel PDF (italien ou anglais selon la langue)', 'manual en PDF (italiano o inglés según el idioma)'),
+    ("parete", "wall", "Wand", "paroi", "pared"),
+    ("gradino", "step", "Stufe", "gradin", "escalón"),
+    ("Flare: semiangolo", "Flare: half-angle", "Flare: Halbwinkel", "Flare : demi-angle", "Flare: semiángulo"),
+    ("lunghezza flare", "flare length", "Flare-Länge", "longueur du flare", "longitud del flare"),
+    ("lunghezza totale", "total length", "Gesamtlänge", "longueur totale", "longitud total"),
+    ("semiangolo flare", "flare half-angle", "Flare-Halbwinkel", "demi-angle du flare", "semiángulo del flare"),
 ]
