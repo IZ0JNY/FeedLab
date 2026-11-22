@@ -29,6 +29,27 @@ if "lang" not in S:
     S.lang = i18n.default_lang()
 i18n.set_lang(S.lang)
 st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
+from feedlab import beta as _beta
+_bst = _beta.status()
+if _bst["beta"]:
+    if _bst["expired"]:
+        st.error(f"⛔ FeedLab {feedlab.__version__} BETA TEST: la versione di prova è scaduta "
+                 f"(valida {_beta.VALID_DAYS} giorni dall'installazione). Scarica la versione aggiornata.")
+        st.link_button("⬇️ Scarica l'ultima versione", _beta.RELEASES_URL)
+        st.stop()
+    if not S.get("beta_seen"):                     # pop-up once per launch (new session = new launch)
+        S["beta_seen"] = True
+
+        @_st.dialog("🧪 BETA TEST")
+        def _beta_popup():
+            st.markdown(f"**FeedLab {feedlab.__version__} BETA TEST**")
+            st.write(f"Versione di prova valida {_beta.VALID_DAYS} giorni dall'installazione: "
+                     f"restano {_bst['days_left']} giorni (scade il {_bst['expires']:%d/%m/%Y}). "
+                     "Alla scadenza il programma si disattiva: scarica la versione aggiornata da GitHub.")
+            if st.button("OK", type="primary"):
+                st.rerun()
+
+        _beta_popup()
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"
 WORK.mkdir(exist_ok=True)
 
@@ -191,7 +212,7 @@ with st.sidebar:
         if st.button("⏻ Chiudi FeedLab", help="ferma il programma (le simulazioni openEMS in corso continuano)"):
             st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
             os._exit(0)
-    st.caption(f"Versione {feedlab.__version__} · © Ivan De Cesaris IZ0JNY")
+    st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
     _man = Path(feedlab.__file__).resolve().parent.parent / "docs" / "manual" / (

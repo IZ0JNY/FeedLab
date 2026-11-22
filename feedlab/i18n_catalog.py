@@ -1222,4 +1222,13 @@ ENTRIES = [
     ('feed a 47 GHz', '47 GHz feed', '47-GHz-Speisesystem', 'source 47 GHz', 'alimentador de 47 GHz'),
     ('rivista tecnica per VHF, UHF e microonde', 'technical magazine for VHF, UHF and microwaves', 'Fachzeitschrift für VHF, UHF und Mikrowellen', 'revue technique VHF, UHF et hyperfréquences', 'revista técnica de VHF, UHF y microondas'),
     ('articoli di Jeff WA6KBL e della comunità EME', 'articles by Jeff WA6KBL and the EME community', 'Artikel von Jeff WA6KBL und der EME-Gemeinschaft', 'articles de Jeff WA6KBL et de la communauté EME', 'artículos de Jeff WA6KBL y de la comunidad EME'),
+    ('la versione di prova è scaduta', 'the test version has expired', 'die Testversion ist abgelaufen', "la version d'essai a expiré", 'la versión de prueba ha caducado'),
+    ("giorni dall'installazione", 'days from installation', 'Tage ab Installation', "jours après l'installation", 'días desde la instalación'),
+    ('Scarica la versione aggiornata.', 'Download the updated version.', 'Laden Sie die aktuelle Version herunter.', 'Téléchargez la version mise à jour.', 'Descargue la versión actualizada.'),
+    ("⬇️ Scarica l'ultima versione", '⬇️ Download the latest version', '⬇️ Neueste Version herunterladen', '⬇️ Télécharger la dernière version', '⬇️ Descargar la última versión'),
+    ('versione di prova valida', 'test version valid for', 'Testversion gültig für', "version d'essai valable", 'versión de prueba válida durante'),
+    ('restano', 'remaining:', 'verbleibend:', 'restants :', 'quedan'),
+    ('giorni (scade il', 'days (expires on', 'Tage (läuft ab am', 'jours (expire le', 'días (caduca el'),
+    ('valida', 'valid for', 'gültig für', 'valable', 'válida durante'),
+    ('Alla scadenza il programma si disattiva: scarica la versione aggiornata da GitHub.', 'When it expires the program is disabled: download the updated version from GitHub.', 'Nach Ablauf wird das Programm deaktiviert: laden Sie die aktuelle Version von GitHub herunter.', "À l'expiration le programme se désactive : téléchargez la version mise à jour depuis GitHub.", 'Al caducar, el programa se desactiva: descargue la versión actualizada desde GitHub.'),
 ]

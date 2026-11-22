@@ -6,6 +6,15 @@
 |---|---|---|
 | 1 | Manuale per ogni lingua dell'installazione, con screenshot in quella lingua (spostato dalla 0.4.7) | da fare |
 | 2 | Nuove lingue: **russo** e **portoghese** (interfaccia, installer, manuali) | da fare |
+| 3 | Feed di Zdeněk OK1DFC (septum feed per la polarizzazione circolare) | in corso |
+| 4 | Versione **BETA TEST** a scadenza: valida 30 giorni dall'installazione, poi si disattiva; avviso in un pop-up a ogni avvio | ✅ fatto (ramo `v0.4.8`) |
+
+## 4. BETA TEST a scadenza
+- **Modulo `feedlab/beta.py`:** al primo avvio di ogni versione salva la data nella cartella impostazioni di FeedLab (`beta.json`). Ogni nuova versione ha i suoi 30 giorni.
+- **A ogni avvio:** pop-up "🧪 BETA TEST" con i giorni rimasti e la data di scadenza, che si chiude con OK o ✕. In barra laterale resta "Versione x.y.z BETA TEST".
+- **Alla scadenza:** pagina di blocco con il link all'ultima versione su GitHub. Anche un orologio spostato indietro di oltre un giorno conta come scadenza.
+- **Limite:** FeedLab è open source, quindi è un avviso per i tester, non una protezione. `BETA = False` produce una versione normale.
+- **Test:** `tests/test_beta.py`.
 
 ---
 
