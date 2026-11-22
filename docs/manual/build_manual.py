@@ -23,11 +23,9 @@ from feedlab import __version__  # noqa: E402
 from feedlab.i18n import MANUALS  # noqa: E402
 
 # source Markdown per language; screenshots in img/<lang>/ (docs/manual/tools/make_screens.py)
-SOURCES = {"it": "manuale_it.md", "en": "user_manual_en.md", "de": "handbuch_de.md", "fr": "manuel_fr.md",
-           "es": "manual_es.md", "ru": "rukovodstvo_ru.md", "pt": "manual_pt.md"}
+SOURCES = {"it": "manuale_it.md", "en": "user_manual_en.md"}
 DOCS = {SOURCES[l]: (MANUALS[l], l) for l in SOURCES}
-TITLES = {"it": "Manuale d’uso", "en": "User Manual", "de": "Benutzerhandbuch", "fr": "Manuel d’utilisation",
-          "es": "Manual de usuario", "ru": "Руководство пользователя", "pt": "Manual do usuário"}
+TITLES = {"it": "Manuale d’uso", "en": "User Manual"}
 
 CSS = """
 @page { size: A4; margin: 18mm 16mm 18mm 16mm; }

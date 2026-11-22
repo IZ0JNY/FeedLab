@@ -40,7 +40,7 @@ feedlab-gui
 ```
 
 ### Lingua
-In alto nella barra laterale: **Lingua / Language**. Le lingue sono sette: italiano, English, Deutsch, Français, Español, Русский, Português. L'installer propone la lingua all'installazione; il pulsante **📖 Manuale** apre il manuale nella lingua scelta.
+In alto nella barra laterale: **Lingua / Language** (italiano o English). L'installer propone la lingua all'installazione; il pulsante **📖 Manuale** apre il manuale nella lingua scelta.
 
 ## 4. La barra laterale
 | Voce | Uso |

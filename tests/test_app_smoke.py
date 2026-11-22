@@ -61,7 +61,7 @@ def test_app_with_openems_and_results(isolated, monkeypatch):
     assert "Centro di fase" in labels and "G/T" in labels
 
 
-@pytest.mark.parametrize("lang", ["en", "de", "fr", "es"])
+@pytest.mark.parametrize("lang", ["en"])
 def test_app_runs_in_every_language(isolated, lang):
     at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.session_state["lang"] = lang

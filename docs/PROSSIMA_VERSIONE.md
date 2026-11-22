@@ -12,21 +12,17 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Manuale per ogni lingua dell'installazione, con screenshot in quella lingua | ✅ fatto: 7 manuali PDF, schermate in `docs/manual/img/<lingua>/` |
-| 2 | Nuove lingue: **russo** e **portoghese** (interfaccia, installer, manuali) | ✅ fatto |
+| 1 | Manuale per ogni lingua dell'installazione, con screenshot in quella lingua | ✅ fatto: manuali IT e EN, schermate in `docs/manual/img/<lingua>/` |
+| 2 | Nuove lingue russo e portoghese | ❌ annullato: su richiesta il software è stato semplificato a **solo italiano e inglese** (tolti anche tedesco, francese e spagnolo, con i loro manuali) |
 | 3 | Feed di Zdeněk OK1DFC (septum) | ❌ annullato su richiesta: è un feed per 1296 MHz, fuori dal campo di FeedLab (da 10 GHz); OK1DFC resta in bibliografia |
 | 4 | Versione **BETA TEST** a scadenza: 30 giorni dall'installazione, pop-up a ogni avvio | ✅ fatto |
 | 5 | Corrugato assiale a 8 gole di Gerald OE2IGL (v1.4) tra i tipi di feed e nella procedura guidata | ✅ fatto |
 | + | Feed di Mirek OK2AQ (horn conico f/D 0.6 e corrugato f/D 0.8, 24 GHz) tra i tipi di feed | ✅ fatto |
 
-## 1. Manuali in 7 lingue
-- Sorgenti Markdown in `docs/manual/` (`manuale_it.md`, `user_manual_en.md`, `handbuch_de.md`, `manuel_fr.md`, `manual_es.md`, `rukovodstvo_ru.md`, `manual_pt.md`); `{IMG}` diventa `img/<lingua>`.
-- Schermate: `python docs/manual/tools/make_screens.py [lingue]` avvia l'app in ogni lingua e fotografa 14 schermate.
-- PDF: `python docs/manual/build_manual.py [lingue]`. Il pulsante 📖 sceglie il PDF della lingua attiva.
-- L'installer include solo i PDF (non schermate e script).
-
-## 2. Russo e portoghese
-`feedlab/i18n_extra.py`: traduzioni RU/PT di tutte le voci del catalogo (chiave = md5 del testo italiano), con ricaduta sull'inglese. Installer Inno Setup con Russian.isl e Portuguese.isl. Test: `tests/test_i18n.py`.
+## 1-2. Lingue e manuali
+- Il software è stato semplificato: interfaccia, installer e manuali solo in **italiano e inglese**. Il catalogo delle traduzioni (`feedlab/i18n_catalog.py`) contiene coppie (it, en); con una lingua di sistema diversa dall'italiano FeedLab parte in inglese.
+- Sorgenti dei manuali: `docs/manual/manuale_it.md`, `docs/manual/user_manual_en.md`; `{IMG}` diventa `img/<lingua>`.
+- Schermate: `python docs/manual/tools/make_screens.py [lingue]`; PDF: `python docs/manual/build_manual.py`. L'installer include solo i PDF.
 
 ## 4. BETA TEST a scadenza
 - **Modulo `feedlab/beta.py`:** al primo avvio di ogni versione salva la data nella cartella impostazioni di FeedLab (`beta.json`). Ogni nuova versione ha i suoi 30 giorni.

@@ -1,9 +1,9 @@
-"""Interface languages of FeedLab: Italiano (source), English, Deutsch, Français, Español.
+"""Interface languages of FeedLab: Italiano (source) and English.
 
 The app is written in Italian; `tr()` translates any interface text into the current language:
 first by exact match of the whole string, otherwise by replacing every known Italian phrase inside it
 (longest first, on word boundaries), so that texts built with numbers (f-strings) are translated too.
-The catalogue is `feedlab.i18n_catalog.ENTRIES` (it, en, de, fr, es).
+The catalogue is `feedlab.i18n_catalog.ENTRIES` (it, en).
 
 `wrap(streamlit)` returns a proxy of the streamlit module that translates labels, help texts, options
 (only how they are displayed: the returned values stay the Italian ones the code compares with), table
@@ -16,21 +16,12 @@ import locale
 import os
 import re
 
-LANGS = {"it": "Italiano", "en": "English", "de": "Deutsch", "fr": "Français", "es": "Español",
-         "ru": "Русский", "pt": "Português"}
-_IDX = {"en": 1, "de": 2, "fr": 3, "es": 4}
-_EXTRA_IDX = {"ru": 0, "pt": 1}                # feedlab.i18n_extra: (Русский, Português), fallback English
-INNO_LANG = {"italian": "it", "english": "en", "german": "de", "french": "fr", "spanish": "es",
-             "russian": "ru", "portuguese": "pt", "brazilianportuguese": "pt"}
+LANGS = {"it": "Italiano", "en": "English"}
+INNO_LANG = {"italian": "it", "english": "en"}
 
 
 def _dst(e, lang):
-    if lang in _IDX:
-        return e[_IDX[lang]]
-    import hashlib
-    from .i18n_extra import EXTRA
-    t = EXTRA.get(hashlib.md5(e[0].encode()).hexdigest()[:8])
-    return t[_EXTRA_IDX[lang]] if t else e[1]
+    return e[1]
 
 _lang = "it"
 _tables: dict = {}
@@ -49,7 +40,7 @@ def _build(lang: str):
         if src[:1].isupper() and len(src) > 1 and not src[:2].isupper():      # lowercase variant
             low = src[0].lower() + src[1:]
             if low not in m:
-                m[low] = dst if lang == "de" or (len(dst) > 1 and dst[:2].isupper()) or not dst[:1].isalpha() \
+                m[low] = dst if (len(dst) > 1 and dst[:2].isupper()) or not dst[:1].isalpha() \
                     else dst[0].lower() + dst[1:]
     keys = sorted(m, key=len, reverse=True)
     parts = []
@@ -120,8 +111,8 @@ def default_lang() -> str:
             pass
     try:
         loc = (locale.getlocale()[0] or "")[:2].lower()
-        if loc in LANGS:
-            return loc
+        if loc:
+            return "it" if loc == "it" else "en"     # any other system language: English
     except Exception:
         pass
     return "it"
@@ -260,6 +251,4 @@ def wrap(st_module):
 
 
 # user manual PDF per language (docs/manual); a missing file falls back to English
-MANUALS = {"it": "FeedLab_Manuale_IT.pdf", "en": "FeedLab_User_Manual_EN.pdf", "de": "FeedLab_Handbuch_DE.pdf",
-           "fr": "FeedLab_Manuel_FR.pdf", "es": "FeedLab_Manual_ES.pdf", "ru": "FeedLab_Rukovodstvo_RU.pdf",
-           "pt": "FeedLab_Manual_PT.pdf"}
+MANUALS = {"it": "FeedLab_Manuale_IT.pdf", "en": "FeedLab_User_Manual_EN.pdf"}

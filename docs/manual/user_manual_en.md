@@ -40,7 +40,7 @@ feedlab-gui
 ```
 
 ### Language
-At the top of the sidebar: **Lingua / Language**. There are seven languages: Italiano, English, Deutsch, Français, Español, Русский, Português. The installer asks for the language; the **📖 Manual** button opens the manual in the chosen language.
+At the top of the sidebar: **Lingua / Language** (Italiano or English). The installer asks for the language; the **📖 Manual** button opens the manual in the chosen language.
 
 ## 4. The sidebar
 | Item | Use |

@@ -35,48 +35,18 @@ UsePreviousLanguage=no
 [Languages]
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "german"; MessagesFile: "compiler:Languages\German.isl"
-Name: "french"; MessagesFile: "compiler:Languages\French.isl"
-Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
-Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
-Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 
 [CustomMessages]
 italian.OemsTask=Scarica e installa anche openEMS (facoltativo, ~100 MB: serve solo per la deep analysis full-wave; si può fare anche dopo, dall'app)
 english.OemsTask=Also download and install openEMS (optional, ~100 MB: only needed for the full-wave deep analysis; can also be done later from the app)
-german.OemsTask=openEMS ebenfalls herunterladen und installieren (optional, ~100 MB: nur für die Full-wave-Tiefenanalyse; auch später in der App möglich)
-french.OemsTask=Télécharger et installer aussi openEMS (facultatif, ~100 Mo : seulement pour l'analyse approfondie full-wave ; possible plus tard depuis l'application)
-spanish.OemsTask=Descargar e instalar también openEMS (opcional, ~100 MB: solo para el análisis profundo full-wave; también se puede hacer después desde la aplicación)
-russian.OemsTask=Также скачать и установить openEMS (необязательно, ~100 МБ: нужен только для полноволнового глубокого анализа; можно сделать позже из программы)
-portuguese.OemsTask=Baixar e instalar também o openEMS (opcional, ~100 MB: só é necessário para a análise aprofundada full-wave; pode ser feito depois no programa)
 italian.OemsGroup=Simulatore full-wave openEMS:
 english.OemsGroup=openEMS full-wave simulator:
-german.OemsGroup=Full-wave-Simulator openEMS:
-french.OemsGroup=Simulateur full-wave openEMS :
-spanish.OemsGroup=Simulador full-wave openEMS:
-russian.OemsGroup=Полноволновой симулятор openEMS:
-portuguese.OemsGroup=Simulador full-wave openEMS:
 italian.OemsStatus=Installazione di openEMS (download e prova)…
 english.OemsStatus=Installing openEMS (download and test)…
-german.OemsStatus=openEMS wird installiert (Download und Test)…
-french.OemsStatus=Installation d'openEMS (téléchargement et test)…
-spanish.OemsStatus=Instalando openEMS (descarga y prueba)…
-russian.OemsStatus=Установка openEMS (загрузка и проверка)…
-portuguese.OemsStatus=Instalando o openEMS (download e teste)…
 italian.AppComment=Progettazione di feed/illuminatori a microonde
 english.AppComment=Microwave feed/illuminator design
-german.AppComment=Entwurf von Mikrowellen-Speisesystemen
-french.AppComment=Conception de sources/illuminateurs hyperfréquences
-spanish.AppComment=Diseño de alimentadores/iluminadores de microondas
-russian.AppComment=Проектирование СВЧ облучателей
-portuguese.AppComment=Projeto de alimentadores/iluminadores de micro-ondas
 italian.InBrowser=nel browser
 english.InBrowser=in the browser
-german.InBrowser=im Browser
-french.InBrowser=dans le navigateur
-spanish.InBrowser=en el navegador
-russian.InBrowser=в браузере
-portuguese.InBrowser=no navegador
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
