@@ -84,7 +84,7 @@ def _wall_dims(ax, geo):
     L = geo.z_aperture
     Rmax = geo.outer_radius
     y_dim = -Rmax * 1.12 - 1.0                           # dimension line below the part
-    if geo.kind in ("axial_corrugated", "ok2aq_corrugated"):   # slots: no smooth-horn step/flare callouts
+    if geo.kind == "axial_corrugated":   # slots: no smooth-horn step/flare callouts
         feats = {**feats, "steps": [], "flares": []}
         t = 0
     if t > 0:                                            # wall at the aperture rim

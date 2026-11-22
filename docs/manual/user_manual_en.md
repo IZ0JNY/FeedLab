@@ -15,7 +15,7 @@ FeedLab is for **designing, simulating and building dish feeds** from **10 to 13
 - design the **λ/4 plate** to the rectangular WR waveguide, with holes, threads and pins;
 - check the design with **openEMS** (optional) and correct it automatically.
 
-The calculations are based on the *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ), Gerald OE2IGL's design guides, the books by Balanis and Kildal and the work of Al W5LUA, Jeff WA6KBL, Sergei RW3BP, Luis CT1DMK, Mirek OK2AQ and Ivan IZ0JNY. The full list is in the **ℹ️ Credits** window.
+The calculations are based on the *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ), Gerald OE2IGL's design guides, the books by Balanis and Kildal and the work of Al W5LUA, Jeff WA6KBL, Sergei RW3BP, Luis CT1DMK and Ivan IZ0JNY. The full list is in the **ℹ️ Credits** window.
 
 ## 2. BETA TEST version
 This is a **test version**: it is valid for **30 days from the first installation**, then it deactivates.
@@ -74,16 +74,15 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 ### 5.1 Feed types
 | Feed | When to use it |
 |---|---|
-| **8-slot axial corrugated (Gerald OE2IGL)** | 10–76 GHz, f/D 0.33–0.9 (offset up to 0.8): 81–86%, the most efficient; dimensions from the v1.4 spreadsheet as a function of the opening angle |
+| **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)** | 10–76 GHz, f/D 0.33–0.9 (offset up to 0.8): 81–86%, the most efficient; dimensions from Gerald OE2IGL's v1.4 spreadsheet as a function of the opening angle |
 | **W2IMU, Pickett-Potter, Skobelev, Large W2IMU** | dual-mode for offset dishes and f/D 0.5–0.95; Pickett-Potter and large W2IMU also above 76 GHz |
 | **Super-VE4MA, Chaparral, open waveguide** | deep prime-focus dishes (f/D < 0.5) |
-| **Conical horn f/D 0.6 / corrugated horn f/D 0.8 (Mirek OK2AQ)** | offset feeds designed at 24.048 GHz and scaled in λ to the other bands; the corrugated one is read from the drawing: check it with openEMS |
 | **Rectangular horn** | linear polarisation only, fed directly from WR waveguide |
 
 1296 MHz feeds (for example Zdeněk OK1DFC's septum) are outside FeedLab's range, which starts at 10 GHz.
 
 ## 6. Feed design
-Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. For the axial corrugated feed you edit pitch, slot width, step, diameters and depths d1…d8.
+Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. For the Axial Corrugated feed you edit pitch, slot width, step, diameters and depths d1…d8.
 
 ![Feed design]({IMG}/03_design.png)
 
@@ -188,9 +187,10 @@ Press **🐞 Report a problem** in the sidebar: GitHub opens with version, syste
 ## 16. Main sources
 ![Credits]({IMG}/13_credits.png)
 - **Paul W1GHZ:** W1GHZ Online Microwave Antenna Book.
-- **Gerald OE2IGL:** design guides, axial corrugated feed v1.4; **HB9PZK**.
+- **Gerald OE2IGL:** design guides, improved version of the Axial Corrugated (v1.4 spreadsheet); **HB9PZK**.
+- **Luis CT1DMK:** base concept of the Axial Corrugated.
 - **Books:** C. A. Balanis, *Antenna Theory*; P.-S. Kildal, *Foundations of Antenna Engineering*.
-- **Articles:** Al W5LUA, Jeff WA6KBL (DUBUS), Sergei RW3BP, Luis CT1DMK, Luis CT1DMK and Willi LX1DB, Mirek OK2AQ, Ivan IZ0JNY.
+- **Articles:** Al W5LUA, Jeff WA6KBL (DUBUS), Sergei RW3BP, Luis CT1DMK, Luis CT1DMK and Willi LX1DB, Ivan IZ0JNY.
 - **Flanges:** Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C.
 - **Software:** openEMS; CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy.
 

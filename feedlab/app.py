@@ -161,7 +161,7 @@ def section_fig(geo):
     fig.add_hline(y=0, line_dash="dashdot", line_color="gray")
     t = float(geo.params.get("wall", 0) or 0)
     feats = geometry.wall_features(geo.profile)
-    if geo.kind in ("axial_corrugated", "ok2aq_corrugated"):      # slots: no smooth-horn step/flare labels
+    if geo.kind == "axial_corrugated":      # slots: no smooth-horn step/flare labels
         feats = {**feats, "steps": [], "flares": []}
     ann = dict(showarrow=True, arrowhead=0, arrowwidth=1, ax=0, ay=-28, font=dict(size=11), bgcolor="rgba(255,255,255,0.8)")
     for z, ra, rb in feats["steps"]:

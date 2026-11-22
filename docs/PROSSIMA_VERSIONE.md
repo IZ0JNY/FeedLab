@@ -16,8 +16,8 @@
 | 2 | Nuove lingue russo e portoghese | ❌ annullato: su richiesta il software è stato semplificato a **solo italiano e inglese** (tolti anche tedesco, francese e spagnolo, con i loro manuali) |
 | 3 | Feed di Zdeněk OK1DFC (septum) | ❌ annullato su richiesta: è un feed per 1296 MHz, fuori dal campo di FeedLab (da 10 GHz); OK1DFC resta in bibliografia |
 | 4 | Versione **BETA TEST** a scadenza: 30 giorni dall'installazione, pop-up a ogni avvio | ✅ fatto |
-| 5 | Corrugato assiale a 8 gole di Gerald OE2IGL (v1.4) tra i tipi di feed e nella procedura guidata | ✅ fatto |
-| + | Feed di Mirek OK2AQ (horn conico f/D 0.6 e corrugato f/D 0.8, 24 GHz) tra i tipi di feed | ✅ fatto |
+| 5 | **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)**, con le quote del foglio di calcolo v1.4 di Gerald OE2IGL, tra i tipi di feed e nella procedura guidata | ✅ fatto |
+| + | Feed di Mirek OK2AQ (horn conico f/D 0.6 e corrugato f/D 0.8, 24 GHz) | ❌ tolti su richiesta |
 
 ## 1-2. Lingue e manuali
 - Il software è stato semplificato: interfaccia, installer e manuali solo in **italiano e inglese**. Il catalogo delle traduzioni (`feedlab/i18n_catalog.py`) contiene coppie (it, en); con una lingua di sistema diversa dall'italiano FeedLab parte in inglese.
@@ -31,9 +31,8 @@
 - **Limite:** FeedLab è open source, quindi è un avviso per i tester, non una protezione. `BETA = False` produce una versione normale.
 - **Test:** `tests/test_beta.py`.
 
-## 5. Corrugato assiale (Gerald OE2IGL) e feed di Mirek OK2AQ
+## 5. Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)
 - **Corrugato assiale v1.4:** quote dai polinomi del foglio di calcolo in funzione dell'angolo di apertura (verificato a 47.088 GHz / 137°); 10–76 GHz; efficienza dell'autore 81–86% usata dalla procedura guidata, dove risulta di solito primo. Sezione, 3D, PDF e STEP; quote modificabili (passo, gole, gradino, d1…d8).
-- **OK2AQ:** horn conico f/D 0.6 (anche nel simulatore rapido) e horn corrugato f/D 0.8 (geometria ricavata dal disegno, con avviso; da verificare con openEMS), progettati a 24.048 GHz e scalati in λ.
 - La scheda "Feed pubblicati" è stata tolta su richiesta: i feed stanno nell'elenco dei tipi di feed insieme agli altri.
 - Test: `tests/test_published_feeds.py`.
 

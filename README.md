@@ -18,7 +18,7 @@ Le basi di conoscenza sono:
 | `reflector` | Geometria prime-focus e offset (angoli ai bordi, f/D equivalente, puntamento del feed offset); fit di parabola offset da misure; Ruze, blocking (Baars), defocus (Milligan), beam factor/HPBW |
 | `patterns` | Pattern BOR1 (E/H complessi). Modelli analitici: gaussiano, cos^q. **Integrazione d'apertura** con miscela di modi (TE11 + TM11 = dual-mode, HE11 = corrugato) e fase quadratica del flare; apertura rettangolare (horn piramidale). Lettura e scrittura dei file `.dat` W1GHZ FEEDPATT/PHASEPAT |
 | `efficiency` | Efficienza d'apertura (Kildal/W1GHZ) con decomposizione in spillover, illuminazione, fase, cross-pol e blocking; curva η vs f/D; **centro di fase** (metodo PHASEPAT e formula di W1GHZ); curva di defocus; riproduzione esatta dell'algoritmo FEEDPATT per confronti |
-| `horns` | Calcolatori: W2IMU (Turrin/W1GHZ e OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter (OE2IGL), corrugato assiale a 8 gole (OE2IGL v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
+| `horns` | Calcolatori: W2IMU (Turrin/W1GHZ e OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter (OE2IGL), Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL, foglio v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
 | `cassegrain` | Progetto del subriflettore iperbolico (procedura W1GHZ verificata sul suo foglio di calcolo), sub ottimo di Kildal, profilo e G-code per tornio |
 | `noise` | T_sky (con correzione di Planck), T_rx, T_spillover, T_antenna integrata sul pattern, G/T, sun noise atteso |
 
@@ -124,7 +124,6 @@ Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programm
 ## Crediti e licenze delle fonti
 - Algoritmi e dati da Paul W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
 - Design guide di Gerald OE2IGL (wettersat.bplaced.net), incluso il *High performance axial corrugated feed* v1.4 (foglio di calcolo e presentazione, Dorsten 2026) → tipo di feed `axial_corrugated`.
-- Mirek OK2AQ: horn conico f/D 0.6 e horn corrugato f/D 0.8 a 24 GHz (radio.feec.vutbr.cz) → tipi di feed `ok2aq_conical` e `ok2aq_corrugated`.
 - C. A. Balanis, *Antenna Theory: Analysis and Design*, Wiley (4ª ed. 2016): formule chiuse di horn e riflettori usate come verifica (`feedlab.balanis`).
 - Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C: foratura delle flange standard (`feedlab.flanges`).
 - Ivan IZ0JNY, feed W2IMU a 24 GHz (https://www.iz0jny.it/24ghz-feedhorn-w2imu/): schema di accoppiamento piastra WR-42 / feed, riprodotto in `tests/test_flanges.py`.
