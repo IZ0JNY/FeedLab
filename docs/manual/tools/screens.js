@@ -18,8 +18,10 @@ const fs = require('fs');
   await p.goto(url, { waitUntil: 'networkidle' });
   await p.waitForSelector('[role="dialog"]', { timeout: 120000 }); await idle(500);
   await shot('00_beta');
-  await p.locator('[role="dialog"] button').last().click(); await idle();
+  await p.locator('[role="dialog"] button').last().click();
+  await p.locator('[role="dialog"]').first().waitFor({ state: 'detached', timeout: 30000 }); await idle(2000);
   await shot('01_wizard');
+  if (process.env.SHOTS_UNTIL === '01') { await b.close(); return; }
   await p.getByRole('button', { name: L.find }).click();
   await p.waitForSelector(`text=${L.use}`, { timeout: 240000 }); await idle();
   await shot('02_wizard_result');
