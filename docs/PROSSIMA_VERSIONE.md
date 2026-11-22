@@ -1,13 +1,23 @@
-# Modifiche per la prossima versione (0.4.9)
+# Modifiche per la prossima versione (0.4.10)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Pop-up BETA: il pulsante OK non funzionava; tolto, al suo posto il testo centrato "Chiudere questa finestra per continuare (✕ in alto a destra)"; si chiude con la ✕ | ✅ fatto (ramo `v0.4.9`) |
-| 2 | Tolta dalla barra laterale l'opzione "Collare Ø40 mm per portaLNB commerciale" | ✅ fatto (ramo `v0.4.9`) |
-| 3 | Axial Corrugated: "8 gole" diventa "8 scalini" (procedura guidata, note, manuali), con le traduzioni inglesi | ✅ fatto (ramo `v0.4.9`) |
-| 4 | Progetto feed e Modello 3D: il feed è colorato come il materiale scelto (rame, ottone, alluminio, argento, oro, inox, stampa 3D) | ✅ fatto (ramo `v0.4.9`) |
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.9 (pubblicata, BETA TEST 30 giorni)
+
+Pubblicata con 4 modifiche su richiesta.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Pop-up BETA: il pulsante OK non funzionava; tolto, al suo posto il testo centrato "Chiudere questa finestra per continuare (✕ in alto a destra)"; si chiude con la ✕ | ✅ fatto |
+| 2 | Tolta dalla barra laterale l'opzione "Collare Ø40 mm per portaLNB commerciale" | ✅ fatto |
+| 3 | Axial Corrugated: "8 gole" diventa "8 scalini" (procedura guidata, note, manuali), con le traduzioni inglesi | ✅ fatto |
+| 4 | Progetto feed e Modello 3D: il feed è colorato come il materiale scelto (rame, ottone, alluminio, argento, oro, inox, stampa 3D) | ✅ fatto |
 
 ---
 
