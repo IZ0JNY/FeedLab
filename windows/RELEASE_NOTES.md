@@ -1,5 +1,7 @@
 ## FeedLab per Windows
 
+**Novità 0.4.1:** nuova scheda **ℹ️ Credits** con autore (Ivan De Cesaris, IZ0JNY), versione e tutte le fonti tecniche, i progetti GitHub e i datasheet delle parabole; versione mostrata anche nella barra laterale.
+
 **Installazione:** scarica `FeedLab-Setup-….exe` e avvialo (non servono diritti di amministratore). In alternativa lo zip *portable*: estrai e fai doppio clic su `FeedLab.bat`.
 
 - Tutta l'app FeedLab (procedura guidata, progetto, laboratorio, simulazione rapida, lobo 3D, modello 3D, disegno PDF/STEP, piastrina WR) in una finestra propria, senza connessione internet.
