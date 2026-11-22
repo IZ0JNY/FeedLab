@@ -126,6 +126,7 @@ Il simulatore rapido non tratta i feed con anelli o gole (VE4MA, Chaparral, corr
 ## 10. Disegno & STEP
 ![Disegno e STEP]({IMG}/09_drawing.png)
 - **📄 Genera PDF:** disegno meccanico A4 con sezione quotata, tabella delle quote (mm e λ), cartiglio e tolleranze generali. Con le tolleranze per quota (§7.1) include la loro tabella; con i fori di fissaggio (§11) c'è un **foglio 2** con la flangia forata.
+  - Ogni quota del disegno riporta il nome del parametro della tabella (es. "Ø22.900 = Di", "9.03 = las"). Per l'Axial Corrugated le profondità d1…d8 sono disegnate in blu dentro ciascuno scalino, con w, pitch e delta; il PDF ha due fogli: mezza sezione a scala doppia e feed intero. Per VE4MA e Chaparral sono indicate ring_width, ring_depth e ring_setback.
 - **🧊 Genera STEP:** file `.stp` per CNC/CAD. I fori filettati sono al diametro di preforo; il filetto è indicato nel PDF.
 - **🖨️ Genera STL:** per la stampa 3D.
 

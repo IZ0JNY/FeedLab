@@ -126,6 +126,7 @@ The fast solver does not handle feeds with rings or slots (VE4MA, Chaparral, cor
 ## 10. Drawing & STEP
 ![Drawing and STEP]({IMG}/09_drawing.png)
 - **📄 Generate PDF:** A4 mechanical drawing with dimensioned section, dimension table (mm and λ), title block and general tolerances. With per-dimension tolerances (§7.1) it includes their table; with fixing holes (§11) a **sheet 2** shows the drilled flange.
+  - Each dimension on the drawing carries the name of the table parameter (e.g. "Ø22.900 = Di", "9.03 = las"). For the Axial Corrugated the depths d1…d8 are drawn in blue inside each step, with w, pitch and delta; the PDF has two sheets: half-section at double scale and the whole feed. For VE4MA and Chaparral, ring_width, ring_depth and ring_setback are shown.
 - **🧊 Generate STEP:** `.stp` file for CNC/CAD. Threaded holes are at tap-drill diameter; the thread is given in the PDF.
 - **🖨️ Generate STL:** for 3D printing.
 

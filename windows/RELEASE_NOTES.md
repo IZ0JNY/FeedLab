@@ -1,24 +1,20 @@
-## FeedLab 0.4.9 BETA TEST per Windows / for Windows
+## FeedLab 0.4.10 BETA TEST per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.9.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.9-portable.zip` → `FeedLab.bat`.
+**Installazione / Installation:** `FeedLab-Setup-0.4.10.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.10-portable.zip` → `FeedLab.bat`.
 
 > 🧪 **BETA TEST:** questa versione vale **30 giorni dall'installazione**, poi si disattiva; a ogni avvio un pop-up indica i giorni rimasti. Alla scadenza scarica la versione più recente da questa pagina.
 > 🧪 **BETA TEST:** this version is valid for **30 days from installation**, then it deactivates; a popup shows the days left at every start. When it expires, download the latest version from this page.
 
-### 🇮🇹 Novità
-- **Pop-up BETA:** tolto il pulsante OK, che non funzionava; la finestra si chiude con la **✕** in alto a destra.
-- **Colore del materiale:** nella sezione di *Progetto feed* e nel *Modello 3D* il feed ha il colore del materiale scelto (rame, ottone, alluminio, argento, oro, inox, stampa 3D); il titolo del modello 3D indica il materiale.
-- **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL):** la descrizione parla ora di **8 scalini** invece di 8 gole.
-- **Piastrina WR-90:** le 4 viti piastra→feed ora sono simmetriche, sugli assi come per le altre guide (prima uscivano ruotate di 40°).
-- **Barra laterale più semplice:** tolta l'opzione del collare per portaLNB.
-- Interfaccia e manuali in italiano e inglese.
+### 🇮🇹 Novità: disegni meccanici PDF
+- **Nomi delle quote:** ogni quota del disegno riporta il nome del parametro della tabella (es. "Ø22.900 = Di", "9.03 = las", "Ø41.797 = D_aperture"), per tutti i tipi di feed.
+- **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL):** profondità d1…d8 disegnate dentro ogni scalino, con w, pitch e delta; diametri affiancati e leggibili. Il PDF ha **due fogli**: mezza sezione a scala doppia e feed intero.
+- **VE4MA e Chaparral:** indicate ring_width, ring_depth e ring_setback.
+- **Una sola lingua:** note e cartiglio del PDF tutti in italiano o tutti in inglese, secondo la lingua scelta.
 
-### 🇬🇧 What's new
-- **BETA popup:** the OK button, which did not work, has been removed; close the window with the **✕** at the top right.
-- **Material colour:** in the *Feed design* section and in the *3D model* the feed takes the colour of the chosen material (copper, brass, aluminium, silver, gold, stainless steel, 3D print); the 3D model title names the material.
-- **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL):** the description now says **8 steps** instead of 8 slots.
-- **WR-90 plate:** the 4 plate→feed screws are now symmetric, on the axes as for the other waveguides (they used to come out rotated by 40°).
-- **Simpler sidebar:** the LNB-holder collar option has been removed.
-- Interface and manuals in Italian and English.
+### 🇬🇧 What's new: mechanical PDF drawings
+- **Dimension names:** each dimension on the drawing carries the name of the table parameter (e.g. "Ø22.900 = Di", "9.03 = las", "Ø41.797 = D_aperture"), for every feed type.
+- **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL):** depths d1…d8 drawn inside each step, with w, pitch and delta; diameters side by side and readable. The PDF has **two sheets**: half-section at double scale and the whole feed.
+- **VE4MA and Chaparral:** ring_width, ring_depth and ring_setback shown.
+- **One language:** notes and title block of the PDF all in Italian or all in English, following the chosen language.
 
 Requisiti / Requirements: Windows 10/11 64-bit.

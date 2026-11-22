@@ -1,12 +1,22 @@
-# Modifiche per la prossima versione (0.4.10)
+# Modifiche per la prossima versione (0.4.11)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Disegno PDF: si vede quale quota è quale (Di, Ds, las, D_aperture, flare_length…); Axial Corrugated con d1…d8 dentro ogni scalino, w, pitch e delta; VE4MA/Chaparral con ring_width, ring_depth, ring_setback | ✅ fatto (ramo `v0.4.10`) |
-| 2 | Axial Corrugated: PDF su due fogli, mezza sezione a scala doppia e feed intero | ✅ fatto (ramo `v0.4.10`) |
-| 3 | PDF dei disegni tutti in una lingua: note dei feed in italiano nel codice con traduzione inglese completa; cartiglio tradotto | ✅ fatto (ramo `v0.4.10`) |
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.10 (pubblicata, BETA TEST 30 giorni)
+
+Pubblicata con 3 modifiche su richiesta.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Disegno PDF: si vede quale quota è quale (Di, Ds, las, D_aperture, flare_length…); Axial Corrugated con d1…d8 dentro ogni scalino, w, pitch e delta; VE4MA/Chaparral con ring_width, ring_depth, ring_setback | ✅ fatto |
+| 2 | Axial Corrugated: PDF su due fogli, mezza sezione a scala doppia e feed intero | ✅ fatto |
+| 3 | PDF dei disegni tutti in una lingua: note dei feed in italiano nel codice con traduzione inglese completa; cartiglio tradotto | ✅ fatto |
 
 ---
 
