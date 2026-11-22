@@ -178,6 +178,12 @@ CATALOG: list[DishModel] = [
               "Prodelin 2.4M Series 1251 datasheet (kusat.com); manuale Series 1250 (4096-663 rev. A, 2005): "
               "'22.3° elevation offset angle'",
               "focale e f/D non pubblicati; asse lungo 2594 mm stimato (2400/cos 22.3°): misura assi e profondità al centro"),
+    DishModel("RW3BP", "2.4 m offset EME 77 GHz", "offset", 2400, 2560, None, None, None, 1380,
+              "Sergei RW3BP, EME 2014", None, None, None, {77.0: 62.5}, "", "Alu 2.5 mm",
+              "Sergei RW3BP, EME antenna and Jupiter noise on 77 GHz (EME 2014)",
+              "HPBW 0.11° a 77 GHz; feed Skobelev DMH (RA3AQ); superficie 0.31 mm rms (−4.3 dB Ruze), corretta con "
+              "una lente in PTFE davanti al feed (+0.4 dB); efficienza del fascio principale 0.65 dal rumore solare; "
+              "asse lungo stimato"),
     DishModel("Channel Master", "1 m (W1GHZ)", "offset", 997, 1083, None, None, None, 604, "misurata W1GHZ (App.5A)", None,
               None, None, {}, "", "", "W1GHZ Antenna Book App. 5A", "tilt 67.5° dall'orizzontale, stringa sup. 1018 mm, f/D eq. 0.68"),
     # --- dishes measured by W1GHZ (App. 5A) ---

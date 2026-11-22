@@ -410,7 +410,7 @@ with tabs[3]:
                     f"{k}: {abs(v / te):.3f} ∠{math.degrees(np.angle(v / te)):.0f}°" for k, v in modes.items()))
                 q_ = explore.tm11_power_ratio(modes)
                 if geo.kind in explore.STEP_HORNS and q_ is not None:
-                    st.caption(f"TM11/TE11 in potenza: {100 * q_:.1f}% — Pawlan WA6KBL indica ~15% per un Pickett-Potter "
+                    st.caption(f"TM11/TE11 in potenza: {100 * q_:.1f}% — Jeff WA6KBL indica ~15% per un Pickett-Potter "
                                f"({'nella norma' if explore.TM11_TARGET[0] <= q_ <= explore.TM11_TARGET[1] else 'da correggere'}).")
         pat, _ = quick_pattern(geo.kind, tuple(geo.staircase()) if not is_rect else (), S.f_ghz,
                                (geo.params["a"], geo.params["b"], geo.params["aperture_H"], geo.params["aperture_E"],

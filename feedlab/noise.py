@@ -121,3 +121,49 @@ def eme_path_loss_db(f_ghz: float, d_km: float = 384_400.0, reflectivity: float 
     lam = 299_792_458.0 / (f_ghz * 1e9)
     sigma = reflectivity * math.pi * 1_737_400.0 ** 2
     return 10 * math.log10((4 * math.pi) ** 3 * (d_km * 1e3) ** 4 / (sigma * lam ** 2))
+
+
+
+# ---------------------------------------------------------------- radio astronomy / EME station checks
+# Luis CT1DMK, "EME and Radio Astronomy"; Sergei RW3BP, "EME antenna and Jupiter noise on 77 GHz" (EME 2014)
+JY = 1e-26                         # W m^-2 Hz^-1
+
+# total flux at 1.4 GHz (Jy), from Luis CT1DMK's table; a single-polarisation receiver sees half of it
+RADIO_SOURCES_1G4 = {
+    "Cassiopeia A (3C461)": 2480, "Cygnus A (3C405)": 1495, "M17 (W38)": 1060, "Taurus A (3C144)": 875,
+    "W51 (3C400)": 710, "Orion A (3C145)": 520, "Virgo A (M87)": 198, "3C273": 46,
+}
+
+
+def dicke_tmin(t_sys: float, bandwidth_hz: float, tau_s: float) -> float:
+    """Smallest detectable temperature change of a total-power radiometer: T_sys / sqrt(B·τ) (Dicke)."""
+    return t_sys / math.sqrt(bandwidth_hz * tau_s)
+
+
+def g_over_t_from_source(y_db: float, flux_jy: float, f_ghz: float, single_pol: bool = True) -> float:
+    """G/T (dB/K) from the Y factor measured on a radio source of known total flux.
+    ΔT = S·Ae/(2k) for a single-polarisation receiver (it gets half of the unpolarised flux), Ae = Gλ²/4π
+    → G/T = 8πk(Y−1)/(λ²S). Luis CT1DMK writes G/T = 4πk(Y−1)/(λ²S) with S already halved."""
+    lam = 299_792_458.0 / (f_ghz * 1e9)
+    y = 10 ** (y_db / 10)
+    s = flux_jy * JY * (0.5 if single_pol else 1.0)
+    return 10 * math.log10(4 * math.pi * K_B * (y - 1) / (lam ** 2 * s))
+
+
+def main_beam_efficiency_from_sun(y_sun_db: float, t_rx: float, t_atm: float, l_atm: float, t_sun: float) -> float:
+    """Sergei RW3BP: ε_M = (T_atm + T_rx)(Y_sun − 1) / (T_sun·L_atm), the Sun filling the main beam.
+    His 77 GHz example: Y 6.3 dB, T_rx 1030 K, T_atm 70 K, L_atm 0.77, T_sun 7250 K → ε_M = 0.65."""
+    y = 10 ** (y_sun_db / 10)
+    return (t_atm + t_rx) * (y - 1) / (t_sun * l_atm)
+
+
+def sun_y_from_main_beam(eps_m: float, t_rx: float, t_atm: float, l_atm: float, t_sun: float) -> float:
+    """Inverse of main_beam_efficiency_from_sun: expected sun Y (dB)."""
+    return 10 * math.log10(1 + t_sun * l_atm * eps_m / (t_atm + t_rx))
+
+
+def small_source_y_db(y_ref_db: float, source_size: float, reference_size: float) -> float:
+    """Sergei RW3BP: a source much smaller than the beam, at the same brightness temperature as a reference
+    filling the beam, gives Y ≈ Y_ref·(θ_source/θ_ref)² (Jupiter 44" with a 400" beam vs new Moon 0.33 dB
+    → 0.004 dB). Valid for small Y (linear in dB)."""
+    return y_ref_db * (source_size / reference_size) ** 2

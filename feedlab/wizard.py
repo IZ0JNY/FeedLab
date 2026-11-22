@@ -130,7 +130,7 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                                  "OE2IGL: 77-80% (openEMS)"])
             add("pickett_potter", ["gradino + flare: ~80% (OE2IGL), consigliato anche oltre 76 GHz"])
             add("skobelev", ["tabella HFSS W1GHZ: 77-81%, lobi molto bassi"],
-                ["Pawlan WA6KBL (DUBUS): le quote di Skobelev in CST hanno dato risultati deludenti a 10 GHz — "
+                ["Jeff WA6KBL (DUBUS): le quote di Skobelev in CST hanno dato risultati deludenti a 10 GHz — "
                  "verifica full-wave (openEMS) prima di costruire"])
             add("w2imu", ["classico W1GHZ (B ≈ 2.35 f/D)"])
         if 0.65 <= fD_feed <= 0.85:

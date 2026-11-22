@@ -1,6 +1,6 @@
 # W5LUA — The Excitement & Challenges of 24 GHz EME (2012)
 
-Presentazione di Al Ward W5LUA del 17 agosto 2012, 46 slide. Serve come riferimento sulle stazioni EME a 24 GHz e per verificare le equazioni di rumore e di percorso di FeedLab sui programmi di VK3UM.
+Presentazione di Al W5LUA del 17 agosto 2012, 46 slide. Serve come riferimento sulle stazioni EME a 24 GHz e per verificare le equazioni di rumore e di percorso di FeedLab sui programmi di VK3UM.
 
 ## Dati di stazione
 - **Parabole e feed:**

@@ -1,6 +1,6 @@
 # FeedLab: base di conoscenza per progettare e simulare illuminatori 10–134 GHz
 
-Sintesi ragionata del *W1GHZ Online Microwave Antenna Book* (Paul Wade W1GHZ, w1ghz.org/antbook) e dei suoi articoli di conferenza. Comprende anche i sorgenti di FEEDPATT, PHASEPAT e HDL_ANT e il foglio `Cassegrain_design.xls`.
+Sintesi ragionata del *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ, w1ghz.org/antbook) e dei suoi articoli di conferenza. Comprende anche i sorgenti di FEEDPATT, PHASEPAT e HDL_ANT e il foglio `Cassegrain_design.xls`.
 
 Le note di lettura dettagliate, capitolo per capitolo, sono in `notes_part1.md` (libro) e `notes_part2.md` (articoli).
 
@@ -305,9 +305,27 @@ Rear feed (Penny, Clavin 1954, pillbox, DK2RV: dal 30 al 45%), dish con disco pi
 - **Horn conico:** D_c = 10·log[(πd/λ)²] − L(s), con L(s) = 0.8 − 1.71s + 26.25s² − 17.79s³ e s = d²/(8λl). All'ottimo s = 3/8 la perdita è 2.91 dB (HDL_ANT/Jasik usa 2.82 dB).
 - **Relazioni di base:** VSWR ↔ S11, perdita di disadattamento, PLF (lineare↔circolare −3.01 dB, cos²ψ tra lineari), Friis.
 
-## 12. Pawlan WA6KBL (DUBUS): Pickett-Potter con ingresso diretto in guida
+## 12. Jeff WA6KBL (DUBUS): Pickett-Potter con ingresso diretto in guida
 - **Gradino del Pickett-Potter:** deve generare il TM11 a circa il 15% del modo dominante, e flare e diametro di bocca vanno scelti in modo che TE11 e TM11 arrivino in fase all'apertura. FeedLab calcola |TM11|²/|TE11|² all'apertura (`explore.tm11_power_ratio`): il Pickett-Potter OE2IGL dà 12.8% a 24 GHz.
 - **Progetto:** feed per offset con f/D 0.6 (valido anche per 0.7) e 0.8, con −10…−12 dB al bordo. Lobi laterali sotto −40 dB misurati in camera anecoica (CTU Praga).
-- **Skobelev:** in CST le quote di Skobelev hanno dato a Pawlan risultati deludenti a 10 GHz. FeedLab lo segnala nella procedura guidata.
+- **Skobelev:** in CST le quote di Skobelev hanno dato a Jeff WA6KBL risultati deludenti a 10 GHz. FeedLab lo segnala nella procedura guidata.
 - **Montaggio:** a 24 GHz la transizione è troppo sottile per tenere le viti della flangia WR-42, quindi serve un distanziale con la stessa sezione interna. FeedLab ingrossa il corpo della piastra con una tasca lato feed.
+
+## 13. EME: Sergei RW3BP (77 GHz), Luis CT1DMK (radioastronomia), Luis CT1DMK e Willi LX1DB (feed CP)
+- **Sergei RW3BP, *EME antenna and Jupiter noise on 77 GHz* (EME 2014):**
+  - parabola offset 2.4 m, focale 1380 mm, alluminio 2.5 mm; HPBW 0.11°, 62.5 dBi; feed Skobelev DMH (RA3AQ);
+  - superficie 0.31 mm rms → Ruze −685.8·(rms/λ)² = −4.3 dB (`reflector.ruze_loss_db`);
+  - **lente dielettrica di correzione** davanti al feed: h = d·(cos φ + 1)/(√ε − 1) (`reflector.lens_thickness_mm`), tre strati di PTFE da 1 mm, +0.4 dB;
+  - **efficienza del fascio principale dal rumore solare:** ε_M = (T_atm + T_rx)(Y − 1)/(T_sun·L_atm) = 0.65 (`noise.main_beam_efficiency_from_sun`); G = π²(D/λ)²·k·ε_M con k = 0.8 per il suo feed;
+  - **Giove** come sorgente puntiforme: Y ≈ Y_luna nuova·(44″/400″)² = 0.004 dB (`noise.small_source_y_db`): misurabile, ma ancora discutibile per tarare l'antenna.
+- **Luis CT1DMK, *EME and Radio Astronomy*:**
+  - risoluzione del radiometro ΔT_min = T_sys/√(Bτ) (`noise.dicke_tmin`);
+  - G/T da una radiosorgente di flusso noto (`noise.g_over_t_from_source`). FeedLab usa ΔT = S·Ae/(2k), perché un ricevitore a una polarizzazione riceve metà del flusso; CT1DMK scrive 4πk(Y−1)/(λ²S) con S già dimezzato;
+  - tabella dei flussi a 1.4 GHz (`noise.RADIO_SOURCES_1G4`).
+- **Luis CT1DMK e Willi LX1DB, feed a polarizzazione circolare per 5.7/10 GHz:**
+  - struttura: lanciatore ortogonale/OMT + polarizzatore a sezione stretta a 45° (senza tarature) + feed;
+  - misure: RL TX −32 dB, RL RX −24 dB, circolarità < 1.5 dB, isolamento 23 dB;
+  - in EME a 10 GHz la polarizzazione si conserva per 4–6 dB, e l'eco in CP ha banda audio circa metà;
+  - CP contro lineare: 2–3 dB sotto (la teoria dà 3 dB);
+  - FeedLab: isolamento cross-polare dal rapporto assiale (`balanis.xpd_from_axial_ratio_db`: 1.5 dB → 21 dB) e perdita tra antenne ellittiche (`balanis.plf_elliptical`).
 

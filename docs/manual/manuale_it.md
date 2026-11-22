@@ -16,7 +16,7 @@ FeedLab serve a **progettare, simulare e costruire illuminatori (feed) per parab
 - verifichi il progetto con **openEMS** (facoltativo) e lo correggi automaticamente.
 
 I calcoli si basano su:
-- il *W1GHZ Online Microwave Antenna Book* (Paul Wade, W1GHZ);
+- il *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ);
 - le design guide di OE2IGL;
 - i libri di Balanis e Kildal;
 - i lavori di W5LUA, WA6KBL e IZ0JNY.
@@ -94,7 +94,7 @@ Qui si "gioca" con le quote.
 | RX | ΔSNR = Δ(G/T) |
 | EME | ΔSNR = ΔG + Δ(G/T) |
 
-**Consigli:** suggerimenti in chiaro, per esempio "taper troppo basso: aumenta l'apertura", "TM11 fuori dal 15% di Pawlan" e così via.
+**Consigli:** suggerimenti in chiaro, per esempio "taper troppo basso: aumenta l'apertura", "TM11 fuori dal 15% di Jeff WA6KBL" e così via.
 
 **Sensibilità:** quanto conta ogni quota (curva su ±span).
 
@@ -190,10 +190,10 @@ openEMS è un simulatore FDTD gratuito. Una simulazione dura da minuti a ore e g
 Premi **🐞 Segnala un problema** nella barra laterale: si apre GitHub con versione, sistema e progetto già scritti. Descrivi cosa è successo, cosa ti aspettavi e come riprodurlo.
 
 ## 15. Fonti principali
-- **Paul Wade, W1GHZ:** W1GHZ Online Microwave Antenna Book.
-- **Gerald Ihninger, OE2IGL:** design guide; **HB9PZK**.
+- **Paul W1GHZ:** W1GHZ Online Microwave Antenna Book.
+- **Gerald OE2IGL:** design guide; **HB9PZK**.
 - **Libri:** C. A. Balanis, *Antenna Theory*; P.-S. Kildal, *Foundations of Antenna Engineering*.
-- **Articoli:** Al Ward, W5LUA, *24 GHz EME*; Jeffrey Pawlan, WA6KBL, dual-mode feedhorn (DUBUS); Ivan De Cesaris, IZ0JNY, feed W2IMU 24 GHz.
+- **Articoli:** Al W5LUA, *24 GHz EME*; Jeff WA6KBL, dual-mode feedhorn (DUBUS); Ivan IZ0JNY, feed W2IMU 24 GHz.
 - **Flange:** Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C.
 - **Software:** openEMS (T. Liebig); CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy.
 

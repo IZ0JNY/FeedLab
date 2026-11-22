@@ -120,3 +120,24 @@ def reflector_aperture_efficiency_cos2(theta0_deg: float) -> float:
     """Closed form for n = 2: ε_ap = 24 {sin²(θ0/2) + ln[cos(θ0/2)]}² cot²(θ0/2)."""
     h = math.radians(theta0_deg) / 2
     return 24 * (math.sin(h) ** 2 + math.log(math.cos(h))) ** 2 / math.tan(h) ** 2
+
+
+
+# ---------------------------------------------------------------- circular polarisation (axial ratio)
+def xpd_from_axial_ratio_db(ar_db: float) -> float:
+    """Cross-polar discrimination of a CP antenna with axial ratio AR: 20·log10((AR+1)/(AR−1)).
+    Luis CT1DMK / Willi LX1DB CP feed for 5.7/10 GHz: AR < 1.5 dB → XPD > 21 dB (23 dB port isolation)."""
+    ar = 10 ** (abs(ar_db) / 20)
+    return float("inf") if ar == 1 else 20 * math.log10((ar + 1) / (ar - 1))
+
+
+def plf_elliptical(ar1_db: float, ar2_db: float, tilt_deg: float = 0.0, same_sense: bool = True) -> float:
+    """Polarisation loss factor between two elliptically polarised antennas (axial ratios in dB, angle
+    between major axes): PLF = ½ + [±4·r1·r2 + (1−r1²)(1−r2²)·cos 2Δτ] / [2(1+r1²)(1+r2²)], r = 1/AR
+    (+ same sense of rotation). Linear (AR → ∞) ↔ circular (AR = 0 dB) gives ½ = −3 dB."""
+    def r(ar_db):
+        return 0.0 if ar_db >= 99 else 1.0 / (10 ** (ar_db / 20))
+    r1, r2 = r(ar1_db), r(ar2_db)
+    sign = 1 if same_sense else -1
+    num = sign * 4 * r1 * r2 + (1 - r1 ** 2) * (1 - r2 ** 2) * math.cos(2 * math.radians(tilt_deg))
+    return 0.5 + num / (2 * (1 + r1 ** 2) * (1 + r2 ** 2))

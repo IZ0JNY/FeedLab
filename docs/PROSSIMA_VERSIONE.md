@@ -1,8 +1,20 @@
-# Modifiche per la prossima versione (0.4.7)
+# Modifiche per la prossima versione (0.4.8)
+
+**Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Manuale per ogni lingua dell'installazione, con screenshot in quella lingua (spostato dalla 0.4.7) | da fare |
+| 2 | Nuove lingue: **russo** e **portoghese** (interfaccia, installer, manuali) | da fare |
+
+---
+
+# Archivio: versione 0.4.7 (pubblicata)
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Un manuale per ogni lingua dell'installazione (IT, EN, DE, FR, ES), con gli screenshot dell'app in quella lingua | da fare |
+| 3 | Riferimenti Sergei RW3BP (77 GHz), Luis CT1DMK (radioastronomia), Luis CT1DMK e Willi LX1DB (feed CP) nei calcoli e in bibliografia; nominativi nei riferimenti | ✅ fatto su `main` |
 | 2 | Scelta delle viti piastrina → feed: M3/M4 a 10 GHz, M2.5/M3/M2 sopra; lunghezza = 2 × spessore piastrina arrotondata alla misura commerciale; equivalenti UNC | ✅ fatto su `main` |
 
 ## 2. Viti piastrina → feed
@@ -53,7 +65,7 @@ Raccolta delle richieste. Si sviluppano sul ramo `v0.4.3`. Quando ce ne sono **5
 | 3 | Validazione openEMS in the loop (space mapping) | ✅ fatto (ramo `v0.4.3`), da provare con openEMS vero |
 | 4 | Fori, filettature, lamature e spine piastra–feed (metrico/pollici) | ✅ fatto |
 | 5 | Pulsante per segnalare problemi su GitHub | ✅ fatto |
-| + | Riferimento Pawlan WA6KBL (controllo TM11) | ✅ fatto |
+| + | Riferimento Jeff WA6KBL (controllo TM11) | ✅ fatto |
 
 **Pubblicata come 0.4.3.**
 

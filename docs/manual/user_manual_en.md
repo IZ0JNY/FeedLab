@@ -18,7 +18,7 @@ FeedLab helps you **design, simulate and build dish feeds** from **10 to 134 GHz
 - check the design with **openEMS** (optional) and correct it automatically.
 
 The calculations are based on:
-- the *W1GHZ Online Microwave Antenna Book* (Paul Wade, W1GHZ);
+- the *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ);
 - the OE2IGL design guides;
 - the books by Balanis and Kildal;
 - work by W5LUA, WA6KBL and IZ0JNY.
@@ -96,7 +96,7 @@ This is where you "play" with the dimensions.
 | RX | ΔSNR = Δ(G/T) |
 | EME | ΔSNR = ΔG + Δ(G/T) |
 
-**Advice:** plain-language hints, for example "taper too low: enlarge the aperture", "TM11 outside Pawlan's 15%" and so on.
+**Advice:** plain-language hints, for example "taper too low: enlarge the aperture", "TM11 outside Jeff WA6KBL's 15%" and so on.
 
 **Sensitivity:** how much each dimension matters (curve over ±span).
 
@@ -192,10 +192,10 @@ openEMS is a free FDTD solver. A run takes from minutes to hours and works in th
 Press **🐞 Report a problem** in the sidebar: GitHub opens with version, system and design pre-filled. Describe what happened, what you expected and how to reproduce it.
 
 ## 15. Main sources
-- **Paul Wade, W1GHZ:** W1GHZ Online Microwave Antenna Book.
-- **Gerald Ihninger, OE2IGL:** design guides; **HB9PZK**.
+- **Paul W1GHZ:** W1GHZ Online Microwave Antenna Book.
+- **Gerald OE2IGL:** design guides; **HB9PZK**.
 - **Books:** C. A. Balanis, *Antenna Theory*; P.-S. Kildal, *Foundations of Antenna Engineering*.
-- **Articles:** Al Ward, W5LUA, *24 GHz EME*; Jeffrey Pawlan, WA6KBL, dual-mode feedhorns (DUBUS); Ivan De Cesaris, IZ0JNY, 24 GHz W2IMU feed.
+- **Articles:** Al W5LUA, *24 GHz EME*; Jeff WA6KBL, dual-mode feedhorns (DUBUS); Ivan IZ0JNY, 24 GHz W2IMU feed.
 - **Flanges:** Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C.
 - **Software:** openEMS (T. Liebig); CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy.
 

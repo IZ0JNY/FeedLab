@@ -5,8 +5,8 @@
 Software per **progettare e simulare illuminatori (feed) per parabole a microonde, da 10 a 134 GHz**.
 
 Le basi di conoscenza sono:
-- il *W1GHZ Online Microwave Antenna Book* e gli articoli di Paul Wade, W1GHZ;
-- le design guide e le simulazioni openEMS/GRASP di Gerald Ihninger, OE2IGL;
+- il *W1GHZ Online Microwave Antenna Book* e gli articoli di Paul W1GHZ;
+- le design guide e le simulazioni openEMS/GRASP di Gerald OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
 > Stato: **v0.4.3**. Programma per Windows (installer e interfaccia in italiano, English, Deutsch, Français, Español), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
@@ -122,10 +122,12 @@ rusk2ua/offset-microwave-dish-comparisons (formule e test incrociati), Abraxas3d
 Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programma, la scheda **ℹ️ Credits** riporta la versione e tutte le fonti.
 
 ## Crediti e licenze delle fonti
-- Algoritmi e dati da P. Wade W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
-- Design guide di G. Ihninger OE2IGL (wettersat.bplaced.net).
+- Algoritmi e dati da Paul W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
+- Design guide di Gerald OE2IGL (wettersat.bplaced.net).
 - C. A. Balanis, *Antenna Theory: Analysis and Design*, Wiley (4ª ed. 2016): formule chiuse di horn e riflettori usate come verifica (`feedlab.balanis`).
 - Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C: foratura delle flange standard (`feedlab.flanges`).
-- I. De Cesaris IZ0JNY, feed W2IMU a 24 GHz (https://www.iz0jny.it/24ghz-feedhorn-w2imu/): schema di accoppiamento piastra WR-42 / feed, riprodotto in `tests/test_flanges.py`.
-- J. Pawlan WA6KBL, *Easy to Manufacture and Extremely High Performance Dual Mode Feedhorns with Direct Waveguide Input For the 10GHz and 24GHz Bands*, DUBUS: criterio TM11 ≈ 15% per il Pickett-Potter (controllo in Simulazione e nei consigli del Laboratorio), avvertenza sulle quote Skobelev.
+- Ivan IZ0JNY, feed W2IMU a 24 GHz (https://www.iz0jny.it/24ghz-feedhorn-w2imu/): schema di accoppiamento piastra WR-42 / feed, riprodotto in `tests/test_flanges.py`.
+- Jeff WA6KBL, *Easy to Manufacture and Extremely High Performance Dual Mode Feedhorns with Direct Waveguide Input For the 10GHz and 24GHz Bands*, DUBUS: criterio TM11 ≈ 15% per il Pickett-Potter (controllo in Simulazione e nei consigli del Laboratorio), avvertenza sulle quote Skobelev.
+- Sergei RW3BP, *EME antenna and Jupiter noise on 77 GHz* (EME 2014); Luis CT1DMK, *EME and Radio Astronomy*; Luis CT1DMK e Willi LX1DB, *Circular Polarized antenna feed* (5.7/10 GHz): verifiche in `tests/test_eme_refs.py`.
+- Paul W1GHZ, AD6FP e AA6IW (feed dual-band 10/24 GHz); Paul W1GHZ e OK1DFC (septum); S57UUU (polarizzatore 10 GHz); DL4MUP (septum); G0IVA (feed 47 GHz); la rivista **DUBUS** (articoli di Jeff WA6KBL e della comunità EME).
 - Il codice qui è una reimplementazione indipendente: non contiene codice né file di dati originali. I pattern `.dat` di W1GHZ si scaricano a parte (`feedpatt.zip`) e si leggono con `patterns.load_w1ghz_dat`.

@@ -70,7 +70,15 @@ def ruze(rms: float, lam: float) -> float:
 
 
 def ruze_loss_db(rms: float, lam: float) -> float:
+    """Ruze in dB: −685.8·(rms/λ)². Sergei RW3BP: 0.31 mm rms at 77 GHz (λ 3.9 mm) → −4.3 dB."""
     return -685.8 * (rms / lam) ** 2
+
+
+def lens_thickness_mm(deviation_mm: float, phi_deg: float, eps_r: float) -> float:
+    """Dielectric correcting lens in front of the feed (Sergei RW3BP, 77 GHz): a surface deviation d along
+    the axis changes the path by d·(cos φ + 1); a dielectric slab of thickness h adds h·(√ε − 1), so
+    h = d·(cos φ + 1)/(√ε − 1). φ: angle of the ray from the focus. PTFE: ε ≈ 2.1."""
+    return deviation_mm * (math.cos(math.radians(phi_deg)) + 1) / (math.sqrt(eps_r) - 1)
 
 
 def blocking_efficiency(d_block: float, D: float, eta_illum: float = 1.0) -> float:

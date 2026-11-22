@@ -1,4 +1,4 @@
-# Appunti OE2IGL (Gerald Ihninger, wettersat.bplaced.net) — simulazioni openEMS/GRASP, design guide, formule
+# Appunti OE2IGL (Gerald OE2IGL, wettersat.bplaced.net) — simulazioni openEMS/GRASP, design guide, formule
 
 ## Flusso di lavoro gratuito (Dorsten 2025)
 - Feed: openEMS (FDTD, Octave/Python), mesh λ/60, ottone come materiale (AddMaterial+conducibilità, non AddMetal, per vedere il ripple). Free CST (max 100k celle: troppo poco; servono 10–500 M celle).

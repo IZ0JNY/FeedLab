@@ -151,7 +151,7 @@ def performance(kind: str, f_ghz: float, sc: Scenario, geo, pat: patterns.Patter
 
 
 STEP_HORNS = ("pickett_potter", "skobelev")
-TM11_TARGET = (0.08, 0.22)        # Pawlan WA6KBL (DUBUS): TM11 at the step ≈ 15 % of the dominant mode
+TM11_TARGET = (0.08, 0.22)        # Jeff WA6KBL (DUBUS): TM11 at the step ≈ 15 % of the dominant mode
 
 
 def tm11_power_ratio(modes: dict) -> float | None:
@@ -248,7 +248,7 @@ def advice(r: Result, base: Result | None, sc: Scenario, objective: str, kind: s
                     "TM11/TE11 (angolo di flare / gradino); un pattern simmetrico migliora anche la CP.")
     q = tm11_power_ratio(r.modes)
     if kind in STEP_HORNS and q is not None and not (TM11_TARGET[0] <= q <= TM11_TARGET[1]):
-        tips.append(f"TM11 all'apertura {100 * q:.0f}% del TE11 in potenza: Pawlan WA6KBL indica ~15% per un "
+        tips.append(f"TM11 all'apertura {100 * q:.0f}% del TE11 in potenza: Jeff WA6KBL indica ~15% per un "
                     f"Pickett-Potter. {'Aumenta' if q < TM11_TARGET[0] else 'Riduci'} il gradino (Ø dopo il gradino) "
                     "e poi riallinea la lunghezza del flare perché i due modi arrivino in fase alla bocca.")
     if r.s11_db is not None and r.s11_db > -18:
