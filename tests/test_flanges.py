@@ -79,8 +79,8 @@ def test_feed_flange_drilled_in_step_and_pdf(tmp_path):
     sol = cad.solid(g1)
     assert len(sol.faces().vals()) > faces0                                  # hole walls
     pdf = drawing.drawing_pdf(g1, tmp_path / "f.pdf")
-    from pypdf import PdfReader
-    assert len(PdfReader(str(pdf)).pages) == 2
+    import re
+    assert len(re.findall(rb"/Type\s*/Page[^s]", pdf.read_bytes())) == 2       # two sheets
 
 
 def test_issue_url():
