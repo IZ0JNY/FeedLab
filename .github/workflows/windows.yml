@@ -107,11 +107,17 @@ jobs:
           name: FeedLab-Windows-portable-${{ steps.ver.outputs.version }}
           path: dist/FeedLab-*-portable.zip
           retention-days: 30
-      - name: GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: GitHub release (every build of main, and tags v*)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         env:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
         run: |
-          gh release create $env:GITHUB_REF_NAME (Get-ChildItem dist\FeedLab-Setup-*.exe).FullName (Get-ChildItem dist\FeedLab-*-portable.zip).FullName `
-            --title "FeedLab $env:GITHUB_REF_NAME per Windows" --notes-file windows/RELEASE_NOTES.md
+          $tag = "v${{ steps.ver.outputs.version }}"
+          $files = @((Get-ChildItem dist\FeedLab-Setup-*.exe).FullName, (Get-ChildItem dist\FeedLab-*-portable.zip).FullName)
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag @files --clobber
+          } else {
+            gh release create $tag @files --target $env:GITHUB_SHA --latest --title "FeedLab $tag per Windows" --notes-file windows/RELEASE_NOTES.md
+          }
