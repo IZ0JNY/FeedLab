@@ -114,6 +114,9 @@ print(efficiency.best_fD(p))
 ## Altri riferimenti usati
 rusk2ua/offset-microwave-dish-comparisons (formule e test incrociati), Abraxas3d/122GHz (W2IMU e Cassegrain stampati 3D a 122 GHz), david-deboer/hera-cst (formato dei pattern CST/HFSS), IRNAS/SatelliteDishHeadHolder (portaLNB Ø40), diablowu/dish-fd-feed, vantalane/dual_band_LHCP_helical_feed (script openEMS).
 
+## Autore
+Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programma, la scheda **ℹ️ Credits** riporta la versione e tutte le fonti.
+
 ## Crediti e licenze delle fonti
 - Algoritmi e dati da P. Wade W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
 - Design guide di G. Ihninger OE2IGL (wettersat.bplaced.net).

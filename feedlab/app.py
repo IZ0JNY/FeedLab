@@ -13,6 +13,8 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as _st
 
+import feedlab
+
 from feedlab import i18n
 
 st = i18n.wrap(_st)
@@ -172,11 +174,12 @@ with st.sidebar:
         if st.button("⏻ Chiudi FeedLab", help="ferma il programma (le simulazioni openEMS in corso continuano)"):
             st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
             os._exit(0)
+    st.caption(f"Versione {feedlab.__version__} · © Ivan De Cesaris IZ0JNY")
     st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
                                          "vedi scheda Full-wave openEMS"))
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
-                "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR", "🖥️ Full-wave openEMS"])
+                "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR", "🖥️ Full-wave openEMS", "ℹ️ Credits"])
 
 # ---------------------------------------------------------------- 1 wizard
 with tabs[0]:
@@ -684,3 +687,9 @@ with tabs[7]:
             st.plotly_chart(fig, width="stretch")
         except ValueError as ex:
             st.error(str(ex))
+
+
+# ---------------------------------------------------------------- credits
+with tabs[9]:
+    from feedlab import credits as _credits
+    _credits.render(st)
