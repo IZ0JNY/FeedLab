@@ -81,6 +81,7 @@ non si avvia su Streamlit Community Cloud. Per usarlo da sorgente sul proprio PC
 - Guida circolare aperta 0.76λ: ~68% a f/D 0.35 (W1GHZ con NEC2: 67%, f/D 0.35–0.4).
 - W2IMU 1.31λ: ottimo a f/D ~0.56 (W1GHZ: 0.5–0.6).
 - Ruze a 122 e 241 GHz, correzione di Planck a 47 GHz (OE2IGL).
+- EME a 24 GHz (W5LUA 2012, calcolatori VK3UM): perdita di percorso EME 295.24 dB, rumore di Luna 2.23 dB e di Sole 12.8 dB, assorbimento atmosferico e rumore del cielo; feed W2IMU modificato di W5LUA con centro di fase ~2.5 mm dietro la faccia (`tests/test_w5lua.py`).
 
 ## Uso rapido
 ```bash

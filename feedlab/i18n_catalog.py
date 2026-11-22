@@ -1121,4 +1121,12 @@ ENTRIES = [
      "FeedLab es una reimplementación independiente: no contiene código ni archivos de datos originales de las fuentes citadas. Los resultados son estimaciones de diseño: verificarlos con simulación de onda completa y medidas antes de la producción."),
     ("Autore, versione e tutte le fonti", "Author, version and all sources", "Autor, Version und alle Quellen",
      "Auteur, version et toutes les sources", "Autor, versión y todas las fuentes"),
+    ("feed W2IMU modificato a 24 GHz, perdita di percorso EME, rumore di Sole e Luna, assorbimento atmosferico",
+     "modified 24 GHz W2IMU feed, EME path loss, sun and moon noise, atmospheric absorption",
+     "modifiziertes W2IMU-Speisesystem für 24 GHz, EME-Pfaddämpfung, Sonnen- und Mondrauschen, atmosphärische Absorption",
+     "source W2IMU modifiée à 24 GHz, affaiblissement de trajet EME, bruit solaire et lunaire, absorption atmosphérique",
+     "alimentador W2IMU modificado a 24 GHz, pérdida de trayecto EME, ruido solar y lunar, absorción atmosférica"),
+    ("temperatura della Luna in funzione della fase", "moon temperature versus lunar phase",
+     "Mondtemperatur in Abhängigkeit von der Mondphase", "température de la Lune selon la phase",
+     "temperatura de la Luna según la fase"),
 ]

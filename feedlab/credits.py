@@ -14,7 +14,7 @@ TECH_SOURCES = [
     ("Paul Wade, W1GHZ", "*The W1GHZ Online Microwave Antenna Book*, FEEDPATT/PHASEPAT, Microwave Update 2006–2024",
      "efficienza del riflettore, feed W2IMU, VE4MA, Chaparral, horn rettangolari, Cassegrain, misure di parabole offset",
      "https://www.w1ghz.org/antbook/contents.htm"),
-    ("Gerhard Ihninger, OE2IGL", "design guide (openEMS)",
+    ("Gerald Ihninger, OE2IGL", "design guide (openEMS)",
      "W2IMU, Pickett-Potter, corrugato assiale, piastrina λ/4 guida circolare→rettangolare (ottimizzazione HB9PZK)",
      "https://wettersat.bplaced.net/index.html"),
     ("Per-Simon Kildal", "*Foundations of Antenna Engineering*",
@@ -23,6 +23,9 @@ TECH_SOURCES = [
     ("Kumar / VE4MA, Wohlleben (Chaparral), G3RPE, Granet", "feed a choke, horn rettangolare per f/D, Cassegrain/Gregorian",
      "", ""),
     ("J. Ruze (1966), Hammerstad & Bekkadal", "perdita per errori di superficie, rugosità e perdite ohmiche", "", ""),
+    ("Al Ward, W5LUA", "*The Excitement & Challenges of 24 GHz EME* (2012), con i calcolatori VK3UM",
+     "feed W2IMU modificato a 24 GHz, perdita di percorso EME, rumore di Sole e Luna, assorbimento atmosferico", ""),
+    ("J. D. Kraus", "*Radio Astronomy* (1966)", "temperatura della Luna in funzione della fase", ""),
     ("Thorsten Liebig — openEMS", "FDTD, tutorial \"Conical Horn\"", "", "https://openems.de"),
 ]
 

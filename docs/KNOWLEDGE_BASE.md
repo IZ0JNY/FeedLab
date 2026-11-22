@@ -285,3 +285,14 @@ Rear feed (Penny, Clavin 1954, pillbox, DK2RV: dal 30 al 45%), dish con disco pi
 - **Offset (Stutzman/Milligan).** Si punta il feed per bilanciare i taper ai bordi: ψ_F = ψ_L + ΔFT·BW/(4.01(2ET−ΔFT)) + ψ_S. Si punta verso il punto più profondo, non verso il centro geometrico.
 - **Formule chiuse** (gaussiano, cos^2N, blocking di Baars, defocus di Milligan, T_sky con correzione di Planck, beam factor) in `feedlab.reflector` e `feedlab.noise`.
 - **Riferimento teorico libero e legale:** P.-S. Kildal, *Foundations of Antenna Engineering* (kildal.se, download gratuito).
+
+## 10. 24 GHz EME: W5LUA 2012 and VK3UM, dettagli in `notes/notes_part4_W5LUA_24GHz_EME.md`
+- **Feed W2IMU modificato di W5LUA** (2.4 m offset, f/D 0.7): FeedLab lo simula con S11 −34 dB e centro di fase 1–3 mm dietro la fine del cilindro (W5LUA: ~2.54 mm). L'efficienza è 64–72% con taper 17–21 dB: sottoilluminazione voluta per il G/T.
+- **Equazioni EME verificate sui valori VK3UM:**
+  - perdita di percorso EME (ρ 0.065), 295.24 dB a 24.048 GHz e 356 400 km;
+  - spazio libero, guadagno e area efficace;
+  - fattore di riempimento del fascio per Sole e Luna, x²/(1−e^(−x²));
+  - rumore di Luna (2.23 dB) e di Sole (12.8 dB);
+  - assorbimento obliquo A_zen/sin(el) e rumore del cielo con T_atm 280 K.
+  Funzioni in `feedlab.noise`, test in `tests/test_w5lua.py`.
+
