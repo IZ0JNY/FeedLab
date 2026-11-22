@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('Chiudere questa finestra per continuare (✕ in alto a destra).', 'Close this window to continue (✕ at the top right).'),
     ('FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde', 'FeedLab — Microwave Feed/Illuminator Design Lab'),
     ('Laboratorio di Progettazione di feed/illuminatori a microonde', 'Microwave Feed/Illuminator Design Lab'),
     ('basato su W1GHZ Antenna Book, design guide OE2IGL e letteratura', 'based on the W1GHZ Antenna Book, OE2IGL design guides and the literature'),

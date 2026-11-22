@@ -53,8 +53,9 @@ if _bst["beta"]:
             _c1.metric("Giorni rimasti", _bst["days_left"])
             _c2.metric("Scadenza", f"{_bst['expires']:%d/%m/%Y}")
             st.write("Alla scadenza il programma si disattiva: scarica la versione aggiornata da GitHub.")
-            if st.button("OK", type="primary"):
-                st.rerun()
+            st.markdown("<div style='text-align:center;font-weight:600;margin-top:0.8em'>"
+                        + i18n.tr("Chiudere questa finestra per continuare (✕ in alto a destra).") + "</div>",
+                        unsafe_allow_html=True)
 
         _beta_popup()
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"

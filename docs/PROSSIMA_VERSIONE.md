@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Pop-up BETA: il pulsante OK non funzionava; tolto, al suo posto il testo centrato "Chiudere questa finestra per continuare (✕ in alto a destra)"; si chiude con la ✕ | ✅ fatto (ramo `v0.4.9`) |
 
 ---
 

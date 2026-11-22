@@ -19,7 +19,7 @@ The calculations are based on the *W1GHZ Online Microwave Antenna Book* (Paul W1
 
 ## 2. BETA TEST version
 This is a **test version**: it is valid for **30 days from the first installation**, then it deactivates.
-- At every start a **popup** shows the expiry date and the days left: close it with **OK**.
+- At every start a **popup** shows the expiry date and the days left: close it with the **✕** at the top right.
 - After expiry FeedLab only shows the notice and a link to the GitHub **Releases** page: download and install the latest version.
 - Each new version gets its own 30 days. If the PC clock is moved back, the version counts as expired.
 
