@@ -8,7 +8,7 @@ from . import __version__, dishes
 
 AUTHOR = "Ivan De Cesaris, IZ0JNY"
 EMAIL = "ivan@iz0jny.it"
-REPO = "https://github.com/IZ0JNY/mwfeeddesign"
+REPO = "https://github.com/IZ0JNY/FeedLab"
 
 TECH_SOURCES = [
     ("Paul Wade, W1GHZ", "*The W1GHZ Online Microwave Antenna Book*, FEEDPATT/PHASEPAT, Microwave Update 2006–2024",

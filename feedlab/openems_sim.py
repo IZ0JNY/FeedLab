@@ -173,7 +173,7 @@ def load_results(path: str | Path) -> dict:
 # The generated script. Only @@CONFIG@@ / @@NAME@@ are substituted; everything else is plain Python
 # that needs numpy + the openEMS/CSXCAD bindings (and h5py, which they use for the NF2FF).
 _TEMPLATE = r'''# -*- coding: utf-8 -*-
-"""FeedLab (mwFeedDesign) - openEMS full-wave "deep analysis" of a dish feed. Auto-generated.
+"""FeedLab - openEMS full-wave "deep analysis" of a dish feed. Auto-generated.
 
 Run:      python -u @@NAME@@            (openEMS >= 0.0.36 with its Python bindings)
 Preview:  python @@NAME@@ --preview     (opens the model in AppCSXCAD, no simulation)

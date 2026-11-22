@@ -1,6 +1,6 @@
 # FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde
 
-*(repository: mwFeedDesign)*
+*(repository: [IZ0JNY/FeedLab](https://github.com/IZ0JNY/FeedLab))*
 
 Software per **progettare e simulare illuminatori (feed) per parabole a microonde, da 10 a 134 GHz**.
 
@@ -25,7 +25,7 @@ Le basi di conoscenza sono:
 
 ## FeedLab per Windows
 
-Scarica **`FeedLab-Setup-<versione>.exe`** dalla pagina [Releases](https://github.com/IZ0JNY/mwFeedDesign/releases) e avvialo: si installa per l'utente corrente, senza diritti di amministratore, con icona nel menu Start (e sul desktop, se vuoi). C'è anche lo zip *portable*: estrai e avvia `FeedLab.bat`.
+Scarica **`FeedLab-Setup-<versione>.exe`** dalla pagina [Releases](https://github.com/IZ0JNY/FeedLab/releases) e avvialo: si installa per l'utente corrente, senza diritti di amministratore, con icona nel menu Start (e sul desktop, se vuoi). C'è anche lo zip *portable*: estrai e avvia `FeedLab.bat`.
 
 - **Multilingua**: italiano, English, Deutsch, Français, Español, sia nell'installer sia nell'app (selettore nella barra laterale; la lingua scelta nell'installazione è quella iniziale). Disegni PDF e report seguono la lingua scelta.
 - Tutte le schede di FeedLab in una **finestra propria** (Microsoft Edge WebView2); funziona senza internet. Se WebView2 manca, si apre nel browser.

@@ -185,6 +185,11 @@ with st.sidebar:
     st.caption(f"Versione {feedlab.__version__} · © Ivan De Cesaris IZ0JNY")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
+    _man = Path(feedlab.__file__).resolve().parent.parent / "docs" / "manual" / (
+        "FeedLab_Manuale_IT.pdf" if i18n.get_lang() == "it" else "FeedLab_User_Manual_EN.pdf")
+    if _man.exists():
+        st.download_button("📖 Manuale", _man.read_bytes(), file_name=_man.name, mime="application/pdf",
+                           help="manuale d'uso in PDF (italiano o inglese secondo la lingua scelta)")
     st.link_button("🐞 Segnala un problema", _credits_mod.issue_url(S.get("feed_kind", ""), S.get("f_ghz")),
                    help="apre la pagina GitHub delle segnalazioni (issue) con versione e progetto già compilati")
     st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else

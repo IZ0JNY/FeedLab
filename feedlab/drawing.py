@@ -35,7 +35,7 @@ def _title_block(fig, geo, title, material, sheet):
     rows = [("Titolo", title), ("Frequenza", f"{geo.f_ghz:g} GHz  (λ = {geo.lam:.3f} mm)"),
             ("Materiale", material), ("Tolleranze generali", f"±{tolerance_mm(geo.f_ghz)} mm  (Ø interni: precisione λ/100)"),
             ("Quote", "mm  —  z = 0 faccia flangia d'ingresso"),
-            ("Data / Foglio", f"{_dt.date.today().isoformat()}  —  {sheet}"), ("Generato da", "FeedLab / mwFeedDesign")]
+            ("Data / Foglio", f"{_dt.date.today().isoformat()}  —  {sheet}"), ("Generato da", "FeedLab")]
     for i, (k, v) in enumerate(rows):
         y = 1 - (i + 1) / len(rows)
         ax.plot([0, 1], [y, y], lw=0.4, color="k")

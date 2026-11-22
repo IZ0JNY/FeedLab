@@ -561,7 +561,7 @@ Spostamento nella banda: {f(a['pc_spread_mm'])} mm.</p>
 <tr><th class=k>HPBW parabola (E / H)</th><td>{f(d0['hpbw_E_deg'], 3)}° / {f(d0['hpbw_H_deg'], 3)}°</td>
 <th class=k>Primo lobo laterale</th><td>{f(d0['sidelobe_db'], 1)} dB</td></tr>
 <tr><th class=k>T sistema</th><td>{f(d0['t_sys'], 1)} K</td><th class=k>G/T</th><td>{f(d0['g_over_t_db'])} dB/K</td></tr></table>
-<p style="color:#777;font-size:12px">Generato da FeedLab (mwFeedDesign). Simulazione FDTD openEMS; efficienza con il metodo
+<p style="color:#777;font-size:12px">Generato da FeedLab. Simulazione FDTD openEMS; efficienza con il metodo
 Kildal/W1GHZ sui tagli E/H (ipotesi BOR1).</p></body></html>"""
     from . import i18n
     html = i18n.tr(html).replace('<html lang="it">', f'<html lang="{i18n.get_lang()}">')

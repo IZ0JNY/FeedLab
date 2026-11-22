@@ -68,7 +68,7 @@ Set-Content -Encoding utf8 "$build\LEGGIMI.txt" @"
 FeedLab $Version - Laboratorio di Progettazione di feed/illuminatori a microonde
 Avvio: doppio clic su FeedLab.bat (finestra propria) oppure "FeedLab (browser).bat".
 openEMS (opzionale, per la deep analysis full-wave): scheda "Full-wave openEMS" > Installazione.
-Progetto: https://github.com/IZ0JNY/mwFeedDesign
+Progetto: https://github.com/IZ0JNY/FeedLab
 "@
 
 # 5. precompile and self-test with the embedded interpreter

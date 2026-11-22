@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT).startswith("/mount/src/"):            # Streamlit Community Cloud checkout
     import streamlit as st
     st.error("FeedLab non è disponibile come app web: scarica il programma per Windows da "
-             "https://github.com/IZ0JNY/mwFeedDesign/releases")
+             "https://github.com/IZ0JNY/FeedLab/releases")
     st.stop()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
