@@ -114,7 +114,57 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
         from . import i18n
         i18n.translate_figure_mpl(fig)
         pdf.savefig(fig); plt.close(fig)
+        mnt = getattr(geo, "mount", None)
+        if mnt is not None:
+            fig = _flange_sheet(geo, mnt, title, material)
+            i18n.translate_figure_mpl(fig)
+            pdf.savefig(fig); plt.close(fig)
     return path
+
+
+def _flange_sheet(geo, mnt, title, material):
+    """Sheet 2: front view of the drilled input flange and the hole table."""
+    from matplotlib.patches import Circle
+    fig = plt.figure(figsize=(11.69, 8.27))
+    ax = fig.add_axes([0.05, 0.25, 0.5, 0.68]); ax.set_aspect("equal"); ax.set_axis_off()
+    R = geo.params["flange_diam"] / 2
+    ax.add_patch(Circle((0, 0), R, fill=False, lw=1.2))
+    ax.add_patch(Circle((0, 0), geo.r_input, fill=False, lw=1.0))
+    ax.plot([-R * 1.1, R * 1.1], [0, 0], lw=0.4, ls="-.", color="0.4")
+    ax.plot([0, 0], [-R * 1.1, R * 1.1], lw=0.4, ls="-.", color="0.4")
+    for i, h in enumerate(mnt.feed_holes, 1):
+        ax.add_patch(Circle((h.x, h.y), h.dia / 2, fill=False, lw=0.9, ec="k" if h.kind == "tap" else "g"))  # dowel/pin in green
+        if h.kind == "tap":                      # thread: 3/4 circle at the major diameter (drawing convention)
+            from matplotlib.patches import Arc
+            ax.add_patch(Arc((h.x, h.y), SCREW_MAJOR(mnt.screw), SCREW_MAJOR(mnt.screw), theta1=0, theta2=270, lw=0.6))
+        ax.text(h.x + h.dia * 0.8, h.y + h.dia * 0.8, str(i), fontsize=7, color="b")
+    ax.set_xlim(-R * 1.25, R * 1.25); ax.set_ylim(-R * 1.25, R * 1.25)
+    ax.set_title(f"Flangia d'ingresso: vista dalla faccia z = 0 (Ø{2 * R:.2f}, spessore "
+                 f"{geo.params['flange_thickness']:.2f} mm)\nlato largo della guida {mnt.flange.wg} lungo x "
+                 f"(polarizzazione {'verticale' if mnt.polarization == 'V' else 'orizzontale'})", fontsize=9)
+    ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()
+    lines = [f"FORATURA per flangia {mnt.flange.wg} {mnt.flange.name}",
+             f"Viti piastra → feed: {mnt.plate_screw} (testa nella lamatura della piastra)",
+             f"Le viti della guida ({mnt.screw}) si avvitano nella piastra.", "",
+             f"{'#':>2s} {'x':>8s} {'y':>8s}  lavorazione"]
+    for i, h in enumerate(mnt.feed_holes, 1):
+        depth = ""
+        lines.append(f"{i:>2d} {h.x:>8.2f} {h.y:>8.2f}  {h.callout}{depth}")
+    lines += ["", "Coordinate in mm dal centro della guida.",
+              "Fori filettati nella flangia; nel file STEP sono", "modellati al diametro di preforo.",
+              "Allineare piastrina e guida con le spine prima di serrare."]
+    import textwrap
+    for w in mnt.warnings:
+        lines += textwrap.wrap(f"ATTENZIONE: {w}", 70)
+    lines += ["", f"Fonte foratura: Flann, Waveguide and Flange Data; MIL-DTL-3922/67C"]
+    ax2.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7.5)
+    _title_block(fig, geo, title, material, "2/2")
+    return fig
+
+
+def SCREW_MAJOR(screw: str) -> float:
+    from .flanges import SCREWS
+    return SCREWS[screw][0]
 
 
 def _rect_views(fig, geo: RectHornGeometry):

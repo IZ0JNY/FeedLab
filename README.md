@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald Ihninger, OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.4**. Programma per Windows (installer e interfaccia in italiano, English, Deutsch, Français, Español), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4.3**. Programma per Windows (installer e interfaccia in italiano, English, Deutsch, Français, Español), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -50,13 +50,13 @@ Si apre nel browser (Windows, Linux, macOS). Schede:
 |---|---|
 | 🧭 Procedura guidata | Scegli la parabola dal **catalogo commerciale** (Gibertini, Triax, Fracarro, Kathrein, Channel Master/Skyware, Edmund, dish misurati da W1GHZ, con fonte di ogni dato) oppure una **parabola custom** (offset o prime focus; da f/D, focale, misure o angolo di illuminazione). Indica polarizzazione, obiettivo (guadagno o G/T) e mezzi di costruzione: FeedLab confronta i feed adatti e li ordina per efficienza stimata |
 | 📐 Progetto feed | Quote del feed modificabili, sezione assiale, regola di progetto usata |
-| 🎛️ Laboratorio | **Cursori sulle quote** con ricalcolo immediato e confronto col progetto di partenza: Δ S/N, efficienza, guadagno, G/T, T antenna, S11, taper, perdite ohmiche del materiale. Obiettivo **TX / RX / EME**, consigli ragionati, **analisi di sensibilità** per ogni quota, **ottimizzazione automatica** |
+| 🎛️ Laboratorio | **Cursori sulle quote** con ricalcolo immediato e confronto col progetto di partenza: Δ S/N, efficienza, guadagno, G/T, T antenna, S11, taper, perdite ohmiche del materiale. Obiettivo **TX / RX / EME**, consigli ragionati, **analisi di sensibilità** per ogni quota, **ottimizzazione automatica**. **Tolleranze di lavorazione**: Monte Carlo della resa, quote critiche con la tolleranza che serve a ciascuna (anche nel PDF), **ottimizzazione robusta** |
 | 📈 Simulazione & S11 | S11 in banda e contenuto modale (mode matching), lobo polare e cartesiano con fase, efficienza vs f/D scomposta, centro di fase, G/T |
 | 🌐 Lobo 3D | Diagramma di irradiazione 3D del feed |
 | 🧊 Modello 3D | Modello del feed con sezione |
 | 📄 Disegno & STEP | Disegno meccanico **PDF** (sezione quotata, tabella, cartiglio, tolleranze), **.stp** e **.stl** |
-| 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR, orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP |
-| 🖥️ Full-wave openEMS | **Opzionale**: installazione guidata di openEMS, simulazioni FDTD in background (singola, convergenza, sweep) e **deep analysis** dei risultati |
+| 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR, orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP. Opzione **fori di fissaggio** (viti metriche o in pollici): foratura della flangia standard (Flann/MIL) filettata nella piastra, 4 viti piastra→feed con testa in lamatura, spine di centraggio da 47 GHz; riportata in PDF e STEP di piastra e feed |
+| 🖥️ Full-wave openEMS | **Opzionale**: installazione guidata di openEMS, simulazioni FDTD in background (singola, convergenza, sweep) e **deep analysis** dei risultati. **⑤ Space mapping**: openEMS verifica pochi candidati e corregge il modello rapido, fino alla convergenza |
 
 Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del feed** (rame, rame argentato, dorato, ottone, alluminio, stampa 3D metallizzata…), con calcolo delle perdite e del rumore, e il **collare Ø40 mm** per i portaLNB commerciali.
 
@@ -109,6 +109,8 @@ print(efficiency.best_fD(p))
 5. **G/T completo per offset**, rete (Otoshi), atmosfera ITU-R P.676 fino a 134 GHz.
 6. **GUI** (Qt o web) con confronto di più feed e report PDF.
 
+Nella barra laterale: **ℹ️ Credits** (autore, versione, fonti) e **🐞 Segnala un problema**, che apre la pagina GitHub delle segnalazioni con versione e progetto già compilati.
+
 ## Documentazione
 - `docs/KNOWLEDGE_BASE.md`: sintesi strutturata di formule, regole e dati.
 - `docs/notes/`: appunti dettagliati per capitolo e articolo (W1GHZ, OE2IGL).
@@ -123,4 +125,7 @@ Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programm
 - Algoritmi e dati da P. Wade W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
 - Design guide di G. Ihninger OE2IGL (wettersat.bplaced.net).
 - C. A. Balanis, *Antenna Theory: Analysis and Design*, Wiley (4ª ed. 2016): formule chiuse di horn e riflettori usate come verifica (`feedlab.balanis`).
+- Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C: foratura delle flange standard (`feedlab.flanges`).
+- I. De Cesaris IZ0JNY, feed W2IMU a 24 GHz (https://www.iz0jny.it/24ghz-feedhorn-w2imu/): schema di accoppiamento piastra WR-42 / feed, riprodotto in `tests/test_flanges.py`.
+- J. Pawlan WA6KBL, *Easy to Manufacture and Extremely High Performance Dual Mode Feedhorns with Direct Waveguide Input For the 10GHz and 24GHz Bands*, DUBUS: criterio TM11 ≈ 15% per il Pickett-Potter (controllo in Simulazione e nei consigli del Laboratorio), avvertenza sulle quote Skobelev.
 - Il codice qui è una reimplementazione indipendente: non contiene codice né file di dati originali. I pattern `.dat` di W1GHZ si scaricano a parte (`feedpatt.zip`) e si leggono con `patterns.load_w1ghz_dat`.

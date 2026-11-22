@@ -149,6 +149,17 @@ def performance(kind: str, f_ghz: float, sc: Scenario, geo, pat: patterns.Patter
                   e.edge_taper_db, G, ta, gt, s11, pc * lam, ohm, pat, modes)
 
 
+STEP_HORNS = ("pickett_potter", "skobelev")
+TM11_TARGET = (0.08, 0.22)        # Pawlan WA6KBL (DUBUS): TM11 at the step ≈ 15 % of the dominant mode
+
+
+def tm11_power_ratio(modes: dict) -> float | None:
+    """|TM11|²/|TE11|² at the aperture (power-normalised modes from mode matching)."""
+    if not modes or "TE11" not in modes or abs(modes["TE11"]) == 0:
+        return None
+    return abs(modes.get("TM11", 0)) ** 2 / abs(modes["TE11"]) ** 2
+
+
 def metric(res: Result, objective: str) -> float:
     return {"tx": res.gain_dbi, "rx": res.g_over_t, "eme": res.gain_dbi + res.g_over_t}[objective]
 
@@ -234,6 +245,11 @@ def advice(r: Result, base: Result | None, sc: Scenario, objective: str, kind: s
     if r.pol < 0.985:
         tips.append(f"Cross-pol {100 * (1 - r.pol):.1f}% di potenza: piani E e H diversi. Nel W2IMU/Potter correggi il rapporto "
                     "TM11/TE11 (angolo di flare / gradino); un pattern simmetrico migliora anche la CP.")
+    q = tm11_power_ratio(r.modes)
+    if kind in STEP_HORNS and q is not None and not (TM11_TARGET[0] <= q <= TM11_TARGET[1]):
+        tips.append(f"TM11 all'apertura {100 * q:.0f}% del TE11 in potenza: Pawlan WA6KBL indica ~15% per un "
+                    f"Pickett-Potter. {'Aumenta' if q < TM11_TARGET[0] else 'Riduci'} il gradino (Ø dopo il gradino) "
+                    "e poi riallinea la lunghezza del flare perché i due modi arrivino in fase alla bocca.")
     if r.s11_db is not None and r.s11_db > -18:
         tips.append(f"S11 {r.s11_db:.1f} dB: adattamento scarso (in TX potenza riflessa {100 * 10 ** (r.s11_db / 10):.1f}%). "
                     "Addolcisci flare/gradini o allunga la transizione d'ingresso.")

@@ -103,10 +103,27 @@ def _wall_polygon(profile, t, flange_r=None, flange_t=None):
 
 
 COLLAR = {"diam": None, "length": 25.0, "z0": 3.0}    # set COLLAR["diam"] = 40 for standard LNB holders
+# bolted stack WR component | λ/4 plate | feed: set MOUNT["wg"] (e.g. "WR-28") to drill the feed flange
+MOUNT = {"wg": None, "system": "metric", "pol": "V"}
 
 
 def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=None, flange=True):
     lam = wavelength_mm(f)
+    mnt = None
+    if flange and MOUNT.get("wg"):
+        from .flanges import mount
+        mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f)
+        d_need, t_need = mnt.feed_flange_min()
+        # the thicker flange must sit on the straight input guide: lengthen it if needed (electrically benign)
+        r0 = profile[0][1]
+        z_first = profile[1][0] if abs(profile[1][1] - r0) < 1e-9 else 0.0
+        if t_need + 0.5 > z_first:
+            d = t_need + 0.5 - z_first
+            rest = profile[2:] if z_first > 0 else profile[1:]
+            profile = [(0.0, r0), (z_first + d, r0)] + [(z + d, r) for z, r in rest]
+            if "input_length" in params:
+                params = {**params, "input_length": params["input_length"] + d}
+            notes = list(notes or []) + [f"guida d'ingresso allungata di {d:.2f} mm per la flangia forata"]
     if COLLAR.get("diam"):
         rc = COLLAR["diam"] / 2
         r_wall = profile[0][1] + t
@@ -122,6 +139,11 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     polys = []
     fl_r = profile[0][1] + t + max(2.0, 0.4 * lam) if flange else None
     fl_t = max(1.5, 0.12 * lam) if flange else None
+    if mnt is not None:
+        fl_r = max(fl_r, d_need / 2)
+        fl_t = max(fl_t, t_need)
+        notes = list(notes or []) + [f"flangia forata per {mnt.flange.wg} {mnt.flange.name}: {mnt.screw}, "
+                                     f"{sum(h.kind == 'dowel' for h in mnt.feed_holes)} fori spina"] + mnt.warnings
     polys.append(_wall_polygon(profile, t, fl_r, fl_t))
     for p in extra_polys or []:
         polys.append(np.asarray(p))
@@ -130,8 +152,10 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         outer = max(outer, fl_r) if fl_r > outer else outer
     if fl_r:
         params = {**params, "flange_diam": 2 * fl_r, "flange_thickness": fl_t}
-    return FeedGeometry(kind, f, params, profile, polys, profile[-1][0], r_ap, profile[0][1],
-                        max(outer, max(np.max(p[:, 0]) for p in polys)), notes or [], design)
+    g = FeedGeometry(kind, f, params, profile, polys, profile[-1][0], r_ap, profile[0][1],
+                     max(outer, max(np.max(p[:, 0]) for p in polys)), notes or [], design)
+    g.mount = mnt
+    return g
 
 
 def _input_len(f, d_in):

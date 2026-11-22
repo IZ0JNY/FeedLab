@@ -117,7 +117,7 @@ jobs:
           $files = @((Get-ChildItem dist\FeedLab-Setup-*.exe).FullName, (Get-ChildItem dist\FeedLab-*-portable.zip).FullName)
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag @files --clobber
+            Write-Host "$tag already published: not overwritten (bump the version to publish changes)"
           } else {
             gh release create $tag @files --target $env:GITHUB_SHA --latest --title "FeedLab $tag per Windows" --notes-file windows/RELEASE_NOTES.md
           }

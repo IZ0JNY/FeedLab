@@ -32,6 +32,13 @@ class MatchingPlate:
     polarization: str      # "V" | "H"
     outer: float           # plate outer side (mm)
     basic: dict
+    mount: object = None   # flanges.Mount when the fixing holes are drilled
+    body_t: float = 0.0    # total plate thickness (> thickness when a pocket makes room for counterbores)
+
+    @property
+    def pocket_depth(self) -> float:
+        """Feed-side pocket of the circular guide diameter: extends the feed's circular guide."""
+        return max(self.body_t - self.thickness, 0.0)
 
     def rotation_deg(self) -> float:
         """Rotation of the WR broad wall from horizontal (0 = H-wall horizontal → vertical polarisation)."""
@@ -44,7 +51,9 @@ def _zte(k, kc):
 
 
 def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str = "V",
-                 corner_r_mm: float | None = None, optimized: bool = True) -> MatchingPlate:
+                 corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None) -> MatchingPlate:
+    """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
+    (feedlab.flanges) — clearance holes for the screws and dowel holes."""
     w = RECT_WG[wg]
     k = 2 * math.pi * f_ghz * 1e9 / C0                    # 1/m
     kc_r = math.pi / (w.a_mm * 1e-3)
@@ -63,16 +72,36 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     else:
         b, a_opt, t = a / 2, a, lg / 4
     outer = max(circ_diam_mm, w.a_mm, a_opt) + 2 * max(6.0, 0.5 * w.a_mm)
-    return MatchingPlate(f_ghz, wg, circ_diam_mm, a_opt, b, r, t, lg / 200, z0, polarization, outer, basic)
+    mnt = None
+    if holes:
+        from .flanges import mount
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz)
+        outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)
+    body_t = max(t, mnt.plate_body_min()) if mnt else t
+    return MatchingPlate(f_ghz, wg, circ_diam_mm, a_opt, b, r, t, lg / 200, z0, polarization, outer, basic, mnt,
+                         round(body_t, 2))
 
 
 def plate_solid(p: MatchingPlate):
+    """z = 0 feed side, z = body_t WR side. The λ/4 rectangular aperture occupies the last `thickness`
+    on the WR side; a thicker body gets a feed-side pocket of the circular guide diameter."""
     import cadquery as cq
-    body = cq.Workplane("XY").rect(p.outer, p.outer).extrude(p.thickness)
-    hole = cq.Workplane("XY").sketch().rect(p.a, p.b).vertices().fillet(max(p.corner_r, 0.01)).finalize().extrude(p.thickness)
+    T = p.body_t or p.thickness
+    body = cq.Workplane("XY").rect(p.outer, p.outer).extrude(T)
+    hole = (cq.Workplane("XY").workplane(offset=T - p.thickness).sketch().rect(p.a, p.b).vertices()
+            .fillet(max(p.corner_r, 0.01)).finalize().extrude(p.thickness))
     if p.polarization == "H":
         hole = hole.rotate((0, 0, 0), (0, 0, 1), 90)
-    return body.cut(hole)
+    body = body.cut(hole)
+    if T - p.thickness > 1e-6:
+        body = body.cut(cq.Workplane("XY").circle(p.circ_diam / 2).extrude(T - p.thickness))
+    if p.mount is not None:
+        for h in p.mount.plate_holes:
+            body = body.cut(cq.Workplane("XY").center(h.x, h.y).circle(h.dia / 2).extrude(T))
+            if h.kind == "cbore":
+                body = body.cut(cq.Workplane("XY").workplane(offset=T - h.cb_depth).center(h.x, h.y)
+                                .circle(h.cb_dia / 2).extrude(h.cb_depth))
+    return body
 
 
 def export_step(p: MatchingPlate, path):
@@ -104,6 +133,18 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     ax.text(h + 3, 0, f"{bb:.3f}", va="center", rotation=90, fontsize=8)
     ax.arrow(0, -bb / 2 * 0.6, 0, bb * 0.5, width=0.05 * bb, color="r") if p.polarization == "V" else \
         ax.arrow(-aa * 0.3, 0, aa * 0.5, 0, width=0.05 * aa, color="r")
+    if p.mount is not None:
+        for hl in p.mount.plate_holes:
+            ax.add_patch(Circle((hl.x, hl.y), hl.dia / 2, fill=False, lw=0.9, ec="g" if hl.kind in ("dowel", "pin") else "k"))
+            if hl.kind == "tap":
+                from .flanges import SCREWS
+                from matplotlib.patches import Arc
+                dM = SCREWS[p.mount.screw][0]
+                ax.add_patch(Arc((hl.x, hl.y), dM, dM, theta1=0, theta2=270, lw=0.6))
+            if hl.kind == "cbore":
+                ax.add_patch(Circle((hl.x, hl.y), hl.cb_dia / 2, fill=False, lw=0.7, ec="m"))
+            ax.plot([hl.x - hl.dia * 0.7, hl.x + hl.dia * 0.7], [hl.y, hl.y], lw=0.3, color="0.4")
+            ax.plot([hl.x, hl.x], [hl.y - hl.dia * 0.7, hl.y + hl.dia * 0.7], lw=0.3, color="0.4")
     ax.set_xlim(-h - 6, h + 8); ax.set_ylim(-h - 6, h + 6)
     ax.set_title("Piastrina λ/4 — vista frontale (rosso = campo E)\n"
                  "tratteggio: Ø guida circolare del feed · punteggiato blu: WR", fontsize=9)
@@ -116,17 +157,34 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
            f"Apertura a × b      {p.a:.3f} × {p.b:.3f} mm\n"
            f"Raggio angoli       {p.corner_r:.2f} mm\n"
            f"Spessore            {p.thickness:.3f} mm  (± {p.tolerance:.3f})\n"
+           + (f"Spessore corpo      {p.body_t:.2f} mm: tasca lato feed Ø{p.circ_diam:.3f}\n"
+              f"                    prof. {p.pocket_depth:.2f} mm (prolunga la guida circolare)\n"
+              if p.pocket_depth > 1e-6 else "") +
            f"Lato esterno        {p.outer:.1f} mm\n"
            f"Z0 intermedia       {p.z0:.1f} Ω\n\n"
            f"Versione base: a {p.basic['a']:.3f}, b {p.basic['b']:.3f}, t {p.basic['thickness']:.3f} mm\n\n"
            f"Materiale: {material}\nTolleranza generale ±{tolerance_mm(p.f_ghz)} mm\n"
-           "Fori di fissaggio: secondo la flangia standard del WR\n"
-           "e del feed (allineare con spine di centraggio).\n\n"
+           + (_holes_text(p) if p.mount is not None else
+              "Fori di fissaggio: secondo la flangia standard del WR\n"
+              "e del feed (allineare con spine di centraggio).\n\n") +
            "Metodo: design guide OE2IGL (openEMS), ottimizzazione HB9PZK.\n"
            "Verificare S11 con openEMS prima della produzione.")
-    ax2.text(0, 1, txt, va="top", family="monospace", fontsize=9)
+    ax2.text(0, 1, txt, va="top", family="monospace", fontsize=8 if p.mount is not None else 9)
     from . import i18n
     i18n.translate_figure_mpl(fig)
     fig.savefig(path)
     plt.close(fig)
     return path
+
+
+def _holes_text(p: MatchingPlate) -> str:
+    m = p.mount
+    lines = ["", f"FORATURA flangia {m.flange.wg} {m.flange.name}",
+             f"(viti guida {m.screw} nella piastra, viti piastra→feed {m.plate_screw};", " coordinate dal centro)"]
+    for h in m.plate_holes:
+        lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {h.callout}")
+    lines.append(f"  viti della guida: lunghezza ≤ flangia guida + {p.body_t:.1f} mm")
+    import textwrap
+    for w in m.warnings:
+        lines += ["  " + x for x in textwrap.wrap(w, 58)]
+    return "\n".join(lines) + "\n\n"

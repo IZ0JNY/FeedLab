@@ -7,8 +7,11 @@ Raccolta delle richieste. Si sviluppano sul ramo `v0.4.3`. Quando ce ne sono **5
 | 1 | Balanis nelle equazioni di calcolo e nella bibliografia | ✅ fatto (ramo `v0.4.3`) |
 | 2 | Analisi di tolleranza Monte Carlo, quote critiche, ottimizzazione robusta | ✅ fatto (ramo `v0.4.3`) |
 | 3 | Validazione openEMS in the loop (space mapping) | ✅ fatto (ramo `v0.4.3`), da provare con openEMS vero |
-| 4 | — | — |
-| 5 | — | — |
+| 4 | Fori, filettature, lamature e spine piastra–feed (metrico/pollici) | ✅ fatto |
+| 5 | Pulsante per segnalare problemi su GitHub | ✅ fatto |
+| + | Riferimento Pawlan WA6KBL (controllo TM11) | ✅ fatto |
+
+**Pubblicata come 0.4.3.**
 
 ## 1. Balanis, *Antenna Theory: Analysis and Design*
 **Richiesta:** aggiungere il libro di C. A. Balanis alle equazioni di calcolo e alla bibliografia (Credits, README, base di conoscenza).

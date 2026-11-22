@@ -14,6 +14,7 @@ import plotly.graph_objects as go
 import streamlit as _st
 
 import feedlab
+from feedlab import credits as _credits_mod
 
 from feedlab import i18n
 
@@ -175,6 +176,7 @@ with st.sidebar:
     st.caption(f"σ = {m_.sigma / 1e7:.2f}·10⁷ S/m · δ = {materials.skin_depth_um(m_.sigma, S.f_ghz):.3f} µm · {m_.notes}")
     col_on = st.checkbox("Collare Ø40 mm per portaLNB commerciale", bool(geometry.COLLAR.get("diam")))
     geometry.COLLAR["diam"] = st.number_input("Ø collare (mm)", 20.0, 80.0, 40.0, 1.0) if col_on else None
+    geometry.MOUNT.update(S.get("mount_cfg") or {"wg": None})
     st.divider()
     if os.environ.get("FEEDLAB_DESKTOP") == "browser":
         if st.button("⏻ Chiudi FeedLab", help="ferma il programma (le simulazioni openEMS in corso continuano)"):
@@ -183,6 +185,8 @@ with st.sidebar:
     st.caption(f"Versione {feedlab.__version__} · © Ivan De Cesaris IZ0JNY")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
+    st.link_button("🐞 Segnala un problema", _credits_mod.issue_url(S.get("feed_kind", ""), S.get("f_ghz")),
+                   help="apre la pagina GitHub delle segnalazioni (issue) con versione e progetto già compilati")
     st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
                                          "vedi scheda Full-wave openEMS"))
 
@@ -382,6 +386,10 @@ with tabs[3]:
                 te = modes["TE11"]
                 st.write("Contenuto modale all'apertura (rispetto a TE11): " + ", ".join(
                     f"{k}: {abs(v / te):.3f} ∠{math.degrees(np.angle(v / te)):.0f}°" for k, v in modes.items()))
+                q_ = explore.tm11_power_ratio(modes)
+                if geo.kind in explore.STEP_HORNS and q_ is not None:
+                    st.caption(f"TM11/TE11 in potenza: {100 * q_:.1f}% — Pawlan WA6KBL indica ~15% per un Pickett-Potter "
+                               f"({'nella norma' if explore.TM11_TARGET[0] <= q_ <= explore.TM11_TARGET[1] else 'da correggere'}).")
         pat, _ = quick_pattern(geo.kind, tuple(geo.staircase()) if not is_rect else (), S.f_ghz,
                                (geo.params["a"], geo.params["b"], geo.params["aperture_H"], geo.params["aperture_E"],
                                 geo.params["axial_length"]) if is_rect else None)
@@ -749,8 +757,23 @@ with tabs[7]:
         rr = c4.number_input("Raggio angoli apertura (mm)", 0.0, 5.0, float(round(min(2.0, 0.08 * RECT_WG[wg].a_mm), 2)), 0.05,
                              help="raggio della fresa: angoli arrotondati compensati sulla larghezza (HB9PZK)")
         opt = st.checkbox("Versione ottimizzata (b e spessore corretti con openEMS)", True)
+        from feedlab import flanges
+        c1, c2 = st.columns(2)
+        holes_on = c1.checkbox("Fori di fissaggio guida → piastrina → feed", bool((S.get("mount_cfg") or {}).get("wg")),
+                               disabled=wg not in flanges.FLANGES, key="mount_on",
+                               help="foratura della flangia standard della guida, viti piastrina→feed con la testa nella "
+                                    "lamatura e spine di centraggio: nel PDF e nello STEP di piastrina e feed")
+        system = c2.radio("Viti", ["metric", "imperial"], horizontal=True, key="mount_sys",
+                          format_func=lambda x: {"metric": "Metriche (M)", "imperial": "Pollici (UNC)"}[x])
+        new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": "V" if pol_ == "Verticale" else "H"}
+        if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
+            S["mount_cfg"] = new_cfg
+            geometry.MOUNT.update(new_cfg)
+            for k in ("pdf", "step", "stl", "plate_pdf", "plate_step"):
+                S.pop(k, None)
         try:
-            pl = plate.design_plate(S.f_ghz, wg, dcirc, "V" if pol_ == "Verticale" else "H", rr, opt)
+            pl = plate.design_plate(S.f_ghz, wg, dcirc, "V" if pol_ == "Verticale" else "H", rr, opt,
+                                    holes=system if holes_on else None)
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Apertura a", f"{pl.a:.3f} mm"); m2.metric("Apertura b", f"{pl.b:.3f} mm")
             m3.metric("Spessore", f"{pl.thickness:.3f} mm", f"± {pl.tolerance:.3f}", delta_color="off")
@@ -758,6 +781,16 @@ with tabs[7]:
             w = RECT_WG[wg]
             st.write(f"{wg}: {w.a_mm} × {w.b_mm} mm (fc TE10 {w.fc_te10_ghz:.2f} GHz) · guida circolare Ø{dcirc:.3f} mm "
                      f"(fc TE11 {299.792458 / (1.706 * dcirc):.2f} GHz)")
+            if pl.mount is not None:
+                mm_ = pl.mount
+                st.info(f"Flangia {mm_.flange.wg} {mm_.flange.name}: le viti della guida ({mm_.screw}) si avvitano nella "
+                        f"piastra; 4 viti piastra→feed {mm_.plate_screw} con testa nella lamatura (lato guida)"
+                        + (", 2 spine di centraggio" if any(h.kind == "pin" for h in mm_.plate_holes) else "") + ". "
+                        + (f"Corpo piastrina {pl.body_t:.2f} mm con tasca Ø{pl.circ_diam:.3f} × {pl.pocket_depth:.2f} mm sul lato "
+                           "feed (prolunga la guida circolare; la parte λ/4 resta invariata). " if pl.pocket_depth > 1e-6 else "")
+                        + "La foratura è applicata anche al feed (PDF foglio 2 e STEP nella scheda Disegno & STEP).")
+                for w_ in mm_.warnings:
+                    st.warning(w_)
             base = WORK / f"plate_{wg}_{S.f_ghz:g}GHz_{pl.polarization}".replace(".", "p")
             b1, b2 = st.columns(2)
             if b1.button("📄 Disegno PDF piastrina"):
@@ -777,6 +810,14 @@ with tabs[7]:
             fig.add_shape(type="circle", x0=-dcirc / 2, y0=-dcirc / 2, x1=dcirc / 2, y1=dcirc / 2, line=dict(dash="dash", color="gray"))
             wa, wb = (w.a_mm, w.b_mm) if pl.polarization == "V" else (w.b_mm, w.a_mm)
             fig.add_shape(type="rect", x0=-wa / 2, y0=-wb / 2, x1=wa / 2, y1=wb / 2, line=dict(dash="dot", color="blue"))
+            if pl.mount is not None:
+                for hl in pl.mount.plate_holes:
+                    col_ = {"tap": "black", "dowel": "green", "pin": "green", "cbore": "black"}.get(hl.kind, "black")
+                    fig.add_shape(type="circle", x0=hl.x - hl.dia / 2, y0=hl.y - hl.dia / 2, x1=hl.x + hl.dia / 2,
+                                  y1=hl.y + hl.dia / 2, line=dict(color=col_))
+                    if hl.kind == "cbore":
+                        fig.add_shape(type="circle", x0=hl.x - hl.cb_dia / 2, y0=hl.y - hl.cb_dia / 2, x1=hl.x + hl.cb_dia / 2,
+                                      y1=hl.y + hl.cb_dia / 2, line=dict(color="magenta"))
             fig.add_annotation(x=0, y=0, ax=0 if pl.polarization == "V" else -40, ay=40 if pl.polarization == "V" else 0,
                                text="E", showarrow=True, arrowcolor="red", arrowhead=2, arrowwidth=2)
             fig.update_layout(height=420, xaxis=dict(range=[-h - 3, h + 3], title="mm"),

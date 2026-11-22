@@ -305,3 +305,9 @@ Rear feed (Penny, Clavin 1954, pillbox, DK2RV: dal 30 al 45%), dish con disco pi
 - **Horn conico:** D_c = 10·log[(πd/λ)²] − L(s), con L(s) = 0.8 − 1.71s + 26.25s² − 17.79s³ e s = d²/(8λl). All'ottimo s = 3/8 la perdita è 2.91 dB (HDL_ANT/Jasik usa 2.82 dB).
 - **Relazioni di base:** VSWR ↔ S11, perdita di disadattamento, PLF (lineare↔circolare −3.01 dB, cos²ψ tra lineari), Friis.
 
+## 12. Pawlan WA6KBL (DUBUS): Pickett-Potter con ingresso diretto in guida
+- **Gradino del Pickett-Potter:** deve generare il TM11 a circa il 15% del modo dominante, e flare e diametro di bocca vanno scelti in modo che TE11 e TM11 arrivino in fase all'apertura. FeedLab calcola |TM11|²/|TE11|² all'apertura (`explore.tm11_power_ratio`): il Pickett-Potter OE2IGL dà 12.8% a 24 GHz.
+- **Progetto:** feed per offset con f/D 0.6 (valido anche per 0.7) e 0.8, con −10…−12 dB al bordo. Lobi laterali sotto −40 dB misurati in camera anecoica (CTU Praga).
+- **Skobelev:** in CST le quote di Skobelev hanno dato a Pawlan risultati deludenti a 10 GHz. FeedLab lo segnala nella procedura guidata.
+- **Montaggio:** a 24 GHz la transizione è troppo sottile per tenere le viti della flangia WR-42, quindi serve un distanziale con la stessa sezione interna. FeedLab ingrossa il corpo della piastra con una tasca lato feed.
+

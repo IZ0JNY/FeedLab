@@ -28,6 +28,13 @@ TECH_SOURCES = [
     ("Al Ward, W5LUA", "*The Excitement & Challenges of 24 GHz EME* (2012), con i calcolatori VK3UM",
      "feed W2IMU modificato a 24 GHz, perdita di percorso EME, rumore di Sole e Luna, assorbimento atmosferico", ""),
     ("J. D. Kraus", "*Radio Astronomy* (1966)", "temperatura della Luna in funzione della fase", ""),
+    ("Jeffrey Pawlan, WA6KBL", "*Easy to Manufacture and Extremely High Performance Dual Mode Feedhorns with Direct "
+     "Waveguide Input For the 10GHz and 24GHz Bands*, DUBUS", "feed dual-mode con ingresso diretto in guida rettangolare",
+     "https://www.researchgate.net/publication/384900000"),
+    ("Ivan De Cesaris, IZ0JNY", "iz0jny.it: feed W2IMU 24 GHz per EME (CST, disegni e STEP)",
+     "accoppiamento piastra WR-42 / feed con viti in lamatura, misure di rumore solare", "https://www.iz0jny.it/"),
+    ("Flann Microwave", "*Waveguide and Flange Data*; MIL-DTL-3922/67C", "foratura delle flange standard delle guide WR",
+     "https://flann.com/wp-content/uploads/2025/02/Waveguide-and-Flange-Data.pdf"),
     ("Thorsten Liebig — openEMS", "FDTD, tutorial \"Conical Horn\"", "", "https://openems.de"),
 ]
 
@@ -38,6 +45,16 @@ LIBRARIES = [("Python", "https://www.python.org"), ("NumPy", "https://numpy.org"
              ("Matplotlib", "https://matplotlib.org"), ("Plotly", "https://plotly.com/python/"),
              ("Streamlit", "https://streamlit.io"), ("CadQuery / Open CASCADE", "https://cadquery.readthedocs.io"),
              ("openEMS", "https://openems.de")]
+
+
+def issue_url(feed_kind: str = "", f_ghz=None) -> str:
+    """GitHub 'new issue' page with version, system and current design filled in."""
+    import platform
+    from urllib.parse import urlencode
+    body = (f"**Versione FeedLab:** {__version__}\n**Sistema:** {platform.system()} {platform.release()}\n"
+            f"**Feed / frequenza:** {feed_kind} {f_ghz if f_ghz is not None else ''} GHz\n\n"
+            "**Cosa è successo:**\n\n**Cosa ti aspettavi:**\n\n**Passi per riprodurre:**\n1. \n")
+    return f"{REPO}/issues/new?" + urlencode({"title": "", "body": body})
 
 
 def dish_sources() -> list[str]:

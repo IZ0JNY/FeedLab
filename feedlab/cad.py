@@ -25,6 +25,12 @@ def solid(geo) -> "object":
         # sketch in XZ plane (x = radius, z = axis) and revolve about the Z axis
         wp = cq.Workplane("XZ").polyline(pts).close().revolve(360, (0, 0, 0), (0, 1, 0))
         body = wp if body is None else body.union(wp)
+    mnt = getattr(geo, "mount", None)
+    if mnt is not None:                    # holes in the input flange (z = 0 face, axis = Z)
+        t = float(geo.params.get("flange_thickness", 3.0))
+        for h in mnt.feed_holes:
+            depth = t if h.kind == "tap" else min(t, h.depth or t)
+            body = body.cut(cq.Workplane("XY").center(h.x, h.y).circle(h.dia / 2).extrude(depth))
     return body
 
 
