@@ -107,12 +107,43 @@ CATALOG: list[DishModel] = [
               {}, "40", "acciaio 0.7 mm", "Triax TDS PRO leaflet (alltrade)"),
     DishModel("Triax", "TDA 64", "offset", 600, 650, None, None, None, None, "", 26.0, None, None,
               {11.7: 35.8}, "40", "Alu", "Triax TDA 64 datasheet (zajadacz.de)", "F/D non pubblicato"),
-    # --- Kathrein (no f/D published in the datasheets found) ---
+    # --- Kathrein (focale/f/D non pubblicati nei datasheet: misurare) ---
+    DishModel("Kathrein", "CAS 60 (20010006)", "offset", 570, 570, None, None, None, None, "", None, None, None,
+              {11.2: 34.9, 12.1: 35.5, 12.625: 35.9}, "", "Alu pulverbeschichtet",
+              "Kathrein CAS 60 Produktinformation, Art.-Nr. 20010006 (PDF fornito dall'utente)",
+              "diametro 57 cm; HPBW < 2.8° a centro banda; G/T 14.7/15.7 dB/K (UAS 571/572/584/585, feed centrale) "
+              "a 11.3/12.5 GHz; elevazione 5–45°; ingombro 599 × 759 × 528 mm con supporto (altezza riflettore non "
+              "data). Focale, f/D e angolo di offset non pubblicati: misura assi e profondità"),
     DishModel("Kathrein", "CAS 90", "offset", 900, 900, None, None, None, None, "", None, None, None,
               {}, "", "Alu", "Kathrein CAS 90 datasheet (diametro e banda)", "F/D/focale non pubblicati: misurare"),
     DishModel("Kathrein", "CAS 120", "offset", 1200, 1200, None, None, None, None, "", None, None, None,
               {11.2: 41.5, 12.1: 42.15, 12.6: 42.5}, "", "Alu", "Kathrein CAS 120/G datasheet (radiomuseum/zajadacz)",
               "HPBW < 1.43°; F/D/focale non pubblicati: misurare"),
+    DishModel("Kathrein", "CAS 180 (216235)", "offset", 1800, 1800, None, None, None, None, "", None, None, None,
+              {11.2: 44.5, 12.1: 45.15, 12.625: 45.5}, "", "Alu pulverbeschichtet, riscaldabile",
+              "Kathrein CAS 180 product information, order no. 216235 (PDF fornito dall'utente)",
+              "diametro 1.8 m; HPBW 0.9°; cross-pol > 30 dB; elevazione 5–50°; ingombri 1980 mm larghezza, 1511 mm "
+              "altezza, 1900 mm sporgenza; supporto feed ZAS 181C. Focale, f/D e angolo di offset non pubblicati: "
+              "misura assi e profondità"),
+    # --- Fuba (fuba.de). La DAA 850 pubblica f/D 0.63 e fuoco 531.3 mm: con offset 21.5° corrisponde alla
+    #     paraboloide col bordo inferiore sull'asse (atan(1/(4·0.63)) = 21.6°); stessa regola usata per stimare
+    #     la focale di DAA 650 e DAA 780 dal loro angolo di offset. ---
+    DishModel("Fuba", "DAA 650", "offset", 600, 650, None, None, None, 368, "stimata dall'offset 22.1° (f = D/(4·tan θ))",
+              22.1, None, None, {10.75: 35.2, 12.75: 36.7}, "40", "Alu 0.8 mm", "Fuba, scheda tecnica su fuba.de + 'DAA/DAL-Sortiment Folder' (fuba_daa_dal_sortiment_folderv2.pdf)",
+              "HPBW < 2.7° a 12.75 GHz; cross-pol ≥ 27 dB; braccio LNB 49 cm; focale stimata: verifica misurando la profondità"),
+    DishModel("Fuba", "DAA 780", "offset", 740, 840, None, None, None, 397, "stimata dall'offset 25° (f = D/(4·tan θ))",
+              25.0, None, None, {10.75: 36.8, 12.75: 38.5}, "40", "Alu 1.0 mm", "Fuba, scheda tecnica su fuba.de + 'DAA/DAL-Sortiment Folder' (fuba_daa_dal_sortiment_folderv2.pdf)",
+              "cross-pol ≥ 27 dB; braccio LNB 61 cm; focale stimata: verifica misurando la profondità"),
+    DishModel("Fuba", "DAA 850", "offset", 850, 850, None, None, 0.63, 531.3, "datasheet Fuba (Brennpunkt 53.13 cm)",
+              21.5, None, None, {10.75: 38.12, 12.75: 39.53}, "40", "Alu 1.1 mm", "Fuba, scheda tecnica su fuba.de + 'DAA/DAL-Sortiment Folder' (fuba_daa_dal_sortiment_folderv2.pdf)",
+              "f/D 0.63; HPBW < 2.2° a 12.75 GHz; cross-pol ≥ 27 dB; braccio LNB 65 cm"),
+    DishModel("Fuba", "DAA 110", "offset", 991, 1099, None, None, None, None, "", None, None, None,
+              {10.75: 39.8, 12.75: 40.9}, "40", "Alu, retro in pressofusione", "Fuba DAA/DAL-Sortiment Folder (fuba_daa_dal_sortiment_folderv2.pdf)",
+              "riflettore 1099 × 991 mm (assegnato 991 orizzontale, 1099 verticale); focale e offset non pubblicati: misura"),
+    DishModel("Fuba", "DAL 800", "offset", 740, 840, None, None, None, None, "", None, None, None,
+              {10.75: 36.8, 12.75: 38.5}, "40", "Alu, retro in pressofusione", "Fuba DAA/DAL-Sortiment Folder (fuba_daa_dal_sortiment_folderv2.pdf)",
+              "antenna portatile con braccio pieghevole; stesse misure e guadagno della DAA 780 (forse stesso riflettore, "
+              "non confermato); focale e offset non pubblicati: misura"),
     # --- Channel Master / Andrew / Skyware ---
     DishModel("Channel Master", "Type 123 1.2 m (Andrew / Skyware)", "offset", 1200, 1300, 1200, None, None, None, "",
               16.97, None, None, {12.0: 41.8, 14.3: 43.3}, "", "SMC/acciaio",
