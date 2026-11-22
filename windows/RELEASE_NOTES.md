@@ -9,6 +9,7 @@
 - **Pop-up BETA:** tolto il pulsante OK, che non funzionava; la finestra si chiude con la **✕** in alto a destra.
 - **Colore del materiale:** nella sezione di *Progetto feed* e nel *Modello 3D* il feed ha il colore del materiale scelto (rame, ottone, alluminio, argento, oro, inox, stampa 3D); il titolo del modello 3D indica il materiale.
 - **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL):** la descrizione parla ora di **8 scalini** invece di 8 gole.
+- **Piastrina WR-90:** le 4 viti piastra→feed ora sono simmetriche, sugli assi come per le altre guide (prima uscivano ruotate di 40°).
 - **Barra laterale più semplice:** tolta l'opzione del collare per portaLNB.
 - Interfaccia e manuali in italiano e inglese.
 
@@ -16,6 +17,7 @@
 - **BETA popup:** the OK button, which did not work, has been removed; close the window with the **✕** at the top right.
 - **Material colour:** in the *Feed design* section and in the *3D model* the feed takes the colour of the chosen material (copper, brass, aluminium, silver, gold, stainless steel, 3D print); the 3D model title names the material.
 - **Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL):** the description now says **8 steps** instead of 8 slots.
+- **WR-90 plate:** the 4 plate→feed screws are now symmetric, on the axes as for the other waveguides (they used to come out rotated by 40°).
 - **Simpler sidebar:** the LNB-holder collar option has been removed.
 - Interface and manuals in Italian and English.
 

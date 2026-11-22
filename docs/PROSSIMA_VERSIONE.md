@@ -10,7 +10,7 @@
 
 # Archivio: versione 0.4.9 (pubblicata, BETA TEST 30 giorni)
 
-Pubblicata con 4 modifiche su richiesta.
+Pubblicata con 5 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|
@@ -18,6 +18,7 @@ Pubblicata con 4 modifiche su richiesta.
 | 2 | Tolta dalla barra laterale l'opzione "Collare Ø40 mm per portaLNB commerciale" | ✅ fatto |
 | 3 | Axial Corrugated: "8 gole" diventa "8 scalini" (procedura guidata, note, manuali), con le traduzioni inglesi | ✅ fatto |
 | 4 | Progetto feed e Modello 3D: il feed è colorato come il materiale scelto (rame, ottone, alluminio, argento, oro, inox, stampa 3D) | ✅ fatto |
+| 5 | Piastrina WR-90: viti piastra→feed storte (ruotate di 40°); ora si cercano prima posizioni simmetriche (assi, poi diagonali) che stiano sulla flangia | ✅ fatto (`tests/test_flanges.py::test_plate_screws_symmetric`) |
 
 ---
 

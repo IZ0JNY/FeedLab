@@ -216,7 +216,8 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
                   screw: str | None = None, plate_t: float | None = None) -> None:
     """Four screws holding the plate on the feed (θ + k·90°), heads sunk in counterbores on the WR side.
     Smallest radius whose counterbores keep ≥ 0.6 mm from every other hole, from the circular guide
-    and from the WR aperture; θ = 0 (on the axes) is tried first, as in IZ0JNY's plate."""
+    and from the WR aperture. Symmetric positions come first: on the axes (θ = 0, as in IZ0JNY's plate) or on the
+    diagonals (θ = 45°), as long as they fit on the flange; other angles only as a last resort."""
     from .waveguide import RECT_WG
     screw = screw or ("M2.5" if system != "imperial" else "2-56 UNC")
     d_major, tap, clear = SCREWS[screw]
@@ -248,9 +249,13 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
     lead = max(1.0, 3 * PITCH.get(screw, 0.5))
     drill_d = float(2 * math.ceil((eng + lead) / 2 - 1e-9))
     tap_d = drill_d - lead
-    for _ in range(600):
-        for i in range(n_ang // 4):
-            th = 0.5 * math.pi * i / (n_ang // 4)
+    # symmetric pattern first: screws on the axes (0°) or on the diagonals (45°), at the smallest radius that
+    # still fits on the flange; only if neither fits, any angle (10° steps) at the smallest free radius
+    r_max = m.flange.A / 2 - cb_d / 2 - 0.5
+    cands = [(rr, th) for th in (0.0, math.pi / 4) for rr in (r + 0.1 * j for j in range(600)) if rr <= r_max]
+    cands += [(r + 0.1 * j, 0.5 * math.pi * i / (n_ang // 4)) for j in range(600) for i in range(n_ang // 4)]
+    for r, th in cands:
+        if True:
             pts = [(r * math.cos(th + k * math.pi / 2), r * math.sin(th + k * math.pi / 2)) for k in range(4)]
             if all(ok(x, y) for x, y in pts):
                 for x, y in pts:
@@ -266,7 +271,6 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
                 m.screw_in = eng
                 m.screw_len, m.screw_len_label = L, L_lab
                 return
-        r += 0.1
     m.warnings.append("nessuna posizione libera per le viti piastrina→feed")
 
 

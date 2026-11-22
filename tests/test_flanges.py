@@ -139,3 +139,14 @@ def test_plate_screw_choices_and_length():
                 for h in taps:          # blind hole: even whole millimetres, thread reaches the screw end
                     assert h.depth % 2 == 0 and m.screw_in <= m.tap_depth < h.depth
                     assert h.depth - m.screw_in < 2 + max(1.0, 3 * flanges.PITCH[m.plate_screw]) + 1e-9
+
+
+@pytest.mark.parametrize("wg,d", [("WR-90", 22.0), ("WR-90", 15.0), ("WR-75", 22.0), ("WR-62", 16.0)])
+def test_plate_screws_symmetric(wg, d):
+    """The 4 plate→feed screws sit on the axes or on the diagonals (WR-90 used to get a crooked 40° pattern)."""
+    import math
+    for pol in "VH":
+        m = flanges.mount(wg, "metric", pol, d, 10.368, plate_t=4.0)
+        cb = [h for h in m.plate_holes if h.kind == "cbore"]
+        ang = math.degrees(math.atan2(cb[0].y, cb[0].x)) % 90
+        assert min(abs(ang), abs(ang - 45), abs(ang - 90)) < 1e-6, (wg, pol, ang)
