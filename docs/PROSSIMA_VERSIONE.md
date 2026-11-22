@@ -1,6 +1,6 @@
-# Modifiche per la prossima versione (0.4.5)
+# Modifiche per la prossima versione (0.4.6)
 
-**Regola:** ogni **5 modifiche** si fa una nuova build e la si pubblica su GitHub (installer + zip portatile, note di rilascio in italiano e inglese). Le modifiche si sviluppano sul ramo `v0.4.5`; `main` si aggiorna solo al momento della pubblicazione.
+**Regola:** ogni **5 modifiche** si fa una nuova build e la si pubblica su GitHub (installer + zip portatile, note di rilascio in italiano e inglese). Le modifiche si sviluppano sul ramo `v0.4.6`; `main` si aggiorna solo al momento della pubblicazione.
 
 | # | Richiesta | Stato |
 |---|---|---|
