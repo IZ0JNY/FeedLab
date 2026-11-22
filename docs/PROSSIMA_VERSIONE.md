@@ -4,9 +4,9 @@ Raccolta delle richieste. Si sviluppano sul ramo `v0.4.3`. Quando ce ne sono **5
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Balanis nelle equazioni di calcolo e nella bibliografia | da fare |
-| 2 | Analisi di tolleranza Monte Carlo, quote critiche, ottimizzazione robusta | in corso |
-| 3 | Validazione openEMS in the loop (space mapping) | da fare |
+| 1 | Balanis nelle equazioni di calcolo e nella bibliografia | ✅ fatto (ramo `v0.4.3`) |
+| 2 | Analisi di tolleranza Monte Carlo, quote critiche, ottimizzazione robusta | ✅ fatto (ramo `v0.4.3`) |
+| 3 | Validazione openEMS in the loop (space mapping) | ✅ fatto (ramo `v0.4.3`), da provare con openEMS vero |
 | 4 | — | — |
 | 5 | — | — |
 
@@ -21,6 +21,11 @@ Raccolta delle richieste. Si sviluppano sul ramo `v0.4.3`. Quando ce ne sono **5
   - **Riflettore con feed cos^n:** efficienza d'apertura in forma chiusa (spillover × taper); confronto con l'integrazione numerica di FeedLab, che già coincide con il calcolo analitico entro 0.3%.
   - **Relazioni di base:** Friis, perdita di disadattamento di polarizzazione (lineare↔circolare, 3 dB), direttività/guadagno/efficienza, VSWR ↔ return loss ↔ S11.
 - **Riferimenti nel codice:** ogni funzione cita "Balanis, cap. X". Il capitolo si indica solo dove è certo; il numero di equazione non si inventa.
+
+**Fatto:** `feedlab/balanis.py` e `tests/test_balanis.py`.
+- Il riflettore con feed cos^n coincide con il motore di FeedLab entro 0.0002.
+- L'horn piramidale (Fresnel) coincide con l'integrale 2D dell'apertura entro 0.01 dB.
+- Il confronto ha scoperto un errore: `horns.pyramidal_gain_dbi` sottostimava di 0.15–0.5 dB; ora usa la formula di Balanis.
 
 **Nota sul PDF:** il link archive.org dato all'inizio è una copia del libro non autorizzata dall'editore, quindi non la scarico né la uso come fonte. Le equazioni del libro sono formule standard della teoria delle antenne e si possono implementare e citare senza il PDF. Se hai il libro, per controllare numero per numero bastano le pagine delle sezioni interessate.
 

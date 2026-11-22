@@ -296,3 +296,12 @@ Rear feed (Penny, Clavin 1954, pillbox, DK2RV: dal 30 al 45%), dish con disco pi
   - assorbimento obliquo A_zen/sin(el) e rumore del cielo con T_atm 280 K.
   Funzioni in `feedlab.noise`, test in `tests/test_w5lua.py`.
 
+## 11. Balanis, *Antenna Theory: Analysis and Design* (Wiley, 4ª ed. 2016): verifiche in forma chiusa (`feedlab.balanis`)
+- **Riflettore con feed G_f = 2(n+1)cos^n θ:** ε_ap = cot²(θ0/2)·|∫√G_f·tan(θ/2)dθ|². Per n = 2 la forma chiusa è 24{sin²(θ0/2) + ln cos(θ0/2)}²·cot²(θ0/2), con massimo 83% a θ0 ≈ 66°. Il motore di FeedLab coincide entro 0.0002 per n = 2…8.
+- **Horn piramidale:**
+  - D_P = πλ²/(32ab)·D_E·D_H, con le direttività dei settoriali calcolate con gli integrali di Fresnel e ρ1, ρ2 distanze apice–apertura lungo l'asse;
+  - coincide con l'integrale 2D dell'apertura entro 0.01 dB;
+  - ha mostrato che la vecchia `pyramidal_gain_dbi` (integrazione dei soli piani E/H) sottostimava di 0.15–0.5 dB: corretta nella 0.4.3.
+- **Horn conico:** D_c = 10·log[(πd/λ)²] − L(s), con L(s) = 0.8 − 1.71s + 26.25s² − 17.79s³ e s = d²/(8λl). All'ottimo s = 3/8 la perdita è 2.91 dB (HDL_ANT/Jasik usa 2.82 dB).
+- **Relazioni di base:** VSWR ↔ S11, perdita di disadattamento, PLF (lineare↔circolare −3.01 dB, cos²ψ tra lineari), Friis.
+

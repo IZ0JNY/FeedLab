@@ -81,6 +81,7 @@ non si avvia su Streamlit Community Cloud. Per usarlo da sorgente sul proprio PC
 - Guida circolare aperta 0.76λ: ~68% a f/D 0.35 (W1GHZ con NEC2: 67%, f/D 0.35–0.4).
 - W2IMU 1.31λ: ottimo a f/D ~0.56 (W1GHZ: 0.5–0.6).
 - Ruze a 122 e 241 GHz, correzione di Planck a 47 GHz (OE2IGL).
+- Balanis: efficienza del riflettore con feed cos^n uguale al motore di FeedLab entro 0.0002; horn piramidale con integrali di Fresnel uguale all'integrale 2D dell'apertura entro 0.01 dB (`tests/test_balanis.py`).
 - EME a 24 GHz (W5LUA 2012, calcolatori VK3UM): perdita di percorso EME 295.24 dB, rumore di Luna 2.23 dB e di Sole 12.8 dB, assorbimento atmosferico e rumore del cielo; feed W2IMU modificato di W5LUA con centro di fase ~2.5 mm dietro la faccia (`tests/test_w5lua.py`).
 
 ## Uso rapido
@@ -121,4 +122,5 @@ Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programm
 ## Crediti e licenze delle fonti
 - Algoritmi e dati da P. Wade W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
 - Design guide di G. Ihninger OE2IGL (wettersat.bplaced.net).
+- C. A. Balanis, *Antenna Theory: Analysis and Design*, Wiley (4ª ed. 2016): formule chiuse di horn e riflettori usate come verifica (`feedlab.balanis`).
 - Il codice qui è una reimplementazione indipendente: non contiene codice né file di dati originali. I pattern `.dat` di W1GHZ si scaricano a parte (`feedpatt.zip`) e si leggono con `patterns.load_w1ghz_dat`.

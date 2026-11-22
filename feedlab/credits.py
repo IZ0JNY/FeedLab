@@ -19,6 +19,8 @@ TECH_SOURCES = [
      "https://wettersat.bplaced.net/index.html"),
     ("Per-Simon Kildal", "*Foundations of Antenna Engineering*",
      "fattorizzazione dell'efficienza, ottimo del subriflettore", "https://www.kildal.se"),
+    ("Constantine A. Balanis", "*Antenna Theory: Analysis and Design*, Wiley (4ª ed. 2016)",
+     "horn piramidali, settoriali e conici, efficienza dei riflettori, relazioni di base (VSWR, polarizzazione, Friis)", ""),
     ("P. D. Potter (1963), H. M. Pickett et al. (1984), Skobelev", "horn dual-mode", "", ""),
     ("Kumar / VE4MA, Wohlleben (Chaparral), G3RPE, Granet", "feed a choke, horn rettangolare per f/D, Cassegrain/Gregorian",
      "", ""),
