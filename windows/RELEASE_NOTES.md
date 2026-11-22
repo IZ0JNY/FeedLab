@@ -1,13 +1,17 @@
-## FeedLab 0.4.5 per Windows / for Windows
+## FeedLab 0.4.6 per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.5.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.5-portable.zip` → `FeedLab.bat`.
+**Installazione / Installation:** `FeedLab-Setup-0.4.6.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.6-portable.zip` → `FeedLab.bat`.
 
 ### 🇮🇹 Novità
-- **Correzione per le simulazioni openEMS su Windows:** mentre FeedLab controllava l'avanzamento, l'aggiornamento del file di stato poteva fallire (file in uso) e fermare la simulazione con un errore. Ora scrittura e lettura riprovano e una simulazione non si interrompe più per questo motivo.
-- Comprende tutte le novità della 0.4.4: manuale d'uso PDF in italiano e inglese (pulsante 📖 Manuale), repository rinominato **IZ0JNY/FeedLab**, e quelle della 0.4.3 (tolleranze e ottimizzazione robusta, space mapping con openEMS, fori di fissaggio piastra/feed, pulsante 🐞 Segnala un problema, verifiche Balanis, W5LUA e Pawlan WA6KBL, parabole Kathrein e Fuba).
+- **Correzione importante — spessore della parete:** al gradino del Pickett-Potter e dello Skobelev la corona tra la guida d'ingresso e il flare aveva spessore zero (2D, 3D, STEP/STL e PDF), e nei tratti conici la parete era più sottile del valore impostato. Ora lo spessore è costante, misurato perpendicolarmente alla parete. **Se avete esportato file per l'officina con le versioni precedenti, rigenerateli.**
+- **Quote nei disegni:** spessore del gradino, spessore della parete e semiangolo del flare, nel PDF e nella sezione dell'app.
+- **Laboratorio:** semiangolo del flare regolabile anche per Pickett-Potter e Skobelev (come già per i W2IMU); sotto i cursori sono indicate la lunghezza del flare e la lunghezza totale risultanti.
+- Comprende la 0.4.5 (simulazioni openEMS su Windows più robuste) e le versioni precedenti.
 
 ### 🇬🇧 What's new
-- **Fix for openEMS simulations on Windows:** while FeedLab was checking progress, updating the status file could fail (file in use) and stop the simulation with an error. Writes and reads now retry, so a simulation no longer stops for this reason.
-- Includes everything from 0.4.4: PDF user manual in Italian and English (📖 Manual button), repository renamed **IZ0JNY/FeedLab**, and from 0.4.3 (tolerances and robust optimisation, openEMS space mapping, plate/feed fixing holes, 🐞 Report a problem button, Balanis, W5LUA and Pawlan WA6KBL checks, Kathrein and Fuba dishes).
+- **Important fix — wall thickness:** at the step of the Pickett-Potter and Skobelev horns the ring between the input guide and the flare had zero thickness (2D, 3D, STEP/STL and PDF), and conical sections had a wall thinner than the value set. The thickness is now constant, measured normal to the wall. **If you exported workshop files with earlier versions, regenerate them.**
+- **Dimensions on drawings:** step thickness, wall thickness and flare half-angle, in the PDF and in the app's section view.
+- **Laboratory:** adjustable flare half-angle for Pickett-Potter and Skobelev too (as for the W2IMU horns); the resulting flare length and total length are shown under the sliders.
+- Includes 0.4.5 (more robust openEMS simulations on Windows) and earlier versions.
 
 Requisiti / Requirements: Windows 10/11 64-bit.

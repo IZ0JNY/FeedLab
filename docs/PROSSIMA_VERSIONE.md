@@ -1,4 +1,4 @@
-# Modifiche per la prossima versione (0.4.6)
+# Versione 0.4.6 (pubblicata) e prossime richieste
 
 | # | Richiesta | Stato |
 |---|---|---|
