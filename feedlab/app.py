@@ -820,7 +820,9 @@ with tabs[7]:
                 mm_ = pl.mount
                 st.info(f"Flangia {mm_.flange.wg} {mm_.flange.name}: le viti della guida ({mm_.screw}) si avvitano nella "
                         f"piastra; 4 viti piastra→feed {mm_.plate_screw} × {mm_.screw_len_label} con testa nella lamatura "
-                        f"(lato guida), filetto nel feed prof. {mm_.tap_depth:.1f} mm"
+                        f"(lato guida); nel feed la vite entra {mm_.screw_in:.1f} mm, foro prof. "
+                        f"{max(h.depth for h in mm_.feed_holes if h.kind == 'tap' and mm_.plate_screw in h.callout):.0f} mm, "
+                        f"filetto prof. {mm_.tap_depth:.1f} mm"
                         + (", 2 spine di centraggio" if any(h.kind == "pin" for h in mm_.plate_holes) else "") + ". "
                         + (f"Corpo piastrina {pl.body_t:.2f} mm con tasca Ø{pl.circ_diam:.3f} × {pl.pocket_depth:.2f} mm sul lato "
                            "feed (prolunga la guida circolare; la parte λ/4 resta invariata). " if pl.pocket_depth > 1e-6 else "")

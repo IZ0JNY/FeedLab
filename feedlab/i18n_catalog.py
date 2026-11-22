@@ -1204,4 +1204,9 @@ ENTRIES = [
     ("filetto nel feed prof.", "thread depth in the feed", "Gewindetiefe im Speisesystem", "profondeur du filetage dans la source",
      "profundidad de rosca en el alimentador"),
     ("a testa cilindrica", "socket head cap screws", "Zylinderkopfschrauben", "à tête cylindrique", "de cabeza cilíndrica"),
+    ("nel feed la vite entra", "the screw goes into the feed by", "die Schraube greift im Speisesystem", "la vis entre dans la source de",
+     "el tornillo entra en el alimentador"),
+    ("foro prof.", "hole depth", "Bohrtiefe", "profondeur du trou", "profundidad del agujero"),
+    ("filetto prof.", "thread depth", "Gewindetiefe", "profondeur du filetage", "profundidad de rosca"),
+    ("preforo", "tap drill", "Kernloch", "avant-trou", "pretaladro"),
 ]

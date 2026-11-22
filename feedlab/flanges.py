@@ -65,6 +65,7 @@ PITCH = {"M2": 0.4, "M2.5": 0.45, "M3": 0.5, "M4": 0.7, "2-56 UNC": 25.4 / 56, "
 PLATE_SCREWS_10GHZ = ["M3", "M4"]              # 10 GHz band
 PLATE_SCREWS_HIGH = ["M2.5", "M3", "M2"]       # 24 GHz and up (first = default)
 TEN_GHZ_MAX = 15.0                             # below this the 10 GHz choices apply
+HOLE_MARGIN = 5.0                              # blind hole in the feed: depth beyond the screw end (mm)
 # imperial equivalents (nearest UNC size): M2→#2-56 (Ø2.18), M2.5→#3-48 (Ø2.51, less common than 4-40),
 # M3→#4-40 (Ø2.84), M4→#8-32 (Ø4.17)
 UNC_FOR_METRIC = {"M2": "2-56 UNC", "M2.5": "3-48 UNC", "M3": "4-40 UNC", "M4": "8-32 UNC"}
@@ -127,6 +128,7 @@ class Mount:
     screw_len: float = 0.0       # their length (mm), 0 = not set (plate thickness unknown)
     screw_len_label: str = ""
     tap_depth: float = 0.0       # threaded depth in the feed flange
+    screw_in: float = 0.0        # length of screw inside the feed (screw length − grip in the plate)
 
     @property
     def plate_radius(self) -> float:
@@ -241,8 +243,10 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
         eng = L - max(plate_t - cb_k, 0.0)
         if eng < 1.5 * d_major:
             m.warnings.append(f"vite {screw} × {L_lab}: solo {eng:.1f} mm di filetto nel feed (< 1.5 d)")
-    tap_d = eng + 0.5                                  # threaded depth: screw end + margin
-    drill_d = tap_d + max(1.0, 3 * PITCH.get(screw, 0.5))  # tap drill deeper than the thread (tap lead)
+    # hole in the feed (IZ0JNY): 5 mm beyond the screw end, rounded up to an even whole millimetre;
+    # the thread stops 3 pitches (≥ 1 mm) before the bottom of the blind hole (tap lead)
+    drill_d = float(2 * math.ceil((eng + HOLE_MARGIN) / 2 - 1e-9))
+    tap_d = drill_d - max(1.0, 3 * PITCH.get(screw, 0.5))
     for _ in range(600):
         for i in range(n_ang // 4):
             th = 0.5 * math.pi * i / (n_ang // 4)
@@ -254,10 +258,11 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
                                               + (f" × {L_lab}" if L_lab else "") + ")",
                                               cb_dia=cb_d, cb_depth=cb_k))
                     m.feed_holes.append(Hole(x, y, tap, "tap", f"{screw} filetto prof. {tap_d:.1f} "
-                                             f"(preforo Ø{tap:g} prof. {drill_d:.1f})", depth=drill_d))
+                                             f"(preforo Ø{tap:g} prof. {drill_d:.0f})", depth=drill_d))
                 m.plate_screw = screw
-                m.engagement = tap_d
+                m.engagement = eng
                 m.tap_depth = tap_d
+                m.screw_in = eng
                 m.screw_len, m.screw_len_label = L, L_lab
                 return
         r += 0.1

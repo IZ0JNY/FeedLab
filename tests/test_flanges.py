@@ -133,6 +133,9 @@ def test_plate_screw_choices_and_length():
                 assert m.screw_len == pytest.approx(flanges.screw_length(p.body_t, system)[0])
                 # the screw reaches the end of the thread minus margin: length = grip + thread
                 cb = flanges.CBORE[m.plate_screw][1]
-                assert m.tap_depth == pytest.approx(m.screw_len - (p.body_t - cb) + 0.5, abs=1e-6)
+                assert m.screw_in == pytest.approx(m.screw_len - (p.body_t - cb), abs=1e-6)
                 taps = [h for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout]
-                assert len(taps) == 4 and all(h.depth > m.tap_depth for h in taps)
+                assert len(taps) == 4
+                for h in taps:          # blind hole: screw end + ≥ 5 mm, even whole millimetres
+                    assert h.depth % 2 == 0 and h.depth >= m.screw_in + 5 - 1e-9 and h.depth < m.screw_in + 7
+                    assert m.screw_in < m.tap_depth < h.depth
