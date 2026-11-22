@@ -39,8 +39,9 @@ def dish_sources() -> list[str]:
     return sorted({d.source for d in dishes.CATALOG if d.source})
 
 
-def render(st) -> None:
-    st.header("ℹ️ Credits")
+def render(st, header: bool = True) -> None:
+    if header:
+        st.header("ℹ️ Credits")
     st.markdown(f"**FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde**  \n"
                 f"Versione **{__version__}**")
     st.markdown(f"Software sviluppato da **{AUTHOR}**  \n"

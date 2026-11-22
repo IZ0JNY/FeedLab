@@ -1,6 +1,6 @@
 ## FeedLab per Windows
 
-**Novità 0.4.2:** catalogo parabole: Kathrein CAS 60 e CAS 180; Fuba DAA 650, DAA 780, DAA 850 (f/D 0.63, fuoco 531.3 mm), DAA 110 e DAL 800.
+**Novità 0.4.2:** catalogo parabole: Kathrein CAS 60 e CAS 180; Fuba DAA 650, DAA 780, DAA 850 (f/D 0.63, fuoco 531.3 mm), DAA 110 e DAL 800. Pulsante **ℹ️ Credits** nella barra laterale.
 
 **Novità 0.4.1:** nuova scheda **ℹ️ Credits** con autore (Ivan De Cesaris, IZ0JNY), versione e tutte le fonti tecniche, i progetti GitHub e i datasheet delle parabole; versione mostrata anche nella barra laterale.
 

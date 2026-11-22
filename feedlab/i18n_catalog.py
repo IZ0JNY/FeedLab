@@ -1119,4 +1119,6 @@ ENTRIES = [
      "FeedLab ist eine unabhängige Neuimplementierung: Es enthält weder Originalcode noch Originaldatendateien der genannten Quellen. Die Ergebnisse sind Entwurfsschätzungen: vor der Fertigung mit Vollwellensimulation und Messungen prüfen.",
      "FeedLab est une réimplémentation indépendante : il ne contient ni code ni fichiers de données originaux des sources citées. Les résultats sont des estimations de conception : les vérifier par simulation full-wave et par des mesures avant la production.",
      "FeedLab es una reimplementación independiente: no contiene código ni archivos de datos originales de las fuentes citadas. Los resultados son estimaciones de diseño: verificarlos con simulación de onda completa y medidas antes de la producción."),
+    ("Autore, versione e tutte le fonti", "Author, version and all sources", "Autor, Version und alle Quellen",
+     "Auteur, version et toutes les sources", "Autor, versión y todas las fuentes"),
 ]

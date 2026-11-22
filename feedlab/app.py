@@ -144,6 +144,12 @@ def _set_lang():
         pass
 
 
+@_st.dialog("ℹ️ Credits", width="large")
+def _credits_dialog():
+    from feedlab import credits as _cr
+    _cr.render(st, header=False)
+
+
 with st.sidebar:
     st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
                  on_change=_set_lang)
@@ -175,6 +181,8 @@ with st.sidebar:
             st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
             os._exit(0)
     st.caption(f"Versione {feedlab.__version__} · © Ivan De Cesaris IZ0JNY")
+    if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
+        _credits_dialog()
     st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
                                          "vedi scheda Full-wave openEMS"))
 
