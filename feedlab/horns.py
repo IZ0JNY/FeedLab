@@ -194,10 +194,10 @@ def axial_corrugated_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
         "illum_pct": 100 * _poly([5.333e-9, -1.262187e-6, 1.12395799e-4, -4.636545892e-3, 0.087318389246, 0.323315663532], psi),
     }
     tol = 0.1 if f_ghz < 30 else 0.05 if f_ghz < 55 else 0.02
-    notes = [f"manufacturing tolerance ±{tol} mm", "dimension names as in OE2IGL v1.4 drawing — check the drawing",
-             "valid 10-76 GHz, prime f/D 0.33-0.90, offset 0.33-0.80"]
+    notes = [f"tolleranza di lavorazione ±{tol} mm (OE2IGL)",
+             "valido 10–76 GHz, prime focus f/D 0.33–0.90, offset 0.33–0.80"]
     if not 10 <= f_ghz <= 76:
-        notes.append("WARNING: outside the validated frequency range")
+        notes.append("ATTENZIONE: fuori dall'intervallo di frequenza validato (10–76 GHz)")
     return Design("Axial corrugated (OE2IGL v1.4)", f_ghz, {**d, **eff}, "OE2IGL high-performance-axial-corrugated-feed v1.4", notes)
 
 

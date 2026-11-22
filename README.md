@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.4.3**. Programma per Windows (installer e interfaccia in italiano, English, Deutsch, Français, Español), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4.8 BETA TEST** (valida 30 giorni dall'installazione). Programma per Windows (installer, interfaccia e manuale PDF in italiano, English, Deutsch, Français, Español, Русский, Português), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -109,7 +109,7 @@ print(efficiency.best_fD(p))
 5. **G/T completo per offset**, rete (Otoshi), atmosfera ITU-R P.676 fino a 134 GHz.
 6. **GUI** (Qt o web) con confronto di più feed e report PDF.
 
-Nella barra laterale: **ℹ️ Credits** (autore, versione, fonti) e **🐞 Segnala un problema**, che apre la pagina GitHub delle segnalazioni con versione e progetto già compilati.
+Nella barra laterale: **ℹ️ Credits** (autore, versione, fonti), **📖 Manuale** (PDF nella lingua scelta) e **🐞 Segnala un problema**, che apre la pagina GitHub delle segnalazioni con versione e progetto già compilati.
 
 ## Documentazione
 - `docs/KNOWLEDGE_BASE.md`: sintesi strutturata di formule, regole e dati.
@@ -123,7 +123,8 @@ Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programm
 
 ## Crediti e licenze delle fonti
 - Algoritmi e dati da Paul W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
-- Design guide di Gerald OE2IGL (wettersat.bplaced.net).
+- Design guide di Gerald OE2IGL (wettersat.bplaced.net), incluso il *High performance axial corrugated feed* v1.4 (foglio di calcolo e presentazione, Dorsten 2026) → tipo di feed `axial_corrugated`.
+- Mirek OK2AQ: horn conico f/D 0.6 e horn corrugato f/D 0.8 a 24 GHz (radio.feec.vutbr.cz) → tipi di feed `ok2aq_conical` e `ok2aq_corrugated`.
 - C. A. Balanis, *Antenna Theory: Analysis and Design*, Wiley (4ª ed. 2016): formule chiuse di horn e riflettori usate come verifica (`feedlab.balanis`).
 - Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C: foratura delle flange standard (`feedlab.flanges`).
 - Ivan IZ0JNY, feed W2IMU a 24 GHz (https://www.iz0jny.it/24ghz-feedhorn-w2imu/): schema di accoppiamento piastra WR-42 / feed, riprodotto in `tests/test_flanges.py`.

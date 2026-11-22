@@ -20,7 +20,14 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(ROOT))
 from feedlab import __version__  # noqa: E402
 
-DOCS = {"manuale_it.md": ("FeedLab_Manuale_IT.pdf", "it"), "user_manual_en.md": ("FeedLab_User_Manual_EN.pdf", "en")}
+from feedlab.i18n import MANUALS  # noqa: E402
+
+# source Markdown per language; screenshots in img/<lang>/ (docs/manual/tools/make_screens.py)
+SOURCES = {"it": "manuale_it.md", "en": "user_manual_en.md", "de": "handbuch_de.md", "fr": "manuel_fr.md",
+           "es": "manual_es.md", "ru": "rukovodstvo_ru.md", "pt": "manual_pt.md"}
+DOCS = {SOURCES[l]: (MANUALS[l], l) for l in SOURCES}
+TITLES = {"it": "Manuale d’uso", "en": "User Manual", "de": "Benutzerhandbuch", "fr": "Manuel d’utilisation",
+          "es": "Manual de usuario", "ru": "Руководство пользователя", "pt": "Manual do usuário"}
 
 CSS = """
 @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
@@ -73,13 +80,14 @@ def _normalise(md: str) -> str:
 
 
 def build(src: str, out_name: str, lang: str) -> Path:
-    md = _normalise((HERE / src).read_text(encoding="utf-8").replace("{VERSION}", __version__))
+    md = _normalise((HERE / src).read_text(encoding="utf-8").replace("{VERSION}", __version__)
+                    .replace("{IMG}", f"img/{lang}"))
     body = markdown.markdown(md, extensions=["tables", "fenced_code"])
     html = HERE / f"_{Path(src).stem}.html"
     html.write_text(f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><style>{CSS}</style></head>'
                     f"<body>{body}</body></html>", encoding="utf-8")
     out = HERE / out_name
-    title = f"FeedLab {__version__} — {'Manuale d’uso' if lang == 'it' else 'User Manual'}"
+    title = f"FeedLab {__version__} — {TITLES[lang]}"
     chrome = os.environ.get("CHROME")
     if chrome:
         subprocess.run([chrome, "--headless", "--no-sandbox", f"--print-to-pdf={out}", "--no-pdf-header-footer",
@@ -94,5 +102,7 @@ def build(src: str, out_name: str, lang: str) -> Path:
 
 
 if __name__ == "__main__":
+    want = sys.argv[1:] or list(SOURCES)
     for src, (out, lang) in DOCS.items():
-        print(build(src, out, lang))
+        if lang in want and (HERE / src).exists():
+            print(build(src, out, lang))

@@ -84,6 +84,9 @@ def _wall_dims(ax, geo):
     L = geo.z_aperture
     Rmax = geo.outer_radius
     y_dim = -Rmax * 1.12 - 1.0                           # dimension line below the part
+    if geo.kind in ("axial_corrugated", "ok2aq_corrugated"):   # slots: no smooth-horn step/flare callouts
+        feats = {**feats, "steps": [], "flares": []}
+        t = 0
     if t > 0:                                            # wall at the aperture rim
         r_ap = geo.profile[-1][1]
         ax.annotate("", (L + 0.02 * L, -r_ap), (L + 0.02 * L, -r_ap - t), arrowprops=dict(arrowstyle="<->", lw=0.6))
@@ -122,8 +125,8 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
         lines = []
         for k, v in geo.params.items():
             if isinstance(v, (int, float)):
-                unit = "°" if k.endswith("_deg") else ("" if k in ("rings",) else " mm")
-                lam = "" if (k.endswith("_deg") or k == "rings") else f"   ({v / geo.lam:.3f} λ)"
+                unit = "°" if k.endswith("_deg") else ("%" if k.endswith("_pct") else ("" if k in ("rings",) else " mm"))
+                lam = "" if (k.endswith(("_deg", "_pct")) or k == "rings") else f"   ({v / geo.lam:.3f} λ)"
                 lines.append(f"{k:<18s} {v:10.3f}{unit}{lam}")
             else:
                 lines.append(f"{k:<18s} {v}")

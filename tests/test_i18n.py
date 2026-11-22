@@ -13,7 +13,7 @@ def test_catalogue_complete():
     assert len(srcs) == len(set(srcs))
 
 
-@pytest.mark.parametrize("lang", ["en", "de", "fr", "es"])
+@pytest.mark.parametrize("lang", ["en", "de", "fr", "es", "ru", "pt"])
 def test_tabs_and_composed_texts(lang):
     tabs = ["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🖥️ Full-wave openEMS"]
     out = [i18n.tr(t, lang) for t in tabs]
@@ -80,3 +80,22 @@ def test_default_lang_from_settings(tmp_path, monkeypatch):
     from feedlab import openems_local
     openems_local.save_settings(language="de")
     assert i18n.default_lang() == "de"
+
+
+def test_russian_portuguese_complete_and_manuals():
+    import hashlib
+    from pathlib import Path
+    from feedlab.i18n_extra import EXTRA
+    keys = {hashlib.md5(e[0].encode()).hexdigest()[:8] for e in ENTRIES}
+    assert keys <= set(EXTRA), sorted(keys - set(EXTRA))[:5]
+    assert all(len(v) == 2 and all(v) for v in EXTRA.values())
+    assert set(i18n.MANUALS) == set(i18n.LANGS)
+    assert i18n.tr("📖 Manuale", "ru") != "📖 Manuale" and i18n.tr("📖 Manuale", "pt") != "📖 Manuale"
+    man = Path(__file__).resolve().parent.parent / "docs" / "manual"
+    from importlib.util import module_from_spec, spec_from_file_location
+    spec = spec_from_file_location("build_manual", man / "build_manual.py")
+    bm = module_from_spec(spec); spec.loader.exec_module(bm)
+    for lang, src in bm.SOURCES.items():
+        assert (man / src).exists(), src
+        imgs = re.findall(r"\{IMG\}/([\w.]+)", (man / src).read_text(encoding="utf-8"))
+        assert len(imgs) >= 13, (lang, len(imgs))

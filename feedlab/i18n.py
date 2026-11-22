@@ -16,9 +16,21 @@ import locale
 import os
 import re
 
-LANGS = {"it": "Italiano", "en": "English", "de": "Deutsch", "fr": "Français", "es": "Español"}
+LANGS = {"it": "Italiano", "en": "English", "de": "Deutsch", "fr": "Français", "es": "Español",
+         "ru": "Русский", "pt": "Português"}
 _IDX = {"en": 1, "de": 2, "fr": 3, "es": 4}
-INNO_LANG = {"italian": "it", "english": "en", "german": "de", "french": "fr", "spanish": "es"}
+_EXTRA_IDX = {"ru": 0, "pt": 1}                # feedlab.i18n_extra: (Русский, Português), fallback English
+INNO_LANG = {"italian": "it", "english": "en", "german": "de", "french": "fr", "spanish": "es",
+             "russian": "ru", "portuguese": "pt", "brazilianportuguese": "pt"}
+
+
+def _dst(e, lang):
+    if lang in _IDX:
+        return e[_IDX[lang]]
+    import hashlib
+    from .i18n_extra import EXTRA
+    t = EXTRA.get(hashlib.md5(e[0].encode()).hexdigest()[:8])
+    return t[_EXTRA_IDX[lang]] if t else e[1]
 
 _lang = "it"
 _tables: dict = {}
@@ -26,11 +38,10 @@ _tables: dict = {}
 
 def _build(lang: str):
     from .i18n_catalog import ENTRIES
-    i = _IDX[lang]
     m = {}
     exact = {}
     for e in ENTRIES:
-        src, dst = e[0], e[i]
+        src, dst = e[0], _dst(e, lang)
         if len(src) <= 3:                 # short words: whole-text match only, never inside sentences
             exact[src] = dst
             continue
@@ -38,7 +49,8 @@ def _build(lang: str):
         if src[:1].isupper() and len(src) > 1 and not src[:2].isupper():      # lowercase variant
             low = src[0].lower() + src[1:]
             if low not in m:
-                m[low] = dst if lang == "de" or (len(dst) > 1 and dst[:2].isupper()) else dst[0].lower() + dst[1:]
+                m[low] = dst if lang == "de" or (len(dst) > 1 and dst[:2].isupper()) or not dst[:1].isalpha() \
+                    else dst[0].lower() + dst[1:]
     keys = sorted(m, key=len, reverse=True)
     parts = []
     for k in keys:
@@ -245,3 +257,9 @@ class Proxy:
 
 def wrap(st_module):
     return Proxy(st_module)
+
+
+# user manual PDF per language (docs/manual); a missing file falls back to English
+MANUALS = {"it": "FeedLab_Manuale_IT.pdf", "en": "FeedLab_User_Manual_EN.pdf", "de": "FeedLab_Handbuch_DE.pdf",
+           "fr": "FeedLab_Manuel_FR.pdf", "es": "FeedLab_Manual_ES.pdf", "ru": "FeedLab_Rukovodstvo_RU.pdf",
+           "pt": "FeedLab_Manual_PT.pdf"}

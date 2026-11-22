@@ -1,37 +1,37 @@
 # FeedLab — User Manual
 
-**Microwave Feed/Illuminator Design Lab**
-Version {VERSION} · Ivan De Cesaris, IZ0JNY · ivan@iz0jny.it
-
-*The screenshots show the Italian interface. Choose English under **Lingua / Language** at the top of the sidebar.*
+**Microwave feed/illuminator design laboratory**
+Version {VERSION} BETA TEST · Ivan De Cesaris, IZ0JNY · ivan@iz0jny.it
 
 ---
 
-## 1. What FeedLab does
-FeedLab helps you **design, simulate and build dish feeds** from **10 to 134 GHz**. With FeedLab you can:
-- choose your dish (commercial catalogue or your own dish) and the band;
+## 1. What FeedLab is
+FeedLab is for **designing, simulating and building dish feeds** from **10 to 134 GHz**. With FeedLab you:
+- choose the dish (commercial catalogue or your own) and the band;
 - get the most suitable feed with its dimensions;
-- see the pattern, efficiency, S11, gain and G/T;
-- change the dimensions and see at once whether the result gets better or worse, for TX, RX or EME;
-- produce the **mechanical PDF drawing** and **.stp** / **.stl** files for the workshop;
-- design the **λ/4 plate** to the rectangular WR waveguide, with holes, threads and dowel pins;
+- see pattern, efficiency, S11, gain and G/T;
+- change dimensions and see at once whether the result improves, for TX, RX or EME;
+- produce the **mechanical PDF drawing** and the **.stp** / **.stl** files for the workshop;
+- design the **λ/4 plate** to the rectangular WR waveguide, with holes, threads and pins;
 - check the design with **openEMS** (optional) and correct it automatically.
 
-The calculations are based on:
-- the *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ);
-- the OE2IGL design guides;
-- the books by Balanis and Kildal;
-- work by W5LUA, WA6KBL and IZ0JNY.
+The calculations are based on the *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ), Gerald OE2IGL's design guides, the books by Balanis and Kildal and the work of Al W5LUA, Jeff WA6KBL, Sergei RW3BP, Luis CT1DMK, Mirek OK2AQ and Ivan IZ0JNY. The full list is in the **ℹ️ Credits** window.
 
-The full list is in the **ℹ️ Credits** window.
+## 2. BETA TEST version
+This is a **test version**: it is valid for **30 days from the first installation**, then it deactivates.
+- At every start a **popup** shows the expiry date and the days left: close it with **OK**.
+- After expiry FeedLab only shows the notice and a link to the GitHub **Releases** page: download and install the latest version.
+- Each new version gets its own 30 days. If the PC clock is moved back, the version counts as expired.
 
-## 2. Installation
+![BETA TEST popup]({IMG}/00_beta.png)
+
+## 3. Installation
 ### Windows (recommended)
-1. Download the latest version from the **Releases** page of the GitHub repository.
+1. Download the latest version from the **Releases** page of the GitHub repository (IZ0JNY/FeedLab).
 2. **Installer:** run `FeedLab-Setup-x.y.z.exe`. No administrator rights are needed. FeedLab then appears in the Start menu.
-3. **Portable version:** unzip `FeedLab-x.y.z-portable.zip` to a folder and double-click `FeedLab.bat`. Nothing is installed on the system.
+3. **Portable version:** extract `FeedLab-x.y.z-portable.zip` to a folder and double-click `FeedLab.bat`. Nothing is installed on the system.
 
-FeedLab opens in its own window, which uses Microsoft Edge WebView2 (already in Windows 11). If WebView2 is missing, it opens in the browser.
+FeedLab opens in its own window (Microsoft Edge WebView2, included in Windows 11). Without WebView2 it opens in the browser.
 
 ### Linux / macOS (from source)
 ```
@@ -40,163 +40,158 @@ feedlab-gui
 ```
 
 ### Language
-At the top of the sidebar: **Lingua / Language** (Italiano, English, Deutsch, Français, Español).
+At the top of the sidebar: **Lingua / Language**. There are seven languages: Italiano, English, Deutsch, Français, Español, Русский, Português. The installer asks for the language; the **📖 Manual** button opens the manual in the chosen language.
 
-## 3. The sidebar
+## 4. The sidebar
 | Item | Use |
 |---|---|
-| **Band** | working frequency (amateur bands 10–134 GHz or *Other frequency…*) |
-| **λ** | the corresponding wavelength |
-| **Dish / Feed** | summary of the choice made in the guided procedure |
+| **Band** | operating frequency (amateur bands 10–134 GHz or *Other frequency…*) |
+| **λ** | corresponding wavelength |
+| **Dish / Feed** | summary of the choice made in the wizard |
 | **Feed material** | copper, silver-plated copper, brass, aluminium, metallised 3D print…: FeedLab computes losses and added noise |
 | **Ø40 mm collar** | adds the collar for commercial LNB holders |
 | **ℹ️ Credits** | author, version and all sources |
-| **🐞 Report a problem** | opens the GitHub issue page with version and design pre-filled |
-| **📖 Manual** | opens this manual |
+| **📖 Manual** | downloads this manual as PDF |
+| **🐞 Report a problem** | opens the GitHub issues page with version and design already filled in |
 
-## 4. Guided procedure
-![Guided procedure](img/1_wizard.png)
+## 5. Wizard
+![Wizard]({IMG}/01_wizard.png)
 
 1. **Dish:**
-   - *catalogue*: Gibertini, Triax, Fracarro, Fuba, Kathrein, Channel Master/Andrew, Prodelin, Edmund and more, with the source of every value;
+   - *catalogue*: Gibertini, Triax, Fracarro, Fuba, Kathrein, Channel Master/Andrew, Prodelin, Edmund and others, with the source of every figure;
    - *custom dish*: offset or prime focus.
 2. **Custom dish data:**
-   - offset: from diameter + f/D, from diameter + focal length, from **field measurements** (long axis, short axis, depth) or from the illumination angle;
-   - prime focus: from f/D or from the depth.
-3. **Polarisation, goal and machining:**
-   - linear or circular polarisation;
-   - goal **gain** (TX) or **G/T** (RX/EME);
-   - machining means (lathe, sheet metal…).
+   - offset: from diameter + f/D, diameter + focal length, **field measurements** (long axis, short axis, depth) or illumination angle;
+   - prime focus: from f/D or depth.
+3. **Polarisation, goal and tools:** linear or circular; **gain** (TX) or **G/T** (RX/EME); lathe or sheet metal.
 4. **Find the best feed:** FeedLab compares the suitable feeds and ranks them by estimated efficiency, with reasons and warnings.
-5. **Use this feed:** the other tabs then work on that design.
+5. **Use this feed:** the other tabs work on that design.
 
-![Guided procedure result](img/1b_wizard_result.png)
+![Wizard result]({IMG}/02_wizard_result.png)
 
 **If the focal length is not published** (as for many Kathrein and Channel Master dishes), the catalogue says so. Use *field measurements*: stretch a string along the long axis and measure the depth at the centre.
 
-## 5. Feed design
-Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand.
+### 5.1 Feed types
+| Feed | When to use it |
+|---|---|
+| **8-slot axial corrugated (Gerald OE2IGL)** | 10–76 GHz, f/D 0.33–0.9 (offset up to 0.8): 81–86%, the most efficient; dimensions from the v1.4 spreadsheet as a function of the opening angle |
+| **W2IMU, Pickett-Potter, Skobelev, Large W2IMU** | dual-mode for offset dishes and f/D 0.5–0.95; Pickett-Potter and large W2IMU also above 76 GHz |
+| **Super-VE4MA, Chaparral, open waveguide** | deep prime-focus dishes (f/D < 0.5) |
+| **Conical horn f/D 0.6 / corrugated horn f/D 0.8 (Mirek OK2AQ)** | offset feeds designed at 24.048 GHz and scaled in λ to the other bands; the corrugated one is read from the drawing: check it with openEMS |
+| **Rectangular horn** | linear polarisation only, fed directly from WR waveguide |
 
-![Feed design](img/2_Progetto_feed.png)
+1296 MHz feeds (for example Zdeněk OK1DFC's septum) are outside FeedLab's range, which starts at 10 GHz.
 
-## 6. Laboratory
+## 6. Feed design
+Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. For the axial corrugated feed you edit pitch, slot width, step, diameters and depths d1…d8.
+
+![Feed design]({IMG}/03_design.png)
+
+## 7. Laboratory
 This is where you "play" with the dimensions.
 
-![Laboratory](img/3_Laboratorio.png)
+![Laboratory]({IMG}/04_lab.png)
 
-**Scenario:**
-- goal **TX** (gain), **RX** (G/T) or **EME** (gain + G/T);
-- elevation, LNA noise figure, line loss, surface roughness, zenith attenuation.
+**Use scenario:** goal **TX** (gain), **RX** (G/T) or **EME** (gain + G/T); elevation, LNA NF, line loss, surface roughness, zenith attenuation.
 
-**Dimension sliders:** after every change FeedLab recomputes efficiency, gain, G/T, antenna temperature, S11, edge taper and the change of **signal-to-noise ratio**:
+**Dimension sliders:** at every change FeedLab recomputes efficiency, gain, G/T, antenna temperature, S11, edge taper and the change in **S/N ratio**:
 
-| Goal | Change of S/N |
+| Goal | S/N change |
 |---|---|
 | TX | ΔSNR = ΔG |
 | RX | ΔSNR = Δ(G/T) |
 | EME | ΔSNR = ΔG + Δ(G/T) |
 
-**Advice:** plain-language hints, for example "taper too low: enlarge the aperture", "TM11 outside Jeff WA6KBL's 15%" and so on.
+Plain-language **advice**, **sensitivity** of each dimension and **automatic optimisation** with an S11 limit.
 
-**Sensitivity:** how much each dimension matters (curve over ±span).
-
-**Automatic optimisation:** looks for the best dimensions for the goal, with an S11 limit.
-
-### 6.1 Fabrication tolerances and yield
-![Tolerances](img/tol_lab.png)
-1. **Settings:**
-   - your workshop's tolerance (±mm);
-   - distribution: *uniform* (conservative) or *normal with ±t = 3σ* (capable CNC);
-   - allowed loss and maximum S11.
-2. **🎲 Analyse tolerances:** in about 10 s FeedLab simulates thousands of manufactured parts and reports:
-   - the **yield**: percentage of good parts;
-   - mean loss, efficiency spread, worst S11;
-   - the **critical dimensions**, with the **recommended tolerance** for each one. Only those dimensions need tight machining.
+### 7.1 Machining tolerances and yield
+![Tolerances]({IMG}/05_tolerances.png)
+1. **Parameters:** workshop tolerance (±mm); *uniform* distribution (conservative) or *normal with ±t = 3σ* (capable CNC); acceptable loss and maximum S11.
+2. **🎲 Analyse tolerances:** FeedLab simulates thousands of parts and gives the **yield** (good parts), mean loss, efficiency spread, worst S11 and the **critical dimensions** with the **recommended tolerance** for each.
 3. **📄 Use these tolerances in the PDF drawing:** adds the tolerance table to the drawing.
-4. **🛡️ Robust optimisation:** looks for dimensions that stay good *within the tolerances* (mean − k·σ) instead of the sharpest peak. Useful above 47 GHz.
+4. **🛡️ Robust optimisation:** looks for dimensions that stay good *within the tolerances* (mean − k·σ). Useful above 47 GHz.
 
-## 7. Simulation & S11
-![Simulation](img/5_Simulazione.png)
-- **S11:** over the band, computed with the fast *mode-matching* solver.
-- **Aperture modes:** for Pickett-Potter and Skobelev also the **TM11/TE11** ratio, which should be about 15% (WA6KBL).
-- **Pattern:** polar and cartesian, E and H planes, with phase.
-- **Dish efficiency** versus f/D, split into spillover, illumination, phase and polarisation.
+## 8. Simulation & S11
+![Simulation]({IMG}/06_simulation.png)
+- **S11** over the band with the fast *mode-matching* solver.
+- **Aperture modes:** for Pickett-Potter and Skobelev also the **TM11/TE11** ratio (about 15%, WA6KBL).
+- **Pattern** in polar and Cartesian form, E and H planes, with phase.
+- **Dish efficiency** versus f/D: spillover, illumination, phase and polarisation.
 - **Phase centre** and G/T.
 
-The fast solver is accurate inside the feed. The aperture, however, is modelled approximately, so S11 is optimistic below 1λ. For a reference result use openEMS (§11).
+The fast solver does not handle feeds with rings or slots (VE4MA, Chaparral, corrugated): for those FeedLab uses the efficiency published by the author and recommends openEMS.
 
-## 8. 3D pattern and 3D model
-![3D pattern](img/6_Lobo_3D.png)
-![3D model](img/7_Modello_3D.png)
+## 9. 3D pattern and 3D model
+![3D pattern]({IMG}/07_lobe3d.png)
+![3D model]({IMG}/08_model3d.png)
 
-## 9. Drawing & STEP
-![Drawing and STEP](img/8_Disegno.png)
-- **📄 Generate PDF:** A4 mechanical drawing with dimensioned section, dimension table (mm and λ), title block and general tolerances.
-  - If you enabled per-dimension tolerances (§6.1), the drawing includes their table.
-  - If you enabled fixing holes (§10), there is a **sheet 2** with the drilled flange and the hole table.
-- **🧊 Generate STEP:** `.stp` file for CNC/CAD (CadQuery/OpenCascade). Holes are real; tapped holes are at tap-drill diameter and the thread is called out in the PDF.
+## 10. Drawing & STEP
+![Drawing and STEP]({IMG}/09_drawing.png)
+- **📄 Generate PDF:** A4 mechanical drawing with dimensioned section, dimension table (mm and λ), title block and general tolerances. With per-dimension tolerances (§7.1) it includes their table; with fixing holes (§11) a **sheet 2** shows the drilled flange.
+- **🧊 Generate STEP:** `.stp` file for CNC/CAD. Threaded holes are at tap-drill diameter; the thread is given in the PDF.
 - **🖨️ Generate STL:** for 3D printing.
 
-## 10. WR plate
-![WR plate](img/4_Piastrina_WR.png)
+## 11. WR plate
+![WR plate]({IMG}/10_plate.png)
 
-The **λ/4 plate** joins the feed's circular guide to the rectangular WR waveguide. The orientation of the WR sets **vertical or horizontal polarisation**. The method is the OE2IGL design guide with the HB9PZK optimisation.
+The **λ/4 plate** joins the feed's circular waveguide to the rectangular WR waveguide. The WR orientation sets **vertical or horizontal polarisation** (OE2IGL design guide, HB9PZK optimisation).
 
-1. **Inputs:** WR waveguide, polarisation, Ø of the feed's circular guide, cutter radius in the corners.
-2. **Result:** aperture a × b, thickness (with tolerance) and intermediate Z0.
+1. **Data:** WR waveguide, polarisation, circular waveguide Ø, cutter radius in the corners.
+2. **Result:** a × b aperture, thickness (with tolerance) and intermediate Z0.
 3. **Fixing holes waveguide → plate → feed**, with **metric** or **inch** screws:
-   - the **standard flange** pattern of the waveguide (Flann / MIL-DTL-3922 tables) is **tapped in the plate**: the waveguide's screws go there;
-   - **4 plate → feed screws** with their **heads in counterbores** on the waveguide side, so the face towards the waveguide stays flat;
-   - plate–feed **dowel pins** from **47 GHz up**;
-   - round UG-383/385/387 flanges: holes for the waveguide's dowels and a 4-40 thread, because these waveguides have captive 4-40 screws;
-   - if the λ/4 plate is too thin for counterbores and threads, FeedLab thickens the plate body and adds on the feed side a **pocket of the circular guide's diameter**. The λ/4 section is unchanged.
-4. The same pattern is applied to the **feed flange**: FeedLab increases its thickness and diameter and, if needed, lengthens the input guide.
+   - the **standard flange** pattern (Flann / MIL-DTL-3922) is **tapped in the plate**;
+   - **4 plate → feed screws** with the **head in a counterbore** on the waveguide side, so the face towards the waveguide stays flat;
+   - **alignment pins** from **47 GHz up**;
+   - round UG-383/385/387 flanges: holes for the waveguide pins and 4-40 thread;
+   - if the plate is too thin, FeedLab thickens its body and cuts a **pocket** of the circular-waveguide diameter on the feed side.
+4. The same pattern is applied to the **feed flange**.
 
-![Plate drawing at 47 GHz](img/plate_drawing_47GHz.png)
+![47 GHz plate drawing](img/plate_drawing_47GHz.png)
 ![Drilled feed flange, sheet 2](img/feed_flange_47GHz.png)
 
-**Always check dimensions before drilling.** For WR-28 (UG-599/U) the Flann table gives the same values as WR-62: FeedLab warns about it. Also compare the screw heads (ISO 4762) with the screws you buy.
+**Always check the dimensions before drilling**, including the screw heads (ISO 4762) against the screws you buy.
 
-## 11. Full-wave openEMS (optional)
-![openEMS](img/9_Full_wave_openEMS.png)
-openEMS is a free FDTD solver. A run takes from minutes to hours and works in the background: you can close FeedLab.
+## 12. Full-wave openEMS (optional)
+![openEMS]({IMG}/11_openems.png)
+openEMS is a free FDTD solver. A simulation takes minutes to hours and runs in the background: you can close FeedLab.
 
 | Sub-tab | Use |
 |---|---|
-| ① **Installation** | guided installation of openEMS and its Python link, with a final test |
+| ① **Installation** | guided installation of openEMS and its Python binding, with a final test |
 | ② **New analysis** | single run, mesh convergence, parameter sweep; time and RAM estimate |
 | ③ **Simulations** | progress, stop, log |
-| ④ **Results** | S11/VSWR, co- and cross-polar patterns, phase centre, efficiency on your dish, G/T, comparison with the fast model; exports HTML report, CSV and W1GHZ `.dat` |
-| ⑤ **Space mapping** | see below |
+| ④ **Results** | S11/VSWR, co- and cross-polar patterns, phase centre, efficiency, G/T, comparison with the fast model; HTML report, CSV and W1GHZ `.dat` |
+| ⑤ **Space mapping** | automatic correction of the fast model with openEMS |
 
-**Space mapping.** openEMS checks a candidate; the difference between openEMS and the fast model corrects the fast model; FeedLab proposes the next candidate. The loop repeats until convergence, also **automatically**. At the end, *✅ Apply the best to the design*.
+**Space mapping:** openEMS checks a candidate, the difference between openEMS and the fast model corrects the fast model and FeedLab proposes the next candidate, until convergence. Then *✅ Apply the best to the design*.
 
-![Space mapping](img/spacemap_tab.png)
+![Space mapping]({IMG}/12_spacemap.png)
 
-## 12. Recommended workflow
-1. **Guided procedure:** dish, band, goal → feed.
-2. **Laboratory:** adjust the dimensions watching ΔS/N, then run the automatic optimisation.
-3. **Tolerances:** ask your workshop for its tolerance and analyse the yield; if needed, use the robust optimisation.
-4. **(Optional) openEMS:** a check run or space mapping.
+## 13. Recommended workflow
+1. **Wizard:** dish, band, goal → feed.
+2. **Laboratory:** fine-tune dimensions watching ΔS/N, then automatic optimisation.
+3. **Tolerances:** ask your workshop for its tolerance and analyse the yield.
+4. **(Optional) openEMS:** check or space mapping (essential for corrugated and ring feeds).
 5. **WR plate:** polarisation, fixing holes, PDF and STEP.
-6. **Feed drawing & STEP:** PDF (with tolerances) and STEP to the workshop.
+6. **Feed drawing & STEP** to the workshop.
 7. **In the field:** measure sun noise and compare it with the expected value.
 
-## 13. Known limitations
-- **Fast solver:** models the aperture as a flange and does not handle choke or ring feeds (VE4MA, Chaparral). Use openEMS for those.
-- **Efficiencies:** these are computed values. On a real dish expect 12–15 points less. The *differences* between variants, however, are reliable.
-- **Dish catalogue:** some focal lengths are estimates (flagged as such). Measure your dish.
-- **Circular polarisation:** the polariser (septum or dielectric) is not designed by FeedLab yet.
+## 14. Known limits
+- **Fast solver:** models the aperture as a flange and does not handle rings and slots. Use openEMS for those.
+- **Efficiencies:** they are calculated values. On a real dish expect 12–15 points less; the *differences* between variants are reliable.
+- **Dish catalogue:** some focal lengths are estimates (marked as such). Measure your dish.
+- **Circular polarisation:** the polariser (septum or dielectric) is not yet designed by FeedLab.
 
-## 14. Reporting a problem
-Press **🐞 Report a problem** in the sidebar: GitHub opens with version, system and design pre-filled. Describe what happened, what you expected and how to reproduce it.
+## 15. Reporting a problem
+Press **🐞 Report a problem** in the sidebar: GitHub opens with version, system and design already written. Describe what happened, what you expected and how to reproduce it.
 
-## 15. Main sources
+## 16. Main sources
+![Credits]({IMG}/13_credits.png)
 - **Paul W1GHZ:** W1GHZ Online Microwave Antenna Book.
-- **Gerald OE2IGL:** design guides; **HB9PZK**.
+- **Gerald OE2IGL:** design guides, axial corrugated feed v1.4; **HB9PZK**.
 - **Books:** C. A. Balanis, *Antenna Theory*; P.-S. Kildal, *Foundations of Antenna Engineering*.
-- **Articles:** Al W5LUA, *24 GHz EME*; Jeff WA6KBL, dual-mode feedhorns (DUBUS); Ivan IZ0JNY, 24 GHz W2IMU feed.
+- **Articles:** Al W5LUA, Jeff WA6KBL (DUBUS), Sergei RW3BP, Luis CT1DMK, Luis CT1DMK and Willi LX1DB, Mirek OK2AQ, Ivan IZ0JNY.
 - **Flanges:** Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C.
-- **Software:** openEMS (T. Liebig); CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy.
+- **Software:** openEMS; CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy.
 
 The full list is in the **ℹ️ Credits** window.

@@ -18,6 +18,11 @@ from feedlab import credits as _credits_mod
 
 from feedlab import i18n
 
+
+def _T(tpl: str, **kw) -> str:
+    """Whole-sentence template: translated as one catalogue entry, then filled in."""
+    return i18n.tr(tpl).format(**kw)
+
 st = i18n.wrap(_st)
 
 from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns, tolerance,
@@ -43,9 +48,11 @@ if _bst["beta"]:
         @_st.dialog("🧪 BETA TEST")
         def _beta_popup():
             st.markdown(f"**FeedLab {feedlab.__version__} BETA TEST**")
-            st.write(f"Versione di prova valida {_beta.VALID_DAYS} giorni dall'installazione: "
-                     f"restano {_bst['days_left']} giorni (scade il {_bst['expires']:%d/%m/%Y}). "
-                     "Alla scadenza il programma si disattiva: scarica la versione aggiornata da GitHub.")
+            st.write(_T("Versione di prova valida {n} giorni dall'installazione.", n=_beta.VALID_DAYS))
+            _c1, _c2 = st.columns(2)
+            _c1.metric("Giorni rimasti", _bst["days_left"])
+            _c2.metric("Scadenza", f"{_bst['expires']:%d/%m/%Y}")
+            st.write("Alla scadenza il programma si disattiva: scarica la versione aggiornata da GitHub.")
             if st.button("OK", type="primary"):
                 st.rerun()
 
@@ -154,6 +161,8 @@ def section_fig(geo):
     fig.add_hline(y=0, line_dash="dashdot", line_color="gray")
     t = float(geo.params.get("wall", 0) or 0)
     feats = geometry.wall_features(geo.profile)
+    if geo.kind in ("axial_corrugated", "ok2aq_corrugated"):      # slots: no smooth-horn step/flare labels
+        feats = {**feats, "steps": [], "flares": []}
     ann = dict(showarrow=True, arrowhead=0, arrowwidth=1, ax=0, ay=-28, font=dict(size=11), bgcolor="rgba(255,255,255,0.8)")
     for z, ra, rb in feats["steps"]:
         z0 = z - t if rb > ra else z
@@ -215,18 +224,21 @@ with st.sidebar:
     st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
-    _man = Path(feedlab.__file__).resolve().parent.parent / "docs" / "manual" / (
-        "FeedLab_Manuale_IT.pdf" if i18n.get_lang() == "it" else "FeedLab_User_Manual_EN.pdf")
+    _mdir = Path(feedlab.__file__).resolve().parent.parent / "docs" / "manual"
+    _man = _mdir / i18n.MANUALS.get(i18n.get_lang(), i18n.MANUALS["en"])
+    if not _man.exists():
+        _man = _mdir / i18n.MANUALS["en"]
     if _man.exists():
         st.download_button("📖 Manuale", _man.read_bytes(), file_name=_man.name, mime="application/pdf",
-                           help="manuale d'uso in PDF (italiano o inglese secondo la lingua scelta)")
+                           help="manuale d'uso in PDF nella lingua scelta")
     st.link_button("🐞 Segnala un problema", _credits_mod.issue_url(S.get("feed_kind", ""), S.get("f_ghz")),
                    help="apre la pagina GitHub delle segnalazioni (issue) con versione e progetto già compilati")
     st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
                                          "vedi scheda Full-wave openEMS"))
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
-                "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR", "🖥️ Full-wave openEMS", "ℹ️ Credits"])
+                "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR",
+                "🖥️ Full-wave openEMS", "ℹ️ Credits"])
 
 # ---------------------------------------------------------------- 1 wizard
 with tabs[0]:
@@ -338,8 +350,11 @@ with tabs[0]:
 with tabs[1]:
     st.header("Progetto del feed")
     kinds = list(geometry.FEED_TYPES)
-    S.feed_kind = st.selectbox("Tipo di feed", kinds, index=kinds.index(S.feed_kind),
-                               format_func=lambda k: geometry.FEED_TYPES[k])
+    _kind = st.selectbox("Tipo di feed", kinds, index=kinds.index(S.feed_kind),
+                         format_func=lambda k: geometry.FEED_TYPES[k])
+    if _kind != S.feed_kind:                     # rerun so the sidebar summary shows the new feed at once
+        S.feed_kind = _kind
+        st.rerun()
     geo = current_geometry()
     c1, c2 = st.columns([1, 2])
     with c1:
@@ -353,6 +368,8 @@ with tabs[1]:
                     "flare_length": "flare_length", "horn_diam": "horn_diam", "ring_width": "ring_width",
                     "ring_depth": "ring_depth", "ring_setback": "ring_setback", "ring_wall": "ring_wall",
                     "aperture_H": "aperture_H", "aperture_E": "aperture_E", "axial_length": "axial_length"}
+        if S.feed_kind == "axial_corrugated":           # OE2IGL design-guide dimensions, edited one by one
+            map_keys = {k: k for k in ("pitch", "w", "axi", "delta", "Di", "Ds", *[f"d{i}" for i in range(1, 9)])}
         for k, v in editable.items():
             if k not in map_keys:
                 continue
@@ -420,7 +437,7 @@ with tabs[3]:
                               height=330, yaxis_range=[min(-40, float(mm.s11_db.min()) - 3), 0])
             st.plotly_chart(fig, width="stretch")
             i0 = int(np.argmin(np.abs(mm.f_ghz - S.f_ghz)))
-            st.caption(f"S11 a {S.f_ghz:g} GHz: **{mm.s11_db[i0]:.1f} dB** (RL {-mm.s11_db[i0]:.1f} dB) · "
+            st.caption(f"S11 @ {S.f_ghz:g} GHz: **{mm.s11_db[i0]:.1f} dB** (RL {-mm.s11_db[i0]:.1f} dB) · "
                        f"bilancio di potenza {mm.power_balance[i0]:.4f} · {time.time() - t0:.1f} s. "
                        "Apertura modellata come flangia (stima ottimistica per aperture < 1λ); "
                        "transizione dalla guida WR esclusa. Per S11 di riferimento usa openEMS.")
@@ -431,8 +448,10 @@ with tabs[3]:
                     f"{k}: {abs(v / te):.3f} ∠{math.degrees(np.angle(v / te)):.0f}°" for k, v in modes.items()))
                 q_ = explore.tm11_power_ratio(modes)
                 if geo.kind in explore.STEP_HORNS and q_ is not None:
-                    st.caption(f"TM11/TE11 in potenza: {100 * q_:.1f}% — Jeff WA6KBL indica ~15% per un Pickett-Potter "
-                               f"({'nella norma' if explore.TM11_TARGET[0] <= q_ <= explore.TM11_TARGET[1] else 'da correggere'}).")
+                    st.caption(_T("TM11/TE11 in potenza: {q}% — Jeff WA6KBL indica circa il 15% per un Pickett-Potter ({stato}).",
+                                  q=f"{100 * q_:.1f}",
+                                  stato=i18n.tr("nella norma" if explore.TM11_TARGET[0] <= q_ <= explore.TM11_TARGET[1]
+                                                else "da correggere")))
         pat, _ = quick_pattern(geo.kind, tuple(geo.staircase()) if not is_rect else (), S.f_ghz,
                                (geo.params["a"], geo.params["b"], geo.params["aperture_H"], geo.params["aperture_E"],
                                 geo.params["axial_length"]) if is_rect else None)
@@ -728,9 +747,10 @@ with tabs[2]:
                 so, se, ss = rep.stats["objective"], rep.stats["eta"], rep.stats["s11_db"]
                 m = st.columns(4)
                 m[0].metric("Resa", f"{100 * rep.yield_frac:.1f} %",
-                            help=f"pezzi con perdita ≤ {rep.spec['loss_budget_db']} dB e S11 ≤ {rep.spec['s11_limit_db']} dB")
-                m[1].metric(f"Perdita media di {ylab}", f"{rep.nominal['objective'] - so['mean']:.3f} dB",
-                            help=f"dispersione σ = {so['std']:.3f} dB")
+                            help=_T("pezzi con perdita ≤ {a} dB e S11 ≤ {b} dB", a=rep.spec['loss_budget_db'],
+                                    b=rep.spec['s11_limit_db']))
+                m[1].metric(_T("Perdita media di {y}", y=ylab), f"{rep.nominal['objective'] - so['mean']:.3f} dB",
+                            help=_T("dispersione σ = {s} dB", s=f"{so['std']:.3f}"))
                 m[2].metric("Efficienza (5–95%)", f"{100 * se['p05']:.1f}–{100 * se['p95']:.1f} %")
                 if not math.isnan(ss["p95"]):
                     m[3].metric("S11 peggiore (95%)", f"{ss['p95']:.1f} dB")
@@ -738,7 +758,7 @@ with tabs[2]:
                 fig.add_trace(go.Histogram(x=rep.samples["objective"] - rep.nominal["objective"], nbinsx=60,
                                            name=f"Δ {ylab} (dB)"))
                 fig.add_vline(x=-rep.spec["loss_budget_db"], line_dash="dot")
-                fig.update_layout(height=260, xaxis_title=f"Δ {ylab} rispetto al nominale (dB)", yaxis_title="pezzi",
+                fig.update_layout(height=260, xaxis_title=_T("Δ {y} rispetto al nominale (dB)", y=ylab), yaxis_title=i18n.tr("pezzi"),
                                   margin=dict(t=20, b=30), showlegend=False)
                 st.plotly_chart(fig, width="stretch")
                 st.markdown("**Quote critiche** (in ordine di importanza)")
@@ -839,15 +859,21 @@ with tabs[7]:
                      f"(fc TE11 {299.792458 / (1.706 * dcirc):.2f} GHz)")
             if pl.mount is not None:
                 mm_ = pl.mount
-                st.info(f"Flangia {mm_.flange.wg} {mm_.flange.name}: le viti della guida ({mm_.screw}) si avvitano nella "
-                        f"piastra; 4 viti piastra→feed {mm_.plate_screw} × {mm_.screw_len_label} con testa nella lamatura "
-                        f"(lato guida); nel feed la vite entra {mm_.screw_in:.1f} mm, foro prof. "
-                        f"{max(h.depth for h in mm_.feed_holes if h.kind == 'tap' and mm_.plate_screw in h.callout):.0f} mm, "
-                        f"filetto prof. {mm_.tap_depth:.1f} mm"
-                        + (", 2 spine di centraggio" if any(h.kind == "pin" for h in mm_.plate_holes) else "") + ". "
-                        + (f"Corpo piastrina {pl.body_t:.2f} mm con tasca Ø{pl.circ_diam:.3f} × {pl.pocket_depth:.2f} mm sul lato "
-                           "feed (prolunga la guida circolare; la parte λ/4 resta invariata). " if pl.pocket_depth > 1e-6 else "")
-                        + "La foratura è applicata anche al feed (PDF foglio 2 e STEP nella scheda Disegno & STEP).")
+                _deep = max(h.depth for h in mm_.feed_holes if h.kind == 'tap' and mm_.plate_screw in h.callout)
+                _txt = [_T("Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastra.",
+                           wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
+                        _T("4 viti piastra→feed {ps} × {ln} con testa nella lamatura (lato guida).",
+                           ps=mm_.plate_screw, ln=mm_.screw_len_label),
+                        _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
+                           a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]
+                if any(h.kind == "pin" for h in mm_.plate_holes):
+                    _txt.append(i18n.tr("2 spine di centraggio piastra–feed."))
+                if pl.pocket_depth > 1e-6:
+                    _txt.append(_T("Corpo piastrina {t} mm con tasca Ø{d} × {p} mm sul lato feed (prolunga la guida "
+                                   "circolare; la parte λ/4 resta invariata).",
+                                   t=f"{pl.body_t:.2f}", d=f"{pl.circ_diam:.3f}", p=f"{pl.pocket_depth:.2f}"))
+                _txt.append(i18n.tr("La foratura è applicata anche al feed (PDF foglio 2 e STEP nella scheda Disegno & STEP)."))
+                st.info(" ".join(_txt))
                 for w_ in mm_.warnings:
                     st.warning(w_)
             base = WORK / f"plate_{wg}_{S.f_ghz:g}GHz_{pl.polarization}".replace(".", "p")

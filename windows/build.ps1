@@ -47,6 +47,8 @@ New-Item -ItemType Directory -Force "$build\app" | Out-Null
 Copy-Item -Recurse "$root\feedlab" "$build\app\feedlab"
 Copy-Item -Recurse "$root\.streamlit" "$build\app\.streamlit"
 Copy-Item -Recurse "$root\docs" "$build\app\docs"
+# the PDFs are enough: the manual sources (screenshots, scripts) stay in the repository
+Remove-Item -Recurse -Force "$build\app\docs\manual\img", "$build\app\docs\manual\tools" -ErrorAction SilentlyContinue
 Copy-Item "$root\feedlab_main.py", "$root\README.md" "$build\app\"
 Copy-Item "$root\windows\feedlab.ico" "$build\"
 Get-ChildItem -Recurse -Directory -Filter "__pycache__" "$build\app" | Remove-Item -Recurse -Force

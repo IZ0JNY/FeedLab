@@ -1,13 +1,32 @@
-# Modifiche per la prossima versione (0.4.8)
+# Modifiche per la prossima versione (0.4.9)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Manuale per ogni lingua dell'installazione, con screenshot in quella lingua (spostato dalla 0.4.7) | da fare |
-| 2 | Nuove lingue: **russo** e **portoghese** (interfaccia, installer, manuali) | da fare |
-| 3 | Feed di Zdeněk OK1DFC (septum feed per la polarizzazione circolare) | in corso |
-| 4 | Versione **BETA TEST** a scadenza: valida 30 giorni dall'installazione, poi si disattiva; avviso in un pop-up a ogni avvio | ✅ fatto (ramo `v0.4.8`) |
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.8 (pubblicata, BETA TEST 30 giorni)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Manuale per ogni lingua dell'installazione, con screenshot in quella lingua | ✅ fatto: 7 manuali PDF, schermate in `docs/manual/img/<lingua>/` |
+| 2 | Nuove lingue: **russo** e **portoghese** (interfaccia, installer, manuali) | ✅ fatto |
+| 3 | Feed di Zdeněk OK1DFC (septum) | ❌ annullato su richiesta: è un feed per 1296 MHz, fuori dal campo di FeedLab (da 10 GHz); OK1DFC resta in bibliografia |
+| 4 | Versione **BETA TEST** a scadenza: 30 giorni dall'installazione, pop-up a ogni avvio | ✅ fatto |
+| 5 | Corrugato assiale a 8 gole di Gerald OE2IGL (v1.4) tra i tipi di feed e nella procedura guidata | ✅ fatto |
+| + | Feed di Mirek OK2AQ (horn conico f/D 0.6 e corrugato f/D 0.8, 24 GHz) tra i tipi di feed | ✅ fatto |
+
+## 1. Manuali in 7 lingue
+- Sorgenti Markdown in `docs/manual/` (`manuale_it.md`, `user_manual_en.md`, `handbuch_de.md`, `manuel_fr.md`, `manual_es.md`, `rukovodstvo_ru.md`, `manual_pt.md`); `{IMG}` diventa `img/<lingua>`.
+- Schermate: `python docs/manual/tools/make_screens.py [lingue]` avvia l'app in ogni lingua e fotografa 14 schermate.
+- PDF: `python docs/manual/build_manual.py [lingue]`. Il pulsante 📖 sceglie il PDF della lingua attiva.
+- L'installer include solo i PDF (non schermate e script).
+
+## 2. Russo e portoghese
+`feedlab/i18n_extra.py`: traduzioni RU/PT di tutte le voci del catalogo (chiave = md5 del testo italiano), con ricaduta sull'inglese. Installer Inno Setup con Russian.isl e Portuguese.isl. Test: `tests/test_i18n.py`.
 
 ## 4. BETA TEST a scadenza
 - **Modulo `feedlab/beta.py`:** al primo avvio di ogni versione salva la data nella cartella impostazioni di FeedLab (`beta.json`). Ogni nuova versione ha i suoi 30 giorni.
@@ -15,6 +34,12 @@
 - **Alla scadenza:** pagina di blocco con il link all'ultima versione su GitHub. Anche un orologio spostato indietro di oltre un giorno conta come scadenza.
 - **Limite:** FeedLab è open source, quindi è un avviso per i tester, non una protezione. `BETA = False` produce una versione normale.
 - **Test:** `tests/test_beta.py`.
+
+## 5. Corrugato assiale (Gerald OE2IGL) e feed di Mirek OK2AQ
+- **Corrugato assiale v1.4:** quote dai polinomi del foglio di calcolo in funzione dell'angolo di apertura (verificato a 47.088 GHz / 137°); 10–76 GHz; efficienza dell'autore 81–86% usata dalla procedura guidata, dove risulta di solito primo. Sezione, 3D, PDF e STEP; quote modificabili (passo, gole, gradino, d1…d8).
+- **OK2AQ:** horn conico f/D 0.6 (anche nel simulatore rapido) e horn corrugato f/D 0.8 (geometria ricavata dal disegno, con avviso; da verificare con openEMS), progettati a 24.048 GHz e scalati in λ.
+- La scheda "Feed pubblicati" è stata tolta su richiesta: i feed stanno nell'elenco dei tipi di feed insieme agli altri.
+- Test: `tests/test_published_feeds.py`.
 
 ---
 

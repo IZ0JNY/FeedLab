@@ -30,11 +30,15 @@ FEED_TYPES = {
     "conical": "Horn conico",
     "ve4ma": "VE4MA / Super-VE4MA (choke)",
     "chaparral": "Chaparral 3 anelli",
+    "axial_corrugated": "Corrugato assiale 8 gole (OE2IGL)",
+    "ok2aq_conical": "Horn conico f/D 0.6 (OK2AQ, 24 GHz)",
+    "ok2aq_corrugated": "Horn corrugato f/D 0.8 (OK2AQ, 24 GHz)",
     "rect_horn": "Horn rettangolare (G3RPE)",
 }
 
 # feeds whose interior is a single circular guide with steps/cones -> mode-matching simulation possible
-MODEMATCH_OK = {"open_circular", "w2imu", "w2imu_oe2igl", "large_w2imu", "skobelev", "pickett_potter", "conical"}
+MODEMATCH_OK = {"open_circular", "w2imu", "w2imu_oe2igl", "large_w2imu", "skobelev", "pickett_potter", "conical",
+                "ok2aq_conical"}
 
 
 @dataclass
@@ -327,7 +331,69 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
                       prof, t, extra_polys=polys, notes=des.notes, design=des)
         return geo
 
+    if kind == "axial_corrugated":
+        return _axial_corrugated(f_ghz, opening_deg, t, kw)
+    if kind in ("ok2aq_conical", "ok2aq_corrugated"):
+        return _ok2aq(kind, f_ghz, kw)
+
     raise ValueError(f"unknown feed type {kind}")
+
+
+def _axial_corrugated(f_ghz, opening_deg, t, kw):
+    """Gerald OE2IGL high-performance axial-corrugated feed v1.4 (from Luis CT1DMK's concept): 8 concentric
+    axial slots on a stepped face, dimensions from OE2IGL's design guide (polynomials of the half opening
+    angle). Geometry as in OE2IGL's cross-section: input guide Ø Di (length las), step to Ø Ds, slot k of
+    radial width w starts at radius Ds/2 + delta + (k−1)·pitch, its opening plane is (k−1)·axi further
+    forward, depth d_k (axial, d2…d8 = λ/4). The body is a solid of revolution (machined from a bar)."""
+    if opening_deg is None:
+        raise ValueError("serve l'angolo di apertura della parabola")
+    des = horns.axial_corrugated_oe2igl(f_ghz, opening_deg)
+    d = des.dims_mm
+    pitch = kw.get("pitch", d["pitch"]); w = kw.get("w", d["w"]); axi = kw.get("axi", d["axi"])
+    delta = kw.get("delta", d["delta"]); Di = kw.get("Di", d["Di"]); Ds = kw.get("Ds", d["Ds"])
+    depths = [kw.get("d1", d["d1"])] + [kw.get(f"d{k}", d["d2_to_d8"]) for k in range(2, 9)]
+    ai, a_s = Di / 2, max(Ds / 2, Di / 2)
+    t_out = kw.get("outer_wall", max(t, 0.5 * pitch))
+    # the input guide must be long enough for the deepest slot bottom to stay inside the body
+    las = kw.get("las", d["las"])
+    z_f = max(las, max(dk - k * axi for k, dk in enumerate(depths)) + t)
+    r_in = [a_s + delta + k * pitch for k in range(8)]
+    r_out = [r + w for r in r_in]
+    z_open = [z_f + k * axi for k in range(8)]
+    z_top = z_f + 8 * axi
+    R = r_out[-1] + t_out
+    # "skyline" of the metal in (r, z): radial bands from the bore to the outer wall
+    bands = [(ai, a_s, z_f)]                                   # step face (Ds > Di) or nothing
+    if delta > 1e-9:
+        bands.append((a_s, r_in[0], z_open[0]))                # lip before the first slot
+    for k in range(8):
+        bands.append((r_in[k], r_out[k], z_open[k] - depths[k]))                    # slot bottom
+        nxt = r_in[k + 1] if k < 7 else R
+        bands.append((r_out[k], nxt, z_open[k + 1] if k < 7 else z_top))            # wall / outer rim
+    poly = [(ai, 0.0)]
+    for r0, r1, h in bands:
+        if r1 - r0 < 1e-9:
+            continue
+        poly += [(r0, h), (r1, h)]
+    poly += [(R, 0.0)]
+    clean = [poly[0]]
+    for pt in poly[1:]:
+        if abs(pt[0] - clean[-1][0]) > 1e-9 or abs(pt[1] - clean[-1][1]) > 1e-9:
+            clean.append(pt)
+    profile = [(0.0, ai), (z_f, ai), (z_f, a_s)] + [(z_open[k], r_in[k]) for k in range(8)] + [(z_top, R)]
+    params = {"pitch": pitch, "w": w, "axi": axi, "delta": delta, "Di": Di, "Ds": Ds, "las": z_f,
+              **{f"d{k + 1}": depths[k] for k in range(8)}, "outer_diam": 2 * R, "length": z_top,
+              "opening_deg": opening_deg, "eta_guide_pct": d["eta_pct"], "wall": t}
+    notes = [f"efficienza secondo la design guide OE2IGL: {d['eta_pct']:.1f}% (spillover {d['spill_pct']:.1f}%, "
+             f"illuminazione {d['illum_pct']:.1f}%)", *des.notes,
+             "usa l'angolo di apertura della parabola, non l'f/D (OE2IGL)",
+             "simulazione rapida non disponibile (gole assiali): verifica con openEMS"]
+    if not z_f == las:
+        notes.append(f"guida d'ingresso portata a {z_f:.2f} mm per contenere la gola più profonda")
+    g = FeedGeometry("axial_corrugated", f_ghz, params, profile, [np.array(clean)], z_top, r_out[-1], ai, R,
+                     notes, des)
+    g.mount = None
+    return g
 
 
 @dataclass
@@ -360,3 +426,69 @@ def build_rect(f_ghz: float, fD: float, wg: str = "WR-90", wall: float | None = 
          "axial_length": kw.get("axial_length", max(des.dims_mm["axial_length"], 0.5 * wavelength_mm(f_ghz))),
          "input_length": kw.get("input_length", wavelength_mm(f_ghz)), "wall": t}
     return RectHornGeometry("rect_horn", f_ghz, p, des.notes)
+
+
+
+OK2AQ_F0 = 24.048      # GHz: Mirek OK2AQ's drawings; other frequencies are scaled with the wavelength
+OK2AQ_SRC = {"ok2aq_conical": "https://www.radio.feec.vutbr.cz/esl/files/EME/Doc/Conical_Horn_0_6_OK2AQ.pdf",
+             "ok2aq_corrugated": "https://www.radio.feec.vutbr.cz/esl/files/EME/Doc/Conical_Horn_0_8_OK2AQ.pdf"}
+
+
+def _ok2aq(kind, f_ghz, kw):
+    """Mirek OK2AQ's 24.048 GHz feeds for offset dishes (HFSS-designed, measured), scaled by λ to f_ghz.
+    z = 0 at the input flange face, aperture at the front (OK2AQ's drawings are mirrored: input on the right)."""
+    k = kw.get("scale", OK2AQ_F0 / f_ghz)
+    notes = [f"Mirek OK2AQ, progetto a {OK2AQ_F0} GHz" + (f", scalato ×{k:.3f} con la lunghezza d'onda" if abs(k - 1) > 1e-6 else ""),
+             f"disegno originale: {OK2AQ_SRC[kind]}"]
+    if kind == "ok2aq_conical":
+        # interior: guide Ø10 × 23, cone to Ø35 over 12, Ø35 through the 2 mm front disc; total 37
+        ai, L_in, ra, L_c, t_disc = 5 * k, 23 * k, 17.5 * k, 12 * k, 2 * k
+        z_ap = L_in + L_c + t_disc
+        profile = [(0.0, ai), (L_in, ai), (L_in + L_c, ra), (z_ap, ra)]
+        body = [(ai, 0.0), (16 * k, 0.0), (16 * k, 5 * k), (10 * k, 5 * k), (10 * k, L_in),        # flange Ø32 × 5, guide Ø20
+                (21 * k, L_in + L_c), (27 * k, L_in + L_c), (27 * k, z_ap), (ra, z_ap),            # cone Ø20→Ø42, disc Ø54 × 2
+                (ra, L_in + L_c), (ai, L_in)]
+        cone_out = lambda z: 10 * k + (21 * k - 10 * k) * (z - L_in) / L_c     # outer surface of the cone
+        fins = []
+        for r_fin, z in ((26 * k, z_ap - t_disc - 5 * k), (25 * k, z_ap - t_disc - 10 * k)):   # Ø52, Ø50 × 2
+            r_root = cone_out(z) - 0.3 * k
+            fins.append([(r_root, z), (r_fin, z), (r_fin, z + 2 * k), (r_root, z + 2 * k)])
+        params = {"d_input": 2 * ai, "input_length": L_in, "D_aperture": 2 * ra, "cone_length": L_c,
+                  "flare_half_deg": math.degrees(math.atan((ra - ai) / L_c)), "disc_diam": 54 * k, "length": z_ap,
+                  "flange_diam": 32 * k, "flange_thickness": 5 * k, "wall": 4 * k}
+        notes += ["flangia d'ingresso WR-42: 4×M3 su 16.26 × 17.02 mm (a 24 GHz)",
+                  "disco frontale e alette posteriori ricostruiti dal disegno: verifica sul PDF originale"]
+        polys = [np.array(body)] + [np.array(f) for f in fins]
+        g = FeedGeometry(kind, f_ghz, params, profile, polys, z_ap, ra, ai, 27 * k, notes, None)
+    else:
+        # corrugated f/D 0.8: guide Ø10 × 23, taper to Ø18 in 4.5, 7 ridges Ø18…Ø54 up to the aperture at 50
+        ai, L_in = 5 * k, 23 * k
+        z0, z_ap = L_in + 4.5 * k, 50 * k
+        n = 7
+        pitch = (z_ap - z0) / n
+        groove_w, groove_r = 1.5 * k, 3 * k
+        poly = [(ai, 0.0), (15 * k, 0.0), (15 * k, 5 * k), (10 * k, 5 * k), (10 * k, L_in)]
+        # outer body: cone from the input guide to the Ø60 cylinder by the end of the first ridge, then Ø60
+        poly += [(30 * k, z0 + pitch), (30 * k, z_ap)]
+        inner = [(ai, L_in), (9 * k, z0)]
+        for i in range(n):                       # ridge i: radius 9+3i, groove behind it (axial width 1.5)
+            r = (9 + 3 * i) * k
+            za, zb = z0 + i * pitch, z0 + (i + 1) * pitch
+            rg = min(r + groove_r, 29 * k)       # keep ≥ 1 mm (×k) of wall behind the last groove
+            inner += [(r, za), (r, zb - groove_w), (rg, zb - groove_w), (rg, zb)]
+        inner[-1] = (inner[-1][0], z_ap)
+        poly += inner[::-1]
+        clean = [poly[0]]
+        for pt in poly[1:]:
+            if abs(pt[0] - clean[-1][0]) > 1e-9 or abs(pt[1] - clean[-1][1]) > 1e-9:
+                clean.append(pt)
+        poly = clean[:-1] if clean[-1] == clean[0] else clean
+        profile = [(0.0, ai), (L_in, ai), (z0, 9 * k)] + [(z0 + (i + 1) * pitch, (9 + 3 * i) * k) for i in range(n)]
+        params = {"d_input": 2 * ai, "input_length": L_in, "ridge_first_diam": 18 * k, "ridge_last_diam": 54 * k,
+                  "ridges": n, "length": z_ap, "outer_diam": 60 * k, "flange_diam": 30 * k, "flange_thickness": 5 * k}
+        notes += ["ATTENZIONE: posizione e profondità delle gole interpretate dal disegno OK2AQ — prima di costruire "
+                  "confronta con il PDF originale e verifica con openEMS",
+                  "simulazione rapida non disponibile (gole)"]
+        g = FeedGeometry(kind, f_ghz, params, profile, [np.array(poly)], z_ap, 27 * k, ai, 30 * k, notes, None)
+    g.mount = None
+    return g

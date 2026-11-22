@@ -1,21 +1,24 @@
-## FeedLab 0.4.7 per Windows / for Windows
+## FeedLab 0.4.8 BETA TEST per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.7.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.7-portable.zip` → `FeedLab.bat`.
+**Installazione / Installation:** `FeedLab-Setup-0.4.8.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.8-portable.zip` → `FeedLab.bat`.
+
+> 🧪 **BETA TEST:** questa versione vale **30 giorni dall'installazione**, poi si disattiva; a ogni avvio un pop-up indica i giorni rimasti. Alla scadenza scarica la versione più recente da questa pagina.
+> 🧪 **BETA TEST:** this version is valid for **30 days from installation**, then it deactivates; a popup shows the days left at every start. When it expires, download the latest version from this page.
 
 ### 🇮🇹 Novità
-- **Viti piastrina → feed selezionabili:** M3/M4 a 10 GHz, M2.5/M3/M2 sopra; lunghezza = 2 × spessore piastrina arrotondata alla misura commerciale; equivalenti UNC; foro nel feed dimensionato sulla vite.
-- **Nuovi calcoli dai riferimenti EME:**
-  - Sergei RW3BP (77 GHz): lente dielettrica di correzione, efficienza del fascio principale dal rumore solare, rumore di Giove; la sua parabola da 2.4 m nel catalogo;
-  - Luis CT1DMK: sensibilità del radiometro, G/T da radiosorgenti, tabella delle radiosorgenti;
-  - Luis CT1DMK e Willi LX1DB: rapporto assiale, isolamento cross-polare e perdita di polarizzazione per i feed CP.
-- **Bibliografia:** nuovi riferimenti (Paul W1GHZ con AD6FP e AA6IW, OK1DFC, S57UUU, DL4MUP, G0IVA, rivista DUBUS). Nei riferimenti compaiono solo nominativi o nome + nominativo.
+- **Corrugato assiale a 8 gole di Gerald OE2IGL (v1.4)** tra i tipi di feed: quote calcolate dall'angolo di apertura della parabola, 10–76 GHz, 81–86% di efficienza; la procedura guidata lo propone (spesso al primo posto). Sezione, 3D, PDF e STEP.
+- **Feed di Mirek OK2AQ:** horn conico per offset f/D 0.6 e horn corrugato f/D 0.8, progettati a 24 GHz e scalati alle altre bande.
+- **Due nuove lingue: russo e portoghese** (interfaccia e installer). Ora le lingue sono 7.
+- **Manuale d'uso in tutte e 7 le lingue**, con le schermate dell'app nella stessa lingua; il pulsante 📖 apre quello della lingua scelta.
+- **Versione BETA TEST** a scadenza di 30 giorni, con pop-up a ogni avvio.
+- **Bibliografia:** corrugato assiale di Gerald OE2IGL (Dorsten 2026) e feed di Mirek OK2AQ.
 
 ### 🇬🇧 What's new
-- **Selectable plate → feed screws:** M3/M4 at 10 GHz, M2.5/M3/M2 above; length = 2 × plate thickness rounded to a commercial size; UNC equivalents; feed hole sized on the screw.
-- **New calculations from EME references:**
-  - Sergei RW3BP (77 GHz): correcting dielectric lens, main-beam efficiency from sun noise, Jupiter noise; his 2.4 m dish in the catalogue;
-  - Luis CT1DMK: radiometer sensitivity, G/T from radio sources, radio source table;
-  - Luis CT1DMK and Willi LX1DB: axial ratio, cross-polar isolation and polarisation loss for CP feeds.
-- **Bibliography:** new references (Paul W1GHZ with AD6FP and AA6IW, OK1DFC, S57UUU, DL4MUP, G0IVA, DUBUS magazine). References use callsigns, or first name + callsign, only.
+- **Gerald OE2IGL's 8-slot axial corrugated feed (v1.4)** among the feed types: dimensions computed from the dish opening angle, 10–76 GHz, 81–86% efficiency; the wizard proposes it (often first). Section, 3D, PDF and STEP.
+- **Mirek OK2AQ's feeds:** conical horn for offset f/D 0.6 and corrugated horn for f/D 0.8, designed at 24 GHz and scaled to the other bands.
+- **Two new languages: Russian and Portuguese** (interface and installer). There are now 7 languages.
+- **User manual in all 7 languages**, with app screenshots in the same language; the 📖 button opens the one for the chosen language.
+- **BETA TEST version** expiring after 30 days, with a popup at every start.
+- **Bibliography:** Gerald OE2IGL's axial corrugated feed (Dorsten 2026) and Mirek OK2AQ's feeds.
 
 Requisiti / Requirements: Windows 10/11 64-bit.
