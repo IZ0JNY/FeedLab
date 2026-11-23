@@ -547,6 +547,22 @@ def _axial_corrugated(f_ghz, opening_deg, t, kw):
              "simulazione rapida non disponibile (scalini assiali): verifica con openEMS"]
     if not z_f == las:
         notes.append(f"guida d'ingresso portata a {z_f:.2f} mm per contenere lo scalino più profondo")
+    # circular waveguide section behind the head, with the base (round, or square like the WR flange) and the
+    # flange drilling, turned in the same piece as the head. L_guide = 0: head only.
+    L_g = float(kw.get("L_guide", wavelength_mm(f_ghz)))
+    if L_g > 1e-6:
+        tube = _finish("axial_corrugated", f_ghz, {"wall": t}, [(0.0, ai), (L_g, ai)], t)
+        L_g = tube.profile[-1][0]                     # lengthened if the drilled base needs it
+        head = np.array([(r, z + L_g) for r, z in clean])
+        profile = [(0.0, ai)] + [(z + L_g, r) for z, r in profile]
+        params = {**params, "L_guide": L_g, "z_head": L_g, "length": z_top + L_g,
+                  **{k: tube.params[k] for k in ("flange_diam", "flange_thickness", "base_square") if k in tube.params}}
+        notes = notes + [n for n in tube.notes if n not in notes]
+        g = FeedGeometry("axial_corrugated", f_ghz, params, profile, [tube.polygons[0], head], z_top + L_g,
+                         r_out[-1], ai, R, notes, des)
+        g.mount = tube.mount
+        return g
+    params = {**params, "L_guide": 0.0}
     g = FeedGeometry("axial_corrugated", f_ghz, params, profile, [np.array(clean)], z_top, r_out[-1], ai, R,
                      notes, des)
     g.mount = None

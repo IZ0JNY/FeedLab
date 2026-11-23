@@ -52,7 +52,7 @@ def _corrugated_dims(ax, geo, half=True):
     p = geo.params
     a_s = max(p["Ds"], p["Di"]) / 2
     r_in = [a_s + p["delta"] + k * p["pitch"] for k in range(8)]
-    z_open = [p["las"] + k * p["axi"] for k in range(8)]
+    z_open = [p.get("z_head", 0.0) + p["las"] + k * p["axi"] for k in range(8)]
     for k in range(8):
         dk = p[f"d{k + 1}"]
         y = r_in[k] + p["w"] / 2

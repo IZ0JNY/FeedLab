@@ -446,7 +446,7 @@ with tabs[1]:
                     "Ls": "Ls", "Dm": "Dm", "L1": "L1", "Lp": "Lp", "L2": "L2",
                     "cone1_half_deg": "a1", "cone2_half_deg": "a2"}
         if S.feed_kind == "axial_corrugated":           # OE2IGL design-guide dimensions, edited one by one
-            map_keys = {k: k for k in ("pitch", "w", "axi", "delta", "Di", "Ds", *[f"d{i}" for i in range(1, 9)])}
+            map_keys = {k: k for k in ("pitch", "w", "axi", "delta", "Di", "Ds", "L_guide", *[f"d{i}" for i in range(1, 9)])}
         for k, v in editable.items():
             if k not in map_keys:
                 continue

@@ -4,7 +4,14 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Piastrina di adattamento con la **forma e la misura della flangia**: quadrata per WR-90/WR-75/WR-42 (10 e 24 GHz), **rotonda** per le flange MIL da 47 GHz in su; più grande della flangia solo se le lamature non ci stanno (avviso) | ✅ fatto |
+| 2 | **Da 47 GHz** niente viti piastrina→feed: la piastrina si appoggia sulla base del feed e le viti della guida la attraversano e si avvitano nella base (filettata passante); le spine standard allineano tutto; base rotonda come la flangia | ✅ fatto |
+| 3 | **Spessore della base del feed** impostabile nella barra laterale (minimo 1 mm, vuoto = automatico); fori filettati e lunghezza delle viti seguono lo spessore | ✅ fatto |
+| 4 | Sezione nella scheda Progetto feed con i **nomi delle quote** (blu lunghezze, verde diametri, rosso angoli dei flare) e stessi colori nella tabella delle quote; **angoli dei coni** IZ0JNY modificabili (la lunghezza del cono si ricalcola) | ✅ fatto |
+| 5 | Laboratorio: **semiangoli dei coni** IZ0JNY tra le quote da variare | ✅ fatto |
+| 6 | IZ0JNY: **profilo esterno per CNC** a scelta (parete costante, proposta 1 pieno fino alla fine del 1° cono, proposta 2 senza rientranze); interno invariato | ✅ fatto |
+| 7 | **Axial Corrugated** con **sezione di guida circolare** (lunghezza L_guide impostabile, 0 = solo la testa) e base quadrata/rotonda con foratura, in un unico pezzo | ✅ fatto |
+| 8 | Traduzioni inglesi corrette negli avvisi delle flange | ✅ fatto |
 
 ---
 
