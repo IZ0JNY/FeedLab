@@ -133,6 +133,14 @@ def plate_solid(p: MatchingPlate):
     return body
 
 
+def mesh(p: MatchingPlate, tol: float = 0.02):
+    """Triangle mesh (vertices Nx3, faces Mx3) of the plate for the 3D preview."""
+    import numpy as np
+    shape = plate_solid(p).val()
+    verts, tris = shape.tessellate(tol, 0.2)
+    return np.array([(v.x, v.y, v.z) for v in verts]), np.array(tris, dtype=int)
+
+
 def export_step(p: MatchingPlate, path):
     import cadquery as cq
     cq.exporters.export(plate_solid(p), str(path), exportType="STEP")

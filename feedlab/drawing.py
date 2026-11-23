@@ -296,6 +296,8 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         if h.kind == "tap":                      # thread: 3/4 circle at the major diameter (drawing convention)
             from matplotlib.patches import Arc
             ax.add_patch(Arc((h.x, h.y), SCREW_MAJOR(mnt.screw), SCREW_MAJOR(mnt.screw), theta1=0, theta2=270, lw=0.6))
+        if h.cb_dia:                             # counterbore on the horn side (hidden from this face): dashed
+            ax.add_patch(Circle((h.x, h.y), h.cb_dia / 2, fill=False, lw=0.7, ec="m", ls="--"))
         ax.text(h.x + h.dia * 0.8, h.y + h.dia * 0.8, str(i), fontsize=7, color="b")
     ax.set_xlim(-R * 1.25, R * 1.25); ax.set_ylim(-R * 1.25, R * 1.25)
     from . import i18n
@@ -309,7 +311,10 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
                  T("lato largo della guida {wg} lungo x (polarizzazione {pol})", wg=mnt.flange.wg, pol=pol), fontsize=9)
     ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()
     import textwrap
-    if mnt.stack:
+    if mnt.stack and mnt.feed_cbore:
+        head = [T("Viti {screw} inserite dal lato del feed, con la testa nella lamatura (tratteggio magenta, lato horn): "
+                  "attraversano base e piastrina e si avvitano nella flangia della guida.", screw=mnt.screw)]
+    elif mnt.stack:
         head = [T("Le viti della guida ({screw}) attraversano la piastrina e si avvitano in questa base. "
                   "Nessuna vite piastrina → feed.", screw=mnt.screw)]
     else:

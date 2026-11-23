@@ -232,14 +232,25 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     if flange and MOUNT.get("wg"):
         from .flanges import mount
         mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f,
-                    MOUNT.get("plate_screw"), MOUNT.get("plate_t"))
+                    MOUNT.get("plate_screw"), MOUNT.get("plate_t"), bool(MOUNT.get("feed_cbore")))
         d_need, t_need = mnt.feed_flange_min()
     # base (flange) thickness: chosen by the user (≥ 1 mm) or automatic (enough for the threaded holes)
     t_user = BASE.get("thickness")
     fl_t = (max(1.0, float(t_user)) if t_user else
             max(max(1.5, 0.12 * lam), t_need if mnt is not None else 0.0)) if flange else None
     if mnt is not None:
-        if mnt.stack:                              # through-tapped base: the thread is the whole base
+        if mnt.stack and mnt.feed_cbore:           # screws from the feed side: grip = base under the head
+            cbk = max(h.cb_depth for h in mnt.feed_holes if h.kind == "cbore_back")
+            mnt.screw_in = max(fl_t - cbk, 0.0)
+            notes = list(notes or []) + [f"viti {mnt.screw} dal lato del feed: lunghezza ≈ {max(fl_t - cbk, 0):.1f} mm (base sotto "
+                                         "la testa) + spessore piastrina + ~4 mm nella flangia della guida"]
+            if fl_t < cbk + 0.8:
+                notes = list(notes) + [f"base {fl_t:.2f} mm troppo sottile per la lamatura ({cbk:g} mm): aumentala"]
+            r_body = max(r for _, r in profile) + t + 0.3       # horn wall seen from the screw-head side
+            if any(math.hypot(h.x, h.y) - h.cb_dia / 2 < r_body for h in mnt.feed_holes if h.kind == "cbore_back"):
+                notes = list(notes) + ["le teste delle viti toccano il corpo del feed: allunga la guida d'ingresso "
+                                       "o usa le viti filettate nella base"]
+        elif mnt.stack:                            # through-tapped base: the thread is the whole base
             mnt.engagement = mnt.screw_in = mnt.tap_depth = fl_t
         elif fl_t < t_need - 1e-9 and mnt.screw_len:
             # plate→feed screws: the longest commercial one whose tip stays inside the base
@@ -265,7 +276,7 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
                         h.callout = h.callout.split(" prof.")[0] + " passante"
             notes = list(notes or []) + [f"base {fl_t:.2f} mm: fori filettati passanti, filetto utile {fl_t:.2f} mm "
                                          f"(consigliati ≥ {t_need:.1f} mm)"]
-        if mnt.stack and fl_t < t_need - 1e-9:
+        if mnt.stack and not mnt.feed_cbore and fl_t < t_need - 1e-9:
             notes = list(notes or []) + [f"base {fl_t:.2f} mm: filetto utile {fl_t:.2f} mm (consigliati ≥ {t_need:.1f} mm)"]
         # the base must sit on the straight input guide: lengthen it if needed (electrically benign)
         r0 = profile[0][1]
@@ -295,7 +306,7 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     fl_r = profile[0][1] + t + max(2.0, 0.4 * lam) if flange else None
     if mnt is not None:
         if mnt.flange.shape == "round":           # round MIL flange: base as large as the flange (holes inside)
-            edge = max(math.hypot(h.x, h.y) + h.dia / 2 for h in mnt.feed_holes)
+            edge = max(math.hypot(h.x, h.y) + max(h.dia, h.cb_dia) / 2 for h in mnt.feed_holes)
             fl_r = max(fl_r, mnt.flange.A / 2, edge + 0.5)
         else:
             fl_r = max(fl_r, d_need / 2)

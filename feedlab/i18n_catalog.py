@@ -6,6 +6,20 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('lato horn', 'horn side'),
+    ('Vista 3D non disponibile: {e}', '3D view not available: {e}'),
+    ('Viti {screw} inserite dal lato del feed, con la testa nella lamatura (tratteggio magenta, lato horn): attraversano base e piastrina e si avvitano nella flangia della guida.', '{screw} screws inserted from the feed side, heads in the counterbores (dashed magenta, horn side): they pass through base and plate and are screwed into the waveguide flange.'),
+    ('dal lato del feed con la testa nella lamatura della base; attraversano piastrina e base e si avvitano nella flangia della guida (se la flangia ha fori passanti: dadi)', 'from the feed side with the head in the base counterbore; they pass through plate and base and are screwed into the waveguide flange (nuts if the flange has through holes)'),
+    ('dal lato del feed: lunghezza ≈', 'from the feed side: length ≈'),
+    ('mm (base sotto la testa) + spessore piastrina + ~4 mm nella flangia della guida', 'mm (base under the head) + plate thickness + ~4 mm in the waveguide flange'),
+    ('troppo sottile per la lamatura', 'too thin for the counterbore'),
+    ('aumentala', 'make it thicker'),
+    ("le teste delle viti toccano il corpo del feed: allunga la guida d'ingresso o usa le viti filettate nella base", 'the screw heads touch the feed body: lengthen the input waveguide or use screws threaded into the base'),
+    ('lato horn (testa', 'horn side (head'),
+    ('Viti dal lato del feed con lamatura nella base', 'Screws from the feed side, counterbored in the base'),
+    ('viti 4-40 inserite dal lato del feed con la testa nella lamatura della base del feed: attraversano piastrina e base e si avvitano nella flangia della guida. Spento: viti della guida filettate nella base.', '4-40 screws inserted from the feed side with the head in a counterbore of the feed base: they pass through plate and base into the waveguide flange. Off: waveguide screws threaded into the base.'),
+    ('Flangia {wg} {name}: viti {screw} dal lato del feed, con la testa nella lamatura della base; attraversano base e piastrina e si avvitano nella flangia della guida.', 'Flange {wg} {name}: {screw} screws from the feed side, head in the base counterbore; they pass through base and plate into the waveguide flange.'),
+    ('Vista 3D della piastrina', '3D view of the plate'),
     ("L'analisi di tolleranza usa il simulatore rapido a guida circolare: non disponibile per l'horn rettangolare.", 'The tolerance analysis uses the fast circular-waveguide simulator: not available for the rectangular horn.'),
     ('modello delle tolleranze…', 'tolerance model…'),
     ("Tolleranza consigliata: la più larga classe d'officina che mantiene la perdita di quella quota entro la sua parte del budget di", 'Recommended tolerance: the widest workshop class that keeps the loss of that dimension within its share of the budget of'),

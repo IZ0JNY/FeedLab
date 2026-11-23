@@ -5,6 +5,8 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Cartiglio dei disegni PDF: i testi lunghi (nome del feed, materiale) vanno a capo e la riga si allarga invece di uscire dal riquadro | ✅ fatto |
+| 2 | Flange rotonde (da 47 GHz): opzione "viti dal lato del feed con lamatura nella base" (testa nella lamatura sul lato horn, viti avvitate nella flangia della guida); riportata nello STEP/STL del feed e nel foglio della flangia del PDF | ✅ fatto |
+| 3 | Scheda Piastrina WR: vista 3D della piastrina accanto alla vista frontale | ✅ fatto |
 
 ---
 
