@@ -53,6 +53,7 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 | **Feed material** | copper, silver-plated copper, brass, aluminium, metallised 3D print…: FeedLab computes losses and added noise |
 | **Rectangular waveguide** | the WR waveguide screwed to the feed, among those of the band: 10 GHz WR-90 or WR-75, 24 GHz WR-42, 47 GHz WR-22 or WR-19. It sizes the plate, the drilling and the base |
 | **Feed base** | round or **square** with the side of the waveguide flange (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm); only for waveguides with a square flange |
+| **Feed base thickness** | minimum 1 mm; empty = automatic (what the threaded holes need) |
 | **ℹ️ Credits** | author, version and all sources |
 | **📖 Manual** | downloads this manual as PDF |
 | **🐞 Report a problem** | opens the GitHub issues page with version and design already filled in |
@@ -86,7 +87,10 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 1296 MHz feeds (for example Zdeněk OK1DFC's septum) are outside FeedLab's range, which starts at 10 GHz.
 
 ## 6. Feed design
-Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. For the Axial Corrugated feed you edit pitch, step width, front step, diameters and depths d1…d8 of the 8 steps.
+Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand. In the section and in the table **lengths are blue**, **diameters green** and **flare angles red**; changing a cone angle makes FeedLab recompute its length (the diameters stay).
+
+- **IZ0JNY Dual-Flare:** choice of the **outer profile** (the inside does not change): constant wall, *option 1* solid from the base to the end of the first cone, *option 2* outside without recesses. The options are simpler and cheaper to make on a CNC.
+- **Axial Corrugated:** you edit pitch, step width, front step, diameters and depths d1…d8 of the 8 steps, and the length **L_guide** of the circular waveguide section behind the head, with its base (0 mm = head only).
 
 ![Feed design]({IMG}/03_design.png)
 
@@ -142,13 +146,11 @@ The **λ/4 plate** joins the feed's circular waveguide to the rectangular WR wav
 
 1. **Data:** polarisation, circular waveguide Ø, cutter radius in the corners. The **WR waveguide** is chosen in the sidebar.
 2. **Result:** a × b aperture, thickness (with tolerance) and intermediate Z0.
-3. **Fixing holes waveguide → plate → feed**, with **metric** or **inch** screws:
-   - the **standard flange** pattern (Flann / MIL-DTL-3922) is **tapped in the plate**;
-   - **4 plate → feed screws** with the **head in a counterbore** on the waveguide side, so the face towards the waveguide stays flat;
-   - **alignment pins** from **47 GHz up**;
-   - round UG-383/385/387 flanges: holes for the waveguide pins and 4-40 thread;
-   - if the plate is too thin, FeedLab thickens its body and cuts a **pocket** of the circular-waveguide diameter on the feed side.
-4. The same pattern is applied to the **feed flange**.
+3. The plate has **the shape and size of the waveguide flange**: **square** at 10 and 24 GHz (WR-90, WR-75, WR-42), **round** (MIL flanges) from 47 GHz up.
+4. **Fixing holes waveguide → plate → feed**, with **metric** or **inch** screws:
+   - **10 and 24 GHz (square flanges):** the standard flange pattern (Flann) is **tapped in the plate**; **4 plate → feed screws** with the **head in a counterbore** on the waveguide side, so the face towards the waveguide stays flat; if the plate is too thin, FeedLab thickens its body and cuts a **pocket** of the circular-waveguide diameter on the feed side;
+   - **from 47 GHz (round UG-383/385/387 flanges):** no plate → feed screws. The plate **rests on the feed base**; the waveguide's 4-40 screws pass through it and are screwed into the base, tapped through. The standard flange dowels align waveguide, plate and feed.
+5. The same pattern is applied to the **feed base**. The **base thickness** is set in the sidebar (minimum 1 mm, empty = automatic): threaded holes and screw lengths follow it.
 
 ![47 GHz plate drawing](img/plate_drawing_47GHz.png)
 ![Drilled feed flange, sheet 2](img/feed_flange_47GHz.png)
