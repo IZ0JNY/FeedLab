@@ -1,6 +1,6 @@
-## FeedLab 0.4.12 BETA TEST per Windows / for Windows
+## FeedLab 0.4.13 BETA TEST per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.12.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.12-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+**Installazione / Installation:** `FeedLab-Setup-0.4.13.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.13-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
 
 > 🧪 **BETA TEST:** questa versione vale **30 giorni dall'installazione**, poi si disattiva; a ogni avvio un pop-up indica i giorni rimasti. Alla scadenza scarica la versione più recente da questa pagina.
 > 🧪 **BETA TEST:** this version is valid for **30 days from installation**, then it deactivates; a popup shows the days left at every start. When it expires, download the latest version from this page.
@@ -13,6 +13,8 @@
 - **Laboratorio:** semiangoli dei coni IZ0JNY tra le quote da variare.
 - **IZ0JNY Dual-Flare:** profilo esterno a scelta per il CNC (parete costante, pieno fino alla fine del primo cono, esterno senza rientranze); l'interno non cambia.
 - **Axial Corrugated:** la testa è unita a una sezione di guida circolare di lunghezza impostabile (L_guide, 0 = solo la testa) con la sua base quadrata o rotonda e la foratura.
+- **Guida circolare d'ingresso allungabile** per tutti i feed (quota input_length, length o L_guide): per un feed più lungo, senza cambiare le prestazioni.
+- **IZ0JNY:** quota dello scalino interno (altezza h e lunghezza Ls) nel disegno PDF e nella sezione.
 - Traduzioni inglesi corrette negli avvisi delle flange.
 
 ### 🇬🇧 What's new
@@ -23,6 +25,8 @@
 - **Laboratory:** IZ0JNY cone half-angles among the dimensions to vary.
 - **IZ0JNY Dual-Flare:** outer profile of your choice for CNC (constant wall, solid up to the end of the first cone, outside without recesses); the inside does not change.
 - **Axial Corrugated:** the head is joined to a circular waveguide section of adjustable length (L_guide, 0 = head only) with its square or round base and drilling.
+- **Circular input waveguide can be lengthened** for every feed (dimension input_length, length or L_guide): for a longer feed, with no change in performance.
+- **IZ0JNY:** inner step dimension (height h and length Ls) on the PDF drawing and on the section.
 - Fixed English translations in the flange warnings.
 
 Requisiti / Requirements: Windows 10/11 64-bit.

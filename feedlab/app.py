@@ -199,6 +199,13 @@ def section_fig(geo):
             fig.add_shape(type="line", x0=z, x1=z, y0=-r, y1=r, line=dict(color="seagreen", width=1, dash="dot"))
             fig.add_annotation(x=z, y=0, text=f"Ø {k} {2 * r:.2f}", showarrow=False, textangle=-90, xshift=-8,
                                font=dict(size=10, color="seagreen"), bgcolor="rgba(255,255,255,0.7)")
+        if geo.kind == "iz0jny":                      # inner step: height and length
+            pp = geo.params
+            zs, ri, rs, ls = pp["input_length"], pp["Di_input"] / 2, pp["Ds_step"] / 2, pp["Ls"]
+            fig.add_shape(type="line", x0=zs + ls / 2, x1=zs + ls / 2, y0=ri, y1=rs, line=dict(color="red", width=2))
+            fig.add_annotation(x=zs + ls / 2, y=(ri + rs) / 2, ax=60, ay=40, showarrow=True, arrowcolor="red",
+                               text=_T("scalino interno h {h:.2f} · Ls {l:.2f}", h=rs - ri, l=ls),
+                               font=dict(size=10, color="red"), bgcolor="rgba(255,255,255,0.8)")
         fig.update_yaxes(range=[-Rmax * 1.25, Rmax * 1.5])
     fig.update_layout(height=380, yaxis=dict(scaleanchor="x"), xaxis_title="z (mm)", yaxis_title="r (mm)",
                       title=f"Sezione assiale · parete {t:.2f} mm", margin=dict(t=40, b=10))
@@ -462,9 +469,13 @@ with tabs[1]:
                 lab = f":green[{k} (mm)]"
             else:
                 lab = f":blue[{k} (mm)]"
+            _guide = k in ("input_length", "L_guide") or (k == "length" and S.feed_kind in ("open_circular", "ve4ma", "chaparral"))
             nv = st.number_input(lab, value=float(round(v, 4)), format="%.4f", key=f"in_{S.feed_kind}_{k}",
                                  help="angolo del cono: cambiandolo FeedLab ricalcola la lunghezza del cono "
-                                      "(i diametri restano)" if k.endswith("_deg") else None)
+                                      "(i diametri restano)" if k.endswith("_deg") else
+                                 ("lunghezza della guida circolare d'ingresso: allungala se vuoi un feed più lungo; "
+                                  "nella guida circolare viaggia solo il TE11, le prestazioni non cambiano"
+                                  if _guide else None))
             if abs(nv - v) > 1e-6:
                 newv[map_keys[k]] = nv
         cc1, cc2 = st.columns(2)

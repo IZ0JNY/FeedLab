@@ -1,4 +1,4 @@
-# Modifiche per la prossima versione (0.4.13)
+# Modifiche per la prossima versione (0.4.14)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
@@ -8,9 +8,9 @@
 
 ---
 
-# Archivio: versione 0.4.12 (pubblicata, BETA TEST 30 giorni)
+# Archivio: versione 0.4.13 (pubblicata, BETA TEST 30 giorni)
 
-Pubblicata con 8 modifiche.
+**Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
@@ -22,6 +22,8 @@ Pubblicata con 8 modifiche.
 | 6 | IZ0JNY: **profilo esterno per CNC** a scelta (parete costante, proposta 1 pieno fino alla fine del 1° cono, proposta 2 senza rientranze); interno invariato | ✅ fatto |
 | 7 | **Axial Corrugated** con **sezione di guida circolare** (lunghezza L_guide impostabile, 0 = solo la testa) e base quadrata/rotonda con foratura, in un unico pezzo | ✅ fatto |
 | 8 | Traduzioni inglesi corrette negli avvisi delle flange | ✅ fatto |
+| 9 | **Guida circolare d'ingresso allungabile** per tutti i feed (input_length; length per guida aperta/VE4MA/Chaparral; L_guide per il corrugato) con spiegazione nella tabella delle quote | ✅ fatto |
+| 10 | IZ0JNY: **quota dello scalino interno** (altezza h e lunghezza Ls) nel disegno PDF e nella sezione | ✅ fatto |
 
 ---
 

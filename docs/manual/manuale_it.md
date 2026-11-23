@@ -87,7 +87,7 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 I feed per 1296 MHz (per esempio il septum di Zdeněk OK1DFC) sono fuori dal campo di FeedLab, che parte da 10 GHz.
 
 ## 6. Progetto feed
-Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano. Nella sezione e nella tabella le **lunghezze sono in blu**, i **diametri in verde** e gli **angoli dei flare in rosso**; cambiando l'angolo di un cono FeedLab ricalcola la sua lunghezza (i diametri restano).
+Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano; **input_length** (o *length* per guida aperta, VE4MA e Chaparral, *L_guide* per il corrugato) allunga la guida circolare d'ingresso se vuoi un feed più lungo, senza cambiare le prestazioni. Per l'IZ0JNY è quotato anche lo **scalino interno** (altezza h e lunghezza Ls). Nella sezione e nella tabella le **lunghezze sono in blu**, i **diametri in verde** e gli **angoli dei flare in rosso**; cambiando l'angolo di un cono FeedLab ricalcola la sua lunghezza (i diametri restano).
 
 - **IZ0JNY Dual-Flare:** scelta del **profilo esterno** (l'interno non cambia): parete costante, *proposta 1* pieno dalla base fino alla fine del primo cono, *proposta 2* esterno senza rientranze. Le proposte sono più semplici ed economiche da fare al CNC.
 - **Axial Corrugated:** si modificano passo, larghezza degli scalini, gradino, diametri e profondità d1…d8 degli 8 scalini, e la lunghezza **L_guide** della sezione di guida circolare dietro la testa, con la sua base (0 mm = solo la testa).

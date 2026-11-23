@@ -6,6 +6,9 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('scalino interno h {h:.2f} · Ls {l:.2f}', 'inner step h {h:.2f} · Ls {l:.2f}'),
+    ('scalino interno: h =', 'inner step: h ='),
+    ("lunghezza della guida circolare d'ingresso: allungala se vuoi un feed più lungo; nella guida circolare viaggia solo il TE11, le prestazioni non cambiano", 'length of the circular input waveguide: make it longer if you want a longer feed; only TE11 travels in the circular guide, the performance does not change'),
     ("Profilo esterno (l'interno non cambia)", 'Outer profile (the inside does not change)'),
     ('Parete costante', 'Constant wall'),
     ('Proposta 1: pieno fino alla fine del 1° cono', 'Option 1: solid up to the end of the 1st cone'),

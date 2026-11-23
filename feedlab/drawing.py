@@ -161,7 +161,24 @@ def _section_axes(fig, geo: FeedGeometry, half: bool = False):
         _corrugated_dims(ax, geo, half)
     if geo.kind in ("ve4ma", "chaparral"):
         _ring_dims(ax, geo)
+    if geo.kind == "iz0jny":
+        _step_dims(ax, geo)
     return ax
+
+
+def _step_dims(ax, geo):
+    """IZ0JNY: the inner step (upper half, inside the bore): height h = (Ds − Di)/2 and length Ls of the
+    cylinder after it, with a leader to a readable label."""
+    p = geo.params
+    zs, ri, rs, ls = p["input_length"], p["Di_input"] / 2, p["Ds_step"] / 2, p["Ls"]
+    c = "tab:red"
+    ax.annotate("", (zs + 0.5 * ls, ri), (zs + 0.5 * ls, rs), arrowprops=dict(arrowstyle="<->", lw=0.6, color=c))
+    ax.annotate("", (zs, rs - 0.25 * (rs - ri)), (zs + ls, rs - 0.25 * (rs - ri)),
+                arrowprops=dict(arrowstyle="<->", lw=0.6, color=c))
+    R = max(geo.outer_radius, rs)
+    ax.annotate(f"scalino interno: h = {rs - ri:.3f} = (Ds_step − Di_input)/2\nLs = {ls:.3f}",
+                xy=(zs + 0.5 * ls, 0.5 * (ri + rs)), xytext=(zs + 0.6 * R, 0.35 * ri),
+                fontsize=6.5, color=c, arrowprops=dict(arrowstyle="-", lw=0.5, color=c))
 
 
 def _wall_dims(ax, geo):
