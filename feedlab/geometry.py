@@ -343,7 +343,9 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
 # phasing cylinder, cone-1 length, phasing length, aperture Ø, cone-2 length. Input guide Ø 0.76 λ (TE11 only).
 IZ0JNY_TABLE = {
     0.6: (0.9363, 0.0706, 1.6766, 0.5438, 1.4442, 1.6977, 1.8372),
+    0.7: (0.9562, 0.0785, 1.6297, 0.5811, 1.7965, 1.8457, 1.2935),
     0.8: (1.0247, 0.254, 1.6833, 0.4785, 1.3186, 2.094, 2.4568),
+    0.9: (0.9696, 0.2941, 1.6948, 0.663, 1.4707, 2.2505, 2.3936),
 }
 
 

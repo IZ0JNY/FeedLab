@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Nuovo feed **IZ0JNY Dual-Flare** (scalino + cono 1 + cilindro di fasatura + cono 2), progettato con il solutore di FeedLab per EME: η calcolata vicina al limite teorico del modello, S11 < −30 dB, antenna più fredda (+0.3…0.7 dB di G/T rispetto al Pickett-Potter). Nel wizard per f/D 0.6–0.9, con ottimizzatore, tolleranze, disegno PDF e script openEMS. Da verificare full-wave | 🔄 in verifica |
+| 1 | Nuovo feed **IZ0JNY Dual-Flare** (scalino + cono 1 + cilindro di fasatura + cono 2), progettato con il solutore di FeedLab per EME: η calcolata vicina al limite teorico del modello, S11 < −30 dB, antenna più fredda (+0.2…0.7 dB di G/T rispetto al Pickett-Potter), 80.1 % a f/D 0.9. Nel wizard per f/D 0.6–0.9, con ottimizzatore, tolleranze, disegno PDF e script openEMS. Studio in docs/IZ0JNY_DualFlare.md. Da verificare full-wave | 🔄 in verifica |
 | 2 | Disegni PDF: le note dei feed vanno a capo e restano dentro il foglio | ✅ fatto |
 
 ---
