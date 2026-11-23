@@ -1,12 +1,24 @@
-# Modifiche per la prossima versione (0.4.14)
+# Modifiche per la prossima versione (0.4.15)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.14 (pubblicata, BETA TEST 30 giorni)
+
+Pubblicata con 5 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | IZ0JNY Dual-Flare: tolte le note "progetto nuovo, verificare con openEMS" (feed già verificato a 24 GHz, risultati nello studio `docs/IZ0JNY_DualFlare.md`, anche a griglia fine) | ✅ fatto |
 | 2 | Progetto feed: dopo "Applica modifiche" i campi mostrano i valori ricalcolati (es. lunghezza del cono dopo aver cambiato l'angolo) e le quote non toccate non vengono più fissate per sbaglio | ✅ fatto |
 | 3 | Disegno & STEP: indicazione chiara se la base del feed è forata (e dove si attiva la foratura, scheda Piastrina WR) | ✅ fatto |
+| 4 | Inglese completo: tolte le scritte italiane rimaste nei PDF (foglio della flangia, foratura della piastrina, note) e in suggerimenti/messaggi dell'interfaccia (tolleranze, space mapping, fori di fissaggio) | ✅ fatto |
+| 5 | Download nell'app desktop: i file .stp/.stl/.pdf si salvano sempre con l'estensione (finestra "Salva con nome" con il tipo di file e l'estensione predefinita) | ✅ fatto |
 
 ---
 

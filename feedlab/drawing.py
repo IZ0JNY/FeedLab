@@ -287,27 +287,37 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
             ax.add_patch(Arc((h.x, h.y), SCREW_MAJOR(mnt.screw), SCREW_MAJOR(mnt.screw), theta1=0, theta2=270, lw=0.6))
         ax.text(h.x + h.dia * 0.8, h.y + h.dia * 0.8, str(i), fontsize=7, color="b")
     ax.set_xlim(-R * 1.25, R * 1.25); ax.set_ylim(-R * 1.25, R * 1.25)
+    from . import i18n
+
+    def T(tpl, **kw):                          # whole sentences translated first (then wrapped), numbers after
+        return i18n.tr(tpl).format(**kw)
     size = f"□ {side:.2f} × {side:.2f}" if side else f"Ø{2 * R:.2f}"
-    ax.set_title(f"Flangia d'ingresso: vista dalla faccia z = 0 ({size}, spessore "
-                 f"{geo.params['flange_thickness']:.2f} mm)\nlato largo della guida {mnt.flange.wg} lungo x "
-                 f"(polarizzazione {'verticale' if mnt.polarization == 'V' else 'orizzontale'})", fontsize=9)
+    pol = T("verticale" if mnt.polarization == "V" else "orizzontale")
+    ax.set_title(T("Flangia d'ingresso: vista dalla faccia z = 0 ({size}, spessore {t:.2f} mm)", size=size,
+                   t=geo.params["flange_thickness"]) + "\n" +
+                 T("lato largo della guida {wg} lungo x (polarizzazione {pol})", wg=mnt.flange.wg, pol=pol), fontsize=9)
     ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()
-    lines = [f"FORATURA per flangia {mnt.flange.wg} {mnt.flange.name}",
-             *([f"Le viti della guida ({mnt.screw}) attraversano la piastrina", "e si avvitano in questa base.",
-                "Nessuna vite piastrina → feed."] if mnt.stack else
-               [f"Viti piastra → feed: {mnt.plate_screw} (testa nella lamatura della piastra)",
-                f"Le viti della guida ({mnt.screw}) si avvitano nella piastra."]), "",
-             f"{'#':>2s} {'x':>8s} {'y':>8s}  lavorazione"]
-    for i, h in enumerate(mnt.feed_holes, 1):
-        depth = ""
-        lines.append(f"{i:>2d} {h.x:>8.2f} {h.y:>8.2f}  {h.callout}{depth}")
-    lines += ["", "Coordinate in mm dal centro della guida.",
-              "Fori filettati nella flangia; nel file STEP sono", "modellati al diametro di preforo.",
-              "Allineare piastrina e guida con le spine prima di serrare."]
     import textwrap
+    if mnt.stack:
+        head = [T("Le viti della guida ({screw}) attraversano la piastrina e si avvitano in questa base. "
+                  "Nessuna vite piastrina → feed.", screw=mnt.screw)]
+    else:
+        head = [T("Viti piastra → feed: {ps} (testa nella lamatura della piastra).", ps=mnt.plate_screw),
+                T("Le viti della guida ({screw}) si avvitano nella piastra.", screw=mnt.screw)]
+    lines = [T("FORATURA per flangia {wg} {name}", wg=mnt.flange.wg, name=mnt.flange.name)]
+    for h_ in head:
+        lines += textwrap.wrap(h_, 62)
+    lines += ["", f"{'#':>2s} {'x':>8s} {'y':>8s}  " + T("lavorazione")]
+    for i, h in enumerate(mnt.feed_holes, 1):
+        lines.append(f"{i:>2d} {h.x:>8.2f} {h.y:>8.2f}  {i18n.tr(h.callout)}")
+    lines.append("")
+    for n_ in (T("Coordinate in mm dal centro della guida."),
+               T("Fori filettati nella flangia; nel file STEP sono modellati al diametro di preforo."),
+               T("Allineare piastrina e guida con le spine prima di serrare.")):
+        lines += textwrap.wrap(n_, 62)
     for w in mnt.warnings:
-        lines += textwrap.wrap(f"ATTENZIONE: {w}", 70)
-    lines += ["", f"Fonte foratura: Flann, Waveguide and Flange Data; MIL-DTL-3922/67C"]
+        lines += textwrap.wrap(T("ATTENZIONE:") + " " + i18n.tr(w), 70)
+    lines += ["", T("Fonte foratura:") + " Flann, Waveguide and Flange Data; MIL-DTL-3922/67C"]
     ax2.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7.5)
     _title_block(fig, geo, title, material, sheet)
     return fig

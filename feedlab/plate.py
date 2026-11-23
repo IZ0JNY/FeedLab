@@ -211,25 +211,32 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
 
 
 def _holes_text(p: MatchingPlate) -> str:
-    m = p.mount
-    if m.stack:
-        lines = ["", f"FORATURA flangia {m.flange.wg} {m.flange.name}",
-                 f"(viti guida {m.screw} passanti, avvitate nella base", " del feed; coordinate dal centro)"]
-    else:
-        lines = ["", f"FORATURA flangia {m.flange.wg} {m.flange.name}",
-                 f"(viti guida {m.screw} nella piastra, viti piastra→feed {m.plate_screw};", " coordinate dal centro)"]
-    for h in m.plate_holes:
-        lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {h.callout}")
-    if m.stack:
-        lines.append(f"  viti della guida: lunghezza = flangia guida + {p.body_t:.1f} mm + {m.screw_in:.1f} nel feed")
-    else:
-        lines.append(f"  viti della guida: lunghezza ≤ flangia guida + {p.body_t:.1f} mm")
-    if m.screw_len and not m.stack:
-        lines.append(f"  viti piastra→feed: 4 × {m.plate_screw} × {m.screw_len_label} a testa cilindrica")
-        drill = max(h.depth for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout)
-        lines.append(f"  (2 × spessore {p.body_t:.2f} → {m.screw_len_label}); nel feed: vite {m.screw_in:.1f},")
-        lines.append(f"  foro prof. {drill:.0f} (pari), filetto prof. {m.tap_depth:.1f}")
+    from . import i18n
     import textwrap
+
+    def T(tpl, **kw):
+        return i18n.tr(tpl).format(**kw)
+    m = p.mount
+    lines = ["", T("FORATURA flangia {wg} {name}", wg=m.flange.wg, name=m.flange.name)]
+    if m.stack:
+        lines += textwrap.wrap(T("(viti guida {screw} passanti, avvitate nella base del feed; coordinate dal centro)",
+                                 screw=m.screw), 58)
+    else:
+        lines += textwrap.wrap(T("(viti guida {screw} nella piastra, viti piastra→feed {ps}; coordinate dal centro)",
+                                 screw=m.screw, ps=m.plate_screw), 58)
+    for h in m.plate_holes:
+        lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {i18n.tr(h.callout)}")
+    if m.stack:
+        lines += ["  " + x for x in textwrap.wrap(T("viti della guida: lunghezza = flangia guida + {t:.1f} mm + {s:.1f} nel feed",
+                                                    t=p.body_t, s=m.screw_in), 58)]
+    else:
+        lines += ["  " + x for x in textwrap.wrap(T("viti della guida: lunghezza ≤ flangia guida + {t:.1f} mm", t=p.body_t), 58)]
+    if m.screw_len and not m.stack:
+        drill = max(h.depth or 0.0 for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout)
+        for x in (T("viti piastra→feed: 4 × {ps} × {ln} a testa cilindrica", ps=m.plate_screw, ln=m.screw_len_label),
+                  T("(2 × spessore {t:.2f} → {ln}); nel feed: vite {s:.1f}, foro prof. {d:.0f} (pari), filetto prof. {tp:.1f}",
+                    t=p.body_t, ln=m.screw_len_label, s=m.screw_in, d=drill, tp=m.tap_depth)):
+            lines += ["  " + y for y in textwrap.wrap(x, 58)]
     for w in m.warnings:
-        lines += ["  " + x for x in textwrap.wrap(w, 58)]
+        lines += ["  " + x for x in textwrap.wrap(i18n.tr(w), 58)]
     return "\n".join(lines) + "\n\n"

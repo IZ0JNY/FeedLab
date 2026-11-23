@@ -84,6 +84,52 @@ def win_set_icon(title: str) -> None:
         pass
 
 
+def patch_downloads() -> None:
+    """Windows/WebView2: pywebview's "Save as" dialog has only an "All files (*.*)" filter and no default
+    extension, so with hidden extensions a .stp/.stl/.pdf could be saved without it. Same dialog, with a
+    filter for the file's own type and that extension as default (added when the user leaves it out)."""
+    if not IS_WIN:
+        return
+    try:
+        import os as _os
+        from webview.platforms import edgechromium as ec
+    except Exception:
+        return
+
+    def on_download_starting(self, sender, args):
+        if not ec.webview_settings["ALLOW_DOWNLOADS"]:
+            args.Cancel = True
+            return
+        name = _os.path.basename(args.ResultFilePath)
+        ext = _os.path.splitext(name)[1].lstrip(".")
+        dialog = ec.WinForms.SaveFileDialog()
+        try:
+            with ec.winreg.OpenKey(ec.winreg.HKEY_CURRENT_USER,
+                                   r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders") as k:
+                dialog.InitialDirectory = ec.winreg.QueryValueEx(k, "{374DE290-123F-4565-9164-39C4925E467B}")[0]
+        except Exception:
+            pass
+        every = "*.*"
+        dialog.Filter = (f"{ext.upper()} (*.{ext})|*.{ext}|" if ext else "") + f"All files ({every})|{every}"
+        if ext:
+            dialog.DefaultExt = ext
+            dialog.AddExtension = True
+        dialog.RestoreDirectory = True
+        dialog.FileName = name
+        if dialog.ShowDialog(self.form) == ec.WinForms.DialogResult.OK:
+            fn = dialog.FileName
+            if ext and not fn.lower().endswith("." + ext.lower()):
+                fn += "." + ext
+            args.ResultFilePath = fn
+        else:
+            args.Cancel = True
+
+    try:
+        ec.EdgeChrome.on_download_starting = on_download_starting
+    except Exception:
+        pass
+
+
 def free_port() -> int:
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
@@ -203,6 +249,7 @@ def main(argv=None) -> int:
                 pass
             from . import i18n
             i18n.set_lang(i18n.default_lang())
+            patch_downloads()
             title = i18n.tr("FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde")
             window = webview.create_window(title, html=i18n.tr(LOADING), width=1440, height=920, min_size=(900, 600))
 

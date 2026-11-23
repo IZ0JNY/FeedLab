@@ -662,14 +662,14 @@ with tabs[6]:
         with st.spinner("OpenCascade…"):
             S["step"] = cad.export_step(geo, base.with_suffix(".step")).read_bytes()
     if S.get("step"):
-        c2.download_button("Scarica .stp", S["step"], file_name=base.name + ".stp")
+        c2.download_button("Scarica .stp", S["step"], file_name=base.name + ".stp", mime="model/step")
     if c3.button("🖨️ Genera STL"):
         S["stl"] = cad.export_stl(geo, base.with_suffix(".stl")).read_bytes()
     if S.get("stl"):
-        c3.download_button("Scarica .stl", S["stl"], file_name=base.name + ".stl")
+        c3.download_button("Scarica .stl", S["stl"], file_name=base.name + ".stl", mime="model/stl")
     rep = {"feed": geo.kind, "f_ghz": S.f_ghz, "params_mm": geo.params,
            "dish": None if S.dish is None else S.dish.__dict__}
-    c4.download_button("🧾 Parametri JSON", json.dumps(rep, indent=2, default=float), file_name=base.name + ".json")
+    c4.download_button("🧾 Parametri JSON", json.dumps(rep, indent=2, default=float), file_name=base.name + ".json", mime="application/json")
     if S.get("pdf"):
         import base64
         b64 = base64.b64encode(S["pdf"]).decode()
@@ -1027,7 +1027,7 @@ with tabs[7]:
             if b2.button("🧊 STEP piastrina"):
                 S["plate_step"] = Path(plate.export_step(pl, base.with_suffix(".step"))).read_bytes()
             if S.get("plate_step"):
-                b2.download_button("Scarica .stp", S["plate_step"], file_name=base.name + ".stp")
+                b2.download_button("Scarica .stp", S["plate_step"], file_name=base.name + ".stp", mime="model/step")
             # front view preview
             fig = go.Figure()
             h = pl.outer / 2
