@@ -177,6 +177,7 @@ _TEMPLATE = r'''# -*- coding: utf-8 -*-
 
 Run:      python -u @@NAME@@            (openEMS >= 0.0.36 with its Python bindings)
 Preview:  python @@NAME@@ --preview     (opens the model in AppCSXCAD, no simulation)
+Post:     python @@NAME@@ --post        (only port + far field again from sim_data, after a full run)
 Output:   results.json (load it in FeedLab, tab "Full-wave openEMS"), status.json, sim_data/
 """
 import os, sys, json, time, traceback
@@ -299,22 +300,34 @@ def preview():
 
 
 def _l(a):
+    """Array -> list with 9 significant digits relative to its largest value. openEMS fields are tiny
+    (far field ~1e-11 V/m for its unit excitation): a fixed number of decimals would store zeros."""
     import numpy as np
-    return np.asarray(a, dtype=float).round(9).tolist()
+    a = np.asarray(a, dtype=float)
+    m = float(np.nanmax(np.abs(a))) if a.size else 0.0
+    if not np.isfinite(m) or m == 0.0:
+        return a.tolist()
+    return a.round(int(8 - np.floor(np.log10(m)))).tolist()
 
 
-def main():
+def main(post_only=False):
+    """post_only (--post): skip the FDTD run and only redo port + far field from the data already in
+    sim_data (same script, same mesh): seconds instead of the whole simulation."""
     import numpy as np
     status("setup")
     sim_path = os.path.join(HERE, "sim_data")
     m = build(sim_path)
-    status("fdtd", **m["info"])
     t0 = time.time()
-    kw = {"numThreads": int(C["threads"])} if int(C.get("threads") or 0) > 0 else {}
-    try:
-        m["FDTD"].Run(sim_path, cleanup=True, **kw)
-    except TypeError:
-        m["FDTD"].Run(sim_path, cleanup=True)
+    if post_only:
+        if not os.path.isdir(sim_path):
+            raise RuntimeError("--post: sim_data non trovata, serve prima la simulazione completa")
+    else:
+        status("fdtd", **m["info"])
+        kw = {"numThreads": int(C["threads"])} if int(C.get("threads") or 0) > 0 else {}
+        try:
+            m["FDTD"].Run(sim_path, cleanup=True, **kw)
+        except TypeError:
+            m["FDTD"].Run(sim_path, cleanup=True)
     t_fdtd = time.time() - t0
 
     status("port")
@@ -360,7 +373,7 @@ def main():
     out = dict(format="feedlab-openems-results", version=2,
                meta=dict(kind=G["kind"], f0_ghz=G["f0_ghz"], params=G["params"], label=C.get("label", "")),
                geometry=G, config=C, mesh=m["info"],
-               timing=dict(fdtd_s=t_fdtd, total_s=time.time() - T_START),
+               timing=dict(fdtd_s=t_fdtd, total_s=time.time() - T_START, post_only=bool(post_only)),
                freq_ghz=_l(freq / 1e9), s11_re=_l(s11.real), s11_im=_l(s11.imag),
                zin_re=_l(np.real(zin)), zin_im=_l(np.imag(zin)), pacc=_l(pacc),
                ff=ff, sphere=sphere, phase_ref="aperture plane z = Z_AP",
@@ -382,7 +395,7 @@ if __name__ == "__main__":
         if "--preview" in sys.argv:
             preview()
         else:
-            main()
+            main(post_only="--post" in sys.argv)
     except BaseException as e:
         status("error", error="%s: %s" % (type(e).__name__, e), trace=traceback.format_exc()[-4000:])
         traceback.print_exc()

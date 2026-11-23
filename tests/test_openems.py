@@ -157,3 +157,14 @@ def test_guided_install_from_zip(fake_env, tmp_path):
     assert openems_local.load_settings()["openems_root"].endswith("openEMS")
     s = openems_local.read_status(tmp_path / "st.json")
     assert s["steps_done"] == openems_local.INSTALL_STEPS
+
+
+def test_far_field_not_rounded_to_zero():
+    """openEMS far fields are ~1e-11 V/m: the script must keep significant digits (0.4.10 stored zeros)."""
+    import numpy as np
+    src = openems_sim._TEMPLATE
+    ns = {}
+    exec(src[src.index("def _l(a):"):src.index("def main(")], ns)
+    v = ns["_l"](np.array([[1.234e-11, -5e-13], [0.0, 2e-12]]))
+    assert v[0][0] == pytest.approx(1.234e-11) and v[1][1] == pytest.approx(2e-12)
+    assert "--post" in src and "post_only" in src

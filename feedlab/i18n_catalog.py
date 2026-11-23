@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ("Diagrammi di radiazione vuoti (tutti zero): file results.json di FeedLab fino alla 0.4.10, che arrotondava il campo lontano. S11 è valido. Rigenera lo script con questa versione e lancialo con --post nella stessa cartella: ricalcola i diagrammi da sim_data in pochi secondi.", 'Empty radiation patterns (all zero): results.json from FeedLab up to 0.4.10, which rounded the far field. S11 is valid. Regenerate the script with this version and run it with --post in the same folder: it recomputes the patterns from sim_data in a few seconds.'),
     ('fori troppo vicini al bordo della base quadrata', 'holes too close to the edge of the square base'),
     ('Base del feed', 'Feed base'),
     ('Quadrata (flangia guida)', 'Square (waveguide flange)'),

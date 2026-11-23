@@ -321,6 +321,7 @@ def analyze(r: DeepResult, dish: DishSpec) -> dict:
         out["sphere"] = {"D_dbi": r.sphere.directivity_dbi(), "D_nf2ff_dbi": r.sphere.Dmax_nf2ff_dbi,
                          "bor_dev_db": r.sphere.bor_deviation_db(A, B, ff0.theta),
                          "rad_eff": (r.sphere.Prad / r.sphere.Pacc) if r.sphere.Pacc and r.sphere.Pacc > 0 else float("nan")}
+    out["empty_far_field"] = bool(r.ff) and all(not np.any(np.abs(f.Et)) and not np.any(np.abs(f.Ep)) for f in r.ff)
     out["warnings"] = warnings(out)
     return out
 
@@ -340,6 +341,10 @@ def warnings(a: dict) -> list[str]:
     if sph and np.isfinite(sph.get("bor_dev_db", np.nan)) and sph["bor_dev_db"] > 1.0:
         w.append(f"Il lobo si discosta dall'ipotesi BOR1 di {sph['bor_dev_db']:.1f} dB RMS: l'efficienza calcolata "
                  "dai soli tagli E/H è approssimata (modi superiori o asimmetrie).")
+    if a.get("empty_far_field"):
+        w.insert(0, "Diagrammi di radiazione vuoti (tutti zero): file results.json di FeedLab fino alla 0.4.10, che "
+                    "arrotondava il campo lontano. S11 è valido. Rigenera lo script con questa versione e lancialo "
+                    "con --post nella stessa cartella: ricalcola i diagrammi da sim_data in pochi secondi.")
     f0 = [x for x in a["per_freq"] if abs(x["f_ghz"] - a["f0"]) < 1e-6]
     if f0 and f0[0]["xpol_peak_db"] > -20:
         w.append(f"Cross-polare di picco {f0[0]['xpol_peak_db']:.1f} dB: alta per EME/polarizzazione circolare.")

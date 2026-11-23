@@ -11,6 +11,7 @@
 | 5 | Disegno e modello: con la flangia forata spessa (es. IZ0JNY 24 GHz su WR-42, 8.8 mm) la parete esterna dello scalino entrava nella flangia. Ora lo scalino parte almeno una parete sopra la flangia e il raccordo è pieno; test su tutti i feed a 10 e 24 GHz | ✅ fatto |
 | 6 | Installer segnalato come virus / bloccato da SmartScreen: l'avvio non usa più FeedLab.exe (copia di pythonw.exe con icona cambiata, quindi con firma digitale rotta, tipico allarme degli antivirus) ma gli interpreti originali firmati da python.org; icona FeedLab da collegamenti (AppUserModelID) e finestra; metadati di versione nel setup; file SHA256SUMS.txt nella release; la CI verifica le firme. SmartScreen sparisce solo con un certificato di firma del codice (scelta dell'autore) | ✅ fatto (firma da decidere) |
 | 7 | Tolta dall'installer l'opzione di scaricare openEMS: si installa solo dall'app, scheda Full-wave openEMS → ① Installazione (l'installer non scarica più nulla) | ✅ fatto |
+| 8 | **Bug openEMS**: lo script salvava i diagrammi di radiazione arrotondati a 9 decimali e il campo lontano di openEMS (~1e-11 V/m) diventava tutto zero (S11 invece era corretto). Ora 9 cifre significative; nuova opzione `--post` che ricalcola porta e campo lontano da sim_data senza rifare la simulazione; avviso nei risultati per i file vecchi | ✅ fatto |
 
 ---
 

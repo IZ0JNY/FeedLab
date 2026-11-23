@@ -3,12 +3,13 @@
 
 Run:      python -u sim_iz0jny_24048_fD065.py            (openEMS >= 0.0.36 with its Python bindings)
 Preview:  python sim_iz0jny_24048_fD065.py --preview     (opens the model in AppCSXCAD, no simulation)
+Post:     python sim_iz0jny_24048_fD065.py --post        (only port + far field again from sim_data, after a full run)
 Output:   results.json (load it in FeedLab, tab "Full-wave openEMS"), status.json, sim_data/
 """
 import os, sys, json, time, traceback
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CFG = json.loads(r"""{"format": "feedlab-openems-config", "version": 2, "geometry": {"kind": "iz0jny", "f0_ghz": 24.0481, "params": {"Di_input": 9.474439480873748, "Ds_step": 12.13, "Ls": 1.0, "Dm": 20.12, "L1": 5.45, "Lp": 17.95, "D_aperture": 22.43, "L2": 20.37, "input_length": 7.479820642795064, "cone1_half_deg": 36.24244194231421, "cone2_half_deg": 3.245254903890163, "wall": 1.0, "flange_diam": 21.447533671267166, "flange_thickness": 1.5}, "polys": [[[4.737219740436874, 4.737219740436874, 6.065, 6.065, 10.06, 10.06, 11.215, 12.216606213493247, 11.06, 11.06, 7.065, 7.065, 5.737219740436874, 5.737219740436874, 10.723766835633583, 10.723766835633583, 4.737219740436874], [0.0, 7.479820642795064, 7.479820642795064, 8.479820642795065, 13.929820642795065, 31.879820642795064, 52.249820642795065, 52.249820642795065, 31.851492877550527, 13.602560268010778, 8.15256026801078, 6.479820642795064, 6.479820642795064, 1.5, 1.5, 0.0, 0.0]]], "r_input": 4.737219740436874, "z_aperture": 52.249820642795065, "outer_radius": 12.216606213493247, "r_aperture": 11.215}, "config": {"f_lo": 21.64329, "f_hi": 26.452910000000003, "cells_per_lambda": 20, "nr_ts": 100000, "end_db": 40.0, "port_mode": "TE11", "n_freq": 201, "ff_freqs": [21.64329, 24.0481, 26.45291], "theta_step": 1.0, "phi_cuts": [0.0, 45.0, 90.0], "sphere": true, "sphere_step": 3.0, "pad_lambda": 0.5, "dump_fields": false, "threads": 0, "openems_root": "", "label": ""}, "notes": ["scalino + cono 1 generano il TM11; il cilindro Dm lo rimette in fase col TE11", "il cono 2 forma l\u0027apertura: bordo \u2248 -12 dB, centro di fase vicino all\u0027apertura", "ottimizzato per EME col solutore rapido: \u0394G + \u0394G/T, S11 < -30 dB su \u00b11 %", "progetto nuovo: verificare con openEMS prima di costruire"]}""")
+CFG = json.loads(r"""{"format": "feedlab-openems-config", "version": 2, "geometry": {"kind": "iz0jny", "f0_ghz": 24.0481, "params": {"Di_input": 9.474439480873748, "Ds_step": 12.13, "Ls": 1.0, "Dm": 20.12, "L1": 5.45, "Lp": 17.95, "D_aperture": 22.43, "L2": 20.37, "input_length": 7.479820642795064, "cone1_half_deg": 36.24244194231421, "cone2_half_deg": 3.245254903890163, "wall": 1.0, "flange_diam": 21.447533671267166, "flange_thickness": 1.5}, "polys": [[[4.737219740436874, 4.737219740436874, 6.065, 6.065, 10.06, 10.06, 11.215, 12.216606213493247, 11.06, 11.06, 7.065, 7.065, 5.737219740436874, 5.737219740436874, 10.723766835633583, 10.723766835633583, 4.737219740436874], [0.0, 7.479820642795064, 7.479820642795064, 8.479820642795065, 13.929820642795065, 31.879820642795064, 52.249820642795065, 52.249820642795065, 31.851492877550527, 13.602560268010778, 8.15256026801078, 6.479820642795064, 6.479820642795064, 1.5, 1.5, 0.0, 0.0]]], "r_input": 4.737219740436874, "z_aperture": 52.249820642795065, "outer_radius": 12.216606213493247, "r_aperture": 11.215}, "config": {"f_lo": 21.64329, "f_hi": 26.452910000000003, "cells_per_lambda": 20, "nr_ts": 100000, "end_db": 40.0, "port_mode": "TE11", "n_freq": 201, "ff_freqs": [21.64329, 24.0481, 26.45291], "theta_step": 1.0, "phi_cuts": [0.0, 45.0, 90.0], "sphere": true, "sphere_step": 3.0, "pad_lambda": 0.5, "dump_fields": false, "threads": 0, "openems_root": "", "label": ""}, "notes": []}""")
 G, C = CFG["geometry"], CFG["config"]
 T_START = time.time()
 
@@ -125,22 +126,34 @@ def preview():
 
 
 def _l(a):
+    """Array -> list with 9 significant digits relative to its largest value. openEMS fields are tiny
+    (far field ~1e-11 V/m for its unit excitation): a fixed number of decimals would store zeros."""
     import numpy as np
-    return np.asarray(a, dtype=float).round(9).tolist()
+    a = np.asarray(a, dtype=float)
+    m = float(np.nanmax(np.abs(a))) if a.size else 0.0
+    if not np.isfinite(m) or m == 0.0:
+        return a.tolist()
+    return a.round(int(8 - np.floor(np.log10(m)))).tolist()
 
 
-def main():
+def main(post_only=False):
+    """post_only (--post): skip the FDTD run and only redo port + far field from the data already in
+    sim_data (same script, same mesh): seconds instead of the whole simulation."""
     import numpy as np
     status("setup")
     sim_path = os.path.join(HERE, "sim_data")
     m = build(sim_path)
-    status("fdtd", **m["info"])
     t0 = time.time()
-    kw = {"numThreads": int(C["threads"])} if int(C.get("threads") or 0) > 0 else {}
-    try:
-        m["FDTD"].Run(sim_path, cleanup=True, **kw)
-    except TypeError:
-        m["FDTD"].Run(sim_path, cleanup=True)
+    if post_only:
+        if not os.path.isdir(sim_path):
+            raise RuntimeError("--post: sim_data non trovata, serve prima la simulazione completa")
+    else:
+        status("fdtd", **m["info"])
+        kw = {"numThreads": int(C["threads"])} if int(C.get("threads") or 0) > 0 else {}
+        try:
+            m["FDTD"].Run(sim_path, cleanup=True, **kw)
+        except TypeError:
+            m["FDTD"].Run(sim_path, cleanup=True)
     t_fdtd = time.time() - t0
 
     status("port")
@@ -186,7 +199,7 @@ def main():
     out = dict(format="feedlab-openems-results", version=2,
                meta=dict(kind=G["kind"], f0_ghz=G["f0_ghz"], params=G["params"], label=C.get("label", "")),
                geometry=G, config=C, mesh=m["info"],
-               timing=dict(fdtd_s=t_fdtd, total_s=time.time() - T_START),
+               timing=dict(fdtd_s=t_fdtd, total_s=time.time() - T_START, post_only=bool(post_only)),
                freq_ghz=_l(freq / 1e9), s11_re=_l(s11.real), s11_im=_l(s11.imag),
                zin_re=_l(np.real(zin)), zin_im=_l(np.imag(zin)), pacc=_l(pacc),
                ff=ff, sphere=sphere, phase_ref="aperture plane z = Z_AP",
@@ -208,7 +221,7 @@ if __name__ == "__main__":
         if "--preview" in sys.argv:
             preview()
         else:
-            main()
+            main(post_only="--post" in sys.argv)
     except BaseException as e:
         status("error", error="%s: %s" % (type(e).__name__, e), trace=traceback.format_exc()[-4000:])
         traceback.print_exc()
