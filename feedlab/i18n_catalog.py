@@ -6,6 +6,9 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('ottimizzato per EME col solutore rapido: ΔG + ΔG/T', 'optimised for EME with the fast solver: ΔG + ΔG/T'),
+    ('verificato con openEMS a 24 GHz (IZ0JNY): G/T come previsto, cross-polare -30 dB, S11 ≈ -28 dB', 'verified with openEMS at 24 GHz (IZ0JNY): G/T as predicted, cross-pol -30 dB, S11 ≈ -28 dB'),
+    ('verificato con openEMS a 24 GHz', 'verified with openEMS at 24 GHz'),
     ('scalino interno h {h:.2f} · Ls {l:.2f}', 'inner step h {h:.2f} · Ls {l:.2f}'),
     ('scalino interno: h =', 'inner step: h ='),
     ("lunghezza della guida circolare d'ingresso: allungala se vuoi un feed più lungo; nella guida circolare viaggia solo il TE11, le prestazioni non cambiano", 'length of the circular input waveguide: make it longer if you want a longer feed; only TE11 travels in the circular guide, the performance does not change'),

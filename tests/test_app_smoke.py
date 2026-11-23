@@ -103,3 +103,16 @@ def test_waveguide_choice_per_band(isolated, band, guides, square):
     assert any(f"**Guida rettangolare:** {guides[-1]}" in m.value for m in at.markdown)
     assert any(r.label == "Base del feed" for r in at.radio) == square
     geometry.BASE.update({"shape": "round", "wg": None})
+
+
+def test_dimension_edit_applies_at_once(isolated):
+    """Editing a dimension (e.g. the circular input guide length) rebuilds the feed at once, without a button."""
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    kind = next(s for s in at.selectbox if s.label == "Tipo di feed")
+    kind.select("iz0jny").run()
+    at.number_input(key="in_iz0jny_input_length").set_value(10.0).run()
+    assert not at.exception, _errors(at)
+    assert at.session_state["overrides"]["iz0jny"]["input_length"] == 10.0
+    assert at.number_input(key="in_iz0jny_input_length").value == 10.0
+    assert not [b for b in at.button if b.label == "Applica modifiche"]

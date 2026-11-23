@@ -476,10 +476,12 @@ with tabs[1]:
                                  ("lunghezza della guida circolare d'ingresso: allungala se vuoi un feed più lungo; "
                                   "nella guida circolare viaggia solo il TE11, le prestazioni non cambiano"
                                   if _guide else None))
-            if abs(nv - v) > 1e-6:
+            if abs(nv - round(v, 4)) > 5e-5:          # edited by the user (the field shows 4 decimals)
                 newv[map_keys[k]] = nv
-        cc1, cc2 = st.columns(2)
-        if cc1.button("Applica modifiche"):
+        def _fresh_inputs():                      # the fields show the rebuilt geometry at the next run
+            for _k in [k_ for k_ in list(S.keys()) if str(k_).startswith(f"in_{S.feed_kind}_")]:
+                del S[_k]
+        if newv:                                  # applied at once: section, 3D and drawings follow
             ov = S.overrides.setdefault(S.feed_kind, {})
             # flare: angle and length are the same quantity seen two ways -> the one just edited wins
             if "alpha" in newv and "flare_length" in newv:
@@ -496,9 +498,13 @@ with tabs[1]:
                 if ln in newv:
                     ov.pop(ang, None)
             ov.update(newv)
+            for k_ in ("pdf", "step", "stl"):
+                S.pop(k_, None)
+            _fresh_inputs()
             st.rerun()
-        if cc2.button("Ripristina progetto"):
+        if st.button("Ripristina progetto"):
             S.overrides[S.feed_kind] = {}
+            _fresh_inputs()
             st.rerun()
     with c2:
         fig = section_fig(geo)
