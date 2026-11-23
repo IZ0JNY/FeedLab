@@ -49,3 +49,26 @@ I modi oltre il TM11 non aggiungono nulla. **Con un feed liscio corto, nel model
 - L'efficienza "reale" sulla parabola sarà più bassa di 12–15 punti, come per tutti i feed (W1GHZ, WD5AGO). Il confronto tra feed resta però valido.
 
 In FeedLab il feed si trova come **IZ0JNY Dual-Flare** nel wizard (f/D 0.6–0.9). Ha anche ottimizzatore, analisi delle tolleranze, disegno PDF e script openEMS (circa 2 milioni di celle, ~5 minuti per frequenza).
+
+## Versione 24.048,1 MHz, f/D 0.65 (ottimizzata per S11)
+
+Partenza: progetto da tabella a f/D 0.65. Obiettivo: S11 più profondo centrato su 24.0481 GHz (media su ±0.2 %, valori sotto −50 dB non contano). Vincoli: G/T al massimo −0.02 dB ed efficienza al massimo −0.1 punti rispetto alla partenza.
+
+| Quota (mm) | Di | Ds | Ls | Dm | L1 | Lp | Dap | L2 | guida d'ingresso | parete |
+|---|---|---|---|---|---|---|---|---|---|---|
+| | 9.47 | 12.13 | 1.00 | 20.12 | 5.45 | 17.95 | 22.43 | 20.37 | 7.48 | 1.00 |
+
+Lunghezza totale 52.25 mm; cono 1 a 36.2°, cono 2 a 3.2°.
+
+| | η | S11 a 24.048 | G/T (dB/K) | T_ant |
+|---|---|---|---|---|
+| IZ0JNY partenza | 77.1 % | −30.1 dB | 29.70 | 34.8 K |
+| **IZ0JNY 24 GHz ottimizzato** | **77.0 %** | **≈ −51 dB** (−42…−51 secondo il numero di modi) | **29.68** | 35.1 K |
+| Pickett-Potter | 76.4 % | −25.6 dB | 29.43 | 39.2 K |
+| W2IMU OE2IGL | 77.0 % | −28.7 dB | 29.47 | 38.4 K |
+
+Offset 1.2 m, elevazione 30°, LNA 40 K.
+
+- **Banda**: S11 sotto −40 dB da 23.65 a 24.55 GHz e sotto −47 dB da 23.9 a 24.25 GHz.
+- **Tolleranze**: con quote sbagliate a caso di ±0.05 mm, il caso peggiore su 20 prove resta a −49.5 dB.
+- **Precisione**: valori di S11 sotto −40 dB sono al limite della precisione del solutore e di qualsiasi misura. Il dato affidabile è "≤ −40 dB, minimo centrato su 24.048 GHz". Va confermato con openEMS.
