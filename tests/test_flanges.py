@@ -203,3 +203,27 @@ def test_iz0jny_cone_angles_in_lab():
     assert {"a1", "a2"} <= {k for k, _, _ in explore.TUNABLE["iz0jny"]}
     g = geometry.build("iz0jny", 24.048, fD=0.65, a1=20, a2=6)
     assert g.params["cone1_half_deg"] == pytest.approx(20) and g.params["cone2_half_deg"] == pytest.approx(6)
+
+
+def test_round_flange_feed_side_counterbores(tmp_path):
+    """Option for round MIL flanges: screws from the feed side, heads in counterbores of the feed base (STEP + PDF)."""
+    from feedlab import cad, drawing, geometry, plate
+    try:
+        geometry.MOUNT.update({"wg": "WR-22", "system": "metric", "pol": "V", "feed_cbore": True})
+        g = geometry.build("pickett_potter", 47.088, fD=0.65)
+        m = g.mount
+        assert m.feed_cbore and sum(h.kind == "cbore_back" for h in m.feed_holes) == 4
+        cb = max(h.cb_depth for h in m.feed_holes if h.kind == "cbore_back")
+        assert g.params["flange_thickness"] >= cb + 1.5 - 1e-9
+        edge = max(math.hypot(h.x, h.y) + h.cb_dia / 2 for h in m.feed_holes)
+        assert g.params["flange_diam"] / 2 >= edge
+        v1 = cad.solid(g).val().Volume()
+        geometry.MOUNT.update({"feed_cbore": False})
+        g0 = geometry.build("pickett_potter", 47.088, fD=0.65)
+        assert v1 != pytest.approx(cad.solid(g0).val().Volume(), rel=1e-4)
+        geometry.MOUNT.update({"feed_cbore": True})
+        drawing.drawing_pdf(g, tmp_path / "f.pdf")
+    finally:
+        geometry.MOUNT.update({"wg": None, "feed_cbore": False})
+    v, f = plate.mesh(plate.design_plate(47.088, "WR-22", 4.84, "V", holes="metric"))
+    assert len(v) > 100 and len(f) > 100

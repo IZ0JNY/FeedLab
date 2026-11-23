@@ -996,12 +996,17 @@ with tabs[7]:
                               help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale "
                                    "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
                                    "seguono la lunghezza della vite")
+        feed_cb = st.checkbox("Viti dal lato del feed con lamatura nella base", key="mount_cbore",
+                              disabled=not (holes_on and _round_fl), value=False,
+                              help="viti 4-40 inserite dal lato del feed con la testa nella lamatura della base del feed: "
+                                   "attraversano piastrina e base e si avvitano nella flangia della guida. "
+                                   "Spento: viti della guida filettate nella base.") if _round_fl else False
         pol_c = "V" if pol_ == "Verticale" else "H"
         try:
             pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
                                     plate_screw=pscrew)
             new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
-                       "plate_t": pl.body_t if holes_on else None}
+                       "plate_t": pl.body_t if holes_on else None, "feed_cbore": bool(feed_cb)}
             if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
                 S["mount_cfg"] = new_cfg
                 geometry.MOUNT.update(new_cfg)
@@ -1022,7 +1027,11 @@ with tabs[7]:
             if pl.mount is not None:
                 mm_ = pl.mount
                 _deep = max((h.depth or 0.0) for h in mm_.feed_holes if h.kind == 'tap')
-                if mm_.stack:
+                if mm_.stack and (S.get("mount_cfg") or {}).get("feed_cbore"):
+                    _txt = [_T("Flangia {wg} {name}: viti {screw} dal lato del feed, con la testa nella lamatura della base; "
+                               "attraversano base e piastrina e si avvitano nella flangia della guida.",
+                               wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw)]
+                elif mm_.stack:
                     _txt = [_T("Flangia {wg} {name}: la piastrina si appoggia sulla base del feed, le viti della guida "
                                "({screw}) la attraversano e si avvitano nella base. Nessuna vite piastrina→feed.",
                                wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
@@ -1077,7 +1086,19 @@ with tabs[7]:
                                text="E", showarrow=True, arrowcolor="red", arrowhead=2, arrowwidth=2)
             fig.update_layout(height=420, xaxis=dict(range=[-h - 3, h + 3], title="mm"),
                               yaxis=dict(range=[-h - 3, h + 3], scaleanchor="x"), title="Vista frontale (lato feed)")
-            st.plotly_chart(fig, width="stretch")
+            v1, v2 = st.columns(2)
+            v1.plotly_chart(fig, width="stretch")
+            try:                                      # 3D model of the plate (same solid as the STEP file)
+                pv, pf = plate.mesh(pl)
+                f3 = go.Figure(go.Mesh3d(x=pv[:, 0], y=pv[:, 1], z=pv[:, 2], i=pf[:, 0], j=pf[:, 1], k=pf[:, 2],
+                                         color=materials.color(S.get("material", "")), flatshading=True,
+                                         lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5)))
+                f3.update_layout(height=420, title="Vista 3D della piastrina", margin=dict(l=0, r=0, t=40, b=0),
+                                 scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
+                                            camera=dict(eye=dict(x=1.2, y=-1.4, z=1.1))))
+                v2.plotly_chart(f3, width="stretch")
+            except Exception as ex_:
+                v2.caption(_T("Vista 3D non disponibile: {e}", e=ex_))
         except ValueError as ex:
             st.error(str(ex))
 
