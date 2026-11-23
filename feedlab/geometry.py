@@ -489,8 +489,7 @@ def _iz0jny(f_ghz, fD, t, kw):
     a2 = math.degrees(math.atan2((Dap - Dm) / 2, L2)) if L2 > 0 else 90.0
     notes = ["scalino + cono 1 generano il TM11; il cilindro Dm lo rimette in fase col TE11",
              "il cono 2 forma l'apertura: bordo ≈ -12 dB, centro di fase vicino all'apertura",
-             "ottimizzato per EME col solutore rapido: ΔG + ΔG/T",
-             "verificato con openEMS a 24 GHz (IZ0JNY): G/T come previsto, cross-polare -30 dB, S11 ≈ -28 dB"]
+             "ottimizzato per EME col solutore rapido: ΔG + ΔG/T"]
     return _finish("iz0jny", f_ghz, {"Di_input": Di, "Ds_step": Ds, "Ls": Ls, "Dm": Dm, "L1": L1, "Lp": Lp, "D_aperture": Dap, "L2": L2,
                                      "input_length": Lin, "cone1_half_deg": a1, "cone2_half_deg": a2, "wall": t},
                    prof, t, notes=notes)

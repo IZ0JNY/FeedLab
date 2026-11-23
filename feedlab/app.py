@@ -481,7 +481,8 @@ with tabs[1]:
         def _fresh_inputs():                      # the fields show the rebuilt geometry at the next run
             for _k in [k_ for k_ in list(S.keys()) if str(k_).startswith(f"in_{S.feed_kind}_")]:
                 del S[_k]
-        if newv:                                  # applied at once: section, 3D and drawings follow
+        cc1, cc2 = st.columns(2)
+        if cc1.button("Applica modifiche"):
             ov = S.overrides.setdefault(S.feed_kind, {})
             # flare: angle and length are the same quantity seen two ways -> the one just edited wins
             if "alpha" in newv and "flare_length" in newv:
@@ -502,7 +503,7 @@ with tabs[1]:
                 S.pop(k_, None)
             _fresh_inputs()
             st.rerun()
-        if st.button("Ripristina progetto"):
+        if cc2.button("Ripristina progetto"):
             S.overrides[S.feed_kind] = {}
             _fresh_inputs()
             st.rerun()
