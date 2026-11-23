@@ -6,6 +6,7 @@
 |---|---|---|
 | 1 | IZ0JNY Dual-Flare: tolte le note "progetto nuovo, verificare con openEMS" (feed già verificato a 24 GHz, risultati nello studio `docs/IZ0JNY_DualFlare.md`, anche a griglia fine) | ✅ fatto |
 | 2 | Progetto feed: dopo "Applica modifiche" i campi mostrano i valori ricalcolati (es. lunghezza del cono dopo aver cambiato l'angolo) e le quote non toccate non vengono più fissate per sbaglio | ✅ fatto |
+| 3 | Disegno & STEP: indicazione chiara se la base del feed è forata (e dove si attiva la foratura, scheda Piastrina WR) | ✅ fatto |
 
 ---
 

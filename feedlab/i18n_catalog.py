@@ -6,6 +6,8 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ("Foratura della base attiva per la flangia {wg} {name}: {n} fori nel PDF (foglio della flangia), nello STEP e nell'STL.", 'Base drilling active for the {wg} {name} flange: {n} holes in the PDF (flange sheet), the STEP and the STL.'),
+    ('Base del feed senza fori: per forarla come la flangia della guida attiva "Fori di fissaggio guida → piastrina → feed" nella scheda Piastrina WR, poi rigenera STEP/STL.', 'Feed base without holes: to drill it like the waveguide flange, enable "Fixing holes waveguide → plate → feed" in the WR plate tab, then generate STEP/STL again.'),
     ('ottimizzato per EME col solutore rapido: ΔG + ΔG/T', 'optimised for EME with the fast solver: ΔG + ΔG/T'),
     ('verificato con openEMS a 24 GHz (IZ0JNY): G/T come previsto, cross-polare -30 dB, S11 ≈ -28 dB', 'verified with openEMS at 24 GHz (IZ0JNY): G/T as predicted, cross-pol -30 dB, S11 ≈ -28 dB'),
     ('verificato con openEMS a 24 GHz', 'verified with openEMS at 24 GHz'),

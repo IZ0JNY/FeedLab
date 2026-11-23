@@ -643,6 +643,13 @@ with tabs[6]:
     mat = st.text_input("Materiale", f"{S.material}, interno lucidato Ra ≤ {materials.MATERIALS[S.material].rq_um} µm")
     name = st.text_input("Titolo", f"{geometry.FEED_TYPES[geo.kind]} {S.f_ghz:g} GHz")
     base = WORK / f"{geo.kind}_{S.f_ghz:g}GHz".replace(".", "p")
+    if getattr(geo, "mount", None) is not None:
+        _m = geo.mount
+        st.success(_T("Foratura della base attiva per la flangia {wg} {name}: {n} fori nel PDF (foglio della flangia), "
+                      "nello STEP e nell'STL.", wg=_m.flange.wg, name=_m.flange.name, n=len(_m.feed_holes)))
+    elif not isinstance(geo, geometry.RectHornGeometry):
+        st.info(i18n.tr("Base del feed senza fori: per forarla come la flangia della guida attiva \"Fori di fissaggio "
+                        "guida → piastrina → feed\" nella scheda Piastrina WR, poi rigenera STEP/STL."))
     c1, c2, c3, c4 = st.columns(4)
     if c1.button("📄 Genera PDF"):
         tt = S.get("tol_table")
