@@ -91,7 +91,7 @@ def _quick_eta(geo, fD_dish, block_ratio):
 
 
 DESIGN_GUIDE_ETA = {   # typical calculated efficiencies from W1GHZ/OE2IGL simulations (incl. xpol/phase)
-    "ve4ma": 0.77, "chaparral": 0.77, "skobelev": 0.79, "pickett_potter": 0.79, "w2imu_oe2igl": 0.78,
+    "ve4ma": 0.77, "chaparral": 0.77, "skobelev": 0.79, "pickett_potter": 0.79, "w2imu_oe2igl": 0.78, "iz0jny": 0.785,
     "large_w2imu": 0.78, "w2imu": 0.76, "open_circular": 0.65, "conical": 0.62, "rect_horn": 0.70,
 }
 
@@ -133,6 +133,10 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                 ["Jeff WA6KBL (DUBUS): le quote di Skobelev in CST hanno dato risultati deludenti a 10 GHz — "
                  "verifica full-wave (openEMS) prima di costruire"])
             add("w2imu", ["classico W1GHZ (B ≈ 2.35 f/D)"])
+        if 0.6 <= fD_feed <= 0.9:
+            add("iz0jny", ["scalino + doppio cono: η vicina al limite teorico del modello, S11 < -30 dB, antenna più "
+                           "fredda (EME)", "solo coni e cilindri: facile al tornio"],
+                ["progetto nuovo (IZ0JNY): verifica full-wave (openEMS) prima di costruire"])
         if 0.65 <= fD_feed <= 0.85:
             add("large_w2imu", ["flare 30° con punta da centri: ideale 47-241 GHz", "migliore G/T su offset (+1.6…2.3 dB sun noise)"])
         if fD_feed > 0.95:

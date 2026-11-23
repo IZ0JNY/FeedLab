@@ -32,10 +32,11 @@ FEED_TYPES = {
     "chaparral": "Chaparral 3 anelli",
     "axial_corrugated": "Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)",
     "rect_horn": "Horn rettangolare (G3RPE)",
+    "iz0jny": "IZ0JNY Dual-Flare (scalino + doppio cono)",
 }
 
 # feeds whose interior is a single circular guide with steps/cones -> mode-matching simulation possible
-MODEMATCH_OK = {"open_circular", "w2imu", "w2imu_oe2igl", "large_w2imu", "skobelev", "pickett_potter", "conical"}
+MODEMATCH_OK = {"open_circular", "w2imu", "w2imu_oe2igl", "large_w2imu", "skobelev", "pickett_potter", "conical", "iz0jny"}
 
 
 @dataclass
@@ -331,7 +332,42 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
     if kind == "axial_corrugated":
         return _axial_corrugated(f_ghz, opening_deg, t, kw)
 
+    if kind == "iz0jny":
+        return _iz0jny(f_ghz, fD, t, kw)
+
     raise ValueError(f"unknown feed type {kind}")
+
+
+# IZ0JNY Dual-Flare: optimised with FeedLab's mode-matching solver for EME (ΔG + ΔG/T, S11 < -30 dB over ±1 %),
+# offset-equivalent f/D 0.6…0.9. Per f/D, in wavelengths: Ø after the step, step section length, Ø of the
+# phasing cylinder, cone-1 length, phasing length, aperture Ø, cone-2 length. Input guide Ø 0.76 λ (TE11 only).
+IZ0JNY_TABLE = {
+    0.6: (0.9363, 0.0706, 1.6766, 0.5438, 1.4442, 1.6977, 1.8372),
+    0.8: (1.0247, 0.254, 1.6833, 0.4785, 1.3186, 2.094, 2.4568),
+}
+
+
+def _iz0jny(f_ghz, fD, t, kw):
+    lam = wavelength_mm(f_ghz)
+    fds = sorted(IZ0JNY_TABLE)
+    x = float(min(max(fD or 0.8, fds[0]), fds[-1]))
+    v = [float(np.interp(x, fds, [IZ0JNY_TABLE[k][i] for k in fds])) * lam for i in range(7)]
+    ds, ls, dm, l1, lp, dap, l2 = v
+    Di = kw.get("Di", 0.76 * lam); Ds = kw.get("Ds", ds); Ls = kw.get("Ls", ls); Dm = kw.get("Dm", dm)
+    L1 = kw.get("L1", l1); Lp = kw.get("Lp", lp); Dap = kw.get("Dap", dap); L2 = kw.get("L2", l2)
+    Lin = kw.get("input_length", 0.6 * lam)
+    Ds = max(Ds, Di); Dm = max(Dm, Ds); Dap = max(Dap, Dm)
+    z = [Lin, Lin + Ls, Lin + Ls + L1, Lin + Ls + L1 + Lp, Lin + Ls + L1 + Lp + L2]
+    prof = [(0.0, Di / 2), (z[0], Di / 2), (z[0], Ds / 2), (z[1], Ds / 2), (z[2], Dm / 2), (z[3], Dm / 2), (z[4], Dap / 2)]
+    a1 = math.degrees(math.atan2((Dm - Ds) / 2, L1)) if L1 > 0 else 90.0
+    a2 = math.degrees(math.atan2((Dap - Dm) / 2, L2)) if L2 > 0 else 90.0
+    notes = ["scalino + cono 1 generano il TM11; il cilindro Dm lo rimette in fase col TE11",
+             "il cono 2 forma l'apertura: bordo ≈ -12 dB, centro di fase vicino all'apertura",
+             "ottimizzato per EME col solutore rapido: ΔG + ΔG/T, S11 < -30 dB su ±1 %",
+             "progetto nuovo: verificare con openEMS prima di costruire"]
+    return _finish("iz0jny", f_ghz, {"Di_input": Di, "Ds_step": Ds, "Ls": Ls, "Dm": Dm, "L1": L1, "Lp": Lp, "D_aperture": Dap, "L2": L2,
+                                     "input_length": Lin, "cone1_half_deg": a1, "cone2_half_deg": a2, "wall": t},
+                   prof, t, notes=notes)
 
 
 def _axial_corrugated(f_ghz, opening_deg, t, kw):

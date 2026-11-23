@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import math
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -224,7 +225,8 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
             else:
                 lines.append(f"{k:<18s} {v}")
         lines.append("")
-        lines += [f"• {n}" for n in (geo.notes or [])][:8]
+        for n in (geo.notes or [])[:8]:           # translated first, then wrapped to the column width
+            lines += textwrap.wrap("• " + i18n.tr(n), 56, subsequent_indent="  ")
         ax.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7)
         if tolerances:
             axt = fig.add_axes([0.05, 0.03, 0.55, 0.17]); axt.set_axis_off()

@@ -38,6 +38,8 @@ TECH_SOURCES = [
      "polarizzatore senza tarature, rapporto assiale, isolamento, polarizzazione circolare in EME", ""),
     ("Ivan IZ0JNY", "iz0jny.it: feed W2IMU 24 GHz per EME (CST, disegni e STEP)",
      "accoppiamento piastra WR-42 / feed con viti in lamatura, misure di rumore solare", "https://www.iz0jny.it/"),
+    ("Ivan IZ0JNY", "IZ0JNY Dual-Flare (FeedLab, 2026)",
+     "feed a scalino + doppio cono con sezione di fasatura, ottimizzato per EME con il solutore di FeedLab", ""),
     ("Gerald OE2IGL", "*High performance axial corrugated feed* v1.4 (foglio di calcolo e presentazione, Dorsten 2026)",
      "Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL): quote in funzione dell'angolo di apertura, efficienza 81-86%",
      "https://wettersat.bplaced.net/feed-simulation.html"),

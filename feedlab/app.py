@@ -364,11 +364,12 @@ with tabs[1]:
         editable = {k: v for k, v in geo.params.items() if isinstance(v, (int, float)) and k not in ("wall", "rings", "flange_diam", "flange_thickness")}
         newv = {}
         map_keys = {"A_input": "A", "B_aperture": "B", "flare_half_deg": "alpha", "C_phasing": "C",
-                    "Di_input": "Di", "Ds_step": "Ds", "D_aperture": "Dap" if S.feed_kind in ("skobelev", "pickett_potter") else "D",
+                    "Di_input": "Di", "Ds_step": "Ds", "D_aperture": "Dap" if S.feed_kind in ("skobelev", "pickett_potter", "iz0jny") else "D",
                     "d_input": "d_in", "diam": "diam", "length": "length", "input_length": "input_length",
                     "flare_length": "flare_length", "horn_diam": "horn_diam", "ring_width": "ring_width",
                     "ring_depth": "ring_depth", "ring_setback": "ring_setback", "ring_wall": "ring_wall",
-                    "aperture_H": "aperture_H", "aperture_E": "aperture_E", "axial_length": "axial_length"}
+                    "aperture_H": "aperture_H", "aperture_E": "aperture_E", "axial_length": "axial_length",
+                    "Ls": "Ls", "Dm": "Dm", "L1": "L1", "Lp": "Lp", "L2": "L2"}
         if S.feed_kind == "axial_corrugated":           # OE2IGL design-guide dimensions, edited one by one
             map_keys = {k: k for k in ("pitch", "w", "axi", "delta", "Di", "Ds", *[f"d{i}" for i in range(1, 9)])}
         for k, v in editable.items():

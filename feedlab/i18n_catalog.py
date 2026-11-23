@@ -6,6 +6,20 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('feed a scalino + doppio cono con sezione di fasatura, ottimizzato per EME con il solutore di FeedLab', 'step + double-cone feed with a phasing section, optimised for EME with the FeedLab solver'),
+    ('IZ0JNY Dual-Flare (scalino + doppio cono)', 'IZ0JNY Dual-Flare (step + double cone)'),
+    ('scalino + cono 1 generano il TM11; il cilindro Dm lo rimette in fase col TE11', 'step + cone 1 generate TM11; the Dm cylinder brings it back in phase with TE11'),
+    ("il cono 2 forma l'apertura: bordo ≈ -12 dB, centro di fase vicino all'apertura", 'cone 2 shapes the aperture: edge ≈ -12 dB, phase centre near the aperture'),
+    ('ottimizzato per EME col solutore rapido: ΔG + ΔG/T, S11 < -30 dB su ±1 %', 'optimised for EME with the fast solver: ΔG + ΔG/T, S11 < -30 dB over ±1 %'),
+    ('progetto nuovo: verificare con openEMS prima di costruire', 'new design: verify with openEMS before building'),
+    ('scalino + doppio cono: η vicina al limite teorico del modello, S11 < -30 dB, antenna più fredda (EME)', 'step + double cone: η close to the theoretical limit of the model, S11 < -30 dB, colder antenna (EME)'),
+    ('solo coni e cilindri: facile al tornio', 'cones and cylinders only: easy on the lathe'),
+    ('progetto nuovo (IZ0JNY): verifica full-wave (openEMS) prima di costruire', 'new design (IZ0JNY): verify full-wave (openEMS) before building'),
+    ('Ø cilindro di fasatura', 'Ø of the phasing cylinder'),
+    ('Lunghezza di fasatura', 'Phasing length'),
+    ('Lunghezza cono 1', 'Cone 1 length'),
+    ('Lunghezza cono 2', 'Cone 2 length'),
+    ('Ø dopo lo scalino', 'Ø after the step'),
     ("centro di fase ≈ 0.1-0.2λ dentro l'apertura", 'phase centre ≈ 0.1-0.2λ inside the aperture'),
     ('Tolleranze generali', 'General tolerances'),
     ('Data / Foglio', 'Date / Sheet'),

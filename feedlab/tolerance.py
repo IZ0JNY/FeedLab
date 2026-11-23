@@ -34,6 +34,9 @@ TOL_KEYS = {
     "conical": [("d_in", "d_input", "Ø ingresso", "len"), ("D", "D_aperture", "Ø apertura", "len"),
                 ("alpha", "flare_half_deg", "Semiangolo flare", "ang")],
 }
+TOL_KEYS["iz0jny"] = [("Ds", "Ds_step", "Ø dopo lo scalino", "len"), ("Dm", "Dm", "Ø cilindro di fasatura", "len"),
+                      ("Dap", "D_aperture", "Ø apertura", "len"), ("Lp", "Lp", "Lunghezza di fasatura", "len"),
+                      ("L1", "L1", "Lunghezza cono 1", "len"), ("L2", "L2", "Lunghezza cono 2", "len")]
 TOL_KEYS["w2imu_oe2igl"] = TOL_KEYS["w2imu"]
 TOL_KEYS["large_w2imu"] = TOL_KEYS["w2imu"]
 TOL_KEYS["skobelev"] = TOL_KEYS["pickett_potter"]
