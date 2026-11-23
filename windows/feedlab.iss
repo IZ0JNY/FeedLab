@@ -43,12 +43,6 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [CustomMessages]
-italian.OemsTask=Scarica e installa anche openEMS (facoltativo, ~100 MB: serve solo per la deep analysis full-wave; si può fare anche dopo, dall'app)
-english.OemsTask=Also download and install openEMS (optional, ~100 MB: only needed for the full-wave deep analysis; can also be done later from the app)
-italian.OemsGroup=Simulatore full-wave openEMS:
-english.OemsGroup=openEMS full-wave simulator:
-italian.OemsStatus=Installazione di openEMS (download e prova)…
-english.OemsStatus=Installing openEMS (download and test)…
 italian.AppComment=Progettazione di feed/illuminatori a microonde
 english.AppComment=Microwave feed/illuminator design
 italian.InBrowser=nel browser
@@ -56,7 +50,6 @@ english.InBrowser=in the browser
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-Name: "openems"; Description: "{cm:OemsTask}"; GroupDescription: "{cm:OemsGroup}"; Flags: unchecked
 
 [Registry]
 ; language chosen in the installer = default language of the app (changeable in the app sidebar)
@@ -76,7 +69,6 @@ Name: "{autoprograms}\FeedLab ({cm:InBrowser})"; Filename: "{app}\python\pythonw
 Name: "{autodesktop}\FeedLab"; Filename: "{app}\python\pythonw.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"; AppUserModelID: "IZ0JNY.FeedLab"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\python\python.exe"; Parameters: "-u -m feedlab.openems_local install"; WorkingDir: "{app}\app"; StatusMsg: "{cm:OemsStatus}"; Tasks: openems; Flags: waituntilterminated
 Filename: "{app}\python\pythonw.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; Description: "{cm:LaunchProgram,FeedLab}"; Flags: postinstall nowait skipifsilent
 
 [UninstallDelete]

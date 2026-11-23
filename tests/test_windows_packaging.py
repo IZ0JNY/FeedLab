@@ -26,3 +26,9 @@ def test_checksums_published():
     wf = (ROOT / ".github" / "workflows" / "windows.yml").read_text()
     assert "SHA256SUMS.txt" in (ROOT / "windows" / "build.ps1").read_text(encoding="utf-8")
     assert "SHA256SUMS.txt" in wf and "Get-AuthenticodeSignature" in wf
+
+
+def test_installer_does_not_download_openems():
+    """openEMS is installed from inside the app (tab Full-wave openEMS), never by the setup."""
+    iss = (ROOT / "windows" / "feedlab.iss").read_text(encoding="utf-8-sig")
+    assert "openems" not in iss.lower()
