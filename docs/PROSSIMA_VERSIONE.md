@@ -10,7 +10,7 @@
 
 # Archivio: versione 0.4.15 (pubblicata, BETA TEST senza scadenza)
 
-Pubblicata subito su richiesta, con 4 modifiche.
+Pubblicata subito su richiesta, con 5 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|
@@ -18,6 +18,7 @@ Pubblicata subito su richiesta, con 4 modifiche.
 | 2 | Licenza GPL-3.0-or-later: file `LICENSE` (anche nell'installer e nel pacchetto), sezione Licenza nei Credits con le licenze delle librerie, README, manuali, `pyproject.toml`, intestazioni SPDX | ✅ fatto |
 | 3 | Credito a chi aiuta: `CONTRIBUTING.md` (contributi con la stessa licenza, firma DCO), `CONTRIBUTORS.md` e sezione "Contributori e beta tester" nei Credits | ✅ fatto |
 | 4 | Avviso di nuova versione: all'avvio controlla l'ultima release su GitHub e mostra "cosa c'è di nuovo" (dalle note di rilascio, nella lingua scelta) con il pulsante di download (`feedlab/updates.py`) | ✅ fatto |
+| 5 | Lavorazione CNC dell'esterno per tutti i feed a simmetria di rotazione (tranne Axial Corrugated): profilo esterno semplificato (proposte 1 e 2) e raccordi esterni facoltativi a raggio scelto, con riduzione automatica dove la parete è sottile; interno sempre a spigolo vivo; applicati a disegno, 3D e STEP/STL (`geometry.fillet_outer`) | ✅ fatto |
 
 ---
 

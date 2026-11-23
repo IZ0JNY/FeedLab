@@ -87,7 +87,10 @@ I feed per 1296 MHz (per esempio il septum di Zdeněk OK1DFC) sono fuori dal cam
 ## 6. Progetto feed
 Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano; **input_length** (o *length* per guida aperta, VE4MA e Chaparral, *L_guide* per il corrugato) allunga la guida circolare d'ingresso se vuoi un feed più lungo, senza cambiare le prestazioni. Per l'IZ0JNY è quotato anche lo **scalino interno** (altezza h e lunghezza Ls). Nella sezione e nella tabella le **lunghezze sono in blu**, i **diametri in verde** e gli **angoli dei flare in rosso**; cambiando l'angolo di un cono FeedLab ricalcola la sua lunghezza (i diametri restano).
 
-- **IZ0JNY Dual-Flare:** scelta del **profilo esterno** (l'interno non cambia): parete costante, *proposta 1* pieno dalla base fino alla fine del primo cono, *proposta 2* esterno senza rientranze. Le proposte sono più semplici ed economiche da fare al CNC.
+- **🛠️ Lavorazione CNC dell'esterno** (facoltativa, per tutti i feed circolari tranne l'Axial Corrugated; l'interno non cambia mai):
+  - **profilo esterno:** parete costante, *proposta 1* pieno dalla base fino alla fine del primo cono, *proposta 2* esterno senza rientranze. Le proposte sono più semplici ed economiche da fare al tornio/CNC;
+  - **raggio dei raccordi esterni:** 0 = spigoli vivi; con R > 0 il bordo dell'apertura, gli scalini e l'attacco alla base diventano raccordi. L'interno resta a spigolo vivo, quindi le prestazioni RF non cambiano; dove la parete resterebbe troppo sottile il raggio si riduce da solo (nota sul disegno).
+  - Le scelte compaiono nel disegno PDF, nel modello 3D e nei file STEP/STL.
 - **Axial Corrugated:** si modificano passo, larghezza degli scalini, gradino, diametri e profondità d1…d8 degli 8 scalini, e la lunghezza **L_guide** della sezione di guida circolare dietro la testa, con la sua base (0 mm = solo la testa).
 
 ![Progetto feed]({IMG}/03_design.png)

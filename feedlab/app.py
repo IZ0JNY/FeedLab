@@ -301,9 +301,11 @@ with st.sidebar:
                           help="vuoto = automatico (quanto serve ai fori filettati della flangia); minimo 1 mm. "
                                "Più sottile: i fori filettati diventano passanti e il filetto utile è lo spessore")
     geometry.BASE.update({"shape": _shape, "wg": _bwg, "thickness": _bt})
-    geometry.OUTER_PROFILE["mode"] = S.get("outer_mode", "wall")    # radio in the Feed design tab (IZ0JNY)
-    if S.get("base_prev") != (_shape, _bwg, _bt, S.get("outer_mode", "wall")):   # stale drawings/models
-        S["base_prev"] = (_shape, _bwg, _bt, S.get("outer_mode", "wall"))
+    geometry.OUTER_PROFILE.update(mode=S.get("outer_mode", "wall"),          # options in the Feed design tab
+                                  fillet=float(S.get("outer_fillet") or 0.0))
+    _outer = (S.get("outer_mode", "wall"), S.get("outer_fillet"))
+    if S.get("base_prev") != (_shape, _bwg, _bt, _outer):                      # stale drawings/models
+        S["base_prev"] = (_shape, _bwg, _bt, _outer)
         for k in ("pdf", "step", "stl"):
             S.pop(k, None)
     st.divider()
@@ -445,19 +447,29 @@ with tabs[1]:
     if _kind != S.feed_kind:                     # rerun so the sidebar summary shows the new feed at once
         S.feed_kind = _kind
         st.rerun()
-    if S.feed_kind == "iz0jny":
-        st.radio("Profilo esterno (l'interno non cambia)", ["wall", "cone1", "hull"], key="outer_mode", horizontal=True,
-                 format_func=lambda m: {"wall": "Parete costante", "cone1": "Proposta 1: pieno fino alla fine del 1° cono",
-                                        "hull": "Proposta 2: esterno senza rientranze"}[m],
-                 help="proposte 1 e 2: esterno più semplice ed economico da fare al CNC, senza lo scalino vicino "
-                      "alla base; si aggiunge solo materiale all'esterno")
-        geometry.OUTER_PROFILE["mode"] = S.get("outer_mode", "wall")
+    if S.feed_kind in ("rect_horn", "axial_corrugated"):
+        st.caption("Opzioni di lavorazione CNC dell'esterno (profilo semplificato, raccordi) non disponibili per questo feed.")
+    else:
+        with st.expander("🛠️ Lavorazione CNC dell'esterno (facoltativa, l'interno non cambia)", expanded=False):
+            st.radio("Profilo esterno", ["wall", "cone1", "hull"], key="outer_mode", horizontal=True,
+                     format_func=lambda m: {"wall": "Parete costante", "cone1": "Proposta 1: pieno fino alla fine del 1° cono",
+                                            "hull": "Proposta 2: esterno senza rientranze"}[m],
+                     help="proposte 1 e 2: esterno più semplice ed economico da fare al tornio/CNC, senza lo scalino "
+                          "vicino alla base; si aggiunge solo materiale all'esterno")
+            st.number_input("Raggio dei raccordi esterni (mm)", min_value=0.0, max_value=10.0, step=0.25,
+                            key="outer_fillet",
+                            help="0 = spigoli vivi. Con R > 0 gli spigoli esterni (bordo dell'apertura, scalini, attacco "
+                                 "alla base) diventano raccordi: niente spigoli taglienti, lavorazione con utensile a "
+                                 "raggio. L'interno resta a spigolo vivo, quindi le prestazioni RF non cambiano. Dove "
+                                 "la parete resterebbe troppo sottile il raggio si riduce da solo.")
+            st.caption("Le scelte si applicano al disegno PDF, al modello 3D e ai file STEP/STL.")
+    geometry.OUTER_PROFILE.update(mode=S.get("outer_mode", "wall"), fillet=float(S.get("outer_fillet") or 0.0))
     geo = current_geometry()
     c1, c2 = st.columns([1, 2])
     with c1:
         st.subheader("Quote (modificabili)")
         S.wall = st.number_input("Spessore parete (mm)", 0.2, 10.0, float(geo.params.get("wall", 1.0)), 0.05)
-        editable = {k: v for k, v in geo.params.items() if isinstance(v, (int, float)) and k not in ("wall", "rings", "flange_diam", "flange_thickness")}
+        editable = {k: v for k, v in geo.params.items() if isinstance(v, (int, float)) and k not in ("wall", "rings", "flange_diam", "flange_thickness", "outer_fillet_R")}
         newv = {}
         map_keys = {"A_input": "A", "B_aperture": "B", "flare_half_deg": "alpha", "C_phasing": "C",
                     "Di_input": "Di", "Ds_step": "Ds", "D_aperture": "Dap" if S.feed_kind in ("skobelev", "pickett_potter", "iz0jny") else "D",

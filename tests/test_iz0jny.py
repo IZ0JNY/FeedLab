@@ -70,10 +70,10 @@ def test_cnc_outer_profile_keeps_the_inside(mode):
     outer = [(z, r) for r, z in g1.polygons[0][n:] if z > ft + 1e-6][::-1]
     rs = [r for z, r in outer[:3]]
     assert rs == sorted(rs)
-    # other feeds are never changed
+    # the Axial Corrugated input tube is never changed (it joins the corrugated head)
     geometry.OUTER_PROFILE["mode"] = mode
     try:
-        w = geometry.build("w2imu", 10.368, fD=0.65)
+        w = geometry.build("axial_corrugated", 10.368, fD=0.65)
     finally:
         geometry.OUTER_PROFILE["mode"] = "wall"
     assert "outer_profile" not in w.params

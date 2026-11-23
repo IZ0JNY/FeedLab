@@ -9,12 +9,14 @@
 - **Nessuna scadenza:** tolto il limite di 30 giorni e il pop-up all'avvio.
 - **Licenza GPLv3:** FeedLab è software libero con licenza GNU GPL v3.0 o successiva (file `LICENSE`, mostrato anche dall'installer). Nella finestra **ℹ️ Credits** ci sono la licenza, le licenze delle librerie usate e la nuova sezione **Contributori e beta tester**.
 - **Avviso di nuova versione:** all'avvio FeedLab controlla GitHub e, se c'è una versione più recente, mostra cosa c'è di nuovo e il pulsante per scaricarla.
+- **Lavorazione CNC dell'esterno per tutti i feed:** le proposte di profilo esterno semplificato (prima solo per il Dual-Flare) e i nuovi **raccordi esterni** a raggio scelto, al posto degli spigoli vivi. Sono facoltativi, l'interno non cambia e valgono per disegno PDF, 3D e STEP/STL.
 - **Contribuire:** regole in `CONTRIBUTING.md`; chi aiuta con prove, misure o codice viene citato in `CONTRIBUTORS.md` e nei Credits.
 
 ### 🇬🇧 What's new
 - **No expiry:** removed the 30-day limit and the start-up popup.
 - **GPLv3 licence:** FeedLab is free software under the GNU GPL v3.0 or later (`LICENSE` file, also shown by the installer). The **ℹ️ Credits** window shows the licence, the licences of the libraries used and the new **Contributors and beta testers** section.
 - **New-version notice:** at start FeedLab checks GitHub and, if a newer version exists, shows what's new and a download button.
+- **CNC machining of the outside for every feed:** the simplified outer-profile options (before, Dual-Flare only) and new **outer fillets** with a chosen radius instead of sharp edges. Optional; the inside does not change; they apply to PDF drawing, 3D and STEP/STL.
 - **Contributing:** rules in `CONTRIBUTING.md`; everyone who helps with tests, measurements or code is credited in `CONTRIBUTORS.md` and in the Credits.
 
 Requisiti / Requirements: Windows 10/11 64-bit.

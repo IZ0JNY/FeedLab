@@ -207,8 +207,84 @@ def cnc_outer(poly, n_inner: int, flange_t: float, mode: str):
     return np.array(inner + [(r, z) for z, r in new[::-1]] + tail)
 
 
-# outer profile of the IZ0JNY feed: "wall" constant wall (default), "cone1" / "hull" simplified for CNC
-OUTER_PROFILE = {"mode": "wall"}
+def _seg_dist(p, a, b) -> float:
+    ax, ay = a; bx, by = b
+    dx, dy = bx - ax, by - ay
+    L2 = dx * dx + dy * dy
+    u = 0.0 if L2 == 0 else max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / L2))
+    return math.hypot(p[0] - ax - u * dx, p[1] - ay - u * dy)
+
+
+def _arc(a, b, c, r, step_deg=10.0):
+    """Points of the fillet of radius r at corner b (a → b → c), or None if the corner is (almost) straight."""
+    u1 = np.subtract(a, b, dtype=float); u2 = np.subtract(c, b, dtype=float)
+    l1, l2 = np.linalg.norm(u1), np.linalg.norm(u2)
+    if l1 < 1e-9 or l2 < 1e-9:
+        return None
+    u1, u2 = u1 / l1, u2 / l2
+    alpha = math.acos(max(-1.0, min(1.0, float(u1 @ u2))))   # angle between the two edges at b
+    if alpha > math.radians(178) or alpha < math.radians(2):
+        return None
+    d = r / math.tan(alpha / 2)                                # tangent length
+    dmax = 0.5 * min(l1, l2)                                   # never past the middle of an edge
+    if d > dmax:
+        d, r = dmax, dmax * math.tan(alpha / 2)
+    if r < 1e-3:
+        return None
+    w = (u1 + u2) / np.linalg.norm(u1 + u2)
+    ctr = np.asarray(b, float) + w * (r / math.sin(alpha / 2))
+    p1, p2 = np.asarray(b, float) + u1 * d, np.asarray(b, float) + u2 * d
+    t1, t2 = math.atan2(*(p1 - ctr)[::-1]), math.atan2(*(p2 - ctr)[::-1])
+    dt = (t2 - t1 + math.pi) % (2 * math.pi) - math.pi        # the short way round
+    n = max(2, int(math.ceil(abs(math.degrees(dt)) / step_deg)) + 1)
+    return [tuple(ctr + r * np.array([math.cos(t1 + dt * k / (n - 1)), math.sin(t1 + dt * k / (n - 1))]))
+            for k in range(n)], r
+
+
+def fillet_outer(poly, n_inner: int, flange_t, radius: float, wall: float):
+    """Round the outer edges (aperture rim, steps, joint with the base) with radius `radius`; the inner (RF)
+    surface keeps sharp edges. Where a convex fillet would leave less than 60% of the wall, its radius is
+    reduced. Returns (polygon, smallest radius actually used or None)."""
+    if not radius or radius <= 0:
+        return poly, None
+    P = [tuple(map(float, p)) for p in poly]
+    inner, rest = P[:n_inner], P[n_inner:]
+    k = next((i for i, (r, z) in enumerate(rest) if flange_t and abs(z - flange_t) < 1e-9), None)
+    if k is not None and k + 1 < len(rest):
+        chain_end = k + 1                     # up to the base top (outer edge of the base stays as it is)
+    else:
+        chain_end = len(rest) - 1             # no base: up to the outer edge of the input face
+    chain = [inner[-1]] + rest[:chain_end + 1]
+    min_wall = 0.6 * wall if wall else 0.0
+    inner_segs = list(zip(inner[:-1], inner[1:]))
+    out = [chain[0]]
+    used = []
+    for i in range(1, len(chain) - 1):
+        a, b, c = chain[i - 1], chain[i], chain[i + 1]
+        r_try = radius
+        arc = None
+        for _ in range(8):
+            res = _arc(a, b, c, r_try)
+            if res is None:
+                break
+            pts, r_eff = res
+            if not min_wall or min(_seg_dist(p, s0, s1) for p in pts for s0, s1 in inner_segs) >= min_wall - 1e-9:
+                arc = res
+                break
+            r_try *= 0.5
+        if arc is None:
+            out.append(b)
+        else:
+            out.extend(arc[0])
+            used.append(arc[1])
+    out.append(chain[-1])
+    new = inner[:-1] + out + rest[chain_end + 1:]
+    return np.array(new), (min(used) if used else None)
+
+
+# outer profile of every feed of revolution: "wall" constant wall (default), "cone1" / "hull" simplified for CNC;
+# "fillet": radius (mm) of the outer edges, 0 = sharp edges
+OUTER_PROFILE = {"mode": "wall", "fillet": 0.0}
 
 COLLAR = {"diam": None, "length": 25.0, "z0": 3.0}    # set COLLAR["diam"] = 40 for standard LNB holders
 # bolted stack WR component | λ/4 plate | feed: set MOUNT["wg"] (e.g. "WR-28") to drill the feed flange
@@ -317,9 +393,29 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         notes = list(notes or []) + [f"flangia forata per {mnt.flange.wg} {mnt.flange.name}: {mnt.screw}, "
                                      f"{sum(h.kind == 'dowel' for h in mnt.feed_holes)} fori spina"] + mnt.warnings
     wall_poly = _wall_polygon(profile, t, fl_r, fl_t)
-    if kind == "iz0jny" and OUTER_PROFILE.get("mode", "wall") != "wall":
-        wall_poly = cnc_outer(wall_poly, len(profile), fl_t, OUTER_PROFILE["mode"])
-        params = {**params, "outer_profile": OUTER_PROFILE["mode"]}
+    # optional CNC outer profile and outer fillets (every feed of revolution; the Axial Corrugated input tube is
+    # joined to the corrugated head, where a fillet would leave a groove)
+    cnc_ok = kind != "axial_corrugated"
+    mode = OUTER_PROFILE.get("mode", "wall") if cnc_ok else "wall"
+    if mode != "wall":
+        simpler = cnc_outer(wall_poly, len(profile), fl_t, mode)
+        if simpler is wall_poly or np.array_equal(simpler, wall_poly):
+            notes = list(notes or []) + [{"cone1": "profilo esterno: nessun primo cono da riempire, parete costante",
+                                          "hull": "profilo esterno: già senza rientranze"}.get(mode, "")]
+        else:
+            wall_poly = simpler
+            params = {**params, "outer_profile": mode}
+            notes = list(notes or []) + [{"cone1": "esterno pieno fino alla fine del 1° cono (interno invariato)",
+                                          "hull": "esterno senza rientranze (interno invariato)"}[mode]]
+    if OUTER_PROFILE.get("fillet") and cnc_ok:
+        wall_poly, r_used = fillet_outer(wall_poly, len(profile), fl_t, float(OUTER_PROFILE["fillet"]), t)
+        if r_used is not None:
+            R = float(OUTER_PROFILE["fillet"])
+            params = {**params, "outer_fillet_R": R}
+            notes = list(notes or []) + [f"spigoli esterni raccordati R {R:g} mm" + (
+                "" if r_used >= R - 1e-6 else
+                f" (minimo R {r_used:.2f} mm sul bordo dell'apertura e dove la parete è sottile)") +
+                "; interno a spigolo vivo"]
     polys.append(wall_poly)
     for p in extra_polys or []:
         polys.append(np.asarray(p))

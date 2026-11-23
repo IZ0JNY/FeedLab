@@ -87,7 +87,10 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 ## 6. Feed design
 Shows the feed dimensions (mm and λ), the axial section and the design rule used (W1GHZ, OE2IGL, Skobelev…). Dimensions can be edited by hand; **input_length** (or *length* for the open waveguide, VE4MA and Chaparral, *L_guide* for the corrugated feed) lengthens the circular input waveguide if you want a longer feed, with no change in performance. For the IZ0JNY the **inner step** is dimensioned too (height h and length Ls). In the section and in the table **lengths are blue**, **diameters green** and **flare angles red**; changing a cone angle makes FeedLab recompute its length (the diameters stay).
 
-- **IZ0JNY Dual-Flare:** choice of the **outer profile** (the inside does not change): constant wall, *option 1* solid from the base to the end of the first cone, *option 2* outside without recesses. The options are simpler and cheaper to make on a CNC.
+- **🛠️ CNC machining of the outside** (optional, for every circular feed except the Axial Corrugated; the inside never changes):
+  - **outer profile:** constant wall, *option 1* solid from the base to the end of the first cone, *option 2* outside without recesses. The options are simpler and cheaper to turn/mill;
+  - **outer fillet radius:** 0 = sharp edges; with R > 0 the aperture rim, the steps and the joint with the base become fillets. The inside keeps sharp edges, so the RF performance does not change; where the wall would become too thin the radius is reduced automatically (note on the drawing).
+  - The choices appear in the PDF drawing, the 3D model and the STEP/STL files.
 - **Axial Corrugated:** you edit pitch, step width, front step, diameters and depths d1…d8 of the 8 steps, and the length **L_guide** of the circular waveguide section behind the head, with its base (0 mm = head only).
 
 ![Feed design]({IMG}/03_design.png)
