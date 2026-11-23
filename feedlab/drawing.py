@@ -96,17 +96,28 @@ def _ring_dims(ax, geo):
 
 
 def _title_block(fig, geo, title, material, sheet):
-    ax = fig.add_axes([0.62, 0.03, 0.36, 0.17]); ax.set_axis_off()
-    ax.add_patch(Rectangle((0, 0), 1, 1, fill=False, lw=1.0))
+    """Title block: long texts (feed names, materials) wrap inside their cell and the row grows to fit."""
+    from . import i18n
     rows = [("Titolo", title), ("Frequenza", f"{geo.f_ghz:g} GHz  (λ = {geo.lam:.3f} mm)"),
             ("Materiale", material), ("Tolleranze generali", f"±{tolerance_mm(geo.f_ghz)} mm  (Ø interni: precisione λ/100)"),
             ("Quote", "mm  —  z = 0 faccia flangia d'ingresso"),
             ("Data / Foglio", f"{_dt.date.today().isoformat()}  —  {sheet}"), ("Generato da", "FeedLab")]
-    for i, (k, v) in enumerate(rows):
-        y = 1 - (i + 1) / len(rows)
-        ax.plot([0, 1], [y, y], lw=0.4, color="k")
-        ax.text(0.02, y + 0.03, k, fontsize=6, color="0.3")
-        ax.text(0.30, y + 0.03, v, fontsize=7)
+    # translate whole texts first, then wrap (a wrapped line would no longer match the translation)
+    cells = [(i18n.tr(k), textwrap.wrap(i18n.tr(str(v)), 52) or [""]) for k, v in rows]
+    n_lines = sum(len(v) for _, v in cells)
+    h = min(0.215, 0.17 * (n_lines + 0.6 * len(cells)) / (1.6 * len(cells)))   # stays below the dimension table
+    ax = fig.add_axes([0.62, 0.03, 0.36, h]); ax.set_axis_off()
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    ax.add_patch(Rectangle((0, 0), 1, 1, fill=False, lw=1.0))
+    unit = 1.0 / (n_lines + 0.6 * len(cells))       # height of one text line in axes units
+    y = 1.0
+    for i, (k, v) in enumerate(cells):
+        hr = unit * (len(v) + 0.6)
+        y -= hr
+        if i < len(cells) - 1:
+            ax.plot([0, 1], [y, y], lw=0.4, color="k")
+        ax.text(0.02, y + hr / 2, k, fontsize=6, color="0.3", va="center")
+        ax.text(0.30, y + hr / 2, "\n".join(v), fontsize=7, va="center", linespacing=1.15)
 
 
 def _section_axes(fig, geo: FeedGeometry, half: bool = False):
