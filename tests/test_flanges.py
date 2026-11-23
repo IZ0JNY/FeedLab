@@ -27,10 +27,14 @@ def test_mount_every_waveguide(wg, system):
     d_circ = 1.1 * RECT_WG[wg].a_mm
     m = flanges.mount(wg, system, "V", d_circ)
     kinds = [h.kind for h in m.plate_holes]
-    assert kinds.count("tap") == 4 and kinds.count("cbore") == 4                 # IZ0JNY scheme
-    assert kinds.count("dowel") == (0 if flanges.FLANGES[wg].shape == "square" else 4)
-    assert m.plate_screw.startswith("M") == (system == "metric")
-    assert m.screw.startswith("M") == (system == "metric" and flanges.FLANGES[wg].shape == "square")
+    if flanges.FLANGES[wg].shape == "square":                                    # IZ0JNY scheme, 10/24 GHz
+        assert kinds.count("tap") == 4 and kinds.count("cbore") == 4 and kinds.count("dowel") == 0
+        assert m.plate_screw.startswith("M") == (system == "metric")
+        assert m.screw.startswith("M") == (system == "metric")
+    else:                                                                       # round MIL: stack, no plate screws
+        assert m.stack and not m.plate_screw
+        assert kinds.count("clear") == 4 and kinds.count("dowel") == 4 and kinds.count("cbore") == 0
+        assert sum(h.kind == "tap" for h in m.feed_holes) == 4 and m.screw == "4-40 UNC"
     # every plate hole keeps clear of the others and of the circular guide
     hs = m.plate_holes
     for i, a in enumerate(hs):
@@ -53,11 +57,11 @@ def test_horizontal_polarisation_rotates_pattern():
 
 
 def test_plate_with_holes_counterbores_and_pocket(tmp_path):
-    p0 = plate.design_plate(47.088, "WR-22", 6.5, "V")
-    p1 = plate.design_plate(47.088, "WR-22", 6.5, "V", holes="metric")
+    p0 = plate.design_plate(24.048, "WR-42", 9.47, "V")
+    p1 = plate.design_plate(24.048, "WR-42", 9.47, "V", holes="metric")
     assert p1.thickness == pytest.approx(p0.thickness)                       # λ/4 section unchanged
-    assert p1.body_t >= p1.mount.plate_body_min() and p1.pocket_depth > 0
-    assert p1.outer >= flanges.FLANGES["WR-22"].A
+    assert p1.body_t >= p1.mount.plate_body_min() and p1.pocket_depth >= 0
+    assert p1.outer >= flanges.FLANGES["WR-42"].A
     s = plate.plate_solid(p1).val()
     plain = p1.outer ** 2 * p1.body_t
     assert s.Volume() < plain - 10                                           # holes, counterbores, pocket cut
@@ -72,10 +76,11 @@ def test_feed_flange_drilled_in_step_and_pdf(tmp_path):
     g1 = geometry.build("pickett_potter", 47.088, fD=0.7)
     m = g1.mount
     d_need, t_need = m.feed_flange_min()
-    assert g1.params["flange_diam"] >= d_need - 1e-9 and g1.params["flange_thickness"] >= t_need - 1e-9
+    assert g1.params["flange_diam"] >= flanges.FLANGES["WR-22"].A - 1e-9      # base as large as the round flange
+    assert g1.params["flange_thickness"] >= t_need - 1e-9
     assert g1.z_aperture - g0.z_aperture == pytest.approx(g1.params["input_length"] - g0.params["input_length"])
-    assert sum(h.kind == "tap" for h in m.feed_holes) == 4                   # the 4 plate → feed screws
-    assert sum(h.kind == "pin" for h in m.feed_holes) == 2                   # 47 GHz: alignment pins
+    assert sum(h.kind == "tap" for h in m.feed_holes) == 4                   # the guide screws, tapped through
+    assert sum(h.kind == "dowel" for h in m.feed_holes) == 4                 # standard dowels align the stack
     sol = cad.solid(g1)
     assert len(sol.faces().vals()) > faces0                                  # hole walls
     pdf = drawing.drawing_pdf(g1, tmp_path / "f.pdf")
@@ -100,11 +105,13 @@ def test_iz0jny_24ghz_plate():
     assert not [h for h in p.mount.plate_holes if h.kind == "pin"]           # below 47 GHz: no pins
 
 
-def test_pins_from_47ghz():
-    assert not [h for h in flanges.mount("WR-22", "metric", "V", 6.5, 46.9).plate_holes if h.kind == "pin"]
+def test_from_47ghz_the_flange_dowels_align_the_stack():
+    """Round MIL flanges: the 4 standard dowel holes go through the plate into the feed base and align the
+    whole stack; no extra plate–feed pins and no plate screws."""
     for f, wg, d in [(47.0, "WR-22", 6.5), (76.0, "WR-12", 3.2), (122.25, "WR-8", 2.2)]:
         m = flanges.mount(wg, "metric", "V", d, f)
-        assert sum(h.kind == "pin" for h in m.plate_holes) == 2 and sum(h.kind == "pin" for h in m.feed_holes) == 2
+        assert not [h for h in m.plate_holes + m.feed_holes if h.kind == "pin"]
+        assert sum(h.kind == "dowel" for h in m.plate_holes) == 4 and sum(h.kind == "dowel" for h in m.feed_holes) == 4
         assert not [w for w in m.warnings if "troppo vicino" in w or "nessuna" in w]
 
 
@@ -166,3 +173,33 @@ def test_plate_has_the_shape_and_size_of_the_flange(f, wg, shape, side):
     assert ph.shape == shape and ph.outer >= side - 1e-9
     if ph.outer > side + 0.01:
         assert any("invece di" in w for w in ph.mount.warnings)
+
+
+def test_round_flange_stack_no_plate_screws():
+    """From 47 GHz (round MIL flanges): the plate rests on the feed base, the guide's 4-40 screws pass through
+    the plate and are tapped through the base; no plate→feed screws, no counterbores."""
+    from feedlab import geometry, plate
+    p = plate.design_plate(47.088, "WR-22", 4.84, "V", holes="metric")
+    m = p.mount
+    assert m.stack and not m.plate_screw and p.shape == "round" and p.outer == pytest.approx(28.55)
+    assert {h.kind for h in m.plate_holes} == {"clear", "dowel"}
+    assert all(h.depth is None for h in m.feed_holes if h.kind == "tap")
+    assert p.body_t == pytest.approx(p.thickness, abs=0.01)
+    try:
+        geometry.MOUNT.update({"wg": "WR-22", "system": "metric", "pol": "V"})
+        for th, expect in ((None, 4.3), (2.0, 2.0), (0.4, 1.0)):
+            geometry.BASE.update({"shape": "round", "wg": None, "thickness": th})
+            g = geometry.build("iz0jny", 47.088, fD=0.65)
+            assert g.params["flange_thickness"] == pytest.approx(expect)
+            assert g.params["flange_diam"] == pytest.approx(28.55)
+            assert g.mount.screw_in == pytest.approx(expect)        # thread = base thickness
+    finally:
+        geometry.BASE.update({"shape": "round", "wg": None, "thickness": None})
+        geometry.MOUNT.update({"wg": None})
+
+
+def test_iz0jny_cone_angles_in_lab():
+    from feedlab import explore, geometry
+    assert {"a1", "a2"} <= {k for k, _, _ in explore.TUNABLE["iz0jny"]}
+    g = geometry.build("iz0jny", 24.048, fD=0.65, a1=20, a2=6)
+    assert g.params["cone1_half_deg"] == pytest.approx(20) and g.params["cone2_half_deg"] == pytest.approx(6)

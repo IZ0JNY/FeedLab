@@ -212,12 +212,19 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
 
 def _holes_text(p: MatchingPlate) -> str:
     m = p.mount
-    lines = ["", f"FORATURA flangia {m.flange.wg} {m.flange.name}",
-             f"(viti guida {m.screw} nella piastra, viti piastra→feed {m.plate_screw};", " coordinate dal centro)"]
+    if m.stack:
+        lines = ["", f"FORATURA flangia {m.flange.wg} {m.flange.name}",
+                 f"(viti guida {m.screw} passanti, avvitate nella base", " del feed; coordinate dal centro)"]
+    else:
+        lines = ["", f"FORATURA flangia {m.flange.wg} {m.flange.name}",
+                 f"(viti guida {m.screw} nella piastra, viti piastra→feed {m.plate_screw};", " coordinate dal centro)"]
     for h in m.plate_holes:
         lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {h.callout}")
-    lines.append(f"  viti della guida: lunghezza ≤ flangia guida + {p.body_t:.1f} mm")
-    if m.screw_len:
+    if m.stack:
+        lines.append(f"  viti della guida: lunghezza = flangia guida + {p.body_t:.1f} mm + {m.screw_in:.1f} nel feed")
+    else:
+        lines.append(f"  viti della guida: lunghezza ≤ flangia guida + {p.body_t:.1f} mm")
+    if m.screw_len and not m.stack:
         lines.append(f"  viti piastra→feed: 4 × {m.plate_screw} × {m.screw_len_label} a testa cilindrica")
         drill = max(h.depth for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout)
         lines.append(f"  (2 × spessore {p.body_t:.2f} → {m.screw_len_label}); nel feed: vite {m.screw_in:.1f},")

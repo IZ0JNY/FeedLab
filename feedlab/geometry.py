@@ -169,11 +169,52 @@ def _wall_polygon(profile, t, flange_r=None, flange_t=None):
     return np.array(poly)
 
 
+def _upper_envelope(pts):
+    """Upper concave envelope of (z, r) points: the smallest outline without dents that contains them."""
+    h = []
+    for p in sorted(set(pts)):
+        while len(h) >= 2 and (h[-1][0] - h[-2][0]) * (p[1] - h[-2][1]) - (h[-1][1] - h[-2][1]) * (p[0] - h[-2][0]) >= -1e-12:
+            h.pop()
+        h.append(p)
+    return h
+
+
+def cnc_outer(poly, n_inner: int, flange_t: float, mode: str):
+    """Outer surface simplified for CNC turning/milling, inner surface untouched (material only added):
+    "cone1": solid from the base up to the end of the first cone (no step / neck next to the base);
+    "hull": the whole outside without dents. Anything else: constant wall (unchanged)."""
+    if mode not in ("cone1", "hull") or not flange_t:
+        return poly
+    P = [tuple(map(float, p)) for p in poly]
+    inner, rest = P[:n_inner], P[n_inner:]
+    k = next((i for i, (r, z) in enumerate(rest) if abs(z - flange_t) < 1e-9), None)
+    if k is None:
+        return poly
+    outer, tail = rest[:k + 1], rest[k + 1:]
+    zr = [(z, r) for r, z in outer][::-1]                     # from the base top to the aperture
+    if mode == "hull":
+        new = _upper_envelope(zr)
+    else:
+        i_end = None                                          # end of the first cone (slope drops after it)
+        for i in range(1, len(zr) - 1):
+            (z0, r0), (z1, r1), (z2, r2) = zr[i - 1], zr[i], zr[i + 1]
+            if z1 > z0 + 1e-9 and r1 > r0 + 1e-9 and (z2 <= z1 + 1e-9 or (r2 - r1) / (z2 - z1) < (r1 - r0) / (z1 - z0) - 1e-6):
+                i_end = i
+                break
+        if i_end is None:
+            return poly
+        new = _upper_envelope(zr[:i_end + 1]) + zr[i_end + 1:]
+    return np.array(inner + [(r, z) for z, r in new[::-1]] + tail)
+
+
+# outer profile of the IZ0JNY feed: "wall" constant wall (default), "cone1" / "hull" simplified for CNC
+OUTER_PROFILE = {"mode": "wall"}
+
 COLLAR = {"diam": None, "length": 25.0, "z0": 3.0}    # set COLLAR["diam"] = 40 for standard LNB holders
 # bolted stack WR component | λ/4 plate | feed: set MOUNT["wg"] (e.g. "WR-28") to drill the feed flange
 MOUNT = {"wg": None, "system": "metric", "pol": "V", "plate_screw": None, "plate_t": None}
 # base of the feed: "round" (disc) or "square" = same size as the square flange of BASE["wg"] (WR-90, WR-75, WR-42…)
-BASE = {"shape": "round", "wg": None}
+BASE = {"shape": "round", "wg": None, "thickness": None}     # thickness None = automatic
 
 
 def square_base_side() -> float | None:
@@ -193,13 +234,46 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f,
                     MOUNT.get("plate_screw"), MOUNT.get("plate_t"))
         d_need, t_need = mnt.feed_flange_min()
-        # the thicker flange must sit on the straight input guide: lengthen it if needed (electrically benign)
+    # base (flange) thickness: chosen by the user (≥ 1 mm) or automatic (enough for the threaded holes)
+    t_user = BASE.get("thickness")
+    fl_t = (max(1.0, float(t_user)) if t_user else
+            max(max(1.5, 0.12 * lam), t_need if mnt is not None else 0.0)) if flange else None
+    if mnt is not None:
+        if mnt.stack:                              # through-tapped base: the thread is the whole base
+            mnt.engagement = mnt.screw_in = mnt.tap_depth = fl_t
+        elif fl_t < t_need - 1e-9 and mnt.screw_len:
+            # plate→feed screws: the longest commercial one whose tip stays inside the base
+            from .flanges import CBORE, LENGTHS_IN, LENGTHS_MM
+            grip = max((MOUNT.get("plate_t") or 0.0) - CBORE[mnt.plate_screw][1], 0.0)
+            short_in = [(1 / 8, '1/8"'), (3 / 16, '3/16"'), (1 / 4, '1/4"'), (5 / 16, '5/16"')]
+            opts = ([(v * 25.4, lab) for v, lab in short_in + list(LENGTHS_IN)] if MOUNT.get("system") == "imperial"
+                    else [(float(v), f"{v} mm") for v in [3, 4, 5, 6, 8] + list(LENGTHS_MM)])
+            fit = [o for o in opts if o[0] <= grip + fl_t + 1e-9]
+            if fit:
+                mnt.screw_len, mnt.screw_len_label = fit[-1]
+                mnt.screw_in = mnt.screw_len - grip
+                notes = list(notes or []) + [f"viti piastrina→feed {mnt.plate_screw} × {mnt.screw_len_label}: "
+                                             f"entrano {mnt.screw_in:.1f} mm nella base"]
+        if fl_t < t_need - 1e-9 and not mnt.stack:
+            # thinner than the tapped holes need: they go through; the thread length is the base thickness
+            for h in mnt.feed_holes:
+                if h.depth is not None and h.depth > fl_t:
+                    h.depth = None
+                    if h.kind == "tap":
+                        h.callout = h.callout.split(" filetto")[0] + " filettato passante"
+                    elif h.kind == "dowel":
+                        h.callout = h.callout.split(" prof.")[0] + " passante"
+            notes = list(notes or []) + [f"base {fl_t:.2f} mm: fori filettati passanti, filetto utile {fl_t:.2f} mm "
+                                         f"(consigliati ≥ {t_need:.1f} mm)"]
+        if mnt.stack and fl_t < t_need - 1e-9:
+            notes = list(notes or []) + [f"base {fl_t:.2f} mm: filetto utile {fl_t:.2f} mm (consigliati ≥ {t_need:.1f} mm)"]
+        # the base must sit on the straight input guide: lengthen it if needed (electrically benign)
         r0 = profile[0][1]
         z_first = profile[1][0] if abs(profile[1][1] - r0) < 1e-9 else 0.0
         # the wall after the input guide (step, cone) is offset by t towards the input: keep it clear of the
         # flange top (t + 0.5 mm), otherwise the outer wall would dip into the flange
-        if t_need + t + 0.5 > z_first:
-            d = t_need + t + 0.5 - z_first
+        if fl_t + t + 0.5 > z_first:
+            d = fl_t + t + 0.5 - z_first
             rest = profile[2:] if z_first > 0 else profile[1:]
             profile = [(0.0, r0), (z_first + d, r0)] + [(z + d, r) for z, r in rest]
             if "input_length" in params:
@@ -219,10 +293,12 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     outer = max(r for _, r in profile) + t
     polys = []
     fl_r = profile[0][1] + t + max(2.0, 0.4 * lam) if flange else None
-    fl_t = max(1.5, 0.12 * lam) if flange else None
     if mnt is not None:
-        fl_r = max(fl_r, d_need / 2)
-        fl_t = max(fl_t, t_need)
+        if mnt.flange.shape == "round":           # round MIL flange: base as large as the flange (holes inside)
+            edge = max(math.hypot(h.x, h.y) + h.dia / 2 for h in mnt.feed_holes)
+            fl_r = max(fl_r, mnt.flange.A / 2, edge + 0.5)
+        else:
+            fl_r = max(fl_r, d_need / 2)
     side = square_base_side() if flange else None
     if side:
         # square base as large as the waveguide flange: in the axial section (cut along x or y) it is ±side/2;
@@ -240,7 +316,11 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     if mnt is not None:
         notes = list(notes or []) + [f"flangia forata per {mnt.flange.wg} {mnt.flange.name}: {mnt.screw}, "
                                      f"{sum(h.kind == 'dowel' for h in mnt.feed_holes)} fori spina"] + mnt.warnings
-    polys.append(_wall_polygon(profile, t, fl_r, fl_t))
+    wall_poly = _wall_polygon(profile, t, fl_r, fl_t)
+    if kind == "iz0jny" and OUTER_PROFILE.get("mode", "wall") != "wall":
+        wall_poly = cnc_outer(wall_poly, len(profile), fl_t, OUTER_PROFILE["mode"])
+        params = {**params, "outer_profile": OUTER_PROFILE["mode"]}
+    polys.append(wall_poly)
     for p in extra_polys or []:
         polys.append(np.asarray(p))
         outer = max(outer, max(x for x, _ in p))
@@ -398,6 +478,11 @@ def _iz0jny(f_ghz, fD, t, kw):
     L1 = kw.get("L1", l1); Lp = kw.get("Lp", lp); Dap = kw.get("Dap", dap); L2 = kw.get("L2", l2)
     Lin = kw.get("input_length", 0.6 * lam)
     Ds = max(Ds, Di); Dm = max(Dm, Ds); Dap = max(Dap, Dm)
+    # cones given by their half-angle (diameters kept): the length follows (Laboratory, optimiser)
+    if kw.get("a1") is not None and Dm - Ds > 1e-6:
+        L1 = (Dm - Ds) / 2 / math.tan(min(max(float(kw["a1"]), 1.0), 80.0) * DEG)
+    if kw.get("a2") is not None and Dap - Dm > 1e-6:
+        L2 = (Dap - Dm) / 2 / math.tan(min(max(float(kw["a2"]), 0.3), 60.0) * DEG)
     z = [Lin, Lin + Ls, Lin + Ls + L1, Lin + Ls + L1 + Lp, Lin + Ls + L1 + Lp + L2]
     prof = [(0.0, Di / 2), (z[0], Di / 2), (z[0], Ds / 2), (z[1], Ds / 2), (z[2], Dm / 2), (z[3], Dm / 2), (z[4], Dap / 2)]
     a1 = math.degrees(math.atan2((Dm - Ds) / 2, L1)) if L1 > 0 else 90.0

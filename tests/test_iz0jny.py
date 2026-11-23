@@ -47,3 +47,33 @@ def test_openems_script(tmp_path):
     g = geometry.build("iz0jny", 10.368, fD=0.8)
     p = openems_sim.make_deep_script(g, tmp_path)
     assert p.exists() and "feedlab-openems-config" in p.read_text()
+
+
+@pytest.mark.parametrize("mode", ["cone1", "hull"])
+def test_cnc_outer_profile_keeps_the_inside(mode):
+    """Options 1/2 for CNC: only material added outside, inner profile identical, no step next to the base."""
+    from feedlab import cad
+    try:
+        geometry.MOUNT.update({"wg": "WR-90", "system": "metric", "pol": "V"})
+        geometry.OUTER_PROFILE["mode"] = "wall"
+        g0 = geometry.build("iz0jny", 10.368, fD=0.65, wall=2.0)
+        geometry.OUTER_PROFILE["mode"] = mode
+        g1 = geometry.build("iz0jny", 10.368, fD=0.65, wall=2.0)
+    finally:
+        geometry.OUTER_PROFILE["mode"] = "wall"
+        geometry.MOUNT.update({"wg": None})
+    n = len(g0.profile)
+    assert [tuple(p) for p in g1.polygons[0][:n]] == [tuple(p) for p in g0.polygons[0][:n]]
+    assert cad.solid(g1).val().Volume() > cad.solid(g0).val().Volume()
+    # outer radius never decreases going from the base top to the end of the first cone
+    ft = g1.params["flange_thickness"]
+    outer = [(z, r) for r, z in g1.polygons[0][n:] if z > ft + 1e-6][::-1]
+    rs = [r for z, r in outer[:3]]
+    assert rs == sorted(rs)
+    # other feeds are never changed
+    geometry.OUTER_PROFILE["mode"] = mode
+    try:
+        w = geometry.build("w2imu", 10.368, fD=0.65)
+    finally:
+        geometry.OUTER_PROFILE["mode"] = "wall"
+    assert "outer_profile" not in w.params

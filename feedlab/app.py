@@ -171,7 +171,7 @@ def section_fig(geo):
         fig.add_annotation(x=z0 + t / 2, y=(min(ra, rb) + t + max(ra, rb)) / 2, text=f"gradino {t:.2f} mm", **ann)
     for z0, r0, z1, r1, a in feats["flares"]:
         fig.add_annotation(x=(z0 + z1) / 2, y=-(r0 + r1) / 2, text=f"flare α = {abs(a):.2f}°",
-                           **{**ann, "ay": 28})
+                           **{**ann, "ay": 28, "font": dict(size=11, color="red"), "arrowcolor": "red"})
     # names of the design dimensions (as in the PDF drawing): axial lengths above, diameters on the part
     if geo.kind != "axial_corrugated":
         prof = geo.profile
@@ -274,9 +274,14 @@ with st.sidebar:
         _shape = "round"
         if _fl_wr is not None:
             st.caption(_T("Flangia {wg} rotonda ({name}): base del feed circolare", wg=_wr, name=_fl_wr.name))
-    geometry.BASE.update({"shape": _shape, "wg": _bwg})
-    if S.get("base_prev") != (_shape, _bwg):         # drawings/models made with the other base are stale
-        S["base_prev"] = (_shape, _bwg)
+    _bt = st.number_input("Spessore base del feed (mm)", min_value=1.0, max_value=30.0, value=None, step=0.5,
+                          key="base_t", placeholder="automatico",
+                          help="vuoto = automatico (quanto serve ai fori filettati della flangia); minimo 1 mm. "
+                               "Più sottile: i fori filettati diventano passanti e il filetto utile è lo spessore")
+    geometry.BASE.update({"shape": _shape, "wg": _bwg, "thickness": _bt})
+    geometry.OUTER_PROFILE["mode"] = S.get("outer_mode", "wall")    # radio in the Feed design tab (IZ0JNY)
+    if S.get("base_prev") != (_shape, _bwg, _bt, S.get("outer_mode", "wall")):   # stale drawings/models
+        S["base_prev"] = (_shape, _bwg, _bt, S.get("outer_mode", "wall"))
         for k in ("pdf", "step", "stl"):
             S.pop(k, None)
     st.divider()
@@ -418,6 +423,13 @@ with tabs[1]:
     if _kind != S.feed_kind:                     # rerun so the sidebar summary shows the new feed at once
         S.feed_kind = _kind
         st.rerun()
+    if S.feed_kind == "iz0jny":
+        st.radio("Profilo esterno (l'interno non cambia)", ["wall", "cone1", "hull"], key="outer_mode", horizontal=True,
+                 format_func=lambda m: {"wall": "Parete costante", "cone1": "Proposta 1: pieno fino alla fine del 1° cono",
+                                        "hull": "Proposta 2: esterno senza rientranze"}[m],
+                 help="proposte 1 e 2: esterno più semplice ed economico da fare al CNC, senza lo scalino vicino "
+                      "alla base; si aggiunge solo materiale all'esterno")
+        geometry.OUTER_PROFILE["mode"] = S.get("outer_mode", "wall")
     geo = current_geometry()
     c1, c2 = st.columns([1, 2])
     with c1:
@@ -431,7 +443,8 @@ with tabs[1]:
                     "flare_length": "flare_length", "horn_diam": "horn_diam", "ring_width": "ring_width",
                     "ring_depth": "ring_depth", "ring_setback": "ring_setback", "ring_wall": "ring_wall",
                     "aperture_H": "aperture_H", "aperture_E": "aperture_E", "axial_length": "axial_length",
-                    "Ls": "Ls", "Dm": "Dm", "L1": "L1", "Lp": "Lp", "L2": "L2"}
+                    "Ls": "Ls", "Dm": "Dm", "L1": "L1", "Lp": "Lp", "L2": "L2",
+                    "cone1_half_deg": "a1", "cone2_half_deg": "a2"}
         if S.feed_kind == "axial_corrugated":           # OE2IGL design-guide dimensions, edited one by one
             map_keys = {k: k for k in ("pitch", "w", "axi", "delta", "Di", "Ds", *[f"d{i}" for i in range(1, 9)])}
         for k, v in editable.items():
@@ -442,8 +455,16 @@ with tabs[1]:
                 continue
             if S.feed_kind == "conical" and k == "flare_length":
                 continue
-            lab = f"{k} ({'°' if k.endswith('_deg') else 'mm'})"
-            nv = st.number_input(lab, value=float(round(v, 4)), format="%.4f", key=f"in_{S.feed_kind}_{k}")
+            # same colours as the dimensions on the section: blue lengths, green diameters, red angles
+            if k.endswith("_deg"):
+                lab = f":red[{k} (°)]"
+            elif k.startswith(("D", "d_", "A_", "B_")) or "diam" in k:
+                lab = f":green[{k} (mm)]"
+            else:
+                lab = f":blue[{k} (mm)]"
+            nv = st.number_input(lab, value=float(round(v, 4)), format="%.4f", key=f"in_{S.feed_kind}_{k}",
+                                 help="angolo del cono: cambiandolo FeedLab ricalcola la lunghezza del cono "
+                                      "(i diametri restano)" if k.endswith("_deg") else None)
             if abs(nv - v) > 1e-6:
                 newv[map_keys[k]] = nv
         cc1, cc2 = st.columns(2)
@@ -456,6 +477,13 @@ with tabs[1]:
                 ov.pop("flare_length", None)
             if "flare_length" in newv:
                 ov.pop("alpha", None)
+            for ang, ln in (("a1", "L1"), ("a2", "L2")):     # IZ0JNY cones: the value just edited wins
+                if ang in newv and ln in newv:
+                    newv.pop(ln)
+                if ang in newv:
+                    ov.pop(ln, None)
+                if ln in newv:
+                    ov.pop(ang, None)
             ov.update(newv)
             st.rerun()
         if cc2.button("Ripristina progetto"):
@@ -664,7 +692,7 @@ with tabs[2]:
         lab_over = {}
         for col, (key, label, span) in zip(cols, explore.TUNABLE[kind]):
             x0 = base_vals[key]
-            unit = "°" if key == "alpha" else "mm"
+            unit = "°" if key in ("alpha", "a1", "a2") else "mm"
             v = col.slider(f"{label} ({unit})", float(x0 * (1 - span)), float(x0 * (1 + span)),
                            float(np.clip(start[key], x0 * (1 - span), x0 * (1 + span))), float(x0 * span / 50),
                            format="%.3f", key=f"lab_{kind}_{key}",
@@ -672,7 +700,14 @@ with tabs[2]:
             col.caption(f"{v / lam:.3f} λ · {100 * (v / x0 - 1):+.1f}%" if unit == "mm" else f"{100 * (v / x0 - 1):+.1f}%")
             if abs(v - x0) > 1e-9:
                 lab_over[key] = v
-        if any(k == "alpha" for k, _, _ in explore.TUNABLE[kind]):
+        if kind == "iz0jny":
+            g_lab = geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **lab_over)
+            p_lab = g_lab.params
+            st.caption(_T("Coni: semiangolo 1 {a1:.2f}° → L1 {l1:.3f} mm · semiangolo 2 {a2:.2f}° → L2 {l2:.3f} mm "
+                          "· lunghezza totale {L:.2f} mm (se cambi l'angolo, la lunghezza del cono segue; "
+                          "l'angolo prevale sulla lunghezza)", a1=p_lab["cone1_half_deg"], l1=p_lab["L1"],
+                          a2=p_lab["cone2_half_deg"], l2=p_lab["L2"], L=g_lab.z_aperture))
+        elif any(k == "alpha" for k, _, _ in explore.TUNABLE[kind]):
             g_lab = geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **lab_over)
             p_lab = g_lab.params
             st.caption(f"Flare: semiangolo {p_lab['flare_half_deg']:.2f}° → lunghezza flare {p_lab['flare_length']:.3f} mm "
@@ -902,7 +937,9 @@ with tabs[7]:
         system = c2.radio("Viti", ["metric", "imperial"], horizontal=True, key="mount_sys",
                           format_func=lambda x: {"metric": "Metriche (M)", "imperial": "Pollici (UNC)"}[x])
         opts = flanges.plate_screw_options(S.f_ghz)
-        pscrew = st.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}", disabled=not holes_on,
+        _round_fl = wg in flanges.FLANGES and flanges.FLANGES[wg].shape == "round"
+        pscrew = st.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}",
+                              disabled=not holes_on or _round_fl,
                               format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
                               help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale "
                                    "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
@@ -918,6 +955,11 @@ with tabs[7]:
                 geometry.MOUNT.update(new_cfg)
                 for k in ("pdf", "step", "stl", "plate_pdf", "plate_step"):
                     S.pop(k, None)
+            _gf = current_geometry()                 # screws follow the feed base thickness (sidebar)
+            if pl.mount is not None and getattr(_gf, "mount", None) is not None and \
+                    _gf.mount.flange.wg == pl.mount.flange.wg:
+                pl.mount.screw_len, pl.mount.screw_len_label = _gf.mount.screw_len, _gf.mount.screw_len_label
+                pl.mount.screw_in = _gf.mount.screw_in
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Apertura a", f"{pl.a:.3f} mm"); m2.metric("Apertura b", f"{pl.b:.3f} mm")
             m3.metric("Spessore", f"{pl.thickness:.3f} mm", f"± {pl.tolerance:.3f}", delta_color="off")
@@ -927,13 +969,20 @@ with tabs[7]:
                      f"(fc TE11 {299.792458 / (1.706 * dcirc):.2f} GHz)")
             if pl.mount is not None:
                 mm_ = pl.mount
-                _deep = max(h.depth for h in mm_.feed_holes if h.kind == 'tap' and mm_.plate_screw in h.callout)
-                _txt = [_T("Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastra.",
-                           wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
-                        _T("4 viti piastra→feed {ps} × {ln} con testa nella lamatura (lato guida).",
-                           ps=mm_.plate_screw, ln=mm_.screw_len_label),
-                        _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
-                           a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]
+                _deep = max((h.depth or 0.0) for h in mm_.feed_holes if h.kind == 'tap')
+                if mm_.stack:
+                    _txt = [_T("Flangia {wg} {name}: la piastrina si appoggia sulla base del feed, le viti della guida "
+                               "({screw}) la attraversano e si avvitano nella base. Nessuna vite piastrina→feed.",
+                               wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
+                            _T("Viti della guida: flangia guida + {t} mm di piastrina + {a} mm nella base del feed "
+                               "(filettata passante).", t=f"{pl.body_t:.2f}", a=f"{mm_.screw_in:.1f}")]
+                else:
+                    _txt = [_T("Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastra.",
+                               wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
+                            _T("4 viti piastra→feed {ps} × {ln} con testa nella lamatura (lato guida).",
+                               ps=mm_.plate_screw, ln=mm_.screw_len_label),
+                            _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
+                               a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]
                 if any(h.kind == "pin" for h in mm_.plate_holes):
                     _txt.append(i18n.tr("2 spine di centraggio piastra–feed."))
                 if pl.pocket_depth > 1e-6:

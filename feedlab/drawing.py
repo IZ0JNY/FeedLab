@@ -276,8 +276,10 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
                  f"(polarizzazione {'verticale' if mnt.polarization == 'V' else 'orizzontale'})", fontsize=9)
     ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()
     lines = [f"FORATURA per flangia {mnt.flange.wg} {mnt.flange.name}",
-             f"Viti piastra → feed: {mnt.plate_screw} (testa nella lamatura della piastra)",
-             f"Le viti della guida ({mnt.screw}) si avvitano nella piastra.", "",
+             *([f"Le viti della guida ({mnt.screw}) attraversano la piastrina", "e si avvitano in questa base.",
+                "Nessuna vite piastrina → feed."] if mnt.stack else
+               [f"Viti piastra → feed: {mnt.plate_screw} (testa nella lamatura della piastra)",
+                f"Le viti della guida ({mnt.screw}) si avvitano nella piastra."]), "",
              f"{'#':>2s} {'x':>8s} {'y':>8s}  lavorazione"]
     for i, h in enumerate(mnt.feed_holes, 1):
         depth = ""

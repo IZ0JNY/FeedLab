@@ -34,7 +34,8 @@ TUNABLE = {
     "skobelev": [("Dap", "Ø apertura", 0.2), ("alpha", "Semiangolo flare", 0.5), ("Ds", "Ø dopo il gradino", 0.08)],
     "pickett_potter": [("Dap", "Ø apertura", 0.2), ("alpha", "Semiangolo flare", 0.5), ("Ds", "Ø dopo il gradino", 0.08)],
     "iz0jny": [("Dap", "Ø apertura", 0.12), ("Dm", "Ø cilindro di fasatura", 0.08), ("Lp", "Lunghezza di fasatura", 0.3),
-               ("L2", "Lunghezza cono 2", 0.25), ("Ds", "Ø dopo lo scalino", 0.05)],
+               ("L2", "Lunghezza cono 2", 0.25), ("Ds", "Ø dopo lo scalino", 0.05),
+               ("a1", "Semiangolo cono 1", 0.4), ("a2", "Semiangolo cono 2", 0.6)],
     "conical": [("D", "Ø apertura", 0.3), ("alpha", "Semiangolo flare", 0.5)],
     "rect_horn": [("aperture_H", "Apertura piano H", 0.25), ("aperture_E", "Apertura piano E", 0.25),
                   ("axial_length", "Lunghezza", 0.4)],
@@ -44,7 +45,7 @@ PARAM_FROM_GEOM = {  # override key -> key in geometry.params
     "diam": "diam", "length": "length", "B": "B_aperture", "C": "C_phasing", "alpha": "flare_half_deg",
     "A": "A_input", "Dap": "D_aperture", "flare_length": "flare_length", "Ds": "Ds_step", "D": "D_aperture",
     "aperture_H": "aperture_H", "aperture_E": "aperture_E", "axial_length": "axial_length",
-    "Dm": "Dm", "Lp": "Lp", "L1": "L1", "L2": "L2", "Ls": "Ls",
+    "Dm": "Dm", "Lp": "Lp", "L1": "L1", "L2": "L2", "Ls": "Ls", "a1": "cone1_half_deg", "a2": "cone2_half_deg",
 }
 
 

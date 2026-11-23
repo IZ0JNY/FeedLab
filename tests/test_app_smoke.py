@@ -81,7 +81,7 @@ def test_square_base_choice_in_sidebar(isolated):
     base = next(r for r in at.radio if r.label == "Base del feed")
     base.set_value("square").run()
     assert not at.exception, _errors(at)
-    assert geometry.BASE == {"shape": "square", "wg": "WR-42"}
+    assert geometry.BASE == {"shape": "square", "wg": "WR-42", "thickness": None}
     assert any("22.41" in c.value for c in at.caption)
     geometry.BASE.update({"shape": "round", "wg": None})
 
