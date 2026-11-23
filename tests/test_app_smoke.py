@@ -69,3 +69,18 @@ def test_app_runs_in_every_language(isolated, lang):
     assert not at.exception, _errors(at)
     tabs = [t.label for t in at.tabs]
     assert tabs and not any("Procedura guidata" in t or "Progetto feed" in t for t in tabs), tabs
+
+
+def test_square_base_choice_in_sidebar(isolated):
+    """At 24 GHz the sidebar offers the square base (WR-42 flange, 22.41 mm); the feed is rebuilt with it."""
+    from feedlab import geometry
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    band = next(s for s in at.selectbox if s.label == "Banda")
+    band.select(next(o for o in band.options if o.startswith("24.048"))).run()
+    base = next(r for r in at.radio if r.label == "Base del feed")
+    base.set_value("square").run()
+    assert not at.exception, _errors(at)
+    assert geometry.BASE == {"shape": "square", "wg": "WR-42"}
+    assert any("22.41" in c.value for c in at.caption)
+    geometry.BASE.update({"shape": "round", "wg": None})

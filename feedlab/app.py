@@ -217,6 +217,33 @@ with st.sidebar:
     st.caption(f"σ = {m_.sigma / 1e7:.2f}·10⁷ S/m · δ = {materials.skin_depth_um(m_.sigma, S.f_ghz):.3f} µm · {m_.notes}")
     geometry.COLLAR["diam"] = None                   # LNB collar option removed from the interface (0.4.9)
     geometry.MOUNT.update(S.get("mount_cfg") or {"wg": None})
+    # base of the feed: round disc or square like the waveguide flange (WR-90, WR-75, WR-42… have square flanges)
+    from feedlab import flanges as _fl
+    from feedlab.waveguide import suggest_rect_wg as _sug
+    _sq = [w for w in _sug(S.f_ghz) if w in _fl.FLANGES and _fl.FLANGES[w].shape == "square"]
+    _mwg = (S.get("mount_cfg") or {}).get("wg")
+    if _mwg in _fl.FLANGES and _fl.FLANGES[_mwg].shape == "square" and _mwg not in _sq:
+        _sq.append(_mwg)
+    _bwg = None
+    if _sq:
+        _shape = st.radio("Base del feed", ["round", "square"], horizontal=True, key="base_shape",
+                          format_func=lambda x: {"round": "Circolare", "square": "Quadrata (flangia guida)"}[x],
+                          help="quadrata: lato uguale alla flangia quadrata della guida rettangolare che si avvita "
+                               "(WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm)")
+        if _shape == "square":
+            if _mwg in _sq:                          # holes drilled for a guide: the base follows that flange
+                _bwg = _mwg
+                st.caption(_T("Base quadrata come la flangia {wg} (scelta nella scheda della piastrina)", wg=_mwg))
+            else:
+                _bwg = st.selectbox("Guida della flangia", _sq, key=f"base_wg_{'_'.join(_sq)}")
+            st.caption(_T("Lato {a:.2f} mm", a=_fl.FLANGES[_bwg].A))
+    else:
+        _shape = "round"
+    geometry.BASE.update({"shape": _shape, "wg": _bwg})
+    if S.get("base_prev") != (_shape, _bwg):         # drawings/models made with the other base are stale
+        S["base_prev"] = (_shape, _bwg)
+        for k in ("pdf", "step", "stl"):
+            S.pop(k, None)
     st.divider()
     if os.environ.get("FEEDLAB_DESKTOP") == "browser":
         if st.button("⏻ Chiudi FeedLab", help="ferma il programma (le simulazioni openEMS in corso continuano)"):

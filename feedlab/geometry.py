@@ -164,6 +164,17 @@ def _wall_polygon(profile, t, flange_r=None, flange_t=None):
 COLLAR = {"diam": None, "length": 25.0, "z0": 3.0}    # set COLLAR["diam"] = 40 for standard LNB holders
 # bolted stack WR component | λ/4 plate | feed: set MOUNT["wg"] (e.g. "WR-28") to drill the feed flange
 MOUNT = {"wg": None, "system": "metric", "pol": "V", "plate_screw": None, "plate_t": None}
+# base of the feed: "round" (disc) or "square" = same size as the square flange of BASE["wg"] (WR-90, WR-75, WR-42…)
+BASE = {"shape": "round", "wg": None}
+
+
+def square_base_side() -> float | None:
+    """Side (mm) of the square base when chosen and the waveguide has a square standard flange, else None."""
+    if BASE.get("shape") != "square":
+        return None
+    from .flanges import FLANGES
+    fl = FLANGES.get(BASE.get("wg") or MOUNT.get("wg") or "")
+    return fl.A if fl is not None and fl.shape == "square" else None
 
 
 def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=None, flange=True):
@@ -202,6 +213,21 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     if mnt is not None:
         fl_r = max(fl_r, d_need / 2)
         fl_t = max(fl_t, t_need)
+    side = square_base_side() if flange else None
+    if side:
+        # square base as large as the waveguide flange: in the axial section (cut along x or y) it is ±side/2;
+        # the corners are added in the 3D model / STEP. Holes on the diagonals fall in the corners.
+        if side / 2 < profile[0][1] + t + 1.0:
+            notes = list(notes or []) + [f"base quadrata {side:.2f} mm troppo piccola per questo feed: base circolare"]
+            side = None
+        else:
+            fl_r = side / 2
+            notes = list(notes or []) + [f"base quadrata {side:.2f} × {side:.2f} mm come la flangia "
+                                         f"{BASE.get('wg') or MOUNT.get('wg')}"]
+            if mnt is not None and any(max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 > side / 2 - 0.5
+                                       for h in mnt.feed_holes):
+                notes = list(notes) + ["fori troppo vicini al bordo della base quadrata"]
+    if mnt is not None:
         notes = list(notes or []) + [f"flangia forata per {mnt.flange.wg} {mnt.flange.name}: {mnt.screw}, "
                                      f"{sum(h.kind == 'dowel' for h in mnt.feed_holes)} fori spina"] + mnt.warnings
     polys.append(_wall_polygon(profile, t, fl_r, fl_t))
@@ -212,6 +238,9 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         outer = max(outer, fl_r) if fl_r > outer else outer
     if fl_r:
         params = {**params, "flange_diam": 2 * fl_r, "flange_thickness": fl_t}
+    if side:
+        params = {**params, "base_square": side}
+        outer = max(outer, side / math.sqrt(math.pi))      # blockage: circle of the same area as the square
     g = FeedGeometry(kind, f, params, profile, polys, profile[-1][0], r_ap, profile[0][1],
                      max(outer, max(np.max(p[:, 0]) for p in polys)), notes or [], design)
     g.mount = mnt

@@ -253,7 +253,13 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
     fig = plt.figure(figsize=(11.69, 8.27))
     ax = fig.add_axes([0.05, 0.25, 0.5, 0.68]); ax.set_aspect("equal"); ax.set_axis_off()
     R = geo.params["flange_diam"] / 2
-    ax.add_patch(Circle((0, 0), R, fill=False, lw=1.2))
+    side = geo.params.get("base_square")
+    if side:
+        from matplotlib.patches import Rectangle as _Rect
+        ax.add_patch(_Rect((-side / 2, -side / 2), side, side, fill=False, lw=1.2))
+        R = side / 2 * 1.15
+    else:
+        ax.add_patch(Circle((0, 0), R, fill=False, lw=1.2))
     ax.add_patch(Circle((0, 0), geo.r_input, fill=False, lw=1.0))
     ax.plot([-R * 1.1, R * 1.1], [0, 0], lw=0.4, ls="-.", color="0.4")
     ax.plot([0, 0], [-R * 1.1, R * 1.1], lw=0.4, ls="-.", color="0.4")
@@ -264,7 +270,8 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
             ax.add_patch(Arc((h.x, h.y), SCREW_MAJOR(mnt.screw), SCREW_MAJOR(mnt.screw), theta1=0, theta2=270, lw=0.6))
         ax.text(h.x + h.dia * 0.8, h.y + h.dia * 0.8, str(i), fontsize=7, color="b")
     ax.set_xlim(-R * 1.25, R * 1.25); ax.set_ylim(-R * 1.25, R * 1.25)
-    ax.set_title(f"Flangia d'ingresso: vista dalla faccia z = 0 (Ø{2 * R:.2f}, spessore "
+    size = f"□ {side:.2f} × {side:.2f}" if side else f"Ø{2 * R:.2f}"
+    ax.set_title(f"Flangia d'ingresso: vista dalla faccia z = 0 ({size}, spessore "
                  f"{geo.params['flange_thickness']:.2f} mm)\nlato largo della guida {mnt.flange.wg} lungo x "
                  f"(polarizzazione {'verticale' if mnt.polarization == 'V' else 'orizzontale'})", fontsize=9)
     ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()

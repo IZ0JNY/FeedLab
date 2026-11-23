@@ -6,6 +6,16 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('fori troppo vicini al bordo della base quadrata', 'holes too close to the edge of the square base'),
+    ('Base del feed', 'Feed base'),
+    ('Quadrata (flangia guida)', 'Square (waveguide flange)'),
+    ('quadrata: lato uguale alla flangia quadrata della guida rettangolare che si avvita (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm)', 'square: side equal to the square flange of the rectangular waveguide screwed onto it (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm)'),
+    ('Base quadrata come la flangia {wg} (scelta nella scheda della piastrina)', 'Square base like the {wg} flange (chosen in the plate tab)'),
+    ('Lato {a:.2f} mm', 'Side {a:.2f} mm'),
+    ('Guida della flangia', 'Waveguide of the flange'),
+    ('troppo piccola per questo feed: base circolare', 'too small for this feed: round base'),
+    ('base quadrata', 'square base'),
+    ('come la flangia', 'like the flange'),
     ('feed a scalino + doppio cono con sezione di fasatura, ottimizzato per EME con il solutore di FeedLab', 'step + double-cone feed with a phasing section, optimised for EME with the FeedLab solver'),
     ('IZ0JNY Dual-Flare (scalino + doppio cono)', 'IZ0JNY Dual-Flare (step + double cone)'),
     ('scalino + cono 1 generano il TM11; il cilindro Dm lo rimette in fase col TE11', 'step + cone 1 generate TM11; the Dm cylinder brings it back in phase with TE11'),

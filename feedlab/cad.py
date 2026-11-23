@@ -25,6 +25,12 @@ def solid(geo) -> "object":
         # sketch in XZ plane (x = radius, z = axis) and revolve about the Z axis
         wp = cq.Workplane("XZ").polyline(pts).close().revolve(360, (0, 0, 0), (0, 1, 0))
         body = wp if body is None else body.union(wp)
+    side = geo.params.get("base_square")
+    if side:                               # square base (WR flange size): box with the input bore
+        t = float(geo.params.get("flange_thickness", 3.0))
+        box = cq.Workplane("XY").rect(side, side).extrude(t).cut(
+            cq.Workplane("XY").circle(geo.r_input).extrude(t))
+        body = body.union(box)
     mnt = getattr(geo, "mount", None)
     if mnt is not None:                    # holes in the input flange (z = 0 face, axis = Z)
         t = float(geo.params.get("flange_thickness", 3.0))
@@ -82,12 +88,17 @@ def profile_mesh(geo: FeedGeometry, n_phi: int = 72, cut_deg: float = 0.0):
     V, F = [], []
     phi0 = math.radians(cut_deg)
     phis = np.linspace(phi0, 2 * math.pi, n_phi)
+    side = geo.params.get("base_square")
+    if side:                               # square base: flange rim vertices pushed out to the square
+        phis = np.unique(np.concatenate([phis, [a for a in np.arange(1, 8, 2) * math.pi / 4 if a > phi0]]))
     for poly in geo.polygons:
         P = np.vstack([poly, poly[:1]])
         base = len(V)
         for ph in phis:
+            sq = 1 / max(abs(math.cos(ph)), abs(math.sin(ph)))
             for r, z in P:
-                V.append((r * math.cos(ph), r * math.sin(ph), z))
+                rr = r * sq if side and abs(r - side / 2) < 1e-6 else r
+                V.append((rr * math.cos(ph), rr * math.sin(ph), z))
         n = len(P)
         for i in range(len(phis) - 1):
             for j in range(n - 1):
