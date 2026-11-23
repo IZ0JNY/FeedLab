@@ -8,5 +8,5 @@ echo openEMS: %OPENEMS_INSTALL_PATH%
 echo Python: %PY%
 "%PY%" -u sim_iz0jny_24048_fD065.py %*
 echo.
-echo Finito: il file results.json e in questa cartella.
+echo Finito: il file results.json si trova in questa cartella.
 pause
