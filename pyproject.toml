@@ -4,9 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "feedlab"
-version = "0.4.14"
+version = "0.4.15"
 description = "Design and analysis of parabolic-dish feeds for 10-134 GHz (W1GHZ / OE2IGL methods)"
 readme = "README.md"
+license = {text = "GPL-3.0-or-later"}
+authors = [{name = "Ivan De Cesaris IZ0JNY", email = "ivan@iz0jny.it"}]
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24", "scipy>=1.10", "matplotlib>=3.7", "plotly>=5.18", "streamlit>=1.35", "cadquery>=2.4"]
 

@@ -9,6 +9,12 @@ from . import __version__, dishes
 AUTHOR = "Ivan De Cesaris, IZ0JNY"
 EMAIL = "ivan@iz0jny.it"
 REPO = "https://github.com/IZ0JNY/FeedLab"
+COPYRIGHT = "© 2026 Ivan De Cesaris, IZ0JNY"
+LICENSE_NAME = "GNU General Public License v3.0 o successiva (GPL-3.0-or-later)"
+LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
+
+# beta testers and contributors (also in CONTRIBUTORS.md): (name and call sign, contribution)
+CONTRIBUTORS: list[tuple[str, str]] = []
 
 TECH_SOURCES = [
     ("Paul W1GHZ", "*The W1GHZ Online Microwave Antenna Book*, FEEDPATT/PHASEPAT, Microwave Update 2006–2024",
@@ -63,10 +69,12 @@ TECH_SOURCES = [
 GITHUB = ["rusk2ua/offset-microwave-dish-comparisons", "Abraxas3d/122GHz", "david-deboer/hera-cst",
           "diablowu/dish-fd-feed", "IRNAS/SatelliteDishHeadHolder", "vantalane/dual_band_LHCP_helical_feed"]
 
-LIBRARIES = [("Python", "https://www.python.org"), ("NumPy", "https://numpy.org"), ("SciPy", "https://scipy.org"),
-             ("Matplotlib", "https://matplotlib.org"), ("Plotly", "https://plotly.com/python/"),
-             ("Streamlit", "https://streamlit.io"), ("CadQuery / Open CASCADE", "https://cadquery.readthedocs.io"),
-             ("openEMS", "https://openems.de")]
+# (name, url, licence): every library keeps its own licence, all compatible with the GPLv3
+LIBRARIES = [("Python", "https://www.python.org", "PSF"), ("NumPy", "https://numpy.org", "BSD-3-Clause"),
+             ("SciPy", "https://scipy.org", "BSD-3-Clause"), ("Matplotlib", "https://matplotlib.org", "Matplotlib (PSF-based)"),
+             ("Plotly", "https://plotly.com/python/", "MIT"), ("Streamlit", "https://streamlit.io", "Apache-2.0"),
+             ("CadQuery / Open CASCADE", "https://cadquery.readthedocs.io", "Apache-2.0 / LGPL-2.1"),
+             ("openEMS", "https://openems.de", "GPL-3.0")]
 
 
 def issue_url(feed_kind: str = "", f_ghz=None) -> str:
@@ -90,6 +98,18 @@ def render(st, header: bool = True) -> None:
                 f"Versione **{__version__}**")
     st.markdown(f"Software sviluppato da **{AUTHOR}**  \n"
                 f"✉️ [{EMAIL}](mailto:{EMAIL}) · GitHub: [{REPO.split('//')[1]}]({REPO})")
+    st.subheader("Licenza")
+    st.markdown(f"{COPYRIGHT}  \nFeedLab è software libero: puoi ridistribuirlo e modificarlo secondo i termini della "
+                f"[{LICENSE_NAME}]({LICENSE_URL}), pubblicata dalla Free Software Foundation. "
+                f"Il testo completo è nel file LICENSE del programma e del [repository]({REPO}/blob/main/LICENSE).")
+    st.caption("FeedLab è distribuito nella speranza che sia utile, ma SENZA ALCUNA GARANZIA, nemmeno implicita di "
+               "commerciabilità o di idoneità a uno scopo particolare. Chi lo modifica e lo ridistribuisce deve "
+               "pubblicarne il codice sorgente con la stessa licenza e citare l'autore originale.")
+    st.subheader("Contributori e beta tester")
+    if CONTRIBUTORS:
+        st.markdown("\n".join(f"- **{who}** — {what}" for who, what in CONTRIBUTORS))
+    st.caption("Grazie a chi prova FeedLab, segnala errori e condivide misure: chi contribuisce viene citato qui e nel "
+               "file CONTRIBUTORS.md del repository (regole in CONTRIBUTING.md).")
     st.subheader("Fonti tecniche")
     lines = []
     for who, what, topics, url in TECH_SOURCES:
@@ -107,7 +127,8 @@ def render(st, header: bool = True) -> None:
     st.caption("I marchi citati appartengono ai rispettivi proprietari. I dati vengono dai datasheet pubblici e possono "
                "contenere stime, indicate nel catalogo.")
     st.subheader("Librerie software")
-    st.markdown(" · ".join(f"[{n}]({u})" for n, u in LIBRARIES))
+    st.markdown(" · ".join(f"[{n}]({u}) ({lic})" for n, u, lic in LIBRARIES))
+    st.caption("Ogni libreria resta coperta dalla propria licenza. openEMS si installa a parte, come programma esterno.")
     st.caption("FeedLab è una reimplementazione indipendente: non contiene codice né file di dati originali delle fonti "
                "citate. I risultati sono stime di progetto: verificarli con simulazione full-wave e misure prima della "
                "produzione.")

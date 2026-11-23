@@ -16,10 +16,7 @@ const fs = require('fs');
   const shot = async (name, full = false) => { await p.screenshot({ path: `${out}/${name}.png`, fullPage: full }); };
   const tab = async (i) => { await p.getByRole('tab').nth(i).click(); await idle(); await p.evaluate(() => window.scrollTo(0, 0)); };
   await p.goto(url, { waitUntil: 'networkidle' });
-  await p.waitForSelector('[role="dialog"]', { timeout: 120000 }); await idle(500);
-  await shot('00_beta');
-  await p.locator('[role="dialog"] button[aria-label="Close"]').first().click();
-  await p.locator('[role="dialog"]').first().waitFor({ state: 'detached', timeout: 30000 }); await idle(2000);
+  await idle(2000);                                       // no BETA popup since 0.4.15 (no expiry)
   await shot('01_wizard');
   if (process.env.SHOTS_UNTIL === '01') { await b.close(); return; }
   await p.getByRole('button', { name: L.find }).click();

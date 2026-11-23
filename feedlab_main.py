@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Ivan De Cesaris, IZ0JNY
 """FeedLab entry point for the desktop program (feedlab.desktop) and for `streamlit run feedlab_main.py` on your PC.
 
 FeedLab is distributed as a Windows program only: it is not meant to be hosted as a web app, and it refuses to

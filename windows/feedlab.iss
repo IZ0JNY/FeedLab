@@ -33,7 +33,8 @@ VersionInfoCompany=IZ0JNY
 VersionInfoDescription=FeedLab setup - microwave feed design
 VersionInfoProductName=FeedLab
 VersionInfoProductVersion={#MyAppVersion}
-VersionInfoCopyright=(c) Ivan De Cesaris IZ0JNY
+VersionInfoCopyright=(c) Ivan De Cesaris IZ0JNY - GPLv3
+LicenseFile=..\LICENSE
 
 ShowLanguageDialog=yes
 UsePreviousLanguage=no

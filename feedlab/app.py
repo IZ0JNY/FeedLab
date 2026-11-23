@@ -36,7 +36,7 @@ i18n.set_lang(S.lang)
 st.set_page_config(page_title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde", page_icon="📡", layout="wide")
 from feedlab import beta as _beta
 _bst = _beta.status()
-if _bst["beta"]:
+if _bst["expiry"]:                                 # 30-day test builds only (off since 0.4.15)
     if _bst["expired"]:
         st.error(f"⛔ FeedLab {feedlab.__version__} BETA TEST: la versione di prova è scaduta "
                  f"(valida {_beta.VALID_DAYS} giorni dall'installazione). Scarica la versione aggiornata.")

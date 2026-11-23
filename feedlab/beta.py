@@ -1,4 +1,7 @@
-"""BETA TEST builds: every version is valid for 30 days from its installation, then FeedLab stops.
+"""BETA TEST builds. From 0.4.15 FeedLab no longer expires (EXPIRY = False): it is free software under the
+GPLv3, so the version is only labelled BETA. The 30-day mechanism below stays available but is switched off.
+
+With EXPIRY = True, every version is valid for 30 days from its installation, then FeedLab stops.
 
 The first start of a version records the date (FeedLab's settings folder, beta.json, one entry per version):
 a new release therefore gets its own 30 days. A clock moved back by more than a day counts as expired.
@@ -15,6 +18,7 @@ import os
 from . import __version__
 
 BETA = True
+EXPIRY = False                                              # no 30-day limit (since 0.4.15)
 VALID_DAYS = 30
 RELEASES_URL = "https://github.com/IZ0JNY/FeedLab/releases"
 
@@ -30,9 +34,9 @@ def _now() -> _dt.datetime:
 
 
 def status(version: str = __version__) -> dict:
-    """{'beta', 'installed', 'expires', 'days_left', 'expired', 'reason'} for this version."""
-    if not BETA:
-        return {"beta": False, "expired": False, "days_left": None}
+    """{'beta', 'expiry', 'installed', 'expires', 'days_left', 'expired', 'reason'} for this version."""
+    if not BETA or not EXPIRY:
+        return {"beta": BETA, "expiry": False, "expired": False, "days_left": None}
     now = _now()
     try:
         data = json.loads(_file().read_text())
@@ -57,5 +61,5 @@ def status(version: str = __version__) -> dict:
     except Exception:
         pass
     left = (expires - now).total_seconds() / 86400
-    return {"beta": True, "installed": installed, "expires": expires, "days_left": max(0, int(left + 0.999)),
+    return {"beta": True, "expiry": True, "installed": installed, "expires": expires, "days_left": max(0, int(left + 0.999)),
             "expired": bool(reason), "reason": reason}

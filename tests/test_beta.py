@@ -1,4 +1,4 @@
-"""BETA TEST builds: 30 days from the first start of each version, clock rollback counts as expired."""
+"""BETA TEST builds (when EXPIRY is on): 30 days from the first start of each version, clock rollback counts as expired."""
 import pytest
 
 from feedlab import beta
@@ -8,6 +8,7 @@ from feedlab import beta
 def cfg(tmp_path, monkeypatch):
     monkeypatch.setenv("FEEDLAB_CONFIG", str(tmp_path))
     monkeypatch.setattr(beta, "BETA", True)
+    monkeypatch.setattr(beta, "EXPIRY", True)
     return tmp_path
 
 
@@ -41,3 +42,15 @@ def test_clock_moved_back(monkeypatch):
 def test_release_build(monkeypatch):
     monkeypatch.setattr(beta, "BETA", False)
     assert beta.status()["expired"] is False
+
+
+def test_no_expiry_by_default(monkeypatch):
+    monkeypatch.setattr(beta, "EXPIRY", False)
+    monkeypatch.setenv("FEEDLAB_BETA_NOW", "2030-01-01T10:00:00")
+    s = beta.status("0.4.15")
+    assert s["beta"] and not s["expiry"] and not s["expired"] and s["days_left"] is None
+
+
+def test_shipped_without_expiry():
+    import importlib
+    assert importlib.reload(beta).EXPIRY is False

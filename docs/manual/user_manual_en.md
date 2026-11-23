@@ -17,13 +17,11 @@ FeedLab is for **designing, simulating and building dish feeds** from **10 to 13
 
 The calculations are based on the *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ), Gerald OE2IGL's design guides, the books by Balanis and Kildal and the work of Al W5LUA, Jeff WA6KBL, Sergei RW3BP, Luis CT1DMK and Ivan IZ0JNY. The full list is in the **ℹ️ Credits** window.
 
-## 2. BETA TEST version
-This is a **test version**: it is valid for **30 days from the first installation**, then it deactivates.
-- At every start a **popup** shows the expiry date and the days left: close it with the **✕** at the top right.
-- After expiry FeedLab only shows the notice and a link to the GitHub **Releases** page: download and install the latest version.
-- Each new version gets its own 30 days. If the PC clock is moved back, the version counts as expired.
-
-![BETA TEST popup]({IMG}/00_beta.png)
+## 2. BETA TEST version and licence
+FeedLab is still in **beta test**, but it **no longer expires**: from version 0.4.15 you can use it with no time limit.
+- New versions are published on the GitHub **Releases** page (IZ0JNY/FeedLab): check it now and then and install the latest one, which fixes bugs and adds features.
+- FeedLab is **free software** under the **GNU GPL v3.0 or later** (© 2026 Ivan De Cesaris, IZ0JNY): you may use, study, modify and redistribute it, provided that whoever redistributes it makes the source code available under the same licence and keeps the copyright notices. The full text is in the LICENSE file.
+- FeedLab comes **without any warranty**: results are design estimates to be verified with full-wave simulation and measurements.
 
 ## 3. Installation
 ### Windows (recommended)
@@ -201,6 +199,7 @@ Press **🐞 Report a problem** in the sidebar: GitHub opens with version, syste
 - **Books:** C. A. Balanis, *Antenna Theory*; P.-S. Kildal, *Foundations of Antenna Engineering*.
 - **Articles:** Al W5LUA, Jeff WA6KBL (DUBUS), Sergei RW3BP, Luis CT1DMK, Luis CT1DMK and Willi LX1DB, Ivan IZ0JNY.
 - **Flanges:** Flann Microwave, *Waveguide and Flange Data*; MIL-DTL-3922/67C.
-- **Software:** openEMS; CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy.
+- **Software:** openEMS; CadQuery / OpenCascade; Streamlit; Plotly; NumPy / SciPy (each under its own licence).
+- **FeedLab licence:** GNU GPL v3.0 or later.
 
 The full list is in the **ℹ️ Credits** window.

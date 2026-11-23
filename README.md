@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.4.14 BETA TEST** (valida 30 giorni dall'installazione). Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4.15 BETA TEST**, software libero con licenza **GPLv3**, senza scadenza. Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -118,6 +118,16 @@ rusk2ua/offset-microwave-dish-comparisons (formule e test incrociati), Abraxas3d
 
 ## Autore
 Software sviluppato da **Ivan De Cesaris, IZ0JNY**, ivan@iz0jny.it. Nel programma, la scheda **ℹ️ Credits** riporta la versione e tutte le fonti.
+
+## Licenza
+Copyright © 2026 Ivan De Cesaris, IZ0JNY.
+
+FeedLab è **software libero**: puoi usarlo, studiarlo, ridistribuirlo e modificarlo secondo i termini della **GNU General Public License v3.0 o successiva** ([GPL-3.0-or-later](https://www.gnu.org/licenses/gpl-3.0.html)); il testo completo è nel file [LICENSE](LICENSE). In breve: chi ridistribuisce FeedLab, anche modificato e anche a pagamento, deve rendere disponibile il codice sorgente con la stessa licenza e mantenere le note di copyright dell'autore. FeedLab è fornito **senza alcuna garanzia**: i risultati sono stime di progetto da verificare con simulazione full-wave e misure.
+
+Le librerie usate restano coperte dalle proprie licenze (Python PSF; NumPy e SciPy BSD; Matplotlib; Plotly MIT; Streamlit Apache-2.0; CadQuery Apache-2.0 e Open CASCADE LGPL-2.1); openEMS (GPL-3.0) si installa a parte come programma esterno.
+
+## Contribuire
+Prove, misure, segnalazioni e codice sono benvenuti: le regole sono in [CONTRIBUTING.md](CONTRIBUTING.md) (i contributi sono distribuiti con la stessa licenza GPLv3 e restano di chi li ha fatti). Chi contribuisce è citato in [CONTRIBUTORS.md](CONTRIBUTORS.md) e nella finestra **ℹ️ Credits**.
 
 ## Crediti e licenze delle fonti
 - Algoritmi e dati da Paul W1GHZ (w1ghz.org). Il suo materiale è gratuito per uso radioamatoriale; per uso commerciale chiede un contributo all'ARRL Foundation.
