@@ -95,3 +95,22 @@ Simulazione FDTD fatta da IZ0JNY con openEMS 0.37: 1.9 milioni di celle, 20 cell
 Il G/T è confermato entro 0.06 dB. Il fascio reale è un po' più stretto del previsto: il feed è ottimale per f/D 0.80 (η 79.6 %), mentre a f/D 0.65 illumina meno la parabola. Il bordo meno illuminato abbassa di poco l'efficienza ma tiene l'antenna più fredda. Il diagramma è molto simmetrico, con cross-polare bassa.
 
 Il minimo di S11 è spostato di circa 1 GHz verso il basso. Il tratto dopo lo scalino (1 mm) è descritto da meno di 2 celle della griglia, quindi serve una simulazione a 30 celle/λ per decidere se lo spostamento è reale (script in `docs/iz0jny/sim_iz0jny_24048_fD065_fine.zip`). Se lo è, lo si corregge con lo space mapping di FeedLab.
+
+### Verifica di convergenza (griglia fine, 30 celle/λ)
+
+3.5 milioni di celle, 31 minuti, stessa geometria della prima simulazione.
+
+| | 20 celle/λ | 30 celle/λ |
+|---|---|---|
+| S11 a 24.048 GHz | −25.4 dB | **−28.2 dB** (ROS 1.08) |
+| S11 tra 23.0 e 25.0 GHz | −23.5 … −34 dB | **−27.5 … −29.5 dB** (piatto) |
+| S11 peggiore 21.6–26.5 GHz | −23.4 dB | −24.3 dB |
+| η sulla parabola (f/D 0.65) | 74.9 % | 75.3 % |
+| G/T | 29.72 dB/K | 29.75 dB/K |
+| T antenna | 33.9 K | 33.7 K |
+| cross-polare | −27.0 dB | −29.7 dB |
+| F/B | 29.9 dB | 37.3 dB |
+| centro di fase | 1.6 mm | 1.2 mm |
+| f/D ottimo del feed | 0.80 | 0.80 |
+
+Diagramma, efficienza e G/T sono convergenti, con differenze di pochi centesimi di dB. L'S11 sotto −25 dB dipende ancora dalla griglia: il "minimo spostato a 23 GHz" della prima simulazione era un effetto della griglia grossa. Con la griglia fine la risposta è piatta, circa −28 dB su tutta la banda 23–25 GHz. Il minimo profondo a −47 dB del modello rapido non è reale, ma un adattamento di −28 dB (perdita per disadattamento 0.007 dB, potenza riflessa in TX 0.16 %) è già ottimo per l'EME.
