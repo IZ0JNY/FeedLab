@@ -10,13 +10,14 @@
 
 # Archivio: versione 0.4.15 (pubblicata, BETA TEST senza scadenza)
 
-Pubblicata subito su richiesta, con 3 modifiche.
+Pubblicata subito su richiesta, con 4 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Tolta la scadenza di 30 giorni e il pop-up BETA all'avvio (`beta.EXPIRY = False`; resta l'etichetta BETA TEST) | ✅ fatto |
 | 2 | Licenza GPL-3.0-or-later: file `LICENSE` (anche nell'installer e nel pacchetto), sezione Licenza nei Credits con le licenze delle librerie, README, manuali, `pyproject.toml`, intestazioni SPDX | ✅ fatto |
 | 3 | Credito a chi aiuta: `CONTRIBUTING.md` (contributi con la stessa licenza, firma DCO), `CONTRIBUTORS.md` e sezione "Contributori e beta tester" nei Credits | ✅ fatto |
+| 4 | Avviso di nuova versione: all'avvio controlla l'ultima release su GitHub e mostra "cosa c'è di nuovo" (dalle note di rilascio, nella lingua scelta) con il pulsante di download (`feedlab/updates.py`) | ✅ fatto |
 
 ---
 

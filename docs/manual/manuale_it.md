@@ -19,7 +19,7 @@ I calcoli si basano sul *W1GHZ Online Microwave Antenna Book* (Paul W1GHZ), sull
 
 ## 2. Versione BETA TEST e licenza
 FeedLab è ancora in **beta test**, ma **non scade più**: dalla versione 0.4.15 puoi usarlo senza limiti di tempo.
-- Le nuove versioni escono sulla pagina **Releases** di GitHub (IZ0JNY/FeedLab): controllala ogni tanto e installa la più recente, che corregge errori e aggiunge funzioni.
+- **Nuove versioni:** all'avvio FeedLab controlla la pagina **Releases** di GitHub (IZ0JNY/FeedLab). Se c'è una versione più recente, una finestra mostra **cosa c'è di nuovo** e il pulsante per scaricarla. Il controllo legge solo la pagina pubblica di GitHub e non invia dati personali; senza internet non compare nulla.
 - FeedLab è **software libero** con licenza **GNU GPL v3.0 o successiva** (© 2026 Ivan De Cesaris, IZ0JNY): puoi usarlo, studiarlo, modificarlo e ridistribuirlo, purché chi lo ridistribuisce renda disponibile il codice sorgente con la stessa licenza e mantenga le note di copyright. Il testo completo è nel file LICENSE.
 - FeedLab è fornito **senza alcuna garanzia**: i risultati sono stime di progetto da verificare con simulazione full-wave e misure.
 

@@ -26,6 +26,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("FEEDLAB_HOME", str(tmp_path / "home"))
     monkeypatch.delenv("OPENEMS_INSTALL_PATH", raising=False)
     monkeypatch.setenv("FEEDLAB_LANG", "it")          # CI runners have an English locale
+    monkeypatch.setenv("FEEDLAB_NO_UPDATE_CHECK", "1")  # no network call / new-version popup in tests
     monkeypatch.chdir(ROOT)
     return tmp_path
 

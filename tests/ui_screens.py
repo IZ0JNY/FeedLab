@@ -18,7 +18,7 @@ FAKE = Path(__file__).resolve().parent / "fake_openems"
 
 def prepare(tmp: Path) -> dict:
     env = os.environ.copy()
-    env.update({"FEEDLAB_CONFIG": str(tmp / "cfg"), "FEEDLAB_HOME": str(tmp / "home"), "FEEDLAB_LANG": "it",
+    env.update({"FEEDLAB_CONFIG": str(tmp / "cfg"), "FEEDLAB_HOME": str(tmp / "home"), "FEEDLAB_LANG": "it", "FEEDLAB_NO_UPDATE_CHECK": "1",
                 "PYTHONPATH": os.pathsep.join([str(FAKE), str(ROOT)])})
     os.environ.update(env)
     sys.path[:0] = [str(ROOT)]

@@ -58,6 +58,21 @@ if _bst["expiry"]:                                 # 30-day test builds only (of
                         unsafe_allow_html=True)
 
         _beta_popup()
+if "update_info" not in S:                         # new version on GitHub: checked once per launch
+    from feedlab import updates as _updates
+    S["update_info"] = _updates.check(feedlab.__version__, i18n.get_lang())
+    if S["update_info"]:
+        _upd = S["update_info"]
+
+        @_st.dialog(i18n.tr("🆕 Nuova versione disponibile"), width="large")
+        def _update_popup():
+            st.markdown(_T("**FeedLab {new}** è disponibile (stai usando la {cur}).", new=_upd["version"],
+                           cur=feedlab.__version__))
+            st.markdown(f"**{i18n.tr('Cosa c’è di nuovo')}**")
+            _st.markdown(_upd["notes"] or i18n.tr("Vedi le note di rilascio su GitHub."))   # already in the right language
+            st.link_button("⬇️ Scarica la nuova versione", _upd["url"])
+
+        _update_popup()
 WORK = Path(tempfile.gettempdir()) / "feedlab_work"
 WORK.mkdir(exist_ok=True)
 
