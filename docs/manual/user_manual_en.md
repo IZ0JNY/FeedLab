@@ -33,6 +33,8 @@ This is a **test version**: it is valid for **30 days from the first installatio
 
 FeedLab opens in its own window (Microsoft Edge WebView2, included in Windows 11). Without WebView2 it opens in the browser.
 
+The installer downloads nothing from the internet: openEMS, if needed, is installed from the app (Full-wave openEMS tab → ① Installation). You can check the downloaded file with the release's `SHA256SUMS.txt`. Until the installer is digitally signed, Windows SmartScreen may show "Windows protected your PC": click **More info → Run anyway**.
+
 ### Linux / macOS (from source)
 ```
 pip install -e .
@@ -49,6 +51,8 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 | **λ** | corresponding wavelength |
 | **Dish / Feed** | summary of the choice made in the wizard |
 | **Feed material** | copper, silver-plated copper, brass, aluminium, metallised 3D print…: FeedLab computes losses and added noise |
+| **Rectangular waveguide** | the WR waveguide screwed to the feed, among those of the band: 10 GHz WR-90 or WR-75, 24 GHz WR-42, 47 GHz WR-22 or WR-19. It sizes the plate, the drilling and the base |
+| **Feed base** | round or **square** with the side of the waveguide flange (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm); only for waveguides with a square flange |
 | **ℹ️ Credits** | author, version and all sources |
 | **📖 Manual** | downloads this manual as PDF |
 | **🐞 Report a problem** | opens the GitHub issues page with version and design already filled in |
@@ -77,6 +81,7 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 | **W2IMU, Pickett-Potter, Skobelev, Large W2IMU** | dual-mode for offset dishes and f/D 0.5–0.95; Pickett-Potter and large W2IMU also above 76 GHz |
 | **Super-VE4MA, Chaparral, open waveguide** | deep prime-focus dishes (f/D < 0.5) |
 | **Rectangular horn** | linear polarisation only, fed directly from WR waveguide |
+| **IZ0JNY Dual-Flare** | f/D 0.6–0.9, EME: step + cone + phasing cylinder + second cone, designed with the FeedLab solver. Colder antenna and better G/T than the classic dual-mode feeds, very low S11; cones and cylinders only. New design: checked with openEMS at 24 GHz (G/T as predicted, cross-pol −27 dB, S11 < −23 dB over ±10 %) |
 
 1296 MHz feeds (for example Zdeněk OK1DFC's septum) are outside FeedLab's range, which starts at 10 GHz.
 
@@ -135,7 +140,7 @@ The fast solver does not handle feeds with rings or slots (VE4MA, Chaparral, cor
 
 The **λ/4 plate** joins the feed's circular waveguide to the rectangular WR waveguide. The WR orientation sets **vertical or horizontal polarisation** (OE2IGL design guide, HB9PZK optimisation).
 
-1. **Data:** WR waveguide, polarisation, circular waveguide Ø, cutter radius in the corners.
+1. **Data:** polarisation, circular waveguide Ø, cutter radius in the corners. The **WR waveguide** is chosen in the sidebar.
 2. **Result:** a × b aperture, thickness (with tolerance) and intermediate Z0.
 3. **Fixing holes waveguide → plate → feed**, with **metric** or **inch** screws:
    - the **standard flange** pattern (Flann / MIL-DTL-3922) is **tapped in the plate**;
@@ -163,6 +168,8 @@ openEMS is a free FDTD solver. A simulation takes minutes to hours and runs in t
 | ⑤ **Space mapping** | automatic correction of the fast model with openEMS |
 
 **Space mapping:** openEMS checks a candidate, the difference between openEMS and the fast model corrects the fast model and FeedLab proposes the next candidate, until convergence. Then *✅ Apply the best to the design*.
+
+**Script on another PC:** ② New analysis can also just download the openEMS script. Run it with `python -u script.py`; `--preview` shows the model in AppCSXCAD, `--post` (after a full run, same folder) recomputes S11 and far field from `sim_data` in seconds. Load the `results.json` in ④ Results.
 
 ![Space mapping]({IMG}/12_spacemap.png)
 

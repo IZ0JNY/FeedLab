@@ -72,3 +72,26 @@ Offset 1.2 m, elevazione 30°, LNA 40 K.
 - **Banda**: S11 sotto −40 dB da 23.65 a 24.55 GHz e sotto −47 dB da 23.9 a 24.25 GHz.
 - **Tolleranze**: con quote sbagliate a caso di ±0.05 mm, il caso peggiore su 20 prove resta a −49.5 dB.
 - **Precisione**: valori di S11 sotto −40 dB sono al limite della precisione del solutore e di qualsiasi misura. Il dato affidabile è "≤ −40 dB, minimo centrato su 24.048 GHz". Va confermato con openEMS.
+
+## Verifica openEMS (24.0481 GHz, f/D 0.65, base rotonda)
+
+Simulazione FDTD fatta da IZ0JNY con openEMS 0.37: 1.9 milioni di celle, 20 celle/λ, 21 minuti. Il dato di confronto è il modello rapido sulla stessa geometria.
+
+| | openEMS | modello rapido |
+|---|---|---|
+| S11 a 24.048 GHz | −25.4 dB (ROS 1.11) | −47 dB |
+| minimo di S11 | −34 dB a 23.04 GHz | −47 dB a 24.05 GHz |
+| S11 peggiore 21.6–26.5 GHz | −23.4 dB | −21 dB |
+| η sulla parabola | 75.7 % | 78.1 % |
+| spillover / illuminazione | 0.961 / 0.788 | 0.943 / 0.828 |
+| bordo (edge taper) | −15.5 dB | −13.6 dB |
+| T antenna | 33.9 K | 35.1 K |
+| **G/T** | **29.72 dB/K** | 29.78 dB/K |
+| cross-polare di picco | −27 dB | — |
+| asimmetria E/H a −10 dB | 2.6° | — |
+| F/B | 30 dB | — |
+| centro di fase | 1.6 mm dentro l'apertura | 0.4 mm |
+
+Il G/T è confermato entro 0.06 dB. Il fascio reale è un po' più stretto del previsto: il feed è ottimale per f/D 0.80 (η 79.6 %), mentre a f/D 0.65 illumina meno la parabola. Il bordo meno illuminato abbassa di poco l'efficienza ma tiene l'antenna più fredda. Il diagramma è molto simmetrico, con cross-polare bassa.
+
+Il minimo di S11 è spostato di circa 1 GHz verso il basso. Il tratto dopo lo scalino (1 mm) è descritto da meno di 2 celle della griglia, quindi serve una simulazione a 30 celle/λ per decidere se lo spostamento è reale (script in `docs/iz0jny/sim_iz0jny_24048_fD065_fine.zip`). Se lo è, lo si corregge con lo space mapping di FeedLab.

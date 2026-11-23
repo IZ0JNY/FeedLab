@@ -33,6 +33,8 @@ Questa è una **versione di prova**: vale **30 giorni dalla prima installazione*
 
 FeedLab si apre in una finestra propria (Microsoft Edge WebView2, già presente in Windows 11). Se WebView2 manca, si apre nel browser.
 
+L'installer non scarica nulla da internet: openEMS, se serve, si installa dall'app (scheda Full-wave openEMS → ① Installazione). Il file scaricato si può controllare con `SHA256SUMS.txt` della release. Finché l'installer non è firmato digitalmente, Windows SmartScreen può mostrare "Windows ha protetto il PC": clic su **Ulteriori informazioni → Esegui comunque**.
+
 ### Linux / macOS (da sorgente)
 ```
 pip install -e .
@@ -49,6 +51,8 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 | **λ** | lunghezza d'onda corrispondente |
 | **Parabola / Feed** | riepilogo della scelta fatta nella procedura guidata |
 | **Materiale del feed** | rame, rame argentato, ottone, alluminio, stampa 3D metallizzata…: FeedLab calcola perdite e rumore aggiunto |
+| **Guida d'onda rettangolare** | la guida WR che si avvita al feed, fra quelle della banda: 10 GHz WR-90 o WR-75, 24 GHz WR-42, 47 GHz WR-22 o WR-19. Dimensiona piastrina, foratura e base |
+| **Base del feed** | circolare oppure **quadrata** con il lato della flangia della guida (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm); solo per le guide con flangia quadrata |
 | **ℹ️ Credits** | autore, versione e tutte le fonti |
 | **📖 Manuale** | scarica questo manuale in PDF |
 | **🐞 Segnala un problema** | apre la pagina GitHub delle segnalazioni con versione e progetto già compilati |
@@ -77,6 +81,7 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 | **W2IMU, Pickett-Potter, Skobelev, Large W2IMU** | dual-mode per offset e f/D 0.5–0.95; Pickett-Potter e W2IMU grande anche oltre 76 GHz |
 | **Super-VE4MA, Chaparral, guida aperta** | prime focus profonde (f/D < 0.5) |
 | **Horn rettangolare** | solo polarizzazione lineare, diretto da guida WR |
+| **IZ0JNY Dual-Flare** | f/D 0.6–0.9, EME: scalino + cono + cilindro di fasatura + secondo cono, progettato con il solutore di FeedLab. Antenna più fredda e G/T migliore dei dual-mode classici, S11 molto basso; solo coni e cilindri. Progetto nuovo: verificato con openEMS a 24 GHz (G/T come previsto, cross-polare −27 dB, S11 < −23 dB su ±10 %) |
 
 I feed per 1296 MHz (per esempio il septum di Zdeněk OK1DFC) sono fuori dal campo di FeedLab, che parte da 10 GHz.
 
@@ -135,7 +140,7 @@ Il simulatore rapido non tratta i feed con anelli o gole (VE4MA, Chaparral, corr
 
 La **piastrina λ/4** collega la guida circolare del feed alla guida rettangolare WR. L'orientamento della WR fissa la **polarizzazione verticale o orizzontale** (design guide OE2IGL, ottimizzazione HB9PZK).
 
-1. **Dati:** guida WR, polarizzazione, Ø della guida circolare, raggio della fresa negli angoli.
+1. **Dati:** polarizzazione, Ø della guida circolare, raggio della fresa negli angoli. La **guida WR** si sceglie nella barra laterale.
 2. **Risultato:** apertura a × b, spessore (con tolleranza) e Z0 intermedia.
 3. **Fori di fissaggio guida → piastrina → feed**, con viti **metriche** o **in pollici**:
    - la foratura della **flangia standard** (Flann / MIL-DTL-3922) è **filettata nella piastra**;
@@ -163,6 +168,8 @@ openEMS è un simulatore FDTD gratuito. Una simulazione dura da minuti a ore e g
 | ⑤ **Space mapping** | correzione automatica del modello rapido con openEMS |
 
 **Space mapping:** openEMS verifica un candidato, la differenza tra openEMS e il modello rapido corregge il modello rapido e FeedLab propone il candidato successivo, fino alla convergenza. Alla fine *✅ Applica il migliore al progetto*.
+
+**Script su un altro PC:** ② Nuova analisi può anche solo scaricare lo script openEMS. Si lancia con `python -u script.py`; `--preview` mostra il modello in AppCSXCAD, `--post` (dopo una simulazione completa, nella stessa cartella) ricalcola S11 e campo lontano da `sim_data` in pochi secondi. Il `results.json` si carica in ④ Risultati.
 
 ![Space mapping]({IMG}/12_spacemap.png)
 

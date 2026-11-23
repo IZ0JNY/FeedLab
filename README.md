@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.4.10 BETA TEST** (valida 30 giorni dall'installazione). Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4.11 BETA TEST** (valida 30 giorni dall'installazione). Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -18,7 +18,7 @@ Le basi di conoscenza sono:
 | `reflector` | Geometria prime-focus e offset (angoli ai bordi, f/D equivalente, puntamento del feed offset); fit di parabola offset da misure; Ruze, blocking (Baars), defocus (Milligan), beam factor/HPBW |
 | `patterns` | Pattern BOR1 (E/H complessi). Modelli analitici: gaussiano, cos^q. **Integrazione d'apertura** con miscela di modi (TE11 + TM11 = dual-mode, HE11 = corrugato) e fase quadratica del flare; apertura rettangolare (horn piramidale). Lettura e scrittura dei file `.dat` W1GHZ FEEDPATT/PHASEPAT |
 | `efficiency` | Efficienza d'apertura (Kildal/W1GHZ) con decomposizione in spillover, illuminazione, fase, cross-pol e blocking; curva η vs f/D; **centro di fase** (metodo PHASEPAT e formula di W1GHZ); curva di defocus; riproduzione esatta dell'algoritmo FEEDPATT per confronti |
-| `horns` | Calcolatori: W2IMU (Turrin/W1GHZ e OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter (OE2IGL), Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL, foglio v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
+| `horns` | Calcolatori: W2IMU (Turrin/W1GHZ e OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter (OE2IGL), **IZ0JNY Dual-Flare** (nuovo, per EME; studio in `docs/IZ0JNY_DualFlare.md`), Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL, foglio v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
 | `cassegrain` | Progetto del subriflettore iperbolico (procedura W1GHZ verificata sul suo foglio di calcolo), sub ottimo di Kildal, profilo e G-code per tornio |
 | `noise` | T_sky (con correzione di Planck), T_rx, T_spillover, T_antenna integrata sul pattern, G/T, sun noise atteso |
 
@@ -53,7 +53,7 @@ Si apre nel browser (Windows, Linux, macOS). Schede:
 | 🌐 Lobo 3D | Diagramma di irradiazione 3D del feed |
 | 🧊 Modello 3D | Modello del feed con sezione |
 | 📄 Disegno & STEP | Disegno meccanico **PDF** (sezione quotata, tabella, cartiglio, tolleranze), **.stp** e **.stl** |
-| 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR, orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP. Opzione **fori di fissaggio** (viti metriche o in pollici): foratura della flangia standard (Flann/MIL) filettata nella piastra, 4 viti piastra→feed con testa in lamatura, spine di centraggio da 47 GHz; riportata in PDF e STEP di piastra e feed |
+| 🔌 Piastrina WR | Piastrina λ/4 da guida circolare a guida rettangolare WR (guida scelta nella barra laterale fra quelle della banda: 10 GHz WR-90/WR-75, 24 GHz WR-42, 47 GHz WR-22/WR-19; base del feed circolare o quadrata come la flangia), orientata per polarizzazione **verticale o orizzontale** (metodo OE2IGL/HB9PZK), PDF + STEP. Opzione **fori di fissaggio** (viti metriche o in pollici): foratura della flangia standard (Flann/MIL) filettata nella piastra, 4 viti piastra→feed con testa in lamatura, spine di centraggio da 47 GHz; riportata in PDF e STEP di piastra e feed |
 | 🖥️ Full-wave openEMS | **Opzionale**: installazione guidata di openEMS, simulazioni FDTD in background (singola, convergenza, sweep) e **deep analysis** dei risultati. **⑤ Space mapping**: openEMS verifica pochi candidati e corregge il modello rapido, fino alla convergenza |
 
 Nella barra laterale si scelgono la banda (10–134 GHz), il **materiale del feed** (rame, rame argentato, dorato, ottone, alluminio, stampa 3D metallizzata…), con calcolo delle perdite e del rumore.
