@@ -83,7 +83,7 @@ def current_geometry():
     kind = S.feed_kind
     ov = dict(S.overrides.get(kind, {}))
     if kind == "rect_horn":
-        return geometry.build_rect(S.f_ghz, dish.fD, wizard._wg_for(S.f_ghz), wall=S.wall, **ov)
+        return geometry.build_rect(S.f_ghz, dish.fD, S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall, **ov)
     return geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **ov)
 
 
@@ -220,25 +220,32 @@ with st.sidebar:
     # base of the feed: round disc or square like the waveguide flange (WR-90, WR-75, WR-42… have square flanges)
     from feedlab import flanges as _fl
     from feedlab.waveguide import suggest_rect_wg as _sug
-    _sq = [w for w in _sug(S.f_ghz) if w in _fl.FLANGES and _fl.FLANGES[w].shape == "square"]
-    _mwg = (S.get("mount_cfg") or {}).get("wg")
-    if _mwg in _fl.FLANGES and _fl.FLANGES[_mwg].shape == "square" and _mwg not in _sq:
-        _sq.append(_mwg)
+    # rectangular waveguide the feed is screwed to (through the λ/4 plate): the usual ones for the band
+    # (10 GHz WR-90 or WR-75, 24 GHz WR-42, 47 GHz WR-22 or WR-19 …). It drives the matching plate, the flange
+    # drilling and the square base.
+    _wgs = _sug(S.f_ghz)
+    _wr = st.selectbox("Guida d'onda rettangolare", _wgs, key=f"wr_wg_{'_'.join(_wgs)}",
+                       help="guida WR che si avvita al feed tramite la piastrina di adattamento circolare → WR: "
+                            "dimensiona la piastrina, la foratura e la base quadrata") if _wgs else None
+    S["wr_wg"] = _wr
+    _mc = S.get("mount_cfg") or {}
+    if _wr and _mc.get("wg") and _mc["wg"] != _wr:   # holes drilled for the guide chosen here
+        S["mount_cfg"] = {**_mc, "wg": _wr}
+        geometry.MOUNT.update(S["mount_cfg"])
     _bwg = None
-    if _sq:
+    _fl_wr = _fl.FLANGES.get(_wr) if _wr else None
+    if _fl_wr is not None and _fl_wr.shape == "square":
         _shape = st.radio("Base del feed", ["round", "square"], horizontal=True, key="base_shape",
                           format_func=lambda x: {"round": "Circolare", "square": "Quadrata (flangia guida)"}[x],
                           help="quadrata: lato uguale alla flangia quadrata della guida rettangolare che si avvita "
                                "(WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm)")
         if _shape == "square":
-            if _mwg in _sq:                          # holes drilled for a guide: the base follows that flange
-                _bwg = _mwg
-                st.caption(_T("Base quadrata come la flangia {wg} (scelta nella scheda della piastrina)", wg=_mwg))
-            else:
-                _bwg = st.selectbox("Guida della flangia", _sq, key=f"base_wg_{'_'.join(_sq)}")
-            st.caption(_T("Lato {a:.2f} mm", a=_fl.FLANGES[_bwg].A))
+            _bwg = _wr
+            st.caption(_T("Base quadrata {a:.2f} × {a:.2f} mm come la flangia {wg}", a=_fl_wr.A, wg=_wr))
     else:
         _shape = "round"
+        if _fl_wr is not None:
+            st.caption(_T("Flangia {wg} rotonda ({name}): base del feed circolare", wg=_wr, name=_fl_wr.name))
     geometry.BASE.update({"shape": _shape, "wg": _bwg})
     if S.get("base_prev") != (_shape, _bwg):         # drawings/models made with the other base are stale
         S["base_prev"] = (_shape, _bwg)
@@ -846,8 +853,12 @@ with tabs[7]:
         st.info("L'horn rettangolare si collega direttamente alla guida WR: piastrina non necessaria.")
     else:
         c1, c2, c3, c4 = st.columns(4)
-        sugg = suggest_rect_wg(S.f_ghz) or list(RECT_WG)
-        wg = c1.selectbox("Guida rettangolare", list(RECT_WG), index=list(RECT_WG).index(sugg[0]))
+        if S.get("wr_wg"):                       # chosen once, in the sidebar (plate, drilling, square base)
+            wg = S["wr_wg"]
+            c1.markdown(_T("**Guida rettangolare:** {wg}", wg=wg))
+            c1.caption("si cambia nella barra laterale")
+        else:
+            wg = c1.selectbox("Guida rettangolare", list(RECT_WG))
         pol_ = c2.radio("Polarizzazione", ["Verticale", "Orizzontale"], horizontal=True)
         dcirc = c3.number_input("Ø guida circolare del feed (mm)", 0.5, 100.0, float(round(2 * geo.r_input, 3)), 0.001,
                                 format="%.3f")

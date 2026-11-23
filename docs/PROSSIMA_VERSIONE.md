@@ -7,6 +7,7 @@
 | 1 | Nuovo feed **IZ0JNY Dual-Flare** (scalino + cono 1 + cilindro di fasatura + cono 2), progettato con il solutore di FeedLab per EME: η calcolata vicina al limite teorico del modello, S11 < −30 dB, antenna più fredda (+0.2…0.7 dB di G/T rispetto al Pickett-Potter), 80.1 % a f/D 0.9. Nel wizard per f/D 0.6–0.9, con ottimizzatore, tolleranze, disegno PDF e script openEMS. Studio in docs/IZ0JNY_DualFlare.md. Da verificare full-wave | 🔄 in verifica |
 | 2 | Disegni PDF: le note dei feed vanno a capo e restano dentro il foglio | ✅ fatto |
 | 3 | Base del feed circolare o **quadrata** con lo stesso lato della flangia della guida (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm): scelta nella barra laterale a 10 e 24 GHz; quadrata anche nel modello 3D, nello STEP/STL e nella vista della flangia del disegno PDF; con la foratura attiva segue la guida scelta per la piastrina | ✅ fatto |
+| 4 | Una sola scelta della guida rettangolare nella barra laterale, limitata alle guide della banda: 10 GHz WR-90 o WR-75, 24 GHz WR-42, 47 GHz WR-22 o WR-19 (76 GHz WR-12 o WR-10…). Dimensiona la piastrina di adattamento circolare → WR, la foratura della flangia, la base quadrata (solo flange quadrate) e l'horn rettangolare | ✅ fatto |
 
 ---
 

@@ -84,3 +84,22 @@ def test_square_base_choice_in_sidebar(isolated):
     assert geometry.BASE == {"shape": "square", "wg": "WR-42"}
     assert any("22.41" in c.value for c in at.caption)
     geometry.BASE.update({"shape": "round", "wg": None})
+
+
+@pytest.mark.parametrize("band,guides,square", [("10.368", ["WR-90", "WR-75"], True), ("24.048", ["WR-42"], True),
+                                                ("47.088", ["WR-22", "WR-19"], False)])
+def test_waveguide_choice_per_band(isolated, band, guides, square):
+    """One waveguide choice in the sidebar, limited to the usual guides of the band: it sizes the matching plate
+    (circular → WR) and, for square flanges, allows the square base."""
+    from feedlab import geometry
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    b = next(s for s in at.selectbox if s.label == "Banda")
+    b.select(next(o for o in b.options if o.startswith(band))).run()
+    wr = next(s for s in at.selectbox if s.label == "Guida d'onda rettangolare")
+    assert list(wr.options) == guides
+    wr.select(guides[-1]).run()
+    assert not at.exception, _errors(at)
+    assert any(f"**Guida rettangolare:** {guides[-1]}" in m.value for m in at.markdown)
+    assert any(r.label == "Base del feed" for r in at.radio) == square
+    geometry.BASE.update({"shape": "round", "wg": None})
