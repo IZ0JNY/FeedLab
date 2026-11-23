@@ -10,7 +10,7 @@
 
 # Archivio: versione 0.4.13 (pubblicata, BETA TEST 30 giorni)
 
-**Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+Pubblicata con 10 modifiche (comprende quelle preparate per la 0.4.12, non pubblicata).
 
 | # | Richiesta | Stato |
 |---|---|---|
