@@ -79,7 +79,13 @@ jobs:
           $setup = Get-ChildItem dist\FeedLab-Setup-*.exe | Select-Object -First 1
           Start-Process $setup.FullName -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/CURRENTUSER","/NORESTART" -Wait
           $app = "$env:LOCALAPPDATA\Programs\FeedLab"
-          if (-not (Test-Path "$app\python\FeedLab.exe")) { throw "installazione non trovata" }
+          if (-not (Test-Path "$app\python\pythonw.exe")) { throw "installazione non trovata" }
+          if (Test-Path "$app\python\FeedLab.exe") { throw "FeedLab.exe (pythonw modificato) non deve più esserci" }
+          foreach ($exe in "python.exe", "pythonw.exe") {      # interpreters must keep the PSF signature
+            $sig = Get-AuthenticodeSignature "$app\python\$exe"
+            Write-Host "$exe : $($sig.Status) $($sig.SignerCertificate.Subject)"
+            if ($sig.Status -ne "Valid") { throw "$exe senza firma digitale valida" }
+          }
           $p = Start-Process "$app\python\python.exe" -ArgumentList "-m","feedlab.desktop","--server-only","--port","8765" -WorkingDirectory "$app\app" -PassThru
           $ok = $false
           for ($i = 0; $i -lt 90; $i++) {
@@ -100,6 +106,7 @@ jobs:
           name: FeedLab-Windows-${{ steps.ver.outputs.version }}
           path: |
             dist/FeedLab-Setup-*.exe
+            dist/SHA256SUMS.txt
             dist/screenshot.png
           retention-days: 30
       - uses: actions/upload-artifact@v4
@@ -114,7 +121,7 @@ jobs:
         shell: pwsh
         run: |
           $tag = "v${{ steps.ver.outputs.version }}"
-          $files = @((Get-ChildItem dist\FeedLab-Setup-*.exe).FullName, (Get-ChildItem dist\FeedLab-*-portable.zip).FullName)
+          $files = @((Get-ChildItem dist\FeedLab-Setup-*.exe).FullName, (Get-ChildItem dist\FeedLab-*-portable.zip).FullName, (Get-Item dist\SHA256SUMS.txt).FullName)
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
             Write-Host "$tag already published: not overwritten (bump the version to publish changes)"

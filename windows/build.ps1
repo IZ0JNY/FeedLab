@@ -53,19 +53,12 @@ Copy-Item "$root\feedlab_main.py", "$root\README.md" "$build\app\"
 Copy-Item "$root\windows\feedlab.ico" "$build\"
 Get-ChildItem -Recurse -Directory -Filter "__pycache__" "$build\app" | Remove-Item -Recurse -Force
 
-# 4. FeedLab.exe = pythonw.exe with FeedLab's icon (taskbar, window and shortcuts show FeedLab)
-Copy-Item "$build\python\pythonw.exe" "$build\python\FeedLab.exe"
-$rcedit = Join-Path $env:TEMP "rcedit-x64.exe"
-if (-not (Test-Path $rcedit)) {
-  Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe" -OutFile $rcedit
-}
-& $rcedit "$build\python\FeedLab.exe" --set-icon "$root\windows\feedlab.ico" `
-  --set-version-string "FileDescription" "FeedLab" --set-version-string "ProductName" "FeedLab" `
-  --set-version-string "CompanyName" "IZ0JNY" --set-file-version "$Version" --set-product-version "$Version"
-if ($LASTEXITCODE -ne 0) { throw "rcedit failed" }
-
-Set-Content -Encoding ascii "$build\FeedLab.bat" "@start `"`" `"%~dp0python\FeedLab.exe`" -m feedlab.desktop %*`r`n"
-Set-Content -Encoding ascii "$build\FeedLab (browser).bat" "@start `"`" `"%~dp0python\FeedLab.exe`" -m feedlab.desktop --browser`r`n"
+# 4. launchers. The Python interpreters are used exactly as published by python.org, with the Python
+# Software Foundation's digital signature intact: a renamed / re-iconed copy (formerly FeedLab.exe, made with
+# rcedit) has a broken signature and is what antivirus heuristics flag. The FeedLab icon comes from the
+# shortcuts (and from the window, set at run time).
+Set-Content -Encoding ascii "$build\FeedLab.bat" "@start `"`" `"%~dp0python\pythonw.exe`" -m feedlab.desktop %*`r`n"
+Set-Content -Encoding ascii "$build\FeedLab (browser).bat" "@start `"`" `"%~dp0python\pythonw.exe`" -m feedlab.desktop --browser`r`n"
 Set-Content -Encoding utf8 "$build\LEGGIMI.txt" @"
 FeedLab $Version - Laboratorio di Progettazione di feed/illuminatori a microonde
 Avvio: doppio clic su FeedLab.bat (finestra propria) oppure "FeedLab (browser).bat".
@@ -95,4 +88,8 @@ if ($iscc) {
 } else {
   Write-Warning "Inno Setup non trovato: creato solo lo zip portatile."
 }
+# 8. SHA-256 checksums of what is published (users can check the download: Get-FileHash <file>)
+$sums = Get-ChildItem $dist -File | Where-Object { $_.Name -like "FeedLab-*" } | ForEach-Object {
+  "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name }
+Set-Content -Encoding ascii (Join-Path $dist "SHA256SUMS.txt") $sums
 Get-ChildItem $dist | Format-Table Name, Length

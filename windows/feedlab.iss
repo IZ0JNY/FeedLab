@@ -19,7 +19,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=..\dist
 OutputBaseFilename=FeedLab-Setup-{#MyAppVersion}
 SetupIconFile=feedlab.ico
-UninstallDisplayIcon={app}\python\FeedLab.exe
+UninstallDisplayIcon={app}\feedlab.ico
 UninstallDisplayName=FeedLab {#MyAppVersion}
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -28,6 +28,12 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 WizardStyle=modern
 CloseApplications=yes
+VersionInfoVersion={#MyAppVersion}
+VersionInfoCompany=IZ0JNY
+VersionInfoDescription=FeedLab setup - microwave feed design
+VersionInfoProductName=FeedLab
+VersionInfoProductVersion={#MyAppVersion}
+VersionInfoCopyright=(c) Ivan De Cesaris IZ0JNY
 
 ShowLanguageDialog=yes
 UsePreviousLanguage=no
@@ -58,18 +64,20 @@ Root: HKCU; Subkey: "Software\FeedLab"; ValueType: string; ValueName: "Language"
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\app"
+; launcher of versions up to 0.4.10 (modified copy of pythonw.exe): no longer used
+Type: files; Name: "{app}\python\FeedLab.exe"
 
 [Files]
 Source: "..\build\FeedLab\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\FeedLab"; Filename: "{app}\python\FeedLab.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"; Comment: "{cm:AppComment}"
-Name: "{autoprograms}\FeedLab ({cm:InBrowser})"; Filename: "{app}\python\FeedLab.exe"; Parameters: "-m feedlab.desktop --browser"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"
-Name: "{autodesktop}\FeedLab"; Filename: "{app}\python\FeedLab.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"; Tasks: desktopicon
+Name: "{autoprograms}\FeedLab"; Filename: "{app}\python\pythonw.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"; AppUserModelID: "IZ0JNY.FeedLab"; Comment: "{cm:AppComment}"
+Name: "{autoprograms}\FeedLab ({cm:InBrowser})"; Filename: "{app}\python\pythonw.exe"; Parameters: "-m feedlab.desktop --browser"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"; AppUserModelID: "IZ0JNY.FeedLab"
+Name: "{autodesktop}\FeedLab"; Filename: "{app}\python\pythonw.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; IconFilename: "{app}\feedlab.ico"; AppUserModelID: "IZ0JNY.FeedLab"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\python\python.exe"; Parameters: "-u -m feedlab.openems_local install"; WorkingDir: "{app}\app"; StatusMsg: "{cm:OemsStatus}"; Tasks: openems; Flags: waituntilterminated
-Filename: "{app}\python\FeedLab.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; Description: "{cm:LaunchProgram,FeedLab}"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\python\pythonw.exe"; Parameters: "-m feedlab.desktop"; WorkingDir: "{app}\app"; Description: "{cm:LaunchProgram,FeedLab}"; Flags: postinstall nowait skipifsilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\python"

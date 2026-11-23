@@ -41,6 +41,49 @@ def python_exe() -> str:
     return str(exe)
 
 
+APP_ID = "IZ0JNY.FeedLab"            # same AppUserModelID as the installer's shortcuts: taskbar shows their icon
+
+
+def icon_path() -> Path | None:
+    for p in (ROOT.parent / "feedlab.ico", ROOT / "windows" / "feedlab.ico"):
+        if p.exists():
+            return p
+    return None
+
+
+def win_identity() -> None:
+    """Windows: group the window under FeedLab's shortcut (icon, pinning) rather than under Python."""
+    if not IS_WIN:
+        return
+    try:
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+    except Exception:
+        pass
+
+
+def win_set_icon(title: str) -> None:
+    """Windows: FeedLab's icon on the window (title bar, Alt+Tab); the interpreter is python.org's own."""
+    ico = icon_path()
+    if not IS_WIN or ico is None:
+        return
+    try:
+        import ctypes
+        u = ctypes.windll.user32
+        u.FindWindowW.restype = ctypes.c_void_p
+        u.LoadImageW.restype = ctypes.c_void_p
+        u.SendMessageW.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_void_p, ctypes.c_void_p]
+        hwnd = u.FindWindowW(None, title)
+        if not hwnd:
+            return
+        for which, size in ((1, 32), (0, 16)):          # ICON_BIG, ICON_SMALL
+            h = u.LoadImageW(None, str(ico), 1, size, size, 0x10)   # IMAGE_ICON, LR_LOADFROMFILE
+            if h:
+                u.SendMessageW(hwnd, 0x0080, which, h)               # WM_SETICON
+    except Exception:
+        pass
+
+
 def free_port() -> int:
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
@@ -131,6 +174,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
+    win_identity()
     port = a.port or free_port()
     use_window = not (a.browser or a.server_only)
     if use_window:
@@ -159,10 +203,11 @@ def main(argv=None) -> int:
                 pass
             from . import i18n
             i18n.set_lang(i18n.default_lang())
-            window = webview.create_window(i18n.tr("FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde"),
-                                           html=i18n.tr(LOADING), width=1440, height=920, min_size=(900, 600))
+            title = i18n.tr("FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde")
+            window = webview.create_window(title, html=i18n.tr(LOADING), width=1440, height=920, min_size=(900, 600))
 
             def load():
+                win_set_icon(title)
                 if wait_ready(port, proc):
                     window.load_url(url)
                 else:
