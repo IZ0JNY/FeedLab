@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Cartiglio dei disegni PDF: i testi lunghi (nome del feed, materiale) vanno a capo e la riga si allarga invece di uscire dal riquadro | ✅ fatto |
 
 ---
 
