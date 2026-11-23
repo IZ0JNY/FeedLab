@@ -156,8 +156,16 @@ def _wall_polygon(profile, t, flange_r=None, flange_t=None):
     poly = inner + outer
     if flange_r and flange_t:
         r_in = profile[0][1]
-        r_out0 = outer[-1][0]
-        poly = inner + outer[:-1] + [(r_out0, flange_t), (flange_r, flange_t), (flange_r, 0.0), (r_in, 0.0)]
+        # outer wall down to one wall thickness above the flange, then straight onto it: a step or cone that
+        # starts just above a thick flange is filled solid (no thin neck, no wall dipping into the flange)
+        keep = []
+        for p in outer[:-1]:
+            if p[1] < flange_t + t - 1e-9:
+                break
+            keep.append(p)
+        keep = keep or outer[:1]
+        r_out0 = keep[-1][0]
+        poly = inner + keep + [(r_out0, flange_t), (flange_r, flange_t), (flange_r, 0.0), (r_in, 0.0)]
     return np.array(poly)
 
 
@@ -188,8 +196,10 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         # the thicker flange must sit on the straight input guide: lengthen it if needed (electrically benign)
         r0 = profile[0][1]
         z_first = profile[1][0] if abs(profile[1][1] - r0) < 1e-9 else 0.0
-        if t_need + 0.5 > z_first:
-            d = t_need + 0.5 - z_first
+        # the wall after the input guide (step, cone) is offset by t towards the input: keep it clear of the
+        # flange top (t + 0.5 mm), otherwise the outer wall would dip into the flange
+        if t_need + t + 0.5 > z_first:
+            d = t_need + t + 0.5 - z_first
             rest = profile[2:] if z_first > 0 else profile[1:]
             profile = [(0.0, r0), (z_first + d, r0)] + [(z + d, r) for z, r in rest]
             if "input_length" in params:

@@ -44,3 +44,30 @@ def test_round_is_default_and_round_flange_guides_ignored():
     assert "base_square" not in g.params
     geometry.BASE.update({"shape": "square", "wg": "WR-15"})      # MIL round flange: no square base
     assert "base_square" not in geometry.build("pickett_potter", 76.032, fD=0.8).params
+
+
+def _self_intersects(poly):
+    pts = [tuple(p) for p in poly]
+    segs = list(zip(pts, pts[1:] + pts[:1]))
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    for i, (a, b) in enumerate(segs):
+        for j, (c, d) in enumerate(segs):
+            if abs(i - j) <= 1 or {i, j} == {0, len(segs) - 1}:
+                continue
+            d1, d2, d3, d4 = cross(c, d, a), cross(c, d, b), cross(a, b, c), cross(a, b, d)
+            if d1 * d2 < -1e-9 and d3 * d4 < -1e-9:
+                return True
+    return False
+
+
+@pytest.mark.parametrize("kind", ["iz0jny", "pickett_potter", "w2imu", "skobelev", "conical"])
+@pytest.mark.parametrize("wg,f", [("WR-90", 10.368), ("WR-75", 10.368), ("WR-42", 24.048)])
+def test_thick_drilled_flange_does_not_overlap_the_wall(kind, wg, f):
+    """IZ0JNY 24 GHz on WR-42: the 8.8 mm drilled flange used to overlap the outer wall of the step."""
+    geometry.BASE.update({"shape": "square", "wg": wg})
+    geometry.MOUNT.update({"wg": wg, "system": "metric", "pol": "V"})
+    g = geometry.build(kind, f, fD=0.65)
+    assert not _self_intersects(g.polygons[0])

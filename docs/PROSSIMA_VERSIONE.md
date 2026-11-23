@@ -8,6 +8,7 @@
 | 2 | Disegni PDF: le note dei feed vanno a capo e restano dentro il foglio | ✅ fatto |
 | 3 | Base del feed circolare o **quadrata** con lo stesso lato della flangia della guida (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm): scelta nella barra laterale a 10 e 24 GHz; quadrata anche nel modello 3D, nello STEP/STL e nella vista della flangia del disegno PDF; con la foratura attiva segue la guida scelta per la piastrina | ✅ fatto |
 | 4 | Una sola scelta della guida rettangolare nella barra laterale, limitata alle guide della banda: 10 GHz WR-90 o WR-75, 24 GHz WR-42, 47 GHz WR-22 o WR-19 (76 GHz WR-12 o WR-10…). Dimensiona la piastrina di adattamento circolare → WR, la foratura della flangia, la base quadrata (solo flange quadrate) e l'horn rettangolare | ✅ fatto |
+| 5 | Disegno e modello: con la flangia forata spessa (es. IZ0JNY 24 GHz su WR-42, 8.8 mm) la parete esterna dello scalino entrava nella flangia. Ora lo scalino parte almeno una parete sopra la flangia e il raccordo è pieno; test su tutti i feed a 10 e 24 GHz | ✅ fatto |
 
 ---
 
