@@ -25,7 +25,7 @@ def _T(tpl: str, **kw) -> str:
 
 st = i18n.wrap(_st)
 
-from feedlab import (app_openems, cad, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns, tolerance,
+from feedlab import (app_openems, cad, update_check, dishes, drawing, efficiency, explore, materials, plate, geometry, modematch, noise, openems_local, openems_sim, patterns, tolerance,
                      reflector, wizard)
 from feedlab.waveguide import HAM_BANDS_GHZ, wavelength_mm
 
@@ -85,6 +85,12 @@ def current_geometry():
     if kind == "rect_horn":
         return geometry.build_rect(S.f_ghz, dish.fD, S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall, **ov)
     return geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **ov)
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def _latest_release():
+    """Latest FeedLab release on GitHub, checked at most once an hour (silent when offline)."""
+    return update_check.latest()
 
 
 @st.cache_data(show_spinner=False)
@@ -297,6 +303,10 @@ with st.sidebar:
             st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
             os._exit(0)
     st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
+    _upd = _latest_release()
+    if update_check.newer_than_running(_upd):
+        st.warning(_T("È disponibile FeedLab {v} (questa è la {c}).", v=_upd["version"], c=feedlab.__version__))
+        st.link_button(_T("⬇️ Scarica la {v} da GitHub", v=_upd["version"]), _upd["url"])
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
     _mdir = Path(feedlab.__file__).resolve().parent.parent / "docs" / "manual"

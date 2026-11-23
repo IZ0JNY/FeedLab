@@ -56,6 +56,7 @@ At the top of the sidebar: **Lingua / Language** (Italiano or English). The inst
 | **Feed base thickness** | minimum 1 mm; empty = automatic (what the threaded holes need) |
 | **ℹ️ Credits** | author, version and all sources |
 | **📖 Manual** | downloads this manual as PDF |
+| **Update notice** | if a newer version is on GitHub, it appears here with the download link |
 | **🐞 Report a problem** | opens the GitHub issues page with version and design already filled in |
 
 ## 5. Wizard

@@ -56,6 +56,7 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 | **Spessore base del feed** | minimo 1 mm; vuoto = automatico (quanto serve ai fori filettati) |
 | **ℹ️ Credits** | autore, versione e tutte le fonti |
 | **📖 Manuale** | scarica questo manuale in PDF |
+| **Avviso di aggiornamento** | se su GitHub c'è una versione più recente, compare qui con il link per scaricarla |
 | **🐞 Segnala un problema** | apre la pagina GitHub delle segnalazioni con versione e progetto già compilati |
 
 ## 5. Procedura guidata

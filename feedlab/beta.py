@@ -3,7 +3,7 @@
 The first start of a version records the date (FeedLab's settings folder, beta.json, one entry per version):
 a new release therefore gets its own 30 days. A clock moved back by more than a day counts as expired.
 
-This is a soft limit for test builds: FeedLab is open source, so it is a notice to testers, not a protection.
+This is a soft limit for test builds: it is a notice to testers, not a protection.
 Set BETA = False to build a normal release.
 """
 from __future__ import annotations

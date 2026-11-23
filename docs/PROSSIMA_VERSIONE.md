@@ -1,12 +1,24 @@
-# Modifiche per la prossima versione (0.4.15)
+# Modifiche per la prossima versione (0.4.16)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.15 (pubblicata, BETA TEST 30 giorni)
+
+Pubblicata con 5 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Cartiglio dei disegni PDF: i testi lunghi (nome del feed, materiale) vanno a capo e la riga si allarga invece di uscire dal riquadro | ✅ fatto |
 | 2 | Flange rotonde (da 47 GHz): opzione "viti dal lato del feed con lamatura nella base" (testa nella lamatura sul lato horn, viti avvitate nella flangia della guida); riportata nello STEP/STL del feed e nel foglio della flangia del PDF | ✅ fatto |
 | 3 | Scheda Piastrina WR: vista 3D della piastrina accanto alla vista frontale | ✅ fatto |
+| 4 | Inglese completo nei Credits e nel catalogo parabole (note e fonti dei datasheet), modulo di segnalazione problemi nella lingua scelta | ✅ fatto |
+| 5 | Controllo aggiornamenti: all'avvio FeedLab guarda su GitHub se c'è una versione più recente e lo segnala con il link per scaricarla | ✅ fatto |
 
 ---
 
