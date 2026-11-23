@@ -172,7 +172,35 @@ def section_fig(geo):
     for z0, r0, z1, r1, a in feats["flares"]:
         fig.add_annotation(x=(z0 + z1) / 2, y=-(r0 + r1) / 2, text=f"flare α = {abs(a):.2f}°",
                            **{**ann, "ay": 28})
-    fig.update_layout(height=330, yaxis=dict(scaleanchor="x"), xaxis_title="z (mm)", yaxis_title="r (mm)",
+    # names of the design dimensions (as in the PDF drawing): axial lengths above, diameters on the part
+    if geo.kind != "axial_corrugated":
+        prof = geo.profile
+        Rmax = max(geo.outer_radius, max(r for _, r in prof))
+        zs = sorted({round(z, 4) for z, _ in prof})
+        named, lev = set(), 0
+        for z0, z1 in zip(zs[:-1], zs[1:]):
+            k = drawing._param_for(geo, z1 - z0, False)
+            if not k or k in named:
+                continue
+            named.add(k)
+            y = Rmax * (1.18 + 0.16 * (lev % 2)); lev += 1
+            fig.add_shape(type="line", x0=z0, x1=z1, y0=y, y1=y, line=dict(color="royalblue", width=1))
+            for zz in (z0, z1):
+                fig.add_shape(type="line", x0=zz, x1=zz, y0=y - 0.04 * Rmax, y1=y + 0.04 * Rmax,
+                              line=dict(color="royalblue", width=1))
+            fig.add_annotation(x=(z0 + z1) / 2, y=y, text=f"{k} {z1 - z0:.2f}", showarrow=False, yshift=9,
+                               font=dict(size=10, color="royalblue"), bgcolor="rgba(255,255,255,0.7)")
+        seen = set()
+        for z, r in prof:
+            k = drawing._param_for(geo, 2 * r, True)
+            if not k or k in seen:
+                continue
+            seen.add(k)
+            fig.add_shape(type="line", x0=z, x1=z, y0=-r, y1=r, line=dict(color="seagreen", width=1, dash="dot"))
+            fig.add_annotation(x=z, y=0, text=f"Ø {k} {2 * r:.2f}", showarrow=False, textangle=-90, xshift=-8,
+                               font=dict(size=10, color="seagreen"), bgcolor="rgba(255,255,255,0.7)")
+        fig.update_yaxes(range=[-Rmax * 1.25, Rmax * 1.5])
+    fig.update_layout(height=380, yaxis=dict(scaleanchor="x"), xaxis_title="z (mm)", yaxis_title="r (mm)",
                       title=f"Sezione assiale · parete {t:.2f} mm", margin=dict(t=40, b=10))
     return fig
 
@@ -929,7 +957,8 @@ with tabs[7]:
             # front view preview
             fig = go.Figure()
             h = pl.outer / 2
-            fig.add_shape(type="rect", x0=-h, y0=-h, x1=h, y1=h, line=dict(color="black"), fillcolor="rgba(201,162,39,0.5)")
+            fig.add_shape(type="circle" if pl.shape == "round" else "rect", x0=-h, y0=-h, x1=h, y1=h,
+                          line=dict(color="black"), fillcolor="rgba(201,162,39,0.5)")
             aa, bb = (pl.a, pl.b) if pl.polarization == "V" else (pl.b, pl.a)
             fig.add_shape(type="rect", x0=-aa / 2, y0=-bb / 2, x1=aa / 2, y1=bb / 2, line=dict(color="black"), fillcolor="white")
             fig.add_shape(type="circle", x0=-dcirc / 2, y0=-dcirc / 2, x1=dcirc / 2, y1=dcirc / 2, line=dict(dash="dash", color="gray"))

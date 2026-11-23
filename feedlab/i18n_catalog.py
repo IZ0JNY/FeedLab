@@ -6,6 +6,14 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('la piastrina misura', 'the plate measures'),
+    ('flangia MIL rotonda: la guida ha viti imperdibili 4-40 UNC, la piastra è filettata 4-40 (le viti piastra→feed restano metriche)', 'round MIL flange: the waveguide has captive 4-40 UNC screws, the plate is threaded 4-40 (the plate→feed screws stay metric)'),
+    ('Flann pubblica per il WR-28 gli stessi valori del WR-62: verifica sulla flangia reale prima di forare', 'Flann publishes the same values for WR-28 as for WR-62: check on the real flange before drilling'),
+    ('le lamature delle viti piastra→feed non ci stanno; con viti piastra→feed più piccole può restare uguale alla flangia', 'the counterbores of the plate→feed screws do not fit; with smaller plate→feed screws it can stay as large as the flange'),
+    ('mm invece di', 'mm instead of'),
+    ('mm come la flangia', 'mm like the flange'),
+    ('(flangia rotonda)', '(round flange)'),
+    ('Ø esterno', 'Outer Ø'),
     ("Diagrammi di radiazione vuoti (tutti zero): file results.json di FeedLab fino alla 0.4.10, che arrotondava il campo lontano. S11 è valido. Rigenera lo script con questa versione e lancialo con --post nella stessa cartella: ricalcola i diagrammi da sim_data in pochi secondi.", 'Empty radiation patterns (all zero): results.json from FeedLab up to 0.4.10, which rounded the far field. S11 is valid. Regenerate the script with this version and run it with --post in the same folder: it recomputes the patterns from sim_data in a few seconds.'),
     ('fori troppo vicini al bordo della base quadrata', 'holes too close to the edge of the square base'),
     ('Base del feed', 'Feed base'),

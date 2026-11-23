@@ -150,3 +150,19 @@ def test_plate_screws_symmetric(wg, d):
         cb = [h for h in m.plate_holes if h.kind == "cbore"]
         ang = math.degrees(math.atan2(cb[0].y, cb[0].x)) % 90
         assert min(abs(ang), abs(ang - 45), abs(ang - 90)) < 1e-6, (wg, pol, ang)
+
+
+@pytest.mark.parametrize("f,wg,shape,side", [(10.368, "WR-90", "square", 41.40), (10.368, "WR-75", "square", 38.30),
+                                             (24.048, "WR-42", "square", 22.41), (47.088, "WR-22", "round", 28.55),
+                                             (47.088, "WR-19", "round", 28.55), (76.032, "WR-12", "round", 19.05)])
+def test_plate_has_the_shape_and_size_of_the_flange(f, wg, shape, side):
+    """Square WR-90/75/42 flanges → square plate; from 47 GHz the MIL flanges are round → round plate,
+    as large as the flange (without holes; with holes larger only if the counterbores do not fit)."""
+    from feedlab import plate
+    d = 0.76 * 299.792458 / f
+    p = plate.design_plate(f, wg, d, "V")
+    assert p.shape == shape and p.outer == pytest.approx(side)
+    ph = plate.design_plate(f, wg, d, "V", holes="metric", plate_screw="M2")
+    assert ph.shape == shape and ph.outer >= side - 1e-9
+    if ph.outer > side + 0.01:
+        assert any("invece di" in w for w in ph.mount.warnings)

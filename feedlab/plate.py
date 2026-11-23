@@ -40,6 +40,14 @@ class MatchingPlate:
         """Feed-side pocket of the circular guide diameter: extends the feed's circular guide."""
         return max(self.body_t - self.thickness, 0.0)
 
+    @property
+    def shape(self) -> str:
+        """Outline of the plate = outline of the standard flange of the WR: square (WR-90, WR-75, WR-42…)
+        or round (MIL UG-383/385/387: WR-22 and smaller). outer is the side or the diameter."""
+        from .flanges import FLANGES
+        fl = FLANGES.get(self.wg)
+        return "round" if fl is not None and fl.shape == "round" else "square"
+
     def rotation_deg(self) -> float:
         """Rotation of the WR broad wall from horizontal (0 = H-wall horizontal → vertical polarisation)."""
         return 0.0 if self.polarization == "V" else 90.0
@@ -80,7 +88,23 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
         body_t = round(max(t, mnt.plate_body_min()), 2)
         # screw length depends on the plate thickness: drill again with it (same positions)
         mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t)
-        outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)
+        outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)   # refined below, per flange shape
+    from .flanges import FLANGES
+    fl = FLANGES.get(wg)
+    if fl is not None:
+        # same outline and size as the waveguide's standard flange (square WR-90/75/42…, round MIL from WR-22),
+        # larger only where the plate→feed screws do not fit inside it (0.5 mm of metal at the edge, as their placement)
+        outer = fl.A
+        if mnt is not None:
+            if fl.shape == "round":
+                need = max(math.hypot(h.x, h.y) + max(h.dia, h.cb_dia) / 2 for h in mnt.plate_holes)
+            else:
+                need = max(max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 for h in mnt.plate_holes)
+            outer = max(outer, 2 * (need + 0.5))
+            if outer > fl.A + 0.01:
+                mnt.warnings.append(f"la piastrina misura {outer:.2f} mm invece di {fl.A:.2f} mm come la flangia {wg}: le lamature delle "
+                                    "viti piastra→feed non ci stanno; con viti piastra→feed più piccole può restare "
+                                    "uguale alla flangia")
     body_t = max(t, mnt.plate_body_min()) if mnt else t
     return MatchingPlate(f_ghz, wg, circ_diam_mm, a_opt, b, r, t, lg / 200, z0, polarization, outer, basic, mnt,
                          round(body_t, 2))
@@ -91,7 +115,8 @@ def plate_solid(p: MatchingPlate):
     on the WR side; a thicker body gets a feed-side pocket of the circular guide diameter."""
     import cadquery as cq
     T = p.body_t or p.thickness
-    body = cq.Workplane("XY").rect(p.outer, p.outer).extrude(T)
+    body = (cq.Workplane("XY").circle(p.outer / 2) if p.shape == "round" else
+            cq.Workplane("XY").rect(p.outer, p.outer)).extrude(T)
     hole = (cq.Workplane("XY").workplane(offset=T - p.thickness).sketch().rect(p.a, p.b).vertices()
             .fillet(max(p.corner_r, 0.01)).finalize().extrude(p.thickness))
     if p.polarization == "H":
@@ -123,7 +148,10 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     fig = plt.figure(figsize=(11.69, 8.27))
     ax = fig.add_axes([0.05, 0.12, 0.5, 0.8]); ax.set_aspect("equal"); ax.set_axis_off()
     h = p.outer / 2
-    ax.add_patch(Rectangle((-h, -h), p.outer, p.outer, fill=False, lw=1.2))
+    if p.shape == "round":
+        ax.add_patch(Circle((0, 0), h, fill=False, lw=1.2))
+    else:
+        ax.add_patch(Rectangle((-h, -h), p.outer, p.outer, fill=False, lw=1.2))
     aa, bb = (p.a, p.b) if p.polarization == "V" else (p.b, p.a)
     ax.add_patch(FancyBboxPatch((-aa / 2 + p.corner_r, -bb / 2 + p.corner_r), aa - 2 * p.corner_r, bb - 2 * p.corner_r,
                                 boxstyle=f"round,pad={p.corner_r}", fill=True, fc="0.85", ec="k", lw=1))
@@ -164,7 +192,8 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
            + (f"Spessore corpo      {p.body_t:.2f} mm: tasca lato feed Ø{p.circ_diam:.3f}\n"
               f"                    prof. {p.pocket_depth:.2f} mm (prolunga la guida circolare)\n"
               if p.pocket_depth > 1e-6 else "") +
-           f"Lato esterno        {p.outer:.1f} mm\n"
+           (f"Ø esterno           {p.outer:.2f} mm (flangia rotonda)\n" if p.shape == "round" else
+              f"Lato esterno        {p.outer:.1f} mm\n") +
            f"Z0 intermedia       {p.z0:.1f} Ω\n\n"
            f"Versione base: a {p.basic['a']:.3f}, b {p.basic['b']:.3f}, t {p.basic['thickness']:.3f} mm\n\n"
            f"Materiale: {material}\nTolleranza generale ±{tolerance_mm(p.f_ghz)} mm\n"
@@ -173,7 +202,7 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
               "e del feed (allineare con spine di centraggio).\n\n") +
            "Metodo: design guide OE2IGL (openEMS), ottimizzazione HB9PZK.\n"
            "Verificare S11 con openEMS prima della produzione.")
-    ax2.text(0, 1, txt, va="top", family="monospace", fontsize=8 if p.mount is not None else 9)
+    ax2.text(0, 1, txt, va="top", family="monospace", fontsize=6.8 if p.mount is not None else 9)
     from . import i18n
     i18n.translate_figure_mpl(fig)
     fig.savefig(path)
