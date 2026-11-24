@@ -185,3 +185,20 @@ def advice(rows: list[dict], setup: dict) -> list[str]:
     if not tips:
         tips.append("Registra almeno 4–5 misure di sole a elevazioni diverse (con il meteo) per avere le prime indicazioni.")
     return tips
+
+
+def focus_fit(rows: list[dict]) -> dict | None:
+    """Best feed position from a focusing scan (kind "focus": value = displacement in mm, y_db = sun/moon Y):
+    parabola through the points, maximum and the Y lost at the starting position (0 mm)."""
+    pts = [(r["value"], r["y_db"]) for r in rows if r["kind"] == "focus" and r.get("value") is not None
+           and r.get("y_db") is not None]
+    if len(pts) < 3:
+        return None
+    x = np.array([p[0] for p in pts], float)
+    y = np.array([p[1] for p in pts], float)
+    a, b, c = np.polyfit(x, y, 2)
+    if a >= 0:
+        return {"n": len(pts), "best_mm": None, "x": x.tolist(), "y": y.tolist(), "coef": [a, b, c]}
+    xb = -b / (2 * a)
+    return {"n": len(pts), "best_mm": float(xb), "y_best": float(c - b * b / (4 * a)), "gain_db": float(-b * b / (4 * a)),
+            "x": x.tolist(), "y": y.tolist(), "coef": [float(a), float(b), float(c)]}

@@ -61,7 +61,7 @@ class DB:
     def __init__(self, path: str | Path | None = None):
         self.path = Path(path) if path else default_path()
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.con = sqlite3.connect(str(self.path))
+        self.con = sqlite3.connect(str(self.path), check_same_thread=False)   # Streamlit reruns on other threads
         self.con.row_factory = sqlite3.Row
         self.con.executescript(SCHEMA)
 

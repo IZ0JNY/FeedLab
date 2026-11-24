@@ -21,9 +21,8 @@ BANDS = {"10.368 GHz": 10.368, "24.048 GHz": 24.048, "47.088 GHz": 47.088}
 
 
 def _db():
-    if "emelab_db" not in _st.session_state:
-        _st.session_state["emelab_db"] = edb.DB()
-    return _st.session_state["emelab_db"]
+    """A fresh connection at every run (Streamlit reruns on other threads; opening SQLite costs ~1 ms)."""
+    return edb.DB()
 
 
 def _fmt(v, f="{:.2f}"):
@@ -38,8 +37,7 @@ def _station(D):
     call = c[0].text_input("Nominativo", stn.get("callsign") or "", key="em_call")
     loc = c[1].text_input("Locator", stn.get("locator") or "", key="em_loc", help="es. JN61fs: calcola latitudine e longitudine")
     lat0, lon0 = stn.get("lat"), stn.get("lon")
-    if loc and len(loc.strip()) >= 4 and (lat0 is None or astro.latlon_to_locator(lat0, lon0, len(loc.strip()))[:4].upper()
-                                          != loc.strip()[:4].upper()):
+    if loc and len(loc.strip()) >= 4 and (lat0 is None or loc.strip().upper() != (stn.get("locator") or "").upper()):
         try:
             lat0, lon0 = astro.locator_to_latlon(loc)
         except Exception:
@@ -248,7 +246,11 @@ def _show_snapshot(c, kind):
 # ------------------------------------------------------------------ log
 def _log(D):
     sets = {s["id"]: s for s in D.setups()}
-    rows = D.measurements()
+    c = st.columns(2)
+    fb = c[0].selectbox("Banda", [None] + list(BANDS), key="em_l_band", format_func=lambda b: i18n.tr("tutte") if b is None else b)
+    fk = c[1].selectbox("Tipo", [None] + list(edb.KINDS), key="em_l_kind",
+                        format_func=lambda k: i18n.tr("tutti") if k is None else edb.KINDS[k])
+    rows = D.measurements(BANDS.get(fb) if fb else None, fk)
     if not rows:
         st.info("Nessuna misura registrata.")
     else:
@@ -257,14 +259,16 @@ def _log(D):
             ev = analysis.evaluate_measurement(r, sets[r["setup_id"]]) if r.get("setup_id") in sets else {}
             c = r.get("calc") or {}
             src = c.get("moon" if r["kind"] in ("moon", "echo", "qso") else "sun") or {}
-            tab.append({"ID": r["id"], "UTC": r["utc"], "GHz": r["band_ghz"], "Tipo": edb.KINDS.get(r["kind"], r["kind"]),
+            tab.append({"ID": r["id"], "UTC": r["utc"].replace("T", " ").replace("Z", ""), "GHz": r["band_ghz"], "Tipo": edb.KINDS.get(r["kind"], r["kind"]),
                         "Y (dB)": r["y_db"], "Y atteso": _r(ev.get("y_expected")), "ΔY": _r(ev.get("y_delta")),
                         "G/T misurato": _r(ev.get("gt_measured")), "ΔG/T": _r(ev.get("gt_delta")), "SNR": r["snr_db"],
                         "SNR atteso": _r(ev.get("snr_expected")), "EL": _r(src.get("el")), "AZ": _r(src.get("az")),
                         "°C": r["t_c"], "UR %": r["rh"], "hPa": r["p_hpa"], "Meteo": r["wx_source"], "Note": r["notes"]})
-        st.dataframe(tab, hide_index=True, use_container_width=True)
+        import pandas as pd
+        st.dataframe(pd.DataFrame(tab), hide_index=True, use_container_width=True)
         c = st.columns(3)
-        dl = c[0].selectbox("Elimina misura (ID)", [None] + [r["id"] for r in rows], key="em_del_m")
+        dl = c[0].selectbox("Elimina misura (ID)", [None] + [r["id"] for r in rows], key="em_del_m",
+                            format_func=lambda i: "—" if i is None else str(i))
         if dl and c[0].button("🗑️ Elimina", key="em_del_m_btn"):
             D.delete(dl)
             st.rerun()
@@ -302,13 +306,25 @@ def _analysis(D):
         fig.update_layout(title="G/T misurato − atteso vs elevazione del sole", xaxis_title="Elevazione (°)",
                           yaxis_title="ΔG/T (dB)", height=360, margin=dict(l=10, r=10, t=40, b=10))
         c[0].plotly_chart(fig, use_container_width=True)
-        fig = go.Figure(go.Scatter(x=[r["utc"] for r, _ in sun], y=[e["gt_measured"] for _, e in sun], mode="markers+lines",
+        fig = go.Figure(go.Scatter(x=[r["utc"] for r, _ in sun], y=[e["gt_measured"] for _, e in sun], mode="markers",
                                    name="misurato"))
         fig.add_trace(go.Scatter(x=[r["utc"] for r, _ in sun], y=[e["gt_expected"] for _, e in sun], mode="lines",
                                  name="atteso", line=dict(dash="dot")))
         fig.update_layout(title="G/T dal sole nel tempo", yaxis_title="G/T (dB/K)", height=360,
                           margin=dict(l=10, r=10, t=40, b=10))
         c[1].plotly_chart(fig, use_container_width=True)
+    ff = analysis.focus_fit(rows)
+    if ff:
+        fig = go.Figure(go.Scatter(x=ff["x"], y=ff["y"], mode="markers", name="misurato"))
+        xs = np.linspace(min(ff["x"]), max(ff["x"]), 60)
+        a, b, c0 = ff["coef"]
+        fig.add_trace(go.Scatter(x=xs, y=a * xs ** 2 + b * xs + c0, mode="lines", name="curva interpolata"))
+        fig.update_layout(title="Messa a fuoco: Y in funzione dello spostamento del feed", xaxis_title="Spostamento (mm)",
+                          yaxis_title="Y (dB)", height=340, margin=dict(l=10, r=10, t=40, b=10))
+        st.plotly_chart(fig, use_container_width=True)
+        if ff["best_mm"] is not None:
+            st.success(i18n.tr("Fuoco migliore a") + f" {ff['best_mm']:+.1f} mm " + i18n.tr("dalla posizione di partenza") +
+                       f" ({ff['gain_db']:+.2f} dB " + i18n.tr("di Y in più") + ").")
     pm = [r for r in rows if r.get("az_off") is not None and r.get("el_off") is not None and r["kind"] in ("sun", "moon")]
     if pm:
         fig = go.Figure(go.Scatter(x=[r["az_off"] for r in pm], y=[r["el_off"] for r in pm], mode="markers",
@@ -362,8 +378,8 @@ def _planner(D):
         if not rows:
             st.info("Nessuna finestra nel periodo con questi limiti.")
             return
-        st.dataframe([{"Giorno (UTC)": str(r["day"]), "Da": r["start"].strftime("%H:%M"), "A": r["end"].strftime("%H:%M"),
-                       "Ore": round(r["hours"], 1), "Momento migliore": r["best_utc"].strftime("%H:%M"),
+        st.dataframe([{"Inizio (UTC)": r["start"].strftime("%Y-%m-%d %H:%M"), "Fine (UTC)": r["end"].strftime("%Y-%m-%d %H:%M"),
+                       "Ore": round(r["hours"], 1), "Momento migliore (UTC)": r["best_utc"].strftime("%Y-%m-%d %H:%M"),
                        "EL max (°)": round(r["best_el"], 1), "Distanza (km)": round(r["dist_km"]),
                        "Eco SNR 1 Hz (dB)": _r(r["snr_1hz"], 1), "Eco SNR nello spreading (dB)": _r(r["snr_spread"], 1),
                        "Spreading (Hz)": round(r["spread_hz"]), "Attenuazione (dB)": round(r["a_slant_db"], 2),
@@ -374,6 +390,20 @@ def _planner(D):
         fig.update_layout(title="SNR atteso delle eco (1 Hz) nelle finestre", yaxis_title="dB", height=360,
                           margin=dict(l=10, r=10, t=40, b=10))
         st.plotly_chart(fig, use_container_width=True)
+    with st.expander("🌡️ Mesi più favorevoli (clima dell'ultimo anno nel tuo luogo)"):
+        st.caption("Medie mensili di temperatura e umidità dall'archivio Open-Meteo: vapore acqueo, attenuazione, "
+                   "temperatura di cielo a 30° e quanto perdi rispetto al mese migliore (G/T e eco).")
+        if st.button("Calcola dal clima", key="em_p_clim"):
+            try:
+                _st.session_state["em_clim"] = planner.monthly_climate(stn["lat"], stn["lon"], setup)
+            except Exception as e:
+                st.warning(i18n.tr("Archivio meteo non disponibile") + f": {e}")
+        cl = _st.session_state.get("em_clim")
+        if cl:
+            st.dataframe([{"Mese": i18n.tr(planner.MONTHS_IT[r["month"] - 1]), "°C": round(r["t_c"], 1), "UR %": round(r["rh"]),
+                           "Vapore (g/m³)": round(r["rho"], 1), "Attenuazione zenit (dB)": round(r["a_zen_db"], 2),
+                           "Cielo a 30° (K)": round(r["t_sky"]), "ΔG/T (dB)": round(r["d_gt_db"], 2),
+                           "ΔEco (dB)": round(r["d_echo_db"], 2)} for r in cl], hide_index=True, use_container_width=True)
     with st.expander("📅 Perigei e apogei dei prossimi mesi"):
         if st.button("Calcola perigei", key="em_p_peri"):
             pts = planner.perigees(datetime.now(timezone.utc), 200)

@@ -4,6 +4,8 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
+| 1 | **EMELab** (scheda opzionale, interruttore «📡 Abilita EMELab» nella barra laterale): stazione e setup per 10/24/47 GHz (anche «Da FeedLab»), diario delle misure in UTC (sole, luna, cielo freddo, terra, eco, beacon, QSO, messa a fuoco) con posizione e distanza di Sole e Luna (ERFA/SOFA), Doppler e spreading, meteo da stazione personale (Meteotemplate/Cumulus/Weather Display) o Open-Meteo, attenuazione ITU-R P.676 e temperatura di cielo; valori attesi (Y sole/luna, eco), G/T dal sole, modello di puntamento, curva di fuoco, consigli; pianificatore per passaggi della Luna con stazione corrispondente e previsioni meteo, perigei/apogei, mesi più favorevoli; guida alle misure. Dati solo sul PC | 🟡 in revisione |
+| 2 | Sintesi di feed EME per la Channel Master 243 (24 e 47 GHz): ricerca globale con il simulatore veloce | 🟡 in corso |
 
 ---
 

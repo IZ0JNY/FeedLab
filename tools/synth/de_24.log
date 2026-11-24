@@ -12,3 +12,8 @@
   12     823s  EME=86.176  conv=0.041
   13     885s  EME=86.188  conv=0.041
   14     949s  EME=86.188  conv=0.041
+  15    1013s  EME=86.188  conv=0.043
+  16    1081s  EME=86.188  conv=0.045
+  17    1141s  EME=86.188  conv=0.047
+/usr/local/lib/python3.13/multiprocessing/resource_tracker.py:479: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown: {'/mp-3ejr1vor', '/mp-51ynoxfj', '/mp-5s7314jv', '/mp-u4cg34vm', '/mp-r99uzrbk', '/mp-2_ch568x'}
+  warnings.warn(

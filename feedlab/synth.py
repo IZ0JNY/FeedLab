@@ -99,3 +99,32 @@ def cost(x, f_ghz, sc_kw):
     if geo.length > 9 * wavelength_mm(f_ghz):                 # keep it machinable / not too long
         val += 0.2 * (geo.length / wavelength_mm(f_ghz) - 9)
     return val
+
+
+# ------------------------------------------------------------------ search around a known family (IZ0JNY Dual-Flare)
+DF_KEYS = ["Di", "Ds", "Ls", "Dm", "L1", "Lp", "Dap", "L2"]
+
+
+def df_params(x, lam):
+    return {k: float(v) * lam for k, v in zip(DF_KEYS, x)}
+
+
+def df_evaluate(x, f_ghz, sc: explore.Scenario, fD_design: float, band: float = 0.01):
+    lam = wavelength_mm(f_ghz)
+    geo = geometry.build("iz0jny", f_ghz, fD=fD_design, **df_params(x, lam))
+    secs = geo.staircase(lam / 20)
+    r = modematch.simulate(secs, [f_ghz * (1 - band), f_ghz, f_ghz * (1 + band)], n_modes=10)
+    pat = modematch.aperture_pattern(r, 1, f_ghz, n_rho=28, n_phi=32, n_theta=181)
+    res = explore.performance("iz0jny", f_ghz, sc, geo, pat, float(r.s11_db[1]), r.aperture_modes[1])
+    return res, float(np.max(r.s11_db)), geo
+
+
+def df_cost(x, f_ghz, sc_kw, fD_design, w_gt: float = 1.0, w_g: float = 1.0):
+    try:
+        res, s11w, geo = df_evaluate(x, f_ghz, explore.Scenario(**sc_kw), fD_design)
+    except Exception:
+        return 1e3
+    val = -(w_g * res.gain_dbi + w_gt * res.g_over_t)
+    if s11w > S11_MAX:
+        val += 0.3 * (s11w - S11_MAX)
+    return val

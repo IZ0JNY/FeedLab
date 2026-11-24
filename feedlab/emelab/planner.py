@@ -38,20 +38,30 @@ def windows(station: dict, setup: dict, start: datetime, days: int = 14, step_mi
 
 
 def daily(samples: list[dict], sun_min_deg: float = 10.0) -> list[dict]:
-    """One row per UTC day: window, best moment (highest echo SNR with the Sun away from the Moon)."""
-    days = {}
+    """One row per Moon pass (consecutive samples above the limits, also across midnight UTC): start, end,
+    duration and the best moment (highest echo SNR with the Sun away from the Moon)."""
+    passes, cur = [], []
     for s in samples:
-        days.setdefault(s["utc"].date(), []).append(s)
+        if cur and (s["utc"] - cur[-1]["utc"]).total_seconds() > 1.5 * _step(samples):
+            passes.append(cur)
+            cur = []
+        cur.append(s)
+    if cur:
+        passes.append(cur)
     rows = []
-    for d, ss in sorted(days.items()):
+    for ss in passes:
         good = [s for s in ss if s["sun_moon_deg"] >= sun_min_deg] or ss
         best = max(good, key=lambda s: (s["snr_1hz"] if s["snr_1hz"] is not None else -s["a_slant_db"]))
-        rows.append({"day": d, "start": ss[0]["utc"], "end": ss[-1]["utc"], "hours": len(ss) * (
-            (ss[1]["utc"] - ss[0]["utc"]).total_seconds() / 3600 if len(ss) > 1 else 0),
-            "best_utc": best["utc"], "best_el": best["el"], "dist_km": best["dist_km"],
-            "snr_1hz": best["snr_1hz"], "snr_spread": best["snr_spread"], "spread_hz": best["spread_hz"],
-            "sun_moon_deg": min(s["sun_moon_deg"] for s in ss), "a_slant_db": best["a_slant_db"]})
+        rows.append({"day": ss[0]["utc"].date(), "start": ss[0]["utc"], "end": ss[-1]["utc"],
+                     "hours": (ss[-1]["utc"] - ss[0]["utc"]).total_seconds() / 3600,
+                     "best_utc": best["utc"], "best_el": max(s["el"] for s in ss), "dist_km": best["dist_km"],
+                     "snr_1hz": best["snr_1hz"], "snr_spread": best["snr_spread"], "spread_hz": best["spread_hz"],
+                     "sun_moon_deg": min(s["sun_moon_deg"] for s in ss), "a_slant_db": best["a_slant_db"]})
     return rows
+
+
+def _step(samples):
+    return (samples[1]["utc"] - samples[0]["utc"]).total_seconds() if len(samples) > 1 else 600.0
 
 
 def perigees(start: datetime, days: int = 400) -> list[tuple[datetime, float, str]]:
@@ -70,3 +80,50 @@ def perigees(start: datetime, days: int = 400) -> list[tuple[datetime, float, st
             x = 0.5 * (a - c) / den if den else 0.0
             out.append((ts[i] + timedelta(hours=3 * x), float(b - 0.25 * (a - c) * x), kind))
     return out
+
+
+MONTHS_IT = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
+
+
+def monthly_climate(lat: float, lon: float, setup: dict, el_deg: float = 30.0, year_end: datetime | None = None) -> list[dict]:
+    """Monthly mean weather of the last 12 months (Open-Meteo archive) → zenith attenuation, sky temperature at
+    el_deg and the change of G/T and of the echo SNR relative to the best month."""
+    import json
+    import math
+    import urllib.parse
+    from . import atmos, weather
+    end = astro.utc(year_end or datetime.now(timezone.utc)) - timedelta(days=7)
+    start = end - timedelta(days=365)
+    q = {"latitude": f"{lat:.3f}", "longitude": f"{lon:.3f}", "start_date": str(start.date()), "end_date": str(end.date()),
+         "daily": "temperature_2m_mean,relative_humidity_2m_mean", "timezone": "UTC"}
+    js = json.loads(weather._get("https://archive-api.open-meteo.com/v1/archive?" + urllib.parse.urlencode(q), 20))
+    d = js["daily"]
+    acc = {}
+    for t, tc, rh in zip(d["time"], d["temperature_2m_mean"], d["relative_humidity_2m_mean"]):
+        if tc is None or rh is None:
+            continue
+        acc.setdefault(int(t[5:7]), []).append((tc, rh))
+    return monthly_from_means({m: (sum(a for a, _ in v) / len(v), sum(b for _, b in v) / len(v)) for m, v in acc.items()},
+                              setup, el_deg)
+
+
+def monthly_from_means(means: dict, setup: dict, el_deg: float = 30.0) -> list[dict]:
+    import math
+    from . import analysis, atmos
+    f = float(setup["band_ghz"])
+    rows = []
+    for m in sorted(means):
+        tc, rh = means[m]
+        z = atmos.zenith_attenuation(f, tc, rh)["total"]
+        a = atmos.slant_attenuation(z, el_deg)
+        tsky = atmos.sky_temperature(a, tc)
+        ts = analysis.tsys_cold(setup, tsky)["sys"]
+        rows.append({"month": m, "t_c": tc, "rh": rh, "rho": atmos.vapour_density(tc, rh), "a_zen_db": z, "a_db": a,
+                     "t_sky": tsky, "tsys": ts})
+    if rows:
+        best_ts = min(r["tsys"] for r in rows)
+        best_a = min(r["a_db"] for r in rows)
+        for r in rows:
+            r["d_gt_db"] = -10 * math.log10(r["tsys"] / best_ts) - (r["a_db"] - best_a)
+            r["d_echo_db"] = r["d_gt_db"] - (r["a_db"] - best_a)        # echo: atmosphere twice + noise
+    return rows
