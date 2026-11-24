@@ -10,7 +10,7 @@ def test_rx_objective_prefers_low_noise_feeds():
 
 
 def test_square_flange_feed_counterbores_adjustable():
-    m = flanges.mount("WR-90", "metric", "V", 23.0, f_ghz=10.368, feed_cbore=True, cb_depth=6, cb_dia=9.5)
+    m = flanges.mount("WR-90", "metric", "V", 23.0, f_ghz=10.368, cbore=True, cb_depth=6, cb_dia=9.5)
     assert m.feed_cbore and m.feed_holes
     h = m.feed_holes[0]
     assert h.kind == "cbore_back" and h.cb_depth == 6 and h.cb_dia == 9.5
@@ -18,7 +18,7 @@ def test_square_flange_feed_counterbores_adjustable():
 
 def test_feed_base_mesh_has_counterbores():
     geometry.MOUNT.clear()
-    geometry.MOUNT.update({"wg": "WR-42", "system": "metric", "polarization": "V", "feed_cbore": True})
+    geometry.MOUNT.update({"wg": "WR-42", "system": "metric", "polarization": "V", "cbore": True})
     try:
         g = geometry.build("w2imu", 24.048, fD=0.6)
         assert any(h.kind == "cbore_back" for h in g.mount.feed_holes)
@@ -30,10 +30,10 @@ def test_feed_base_mesh_has_counterbores():
 
 
 def test_feed_through_holes_without_counterbore():
-    m = flanges.mount("WR-42", "metric", "V", 9.47, f_ghz=24.048, feed_cbore=True, cbore=False)
+    m = flanges.mount("WR-42", "metric", "V", 9.47, f_ghz=24.048, cbore=False)
     assert m.feed_cbore and all(h.kind == "cbore_back" and h.cb_depth == 0 and h.cb_dia == 0 for h in m.feed_holes)
     geometry.MOUNT.clear()
-    geometry.MOUNT.update({"wg": "WR-42", "system": "metric", "polarization": "V", "feed_cbore": True, "feed_nocb": True})
+    geometry.MOUNT.update({"wg": "WR-42", "system": "metric", "polarization": "V", "cbore": False})
     try:
         g = geometry.build("w2imu", 24.048, fD=0.6)
         assert g.params["flange_thickness"] >= 3.0

@@ -20,6 +20,15 @@ def tolerance_mm(f_ghz: float) -> float:
     return 0.1 if f_ghz < 30 else 0.05 if f_ghz < 55 else 0.02 if f_ghz < 80 else 0.01
 
 
+TOLERANCE = {"general": None}    # general machining tolerance set by the user (None = OE2IGL value for the band)
+HOLE_TOLERANCES = "filetti ISO 6H · fori spina H7 (pin m6) · fori passanti +0.1/0 · lamature +0.2/0"
+
+
+def general_tolerance(f_ghz: float) -> float:
+    """Tolerance printed on the drawings: the user's value, or the recommended one for the band."""
+    return float(TOLERANCE.get("general") or tolerance_mm(f_ghz))
+
+
 def _dim_h(ax, x0, x1, y, text, off=0.0):
     ax.annotate("", (x0, y), (x1, y), arrowprops=dict(arrowstyle="<->", lw=0.6))
     ax.text((x0 + x1) / 2, y + off, text, ha="center", va="bottom", fontsize=6.5)
@@ -99,7 +108,8 @@ def _title_block(fig, geo, title, material, sheet):
     """Title block: long texts (feed names, materials) wrap inside their cell and the row grows to fit."""
     from . import i18n
     rows = [("Titolo", title), ("Frequenza", f"{geo.f_ghz:g} GHz  (λ = {geo.lam:.3f} mm)"),
-            ("Materiale", material), ("Tolleranze generali", f"±{tolerance_mm(geo.f_ghz)} mm  (Ø interni: precisione λ/100)"),
+            ("Materiale", material), ("Tolleranze generali", f"±{general_tolerance(geo.f_ghz):g} mm  (Ø interni: precisione λ/100)"),
+            ("Tolleranze fori", HOLE_TOLERANCES),
             ("Quote", "mm  —  z = 0 faccia flangia d'ingresso"),
             ("Data / Foglio", f"{_dt.date.today().isoformat()}  —  {sheet}"), ("Generato da", "FeedLab")]
     # translate whole texts first, then wrap (a wrapped line would no longer match the translation)
@@ -295,7 +305,8 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         ax.add_patch(Circle((h.x, h.y), h.dia / 2, fill=False, lw=0.9, ec="k" if h.kind == "tap" else "g"))  # dowel/pin in green
         if h.kind == "tap":                      # thread: 3/4 circle at the major diameter (drawing convention)
             from matplotlib.patches import Arc
-            ax.add_patch(Arc((h.x, h.y), SCREW_MAJOR(mnt.screw), SCREW_MAJOR(mnt.screw), theta1=0, theta2=270, lw=0.6))
+            dM = SCREW_MAJOR((mnt.plate_screw if h.depth else mnt.thread) or mnt.screw)
+            ax.add_patch(Arc((h.x, h.y), dM, dM, theta1=0, theta2=270, lw=0.6))
         if h.cb_dia:                             # counterbore on the horn side (hidden from this face): dashed
             ax.add_patch(Circle((h.x, h.y), h.cb_dia / 2, fill=False, lw=0.7, ec="m", ls="--"))
         ax.text(h.x + h.dia * 0.8, h.y + h.dia * 0.8, str(i), fontsize=7, color="b")
@@ -312,15 +323,17 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
                  T("lato largo della guida {wg} lungo x (polarizzazione {pol})", wg=mnt.flange.wg, pol=pol), fontsize=9)
     ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()
     import textwrap
-    if mnt.stack and mnt.feed_cbore:
+    if mnt.base_holes == "tap":
+        head = [T("Fori della flangia filettati {th} passanti: le viti entrano dal lato della guida, attraversano "
+                  "flangia e piastrina e si avvitano in questa base.", th=mnt.thread)]
+    elif any(h.cb_dia for h in mnt.feed_holes):
         head = [T("Viti {screw} inserite dal lato del feed, con la testa nella lamatura (tratteggio magenta, lato horn): "
                   "attraversano base e piastrina e si avvitano nella flangia della guida.", screw=mnt.screw)]
-    elif mnt.stack:
-        head = [T("Le viti della guida ({screw}) attraversano la piastrina e si avvitano in questa base. "
-                  "Nessuna vite piastrina → feed.", screw=mnt.screw)]
     else:
-        head = [T("Viti piastra → feed: {ps} (testa nella lamatura della piastra).", ps=mnt.plate_screw),
-                T("Le viti della guida ({screw}) si avvitano nella piastra.", screw=mnt.screw)]
+        head = [T("Fori della flangia passanti: viti {screw} inserite dal lato del feed con la testa appoggiata sulla "
+                  "base; attraversano base e piastrina e si avvitano nella flangia della guida.", screw=mnt.screw)]
+    if mnt.plate_screw:
+        head.append(T("Viti piastra → feed: {ps} (testa nella lamatura della piastra).", ps=mnt.plate_screw))
     lines = [T("FORATURA per flangia {wg} {name}", wg=mnt.flange.wg, name=mnt.flange.name)]
     for h_ in head:
         lines += textwrap.wrap(h_, 62)

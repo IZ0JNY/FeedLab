@@ -7,8 +7,10 @@
 | 1 | Fori nella base del feed (viti dal lato del feed): scelta fra **con lamatura** (testa incassata, diametro e profondità modificabili) e **senza lamatura** (fori passanti, testa appoggiata sulla base) | ✅ fatto |
 | 2 | Controllo aggiornamenti: la verifica del certificato di GitHub la fa Windows stesso (truststore, come il browser), così funziona anche con antivirus che ispezionano le connessioni HTTPS; ultima riserva PowerShell; l'errore mostra tutti i tentativi | ✅ fatto |
 | 3 | Scheda Piastrina WR spostata prima di Disegno & STEP | ✅ fatto |
-| 4 | Fori sulla base del feed alla posizione della flangia: come la flangia, maggiorati (Ø proposto e modificabile, anche sulla piastrina) o filettati passanti (10 GHz M4/M3, 24 GHz M3/M2.5/M2, o pollici), con lamatura opzionale; piastrine quadrate con gli stessi 4 fori del feed + 4 viti piastrina→feed opzionali con lamatura; piastrine e basi rotonde (da 47 GHz) con fori della flangia e pin di allineamento opzionali | ⏳ in corso |
-| 5 | Procedura guidata: illuminazione della parabola scelta dall'utente (default quella attuale) e piccolo grafico della superficie illuminata | ⏳ da fare |
+| 4 | Fori sulla base del feed alla posizione della flangia: come la flangia, maggiorati (Ø proposto e modificabile, anche sulla piastrina) o filettati passanti (10 GHz M4/M3, 24 GHz M3/M2.5/M2, o pollici), con lamatura opzionale; piastrine quadrate con gli stessi 4 fori del feed + 4 viti piastrina→feed opzionali con lamatura; piastrine e basi rotonde (da 47 GHz) con fori della flangia e pin di allineamento opzionali | ✅ fatto |
+| 5 | Procedura guidata: illuminazione della parabola scelta dall'utente (taper al bordo in dB, default quella attuale), grafico e disco 3D della parabola con la superficie illuminata ombreggiata | ⏳ da fare |
+| 6 | Tolleranza generale di lavorazione impostabile (scheda Disegno & STEP) e tolleranze dei fori scritte nei PDF di feed e piastrina | ✅ fatto |
+| 7 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
 
 ---
 

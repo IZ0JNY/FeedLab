@@ -60,10 +60,11 @@ def _zte(k, kc):
 
 def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str = "V",
                  corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None,
-                 plate_screw: str | None = None, feed_cbore: bool = False,
-                 cb_depth: float | None = None, cb_dia: float | None = None, cbore: bool = True) -> MatchingPlate:
+                 plate_screw: str | None = None, base_holes: str = "flange", hole_dia: float | None = None,
+                 thread: str | None = None, cbore: bool = False, cb_depth: float | None = None,
+                 cb_dia: float | None = None, pins: bool = True) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
-    (feedlab.flanges) — clearance holes for the screws and dowel holes."""
+    (feedlab.flanges.mount: same 4 holes in plate and feed base, optional plate→feed screws, optional pins)."""
     w = RECT_WG[wg]
     k = 2 * math.pi * f_ghz * 1e9 / C0                    # 1/m
     kc_r = math.pi / (w.a_mm * 1e-3)
@@ -85,12 +86,12 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     mnt = None
     if holes:
         from .flanges import mount
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, feed_cbore=feed_cbore, cb_depth=cb_depth, cb_dia=cb_dia,
-                    cbore=cbore)
+        kw = dict(base_holes=base_holes, hole_dia=hole_dia, thread=thread, cbore=cbore, cb_depth=cb_depth,
+                  cb_dia=cb_dia, pins=pins)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, **kw)
         body_t = round(max(t, mnt.plate_body_min()), 2)
         # screw length depends on the plate thickness: drill again with it (same positions)
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, feed_cbore=feed_cbore,
-                    cb_depth=cb_depth, cb_dia=cb_dia, cbore=cbore)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, **kw)
         outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)   # refined below, per flange shape
     from .flanges import FLANGES
     fl = FLANGES.get(wg)
@@ -155,7 +156,7 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import FancyBboxPatch, Rectangle, Circle
-    from .drawing import tolerance_mm
+    from .drawing import HOLE_TOLERANCES, general_tolerance
     fig = plt.figure(figsize=(11.69, 8.27))
     ax = fig.add_axes([0.05, 0.12, 0.5, 0.8]); ax.set_aspect("equal"); ax.set_axis_off()
     h = p.outer / 2
@@ -212,7 +213,9 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
               f"Lato esterno        {p.outer:.1f} mm\n") +
            f"Z0 intermedia       {p.z0:.1f} Ω\n\n"
            f"Versione base: a {p.basic['a']:.3f}, b {p.basic['b']:.3f}, t {p.basic['thickness']:.3f} mm\n\n"
-           f"Materiale: {material}\nTolleranza generale ±{tolerance_mm(p.f_ghz)} mm\n"
+           f"Materiale: {material}\nTolleranza generale ±{general_tolerance(p.f_ghz):g} mm\n"
+           f"Spessore λ/4: ±{p.tolerance:.3f} mm (critico)\n"
+           + (f"Fori: {HOLE_TOLERANCES}\n" if p.mount is not None else "")
            + (_holes_text(p) if p.mount is not None else
               "Fori di fissaggio: secondo la flangia standard del WR\n"
               "e del feed (allineare con spine di centraggio).\n\n") +
@@ -234,21 +237,19 @@ def _holes_text(p: MatchingPlate) -> str:
         return i18n.tr(tpl).format(**kw)
     m = p.mount
     lines = ["", T("FORATURA flangia {wg} {name}", wg=m.flange.wg, name=m.flange.name)]
-    if m.stack:
-        lines += textwrap.wrap(T("(viti guida {screw} passanti, avvitate nella base del feed; coordinate dal centro)",
-                                 screw=m.screw), 58)
-    else:
-        lines += textwrap.wrap(T("(viti guida {screw} nella piastra, viti piastra→feed {ps}; coordinate dal centro)",
-                                 screw=m.screw, ps=m.plate_screw), 58)
+    lines += textwrap.wrap(T("(stessi 4 fori della flangia nella piastrina e nella base del feed; coordinate dal centro)"), 58)
     for h in m.plate_holes:
         lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {i18n.tr(h.callout)}")
-    if m.stack:
-        lines += ["  " + x for x in textwrap.wrap(T("viti della guida: lunghezza = flangia guida + {t:.1f} mm + {s:.1f} nel feed",
-                                                    t=p.body_t, s=m.screw_in), 58)]
+    if m.base_holes == "tap":
+        lines += ["  " + x for x in textwrap.wrap(T("base del feed: fori filettati {th} passanti; viti della guida: flangia "
+                                                    "guida + {t:.1f} mm di piastrina + {s:.1f} mm nella base",
+                                                    th=m.thread, t=p.body_t, s=m.guide_in), 58)]
     else:
-        lines += ["  " + x for x in textwrap.wrap(T("viti della guida: lunghezza ≤ flangia guida + {t:.1f} mm", t=p.body_t), 58)]
-    if m.screw_len and not m.stack:
-        drill = max(h.depth or 0.0 for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout)
+        lines += ["  " + x for x in textwrap.wrap(T("base del feed: fori passanti, viti {sc} dal lato del feed: base {s:.1f} mm "
+                                                    "sotto la testa + {t:.1f} mm di piastrina + filetto nella flangia della guida",
+                                                    sc=m.screw, s=m.guide_in, t=p.body_t), 58)]
+    if m.plate_screw:
+        drill = max((h.depth or 0.0 for h in m.feed_holes if h.kind == "tap" and h.depth), default=0.0)
         for x in (T("viti piastra→feed: 4 × {ps} × {ln} a testa cilindrica", ps=m.plate_screw, ln=m.screw_len_label),
                   T("(2 × spessore {t:.2f} → {ln}); nel feed: vite {s:.1f}, foro prof. {d:.0f} (pari), filetto prof. {tp:.1f}",
                     t=p.body_t, ln=m.screw_len_label, s=m.screw_in, d=drill, tp=m.tap_depth)):

@@ -98,9 +98,9 @@ def screw_length(plate_t: float, system: str = "metric") -> tuple[float, str]:
 # counterbores for the plate → feed screws: socket head cap screws ISO 4762 / ASME B18.3 (head Ø, height)
 # → counterbore Ø, depth. M2.5: Ø5.5 × 2.5 as in IZ0JNY's WR-42 plate. Check against the screws you buy.
 HEADS = {"M2": (3.8, 2.0), "M2.5": (4.5, 2.5), "M3": (5.5, 3.0), "M4": (7.0, 4.0), "2-56 UNC": (3.56, 2.18),
-         "3-48 UNC": (4.09, 2.51), "4-40 UNC": (4.65, 2.84), "8-32 UNC": (6.86, 4.17)}
+         "3-48 UNC": (4.09, 2.51), "4-40 UNC": (4.65, 2.84), "6-32 UNC": (5.46, 3.51), "8-32 UNC": (6.86, 4.17)}
 CBORE = {"M2": (4.4, 2.1), "M2.5": (5.5, 2.5), "M3": (6.5, 3.1), "M4": (8.0, 4.4), "2-56 UNC": (4.2, 2.3),
-         "3-48 UNC": (4.8, 2.7), "4-40 UNC": (5.3, 3.0), "8-32 UNC": (7.9, 4.4)}
+         "3-48 UNC": (4.8, 2.7), "4-40 UNC": (5.3, 3.0), "6-32 UNC": (6.1, 3.7), "8-32 UNC": (7.9, 4.4)}
 METRIC_FOR = {"4-40 UNC": "M3", "6-32 UNC": "M3", "8-32 UNC": "M4"}   # passes the standard's clearance holes (M3 on UG-595 as IZ0JNY)
 DOWEL_HOLE_ROUND = 1.65          # MIL round flanges, for Ø1.549/1.562 pins
 DOWEL_PIN_SQUARE = 2.0           # alignment pins added by FeedLab on square flanges (Ø2 m6, holes Ø2 H7)
@@ -133,18 +133,18 @@ class Mount:
     tap_depth: float = 0.0       # threaded depth in the feed flange
     screw_in: float = 0.0        # length of screw inside the feed (screw length − grip in the plate)
     stack: bool = False          # round MIL flange: guide screws through the plate into the feed, no plate screws
-    feed_cbore: bool = False     # stack variant: screws from the feed side, heads in counterbores of the feed base
+    feed_cbore: bool = False     # through holes in the base: screws from the feed side (head in a counterbore or on the base)
+    base_holes: str = "flange"   # "flange" | "clear" | "tap" (see mount)
+    thread: str = ""             # thread of the base holes (base_holes "tap")
+    guide_in: float = 0.0        # length of the flange screw inside / through the feed base
 
     @property
     def plate_radius(self) -> float:
         return max(math.hypot(h.x, h.y) + max(h.dia, h.cb_dia) / 2 for h in self.plate_holes)
 
     def plate_body_min(self) -> float:
-        """Plate thickness needed: counterbore + 0.8 mm seat, and ≥ 1·d of thread for the tapped flange screws."""
-        if self.stack:                    # nothing threaded or counterbored in the plate: λ/4 is enough
-            return 0.0
-        cb = max((h.cb_depth + 0.8 for h in self.plate_holes if h.kind == "cbore"), default=0.0)
-        return max(cb, SCREWS[self.screw][0] + 0.3)
+        """Plate thickness needed: counterbore of the plate→feed screws + 0.8 mm seat (else λ/4 is enough)."""
+        return max((h.cb_depth + 0.8 for h in self.plate_holes if h.kind == "cbore"), default=0.0)
 
     @property
     def radius(self) -> float:
@@ -152,17 +152,23 @@ class Mount:
         return max(math.hypot(h.x, h.y) + max(h.dia, h.cb_dia) / 2 for h in self.feed_holes)
 
     def feed_flange_min(self) -> tuple[float, float]:
-        """(diameter, thickness) the feed flange needs for these holes."""
-        d_major = SCREWS[self.plate_screw or self.screw][0]
-        drill = max((h.depth or 0.0 for h in self.feed_holes if h.kind == "tap"), default=0.0)
-        if self.stack and self.feed_cbore:   # counterbore + at least 1.5 mm of seat under the screw head
-            cb = max(h.cb_depth for h in self.feed_holes if h.kind == "cbore_back")
-            head = CBORE[self.screw][0] / 2 if not cb else 0.0          # no counterbore: the head rests on the base
-            return 2 * (max(self.radius, max(math.hypot(h.x, h.y) for h in self.feed_holes) + head)
-                        + max(1.5, 0.75 * d_major)), max(cb + 1.5, 3.0)
-        if self.stack:                    # through-tapped base: the thread engagement is all it needs
-            return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(self.engagement, 3.0)
-        return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(self.engagement + 1.0, drill + 0.8, 3.0)
+        """(diameter, thickness) the feed base needs for these holes."""
+        d_major = SCREWS[self.thread or self.screw][0]
+        guide = [h for h in self.feed_holes if h.kind in ("tap", "cbore_back") and h.depth is None]
+        r_need = self.radius
+        t_need = 3.0
+        if self.feed_cbore:                       # through holes: counterbore + 1.5 mm seat, or head on the base
+            cb = max((h.cb_depth for h in guide if h.kind == "cbore_back"), default=0.0)
+            if not cb:
+                head = HEADS.get(self.screw, (2 * d_major, 0))[0] / 2
+                r_need = max(r_need, max(math.hypot(h.x, h.y) for h in guide) + head)
+            t_need = max(t_need, cb + 1.5)
+        elif self.base_holes == "tap":            # threaded through: the thread engagement is the base
+            t_need = max(t_need, self.guide_in)
+        if self.plate_screw:                      # blind tapped holes of the plate→feed screws
+            drill = max((h.depth or 0.0 for h in self.feed_holes if h.kind == "tap" and h.depth), default=0.0)
+            t_need = max(t_need, self.engagement + 1.0, drill + 0.8)
+        return 2 * (r_need + max(1.5, 0.75 * d_major)), t_need
 
 
 def screw_for(wg: str, system: str = "metric") -> str:
@@ -181,22 +187,64 @@ def _rot(x, y, pol):
 PIN_FROM_GHZ = 47.0             # alignment pins plate ↔ feed from 47 GHz up (IZ0JNY)
 
 
+# feed-base holes at the positions of the waveguide flange (IZ0JNY, 0.4.19)
+BASE_HOLE_MODES = ("flange", "clear", "tap")
+# through holes "maggiorati": medium-fit clearance (ISO 273 / ASME B18.2.8) for the flange screw
+CLEAR_MEDIUM = {"M2": 2.4, "M2.5": 2.9, "M3": 3.4, "M4": 4.5, "2-56 UNC": 2.6, "3-48 UNC": 2.9, "4-40 UNC": 3.4,
+                "6-32 UNC": 3.9, "8-32 UNC": 4.5}
+BASE_THREADS_10GHZ = ["M4", "M3"]
+BASE_THREADS_HIGH = ["M3", "M2.5", "M2"]
+MIL_HOLE = 3.05                  # clearance holes of the round MIL flanges (4-40, Ø0.120")
+
+
+def flange_hole(wg: str) -> float:
+    """Diameter of the screw holes of the standard flange (published clearance; MIL round: Ø3.05)."""
+    fl = FLANGES[wg]
+    return fl.hole or MIL_HOLE
+
+
+def clear_hole(wg: str, system: str = "metric") -> float:
+    """Proposed diameter of the enlarged through holes (medium clearance of the flange screw)."""
+    return round(max(CLEAR_MEDIUM.get(screw_for(wg, system), flange_hole(wg) + 0.3), flange_hole(wg) + 0.2), 2)
+
+
+def base_thread_options(wg: str, f_ghz: float | None, system: str = "metric") -> list[str]:
+    """Threads offered for the feed-base holes: 10 GHz M4/M3, 24 GHz M3/M2.5/M2 (or the UNC equivalents);
+    round MIL flanges: 4-40 UNC (their captive screws)."""
+    if FLANGES[wg].shape == "round":
+        return ["4-40 UNC"]
+    met = BASE_THREADS_10GHZ if f_ghz is not None and f_ghz < TEN_GHZ_MAX else BASE_THREADS_HIGH
+    return [plate_screw_name(x, system) for x in met]
+
+
 def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_diam: float = 0.0,
           f_ghz: float | None = None, plate_screw: str | None = None, plate_t: float | None = None,
-          feed_cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None,
-          cbore: bool = True) -> Mount:
-    """Hole patterns of the plate and of the feed flange for waveguide `wg` (see module docstring)."""
+          base_holes: str = "flange", hole_dia: float | None = None, thread: str | None = None,
+          cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None,
+          pins: bool = True) -> Mount:
+    """Holes of the plate and of the feed base for waveguide `wg`.
+
+    The 4 holes of the standard flange are reproduced, at the same positions, in the plate and in the feed base:
+      base_holes "flange": through, same diameter as the flange holes;
+                 "clear":  through, enlarged (hole_dia, proposed = medium clearance) — also in the plate: the feed
+                           is screwed onto the external waveguide (relay, LNA) with screws from the feed side;
+                 "tap":    threaded through in the base (thread; 10 GHz M4/M3, 24 GHz M3/M2.5/M2, UNC equivalents),
+                           the plate keeps the flange-size holes.
+      cbore: through holes only — counterbore for the screw head on the horn side of the base.
+      plate_screw: square flanges — 4 extra screws plate→feed in the free spots, heads in counterbores of the
+                   plate (WR side), blind tapped holes in the feed. None = no plate screws.
+      pins: round MIL flanges — the 4 dowel holes of the flange, through the plate and into the base."""
     if wg not in FLANGES:
         raise ValueError(f"nessuna flangia standard in tabella per {wg}")
+    if base_holes not in BASE_HOLE_MODES:
+        raise ValueError(f"fori della base: {base_holes}?")
     fl = FLANGES[wg]
-    screw = screw_for(wg, system)
-    d_major, tap, clear = SCREWS[screw]
+    screw = screw_for(wg, system)                     # the waveguide flange screw
     m = Mount(fl, screw, polarization)
+    m.stack = True                                    # the flange screws always go through the plate
+    m.base_holes = base_holes
     if fl.note:
         m.warnings.append(fl.note)
-    if fl.shape == "round" and system != "imperial":
-        m.warnings.append("flangia MIL rotonda: la guida ha viti imperdibili 4-40 UNC, la piastra è filettata 4-40 "
-                          "(le viti piastra→feed restano metriche)")
     if fl.shape == "square":
         screw_xy = [(sx * fl.F, sy * fl.E) for sx in (1, -1) for sy in (1, -1)]
         dowel_xy = []
@@ -204,58 +252,44 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         r = fl.pcd / 2
         screw_xy = [(r * math.cos(math.radians(a)), r * math.sin(math.radians(a))) for a in (0, 90, 180, 270)]
         dowel_xy = [(r * math.cos(math.radians(a)), r * math.sin(math.radians(a))) for a in (45, 135, 225, 315)]
-    if fl.shape == "round" or feed_cbore:
-        # stack (IZ0JNY): guide screws through the plate, tapped in the feed base (round MIL flanges) or, with
-        # feed_cbore, screws from the feed side with the head counterbored in the feed base (any flange):
-        # the feed screws straight onto the waveguide, plate in between; dowels through plate into base
-        m.stack = True
-        m.warnings = [w for w in m.warnings if not w.startswith("flangia MIL rotonda")]
-        m.warnings.append(f"flangia MIL rotonda: la piastrina si appoggia sulla base del feed; le viti {screw} della "
-                          "guida passano nella piastrina e si avvitano nella base (foratura standard), senza viti "
-                          "piastrina→feed")
-        # tapped THROUGH the base (no blind hole, no tap lead): the base only needs the thread engagement
-        eng = round(max(1.5 * d_major, 4.0), 1)
-        drill_d = eng
-        lead = 0.0
-        cb_d, cb_k = CBORE[screw]
-        if cb_depth:                     # counterbore depth chosen by the user (head height + margin by default)
+    d_fl = flange_hole(wg)
+    if base_holes == "tap":
+        opts = base_thread_options(wg, f_ghz, system)
+        thread = thread if thread in opts else opts[0]
+        m.thread = thread
+        d_major, tap, _ = SCREWS[thread]
+        d_plate = d_fl
+        m.engagement = m.tap_depth = m.guide_in = round(max(1.5 * d_major, 3.0), 1)
+    else:
+        d_hole = d_fl if base_holes == "flange" else round(max(float(hole_dia or clear_hole(wg, system)), d_fl), 2)
+        d_plate = d_hole
+        m.feed_cbore = True                           # screws from the feed side, through base and plate
+        cb_d, cb_k = (CBORE.get(screw, (round(HEADS.get(screw, (d_hole * 1.8, 0))[0] + 0.6, 1), 3.0))
+                      if cbore else (0.0, 0.0))
+        if cbore and cb_depth:
             cb_k = round(max(0.5, float(cb_depth)), 2)
-        if cb_dia:                       # counterbore diameter chosen by the user (never smaller than the hole)
-            cb_d = round(max(float(cb_dia), clear + 0.2), 2)
-        if feed_cbore and not cbore:     # plain through holes: the screw head rests on the base (horn side)
-            cb_d, cb_k = 0.0, 0.0
-        if feed_cbore:                   # option: screws from the feed side, heads sunk in the base (or resting on it)
-            m.feed_cbore = True
-            m.warnings[-1] = (("flangia MIL rotonda: " if fl.shape == "round" else "") +
-                              (f"viti {screw} dal lato del feed con la testa nella lamatura della base; " if cbore else
-                               f"viti {screw} dal lato del feed con la testa appoggiata sulla base (fori passanti "
-                               "senza lamatura); ") +
-                              "attraversano piastrina e base e si avvitano nella flangia della guida "
-                              "(se la flangia ha fori passanti: dadi)")
-        for x, y in screw_xy:
-            x, y = _rot(x, y, polarization)
-            m.plate_holes.append(Hole(x, y, clear, "clear", f"Ø{clear:g} passante, viti guida {screw}"))
-            if feed_cbore:
-                m.feed_holes.append(Hole(x, y, clear, "cbore_back",
-                                         f"Ø{clear:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} lato horn" if cbore else
-                                         f"Ø{clear:g} passante, viti {screw}", cb_dia=cb_d, cb_depth=cb_k))
-            else:
-                m.feed_holes.append(Hole(x, y, tap, "tap", f"{screw} filettato passante (preforo Ø{tap:g})"))
-        for x, y in dowel_xy:
-            x, y = _rot(x, y, polarization)
-            m.plate_holes.append(Hole(x, y, DOWEL_HOLE_ROUND, "dowel", f"Ø{DOWEL_HOLE_ROUND:g} passante, spine guida Ø1.56"))
-            m.feed_holes.append(Hole(x, y, DOWEL_HOLE_ROUND, "dowel", f"Ø{DOWEL_HOLE_ROUND:g} prof. 3, punte spine guida",
-                                     depth=3.0))
-        m.engagement, m.tap_depth, m.screw_in = eng, drill_d - lead, eng
-        return m
+        if cbore and cb_dia:
+            cb_d = round(max(float(cb_dia), d_hole + 0.2), 2)
     for x, y in screw_xy:
         x, y = _rot(x, y, polarization)
-        m.plate_holes.append(Hole(x, y, tap, "tap", f"{screw} filettato passante (preforo Ø{tap:g})"))
-    choices = plate_screw_options(f_ghz)
-    metric = plate_screw if plate_screw in choices else choices[0]
-    _plate_screws(m, system, feed_input_diam, wg, screw=plate_screw_name(metric, system), plate_t=plate_t)
-    if f_ghz is not None and f_ghz >= PIN_FROM_GHZ - 1e-9:
-        _alignment_pins(m, feed_input_diam, wg)
+        m.plate_holes.append(Hole(x, y, d_plate, "clear", f"Ø{d_plate:g} passante, viti guida"))
+        if base_holes == "tap":
+            m.feed_holes.append(Hole(x, y, tap, "tap", f"{thread} filettato passante (preforo Ø{tap:g})"))
+        else:
+            m.feed_holes.append(Hole(x, y, d_hole, "cbore_back",
+                                     f"Ø{d_hole:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} lato horn" if cbore
+                                     else f"Ø{d_hole:g} passante", cb_dia=cb_d, cb_depth=cb_k))
+    if pins and dowel_xy:
+        for x, y in dowel_xy:
+            x, y = _rot(x, y, polarization)
+            m.plate_holes.append(Hole(x, y, DOWEL_HOLE_ROUND, "dowel", f"Ø{DOWEL_HOLE_ROUND:g} passante, pin di allineamento Ø1.56"))
+            m.feed_holes.append(Hole(x, y, DOWEL_HOLE_ROUND, "dowel", f"Ø{DOWEL_HOLE_ROUND:g} prof. 3, pin di allineamento",
+                                     depth=3.0))
+    if plate_screw and fl.shape == "square":
+        choices = plate_screw_options(f_ghz)
+        metric = plate_screw if plate_screw in choices else (
+            next((k for k, v in UNC_FOR_METRIC.items() if v == plate_screw), choices[0]))
+        _plate_screws(m, system, feed_input_diam, wg, screw=plate_screw_name(metric, system), plate_t=plate_t)
     # interference with the feed's circular input guide
     if feed_input_diam:
         for h in m.feed_holes:

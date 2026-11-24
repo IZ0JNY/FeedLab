@@ -364,7 +364,7 @@ with st.sidebar:
         if _shape == "square":
             _bwg = _wr
             st.caption(_T("Base quadrata {a:.2f} × {a:.2f} mm come la flangia {wg}", a=_fl_wr.A, wg=_wr) +
-                       (" " + i18n.tr("(più larga se le lamature non ci stanno)") if S.get("mount_cbore") else ""))
+                       (" " + i18n.tr("(più larga se fori e lamature non ci stanno)") if (S.get("mount_cfg") or {}).get("wg") else ""))
     else:
         _shape = "round"
         if _fl_wr is not None:
@@ -776,6 +776,17 @@ with tabs[7], contextlib.suppress(_Skip):
     geo = current_geometry()
     mat = st.text_input("Materiale", f"{S.material}, interno lucidato Ra ≤ {materials.MATERIALS[S.material].rq_um} µm")
     name = st.text_input("Titolo", f"{geometry.FEED_TYPES[geo.kind]} {S.f_ghz:g} GHz")
+    _tol_rec = drawing.tolerance_mm(S.f_ghz)
+    _tol = st.number_input(_T("Tolleranza generale di lavorazione ± (mm, consigliata {t:g} per {f:g} GHz)", t=_tol_rec, f=S.f_ghz),
+                           min_value=0.005, max_value=1.0, value=float(_tol_rec), step=0.005, format="%.3f",
+                           key=f"tol_general_{_tol_rec}",
+                           help="scritta nel cartiglio del PDF del feed e della piastrina; i fori hanno le loro "
+                                "tolleranze (filetti 6H, spine H7, passanti +0.1/0). Consigliata OE2IGL: ±0.1 mm sotto "
+                                "30 GHz, ±0.05 sotto 55 GHz, ±0.02 sotto 80 GHz, ±0.01 oltre")
+    if drawing.TOLERANCE.get("general") != _tol:
+        drawing.TOLERANCE["general"] = _tol
+        for _k in ("pdf", "plate_pdf"):
+            S.pop(_k, None)
     base = WORK / f"{geo.kind}_{S.f_ghz:g}GHz".replace(".", "p")
     if getattr(geo, "mount", None) is not None:
         _m = geo.mount
@@ -1099,49 +1110,72 @@ with tabs[6], contextlib.suppress(_Skip):
                                     "lamatura e spine di centraggio: nel PDF e nello STEP di piastrina e feed")
         system = c2.radio("Viti", ["metric", "imperial"], horizontal=True, key="mount_sys",
                           format_func=lambda x: {"metric": "Metriche (M)", "imperial": "Pollici (UNC)"}[x])
-        opts = flanges.plate_screw_options(S.f_ghz)
         _round_fl = wg in flanges.FLANGES and flanges.FLANGES[wg].shape == "round"
-        pscrew = st.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}",
-                              disabled=not holes_on or _round_fl or bool(S.get("mount_cbore")),
-                              format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
-                              help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale "
-                                   "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
-                                   "seguono la lunghezza della vite")
-        feed_cb = st.checkbox("Viti dal lato del feed (fori passanti nella base)", key="mount_cbore",
-                              disabled=not holes_on, value=False,
-                              help="il feed si avvita direttamente sulla guida: le viti della flangia standard entrano "
-                                   "dal lato del feed (testa nella lamatura o appoggiata sulla base), attraversano base e "
-                                   "piastrina e si avvitano nella flangia della guida (o con i dadi se i suoi fori sono "
-                                   "passanti). Spento: schema standard (flange quadrate: viti della guida nella "
-                                   "piastrina e viti piastrina→feed; rotonde: viti della guida filettate nella base).")
-        _cbore = st.radio("Fori nella base del feed", ["cbore", "plain"], horizontal=True, key="mount_cbore_kind",
-                          disabled=not (holes_on and feed_cb),
-                          format_func=lambda k: {"cbore": "Con lamatura (testa incassata)",
-                                                 "plain": "Senza lamatura (testa appoggiata sulla base)"}[k]) == "cbore"
-        feed_cbk = bool(feed_cb) and _cbore
         _scr = flanges.screw_for(wg, system) if wg in flanges.FLANGES else None
-        _cb_def = flanges.CBORE[_scr][1] if _scr in flanges.CBORE else 3.0
-        _cbd_def = flanges.CBORE[_scr][0] if _scr in flanges.CBORE else 6.0
-        cb_dia = st.number_input(_T("Diametro della lamatura (mm, standard {d:g} per la testa {s})", d=_cbd_def, s=_scr or ""),
-                                 min_value=1.0, max_value=30.0, value=float(_cbd_def), step=0.1, key=f"cb_dia_{_scr}",
-                                 disabled=not (holes_on and feed_cbk),
-                                 help="diametro della sede della testa della vite; il valore proposto va bene per le viti "
-                                      "a testa cilindrica ISO 4762 / UNC: controllalo con le viti che compri") \
-            if feed_cbk else None
-        cb_depth = st.number_input(_T("Profondità della lamatura (mm, standard {d:g} per la testa {s})", d=_cb_def, s=_scr or ""),
-                                   min_value=0.5, max_value=20.0, value=float(_cb_def), step=0.5, key=f"cb_depth_{_scr}",
-                                   disabled=not (holes_on and feed_cbk),
-                                   help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
-                                        "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)") \
-            if feed_cbk else None
+        _dfl = flanges.flange_hole(wg) if wg in flanges.FLANGES else 3.0
+        st.markdown(_T("**Fori della flangia {wg}** (stessa posizione nella piastrina e nella base del feed)", wg=wg))
+        h1, h2 = st.columns(2)
+        _modes = ["flange", "clear", "tap"]
+        base_holes = h1.radio("Fori nella base del feed", _modes, key="base_holes_mode", disabled=not holes_on,
+                              format_func=lambda k: {"flange": _T("Come la flangia (Ø{d:g} passanti)", d=_dfl),
+                                                     "clear": i18n.tr("Maggiorati (passanti, anche nella piastrina)"),
+                                                     "tap": i18n.tr("Filettati passanti")}[k],
+                              help="come la flangia: stessi fori della flangia standard; maggiorati: il feed si avvita "
+                                   "sulla guida esterna (relè, LNA) con viti dal lato del feed; filettati: le viti della "
+                                   "guida attraversano flangia e piastrina e si avvitano nella base")
+        hole_dia = thread = None
+        if base_holes == "clear":
+            hole_dia = h2.number_input(_T("Ø fori maggiorati (mm, proposto {d:g} per {s})",
+                                          d=flanges.clear_hole(wg, system), s=_scr or ""),
+                                       min_value=float(_dfl), max_value=12.0, step=0.1,
+                                       value=float(flanges.clear_hole(wg, system)), key=f"hole_dia_{wg}_{system}",
+                                       disabled=not holes_on)
+        elif base_holes == "tap":
+            _th = flanges.base_thread_options(wg, S.f_ghz, system)
+            thread = h2.selectbox("Filettatura dei fori nella base", _th, key=f"base_thread_{'_'.join(_th)}",
+                                  disabled=not holes_on)
+        _cbore = False
+        if base_holes != "tap":
+            _cbore = h2.checkbox("Lamatura per la testa della vite (lato horn della base)", key="mount_cbore",
+                                 disabled=not holes_on,
+                                 help="la testa della vite resta incassata nella base; senza lamatura si appoggia sulla base")
+        cb_dia = cb_depth = None
+        if _cbore and _scr in flanges.CBORE:
+            _cbd_def, _cb_def = flanges.CBORE[_scr]
+            cb_dia = h2.number_input(_T("Diametro della lamatura (mm, standard {d:g} per la testa {s})", d=_cbd_def, s=_scr),
+                                     min_value=1.0, max_value=30.0, value=float(_cbd_def), step=0.1, key=f"cb_dia_{_scr}",
+                                     disabled=not holes_on,
+                                     help="diametro della sede della testa della vite; il valore proposto va bene per le viti "
+                                          "a testa cilindrica ISO 4762 / UNC: controllalo con le viti che compri")
+            cb_depth = h2.number_input(_T("Profondità della lamatura (mm, standard {d:g} per la testa {s})", d=_cb_def, s=_scr),
+                                       min_value=0.5, max_value=20.0, value=float(_cb_def), step=0.5, key=f"cb_depth_{_scr}",
+                                       disabled=not holes_on,
+                                       help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
+                                            "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)")
+        pscrew, pins = None, True
+        if _round_fl:
+            pins = st.checkbox("Fori per i pin di allineamento (piastrina e base del feed)", True, key="mount_pins",
+                               disabled=not holes_on, help="i 4 fori spina della flangia MIL: passanti nella piastrina, "
+                                                           "profondi 3 mm nella base")
+        else:
+            opts = flanges.plate_screw_options(S.f_ghz)
+            p1, p2 = st.columns(2)
+            if p1.checkbox("4 viti piastrina → feed con lamatura (nei 4 punti liberi)", key="mount_plate_screws",
+                           disabled=not holes_on,
+                           help="fissano la piastrina alla base del feed; la testa sta nella lamatura della piastrina "
+                                "(lato guida), così non fa spessore. Nel feed: fori filettati ciechi"):
+                pscrew = p2.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}", disabled=not holes_on,
+                                      format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
+                                      help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale; "
+                                           "la lamatura segue la testa della vite scelta")
         pol_c = "V" if pol_ == "Verticale" else "H"
         try:
             pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
-                                    plate_screw=pscrew, feed_cbore=bool(feed_cb), cb_depth=cb_depth, cb_dia=cb_dia,
-                                    cbore=_cbore)
+                                    plate_screw=pscrew, base_holes=base_holes, hole_dia=hole_dia, thread=thread,
+                                    cbore=_cbore, cb_depth=cb_depth, cb_dia=cb_dia, pins=pins)
             new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
-                       "plate_t": pl.body_t if holes_on else None, "feed_cbore": bool(feed_cb),
-                       "cb_depth": cb_depth, "cb_dia": cb_dia, "feed_nocb": bool(feed_cb) and not _cbore}
+                       "plate_t": pl.body_t if holes_on else None, "base_holes": base_holes, "hole_dia": hole_dia,
+                       "thread": thread, "cbore": _cbore, "cb_depth": cb_depth, "cb_dia": cb_dia, "pins": pins}
             if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
                 S["mount_cfg"] = new_cfg
                 geometry.MOUNT.update(new_cfg)
@@ -1161,24 +1195,26 @@ with tabs[6], contextlib.suppress(_Skip):
                      f"(fc TE11 {299.792458 / (1.706 * dcirc):.2f} GHz)")
             if pl.mount is not None:
                 mm_ = pl.mount
-                _deep = max(((h.depth or 0.0) for h in mm_.feed_holes if h.kind == 'tap'), default=0.0)
-                if mm_.stack and (S.get("mount_cfg") or {}).get("feed_cbore"):
+                _deep = max(((h.depth or 0.0) for h in mm_.feed_holes if h.kind == 'tap' and h.depth), default=0.0)
+                if mm_.base_holes == "tap":
+                    _txt = [_T("Flangia {wg} {name}: fori filettati {th} passanti nella base; le viti della guida "
+                               "attraversano flangia e piastrina e si avvitano nella base.",
+                               wg=mm_.flange.wg, name=mm_.flange.name, th=mm_.thread)]
+                elif any(h.cb_dia for h in mm_.feed_holes):
                     _txt = [_T("Flangia {wg} {name}: viti {screw} dal lato del feed, con la testa nella lamatura della base; "
                                "attraversano base e piastrina e si avvitano nella flangia della guida.",
                                wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw)]
-                elif mm_.stack:
-                    _txt = [_T("Flangia {wg} {name}: la piastrina si appoggia sulla base del feed, le viti della guida "
-                               "({screw}) la attraversano e si avvitano nella base. Nessuna vite piastrina→feed.",
-                               wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
-                            _T("Viti della guida: flangia guida + {t} mm di piastrina + {a} mm nella base del feed "
-                               "(filettata passante).", t=f"{pl.body_t:.2f}", a=f"{mm_.screw_in:.1f}")]
                 else:
-                    _txt = [_T("Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastra.",
-                               wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw),
-                            _T("4 viti piastra→feed {ps} × {ln} con testa nella lamatura (lato guida).",
-                               ps=mm_.plate_screw, ln=mm_.screw_len_label),
-                            _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
-                               a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]
+                    _txt = [_T("Flangia {wg} {name}: fori passanti nella base e nella piastrina; viti {screw} dal lato del "
+                               "feed con la testa appoggiata sulla base, avvitate nella flangia della guida.",
+                               wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw)]
+                if mm_.plate_screw:
+                    _txt += [_T("4 viti piastra→feed {ps} × {ln} con testa nella lamatura (lato guida).",
+                                ps=mm_.plate_screw, ln=mm_.screw_len_label),
+                             _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
+                                a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]
+                if any(h.kind == "dowel" for h in mm_.plate_holes):
+                    _txt.append(i18n.tr("4 fori per i pin di allineamento della flangia."))
                 if any(h.kind == "pin" for h in mm_.plate_holes):
                     _txt.append(i18n.tr("2 spine di centraggio piastra–feed."))
                 if pl.pocket_depth > 1e-6:

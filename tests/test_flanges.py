@@ -25,16 +25,20 @@ def test_flann_patterns():
 @pytest.mark.parametrize("system", ["metric", "imperial"])
 def test_mount_every_waveguide(wg, system):
     d_circ = 1.1 * RECT_WG[wg].a_mm
-    m = flanges.mount(wg, system, "V", d_circ)
+    square = flanges.FLANGES[wg].shape == "square"
+    m = flanges.mount(wg, system, "V", d_circ, plate_screw="M2.5" if square else None)
     kinds = [h.kind for h in m.plate_holes]
-    if flanges.FLANGES[wg].shape == "square":                                    # IZ0JNY scheme, 10/24 GHz
-        assert kinds.count("tap") == 4 and kinds.count("cbore") == 4 and kinds.count("dowel") == 0
+    # the 4 holes of the flange, same size and position in plate and feed base
+    assert kinds.count("clear") == 4
+    assert all(h.dia == pytest.approx(flanges.flange_hole(wg)) for h in m.plate_holes if h.kind == "clear")
+    assert sum(h.kind == "cbore_back" for h in m.feed_holes) == 4
+    if square:                                   # + 4 optional plate→feed screws, counterbored in the plate
+        assert kinds.count("cbore") == 4 and kinds.count("dowel") == 0
         assert m.plate_screw.startswith("M") == (system == "metric")
         assert m.screw.startswith("M") == (system == "metric")
-    else:                                                                       # round MIL: stack, no plate screws
-        assert m.stack and not m.plate_screw
-        assert kinds.count("clear") == 4 and kinds.count("dowel") == 4 and kinds.count("cbore") == 0
-        assert sum(h.kind == "tap" for h in m.feed_holes) == 4 and m.screw == "4-40 UNC"
+    else:                                        # round MIL: no plate screws, the 4 alignment-pin holes
+        assert not m.plate_screw and kinds.count("dowel") == 4 and kinds.count("cbore") == 0
+        assert m.screw == "4-40 UNC"
     # every plate hole keeps clear of the others and of the circular guide
     hs = m.plate_holes
     for i, a in enumerate(hs):
@@ -51,14 +55,14 @@ def test_mount_every_waveguide(wg, system):
 def test_horizontal_polarisation_rotates_pattern():
     v = flanges.mount("WR-42", "metric", "V", 12.0)
     h = flanges.mount("WR-42", "metric", "H", 12.0)
-    pv = sorted((round(x.x, 3), round(x.y, 3)) for x in v.plate_holes if x.kind == "tap")
-    ph = sorted((round(-x.y, 3), round(x.x, 3)) for x in h.plate_holes if x.kind == "tap")
+    pv = sorted((round(x.x, 3), round(x.y, 3)) for x in v.plate_holes if x.kind == "clear")
+    ph = sorted((round(-x.y, 3), round(x.x, 3)) for x in h.plate_holes if x.kind == "clear")
     assert sorted(pv) == sorted(ph)
 
 
 def test_plate_with_holes_counterbores_and_pocket(tmp_path):
     p0 = plate.design_plate(24.048, "WR-42", 9.47, "V")
-    p1 = plate.design_plate(24.048, "WR-42", 9.47, "V", holes="metric")
+    p1 = plate.design_plate(24.048, "WR-42", 9.47, "V", holes="metric", plate_screw="M2.5")
     assert p1.thickness == pytest.approx(p0.thickness)                       # λ/4 section unchanged
     assert p1.body_t >= p1.mount.plate_body_min() and p1.pocket_depth >= 0
     assert p1.outer >= flanges.FLANGES["WR-42"].A
@@ -79,7 +83,7 @@ def test_feed_flange_drilled_in_step_and_pdf(tmp_path):
     assert g1.params["flange_diam"] >= flanges.FLANGES["WR-22"].A - 1e-9      # base as large as the round flange
     assert g1.params["flange_thickness"] >= t_need - 1e-9
     assert g1.z_aperture - g0.z_aperture == pytest.approx(g1.params["input_length"] - g0.params["input_length"])
-    assert sum(h.kind == "tap" for h in m.feed_holes) == 4                   # the guide screws, tapped through
+    assert sum(h.kind == "cbore_back" for h in m.feed_holes) == 4            # the flange holes, through
     assert sum(h.kind == "dowel" for h in m.feed_holes) == 4                 # standard dowels align the stack
     sol = cad.solid(g1)
     assert len(sol.faces().vals()) > faces0                                  # hole walls
@@ -95,10 +99,11 @@ def test_issue_url():
 
 def test_iz0jny_24ghz_plate():
     """IZ0JNY's WR-42 plate for his 24 GHz W2IMU (iz0jny.it): circular guide Ø9.50, corner radius 2,
-    thickness 3.59, M3 tapped flange holes at (±8.13, ±8.51), 4 M2.5 screws in Ø5.5 × 2.5 counterbores."""
-    p = plate.design_plate(24.048, "WR-42", 9.5, "V", 2.0, True, holes="metric")
+    thickness 3.59, flange holes at (±8.13, ±8.51), 4 M2.5 screws in Ø5.5 × 2.5 counterbores."""
+    p = plate.design_plate(24.048, "WR-42", 9.5, "V", 2.0, True, holes="metric", plate_screw="M2.5")
     assert p.thickness == pytest.approx(3.59, abs=0.02)
     assert p.mount.screw == "M3" and p.mount.plate_screw == "M2.5"
+    assert sorted({(abs(round(h.x, 2)), abs(round(h.y, 2))) for h in p.mount.plate_holes if h.kind == "clear"}) == [(8.13, 8.51)]
     cb = [h for h in p.mount.plate_holes if h.kind == "cbore"]
     assert len(cb) == 4 and all(h.cb_dia == 5.5 and h.cb_depth == 2.5 for h in cb)
     assert all(abs(math.hypot(h.x, h.y) - 9.0) < 0.5 for h in cb)            # IZ0JNY: on the axes at 9.00
@@ -153,7 +158,7 @@ def test_plate_screws_symmetric(wg, d):
     """The 4 plate→feed screws sit on the axes or on the diagonals (WR-90 used to get a crooked 40° pattern)."""
     import math
     for pol in "VH":
-        m = flanges.mount(wg, "metric", pol, d, 10.368, plate_t=4.0)
+        m = flanges.mount(wg, "metric", pol, d, 10.368, plate_screw="M3", plate_t=4.0)
         cb = [h for h in m.plate_holes if h.kind == "cbore"]
         ang = math.degrees(math.atan2(cb[0].y, cb[0].x)) % 90
         assert min(abs(ang), abs(ang - 45), abs(ang - 90)) < 1e-6, (wg, pol, ang)
@@ -177,7 +182,7 @@ def test_plate_has_the_shape_and_size_of_the_flange(f, wg, shape, side):
 
 def test_round_flange_stack_no_plate_screws():
     """From 47 GHz (round MIL flanges): the plate rests on the feed base, the guide's 4-40 screws pass through
-    the plate and are tapped through the base; no plate→feed screws, no counterbores."""
+    the plate; threaded option: tapped through the base. No plate→feed screws."""
     from feedlab import geometry, plate
     p = plate.design_plate(47.088, "WR-22", 4.84, "V", holes="metric")
     m = p.mount
@@ -186,16 +191,16 @@ def test_round_flange_stack_no_plate_screws():
     assert all(h.depth is None for h in m.feed_holes if h.kind == "tap")
     assert p.body_t == pytest.approx(p.thickness, abs=0.01)
     try:
-        geometry.MOUNT.update({"wg": "WR-22", "system": "metric", "pol": "V"})
+        geometry.MOUNT.update({"wg": "WR-22", "system": "metric", "pol": "V", "base_holes": "tap"})
         for th, expect in ((None, 4.3), (2.0, 2.0), (0.4, 1.0)):
             geometry.BASE.update({"shape": "round", "wg": None, "thickness": th})
             g = geometry.build("iz0jny", 47.088, fD=0.65)
             assert g.params["flange_thickness"] == pytest.approx(expect)
             assert g.params["flange_diam"] == pytest.approx(28.55)
-            assert g.mount.screw_in == pytest.approx(expect)        # thread = base thickness
+            assert g.mount.guide_in == pytest.approx(expect)        # thread = base thickness
     finally:
         geometry.BASE.update({"shape": "round", "wg": None, "thickness": None})
-        geometry.MOUNT.update({"wg": None})
+        geometry.MOUNT.update({"wg": None, "base_holes": "flange"})
 
 
 def test_iz0jny_cone_angles_in_lab():
@@ -209,7 +214,7 @@ def test_round_flange_feed_side_counterbores(tmp_path):
     """Option for round MIL flanges: screws from the feed side, heads in counterbores of the feed base (STEP + PDF)."""
     from feedlab import cad, drawing, geometry, plate
     try:
-        geometry.MOUNT.update({"wg": "WR-22", "system": "metric", "pol": "V", "feed_cbore": True})
+        geometry.MOUNT.update({"wg": "WR-22", "system": "metric", "pol": "V", "cbore": True})
         g = geometry.build("pickett_potter", 47.088, fD=0.65)
         m = g.mount
         assert m.feed_cbore and sum(h.kind == "cbore_back" for h in m.feed_holes) == 4
@@ -218,12 +223,34 @@ def test_round_flange_feed_side_counterbores(tmp_path):
         edge = max(math.hypot(h.x, h.y) + h.cb_dia / 2 for h in m.feed_holes)
         assert g.params["flange_diam"] / 2 >= edge
         v1 = cad.solid(g).val().Volume()
-        geometry.MOUNT.update({"feed_cbore": False})
+        geometry.MOUNT.update({"cbore": False})
         g0 = geometry.build("pickett_potter", 47.088, fD=0.65)
         assert v1 != pytest.approx(cad.solid(g0).val().Volume(), rel=1e-4)
-        geometry.MOUNT.update({"feed_cbore": True})
+        geometry.MOUNT.update({"cbore": True})
         drawing.drawing_pdf(g, tmp_path / "f.pdf")
     finally:
-        geometry.MOUNT.update({"wg": None, "feed_cbore": False})
+        geometry.MOUNT.update({"wg": None, "cbore": False})
     v, f = plate.mesh(plate.design_plate(47.088, "WR-22", 4.84, "V", holes="metric"))
     assert len(v) > 100 and len(f) > 100
+
+
+@pytest.mark.parametrize("wg,f", [("WR-90", 10.368), ("WR-42", 24.048), ("WR-22", 47.088)])
+def test_base_hole_modes(wg, f, tmp_path):
+    """Feed-base holes at the flange positions: as the flange, enlarged (plate too) or threaded through."""
+    d = 0.76 * 299.792458 / f
+    fl = flanges.flange_hole(wg)
+    m = flanges.mount(wg, "metric", "V", d, f)                                      # as the flange
+    assert {round(h.dia, 3) for h in m.feed_holes if h.kind == "cbore_back"} == {round(fl, 3)}
+    m = flanges.mount(wg, "metric", "V", d, f, base_holes="clear", hole_dia=fl + 0.6)
+    assert all(h.dia == pytest.approx(fl + 0.6, abs=0.006) for h in m.plate_holes + m.feed_holes if h.kind in ("clear", "cbore_back"))
+    opts = flanges.base_thread_options(wg, f)
+    assert opts == {"WR-90": ["M4", "M3"], "WR-42": ["M3", "M2.5", "M2"], "WR-22": ["4-40 UNC"]}[wg]
+    if wg != "WR-22":
+        assert flanges.base_thread_options(wg, f, "imperial") == [flanges.UNC_FOR_METRIC[x] for x in opts]
+    m = flanges.mount(wg, "metric", "V", d, f, base_holes="tap", thread=opts[-1])
+    assert m.thread == opts[-1] and all(h.depth is None for h in m.feed_holes if h.kind == "tap")
+    assert all(h.dia == pytest.approx(fl) for h in m.plate_holes if h.kind == "clear")   # plate keeps the flange holes
+    if wg == "WR-22":
+        assert not [h for h in flanges.mount(wg, "metric", "V", d, f, pins=False).plate_holes if h.kind == "dowel"]
+    p = plate.design_plate(f, wg, d, "V", holes="metric", base_holes="clear")
+    assert plate.drawing_pdf(p, tmp_path / "p.pdf").stat().st_size > 5000
