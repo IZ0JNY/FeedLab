@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Controllo aggiornamenti più robusto su Windows (certificati di GitHub anche dal pacchetto certifi) e pulsante "🔄 Controlla aggiornamenti" nella barra laterale che mostra l'esito o l'errore | ✅ fatto |
 
 ---
 

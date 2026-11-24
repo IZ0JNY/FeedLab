@@ -387,6 +387,18 @@ with st.sidebar:
     st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
+    if st.button("🔄 Controlla aggiornamenti", key="upd_btn", help="chiede a GitHub se c'è una versione più nuova"):
+        from feedlab import updates as _updates
+        _u = _updates.check(feedlab.__version__, i18n.get_lang())
+        if _u:
+            st.markdown(_T("**FeedLab {new}** è disponibile (stai usando la {cur}).", new=_u["version"],
+                           cur=feedlab.__version__))
+            st.link_button("⬇️ Scarica la nuova versione", _u["url"])
+        elif _updates.LAST_ERROR:
+            st.warning(_T("Impossibile contattare GitHub ({e}). Controlla la connessione o scarica da {url}",
+                          e=_updates.LAST_ERROR, url=_updates.RELEASES_URL))
+        else:
+            st.success("Hai già l'ultima versione.")
     _mdir = Path(feedlab.__file__).resolve().parent.parent / "docs" / "manual"
     _man = _mdir / i18n.MANUALS.get(i18n.get_lang(), i18n.MANUALS["en"])
     if not _man.exists():

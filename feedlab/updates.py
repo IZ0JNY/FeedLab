@@ -46,19 +46,40 @@ def notes_for(body: str, lang: str = "it") -> str:
     return body.strip()
 
 
-def latest_release(timeout: float = 4.0) -> dict | None:
-    """{'version', 'url', 'body'} of the latest GitHub release, or None (offline, disabled, any error)."""
-    if os.environ.get("FEEDLAB_NO_UPDATE_CHECK"):
-        return None
+LAST_ERROR: str | None = None          # why the last check failed (shown by the manual check in the sidebar)
+
+
+def _contexts():
+    """TLS contexts to try: the system store first, then certifi's bundle. The embedded Python of the Windows
+    build reads the Windows certificate store, which may not hold GitHub's root yet (Windows downloads roots on
+    demand): that made the check fail silently on some PCs."""
+    import ssl
+    yield None
     try:
-        req = urllib.request.Request(API_URL, headers={"Accept": "application/vnd.github+json",
-                                                       "User-Agent": "FeedLab-update-check"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            data = json.loads(r.read().decode("utf-8"))
-        return {"version": data.get("tag_name", ""), "url": data.get("html_url") or RELEASES_URL,
-                "body": data.get("body") or ""}
+        import certifi
+        yield ssl.create_default_context(cafile=certifi.where())
     except Exception:
+        return
+
+
+def latest_release(timeout: float = 6.0) -> dict | None:
+    """{'version', 'url', 'body'} of the latest GitHub release, or None (offline, disabled, any error)."""
+    global LAST_ERROR
+    LAST_ERROR = None
+    if os.environ.get("FEEDLAB_NO_UPDATE_CHECK"):
+        LAST_ERROR = "FEEDLAB_NO_UPDATE_CHECK"
         return None
+    req = urllib.request.Request(API_URL, headers={"Accept": "application/vnd.github+json",
+                                                   "User-Agent": "FeedLab-update-check"})
+    for ctx in _contexts():
+        try:
+            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
+                data = json.loads(r.read().decode("utf-8"))
+            return {"version": data.get("tag_name", ""), "url": data.get("html_url") or RELEASES_URL,
+                    "body": data.get("body") or ""}
+        except Exception as ex:
+            LAST_ERROR = f"{type(ex).__name__}: {ex}"
+    return None
 
 
 def check(current: str, lang: str = "it") -> dict | None:

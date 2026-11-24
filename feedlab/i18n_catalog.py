@@ -6,6 +6,10 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('🔄 Controlla aggiornamenti', '🔄 Check for updates'),
+    ("chiede a GitHub se c'è una versione più nuova", 'asks GitHub whether a newer version exists'),
+    ('Impossibile contattare GitHub ({e}). Controlla la connessione o scarica da {url}', 'Cannot reach GitHub ({e}). Check the connection or download from {url}'),
+    ("Hai già l'ultima versione.", 'You already have the latest version.'),
     ('Massime prestazioni RX (minimo rumore)', 'Maximum RX performance (minimum noise)'),
     ("G/T: equilibrio fra guadagno e rumore. Prestazioni RX: illuminazione più morbida e feed con lobi laterali/posteriori più bassi → meno rumore dal terreno, a costo di un po' di guadagno", 'G/T: balance between gain and noise. RX performance: softer illumination and feeds with lower side/back lobes → less ground noise, at the cost of a little gain'),
     ('lobi laterali e posteriori bassi: poco rumore dal terreno (RX)', 'low side and back lobes: little ground noise (RX)'),
