@@ -355,7 +355,7 @@ Questa scheda decide **come si fissano il feed e la piastrina λ/4 al tronchetto
 |---|---|---|
 | **Viti dal lato del feed** | le viti entrano dal lato del feed, testa nella lamatura della base, attraversano base e piastrina e si avvitano nella flangia della guida | fori passanti in base e piastrina (Ø della flangia arrotondato al decimo: WR-42 3.07 → 3.1), lamatura nella base |
 | **Viti dal lato della guida** | le viti della guida attraversano flangia e piastrina e si avvitano nella base | fori filettati passanti nella base (24 GHz M3, 10 GHz M4…), passanti nella piastrina |
-| **Piastrina avvitata a guida e feed (IZ0JNY)** | la guida si avvita alla piastrina; 4 viti a brugola (WR-42: M2.5) nelle lamature della piastrina la fissano alla base | fori della flangia filettati M3 6H nella piastrina, 4 viti piastrina→feed sugli assi (WR-42: a 9.00 mm), fori filettati ciechi nel feed |
+| **Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata al feed)** | la guida si avvita alla piastrina; 4 viti a brugola (WR-42: M2.5) nelle lamature della piastrina la fissano alla base | fori della flangia filettati M3 6H nella piastrina, 4 viti piastrina→feed sugli assi (WR-42: a 9.00 mm), fori filettati ciechi nel feed |
 | **Da 47 GHz: viti dal lato del feed + pin / viti della guida filettate nella base + pin** | flangia rotonda MIL; i pin della flangia allineano tutto | fori passanti o filettati (4-40), fori per i pin in piastrina e base |
 | **Nessun foro** | fissaggio a cura tua | niente |
 
@@ -365,7 +365,7 @@ A destra, la **sezione** del pacco (flangia della guida esterna | piastrina | ba
 
 ![Viti dal lato della guida]({IMG}/m24_mount_guideside.jpg)
 
-![Piastrina avvitata a guida e feed (IZ0JNY)]({IMG}/m25_mount_plate.jpg)
+![Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata al feed)]({IMG}/m25_mount_plate.jpg)
 
 ### 10.2 Avanzate: ogni dettaglio
 
@@ -514,7 +514,7 @@ Teste cilindriche ISO 4762 / ASME B18.3; teste piane ISO 7046 (90°) / UNC 82°.
 3. **Progetto feed:** controlla "Progettato per f/D …"; spessore della base automatico; **Applica modifiche** dopo ogni modifica.
 4. **Laboratorio:** obiettivo **EME**, NF dell'LNA e perdita di linea; leggi **Tsys** e Δ S/N; **Analizza tolleranze** a ±0.1 mm.
 5. **Simulazione & S11:** S11 < −20 dB sulla banda; confronta l'**angolo a −10 dB** con l'apertura della parabola; η e centro di fase.
-6. **Montaggio:** schema **Piastrina avvitata a guida e feed (IZ0JNY)** — M3 6H nella piastrina, 4 viti a brugola M2.5 a 9.00 mm; in Avanzate imposta la misura esterna (per esempio 27.86 mm, R2) se vuoi.
+6. **Montaggio:** schema **Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata al feed)** — M3 6H nella piastrina, 4 viti a brugola M2.5 a 9.00 mm; in Avanzate imposta la misura esterna (per esempio 27.86 mm, R2) se vuoi.
 7. **Piastrina WR:** raggio angoli apertura **2.00** (la tua fresa); **Disegno PDF piastrina** e **STEP piastrina**.
 8. **Disegno & STEP:** tolleranza generale ±0.1 mm; **Genera PDF** (feed + flangia forata) e **Genera STEP**.
 9. **Facoltativo:** openEMS prima di tagliare il metallo.

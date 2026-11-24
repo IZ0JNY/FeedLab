@@ -355,7 +355,7 @@ This tab decides **how the feed and the λ/4 plate are fixed to the external wav
 |---|---|---|
 | **Screws from the feed side** | the screws go in from the feed side, head in a counterbore of the base, through base and plate into the waveguide flange | through holes in base and plate (flange Ø rounded up to the tenth: WR-42 3.07 → 3.1), counterbore in the base |
 | **Screws from the waveguide side** | the waveguide screws pass through flange and plate and screw into the base | threaded through holes in the base (24 GHz M3, 10 GHz M4…), through holes in the plate |
-| **Plate screwed to waveguide and feed (IZ0JNY)** | the waveguide screws into the plate; 4 socket-head screws (WR-42: M2.5) in counterbores of the plate fix it to the base | flange holes threaded M3 6H in the plate, 4 plate→feed screws on the axes (WR-42: at 9.00 mm), blind tapped holes in the feed |
+| **Plate screwed to feed base with counterbored screws (waveguide screwed into feed)** | the waveguide screws into the plate; 4 socket-head screws (WR-42: M2.5) in counterbores of the plate fix it to the base | flange holes threaded M3 6H in the plate, 4 plate→feed screws on the axes (WR-42: at 9.00 mm), blind tapped holes in the feed |
 | **From 47 GHz: screws from the feed side + pins / waveguide screws threaded in the base + pins** | round MIL flange; the flange dowels align the stack | through or threaded (4-40) holes, alignment-pin holes in plate and base |
 | **No holes** | fixing up to you | nothing |
 
@@ -365,7 +365,7 @@ On the right, the **cross-section** of the stack (external waveguide flange | pl
 
 ![Screws from the waveguide side]({IMG}/m24_mount_guideside.jpg)
 
-![Plate screwed to waveguide and feed (IZ0JNY)]({IMG}/m25_mount_plate.jpg)
+![Plate screwed to feed base with counterbored screws (waveguide screwed into feed)]({IMG}/m25_mount_plate.jpg)
 
 ### 10.2 Advanced: every detail
 
@@ -514,7 +514,7 @@ Socket heads ISO 4762 / ASME B18.3; flat heads ISO 7046 (90°) / UNC 82°. Blind
 3. **Feed design:** check "Designed for f/D …"; base thickness automatic; **Apply changes** after any edit.
 4. **Laboratory:** goal **EME**, LNA NF and line loss; read **Tsys** and Δ S/N; **Analyse tolerances** at ±0.1 mm.
 5. **Simulation & S11:** S11 < −20 dB over the band; compare the **−10 dB angle** with the dish opening; η and phase centre.
-6. **Assembly:** scheme **Plate screwed to waveguide and feed (IZ0JNY)** — M3 6H in the plate, 4 × M2.5 socket screws at 9.00 mm; in Advanced set the outer size (e.g. 27.86 mm, R2) if you want.
+6. **Assembly:** scheme **Plate screwed to feed base with counterbored screws (waveguide screwed into feed)** — M3 6H in the plate, 4 × M2.5 socket screws at 9.00 mm; in Advanced set the outer size (e.g. 27.86 mm, R2) if you want.
 7. **WR plate:** aperture corner radius **2.00** (your end mill); **Plate PDF drawing** and **Plate STEP**.
 8. **Drawing & STEP:** general tolerance ±0.1 mm; **Create PDF** (feed + drilled flange) and **Create STEP**.
 9. **Optional:** openEMS before cutting metal.

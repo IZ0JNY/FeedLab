@@ -6,6 +6,7 @@
 |---|---|---|
 | 1 | Manuale dettagliato in italiano e inglese: ogni scheda e ogni campo spiegati con screenshot nuovi (33 per lingua), scheda Montaggio, illuminazione, Tsys, angolo a −10 dB, tabelle di materiali, tolleranze, flange e viti, esempio completo, problemi frequenti, glossario | ✅ fatto (in revisione) |
 | 2 | Montaggio: la didascalia sotto la sezione non si sovrappone più alla flangia della guida esterna (più spazio sotto il disegno) | ✅ fatto |
+| 3 | Schema di montaggio rinominato "Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata al feed)" / "Plate screwed to feed base with counterbored screws (waveguide screwed into feed)", senza IZ0JNY | ✅ fatto |
 
 ---
 

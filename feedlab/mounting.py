@@ -17,7 +17,7 @@ SCHEMES = {
     "guide_side": ("Viti dal lato della guida",
                    "Le viti della guida attraversano la flangia e la piastrina e si avvitano nei fori filettati della "
                    "base del feed."),
-    "plate_screwed": ("Piastrina avvitata a guida e feed (IZ0JNY)",
+    "plate_screwed": ("Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata al feed)",
                       "La guida si avvita alla piastrina (fori della flangia filettati nella piastrina); 4 viti a "
                       "brugola con la testa nella lamatura della piastrina (lato guida) la fissano alla base del feed."),
     "round_feed_side": ("Viti dal lato del feed + pin di allineamento",
