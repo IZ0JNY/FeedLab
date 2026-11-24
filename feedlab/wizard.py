@@ -102,7 +102,8 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
     D_l = dish.D_mm / lam
     fD = dish.fD
     # G/T priority -> design the feed for a slightly larger f/D (under-illuminate, W1GHZ 2014/2024)
-    fD_feed = fD * (1.08 if priority == "gt" else 1.0)
+    # RX (minimum noise) -> under-illuminate a bit more: lower spillover towards the warm ground
+    fD_feed = fD * {"gt": 1.08, "rx": 1.12}.get(priority, 1.0)
     cands = []
 
     def add(kind, why, warn=(), **kw):
@@ -176,6 +177,13 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
             c.warnings.append("richiede tornio")
         if priority == "gt" and c.kind in ("large_w2imu", "skobelev", "pickett_potter"):
             c.score += 0.01
+        if priority == "rx":
+            if c.kind in ("iz0jny", "large_w2imu", "axial_corrugated", "skobelev", "pickett_potter"):
+                c.score += 0.02
+                c.reasons.append("lobi laterali e posteriori bassi: poco rumore dal terreno (RX)")
+            elif c.kind in ("open_circular", "rect_horn"):
+                c.score -= 0.03
+                c.warnings.append("lobo posteriore alto: più rumore dal terreno in RX")
     if dish.kind == "prime" and fD < 0.3:
         for c in cands:
             if c.kind == "chaparral":

@@ -181,7 +181,7 @@ PIN_FROM_GHZ = 47.0             # alignment pins plate ↔ feed from 47 GHz up (
 
 def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_diam: float = 0.0,
           f_ghz: float | None = None, plate_screw: str | None = None, plate_t: float | None = None,
-          feed_cbore: bool = False) -> Mount:
+          feed_cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None) -> Mount:
     """Hole patterns of the plate and of the feed flange for waveguide `wg` (see module docstring)."""
     if wg not in FLANGES:
         raise ValueError(f"nessuna flangia standard in tabella per {wg}")
@@ -201,8 +201,10 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         r = fl.pcd / 2
         screw_xy = [(r * math.cos(math.radians(a)), r * math.sin(math.radians(a))) for a in (0, 90, 180, 270)]
         dowel_xy = [(r * math.cos(math.radians(a)), r * math.sin(math.radians(a))) for a in (45, 135, 225, 315)]
-    if fl.shape == "round":
-        # stack (IZ0JNY): guide screws through the plate, tapped in the feed base; dowels through plate into base
+    if fl.shape == "round" or feed_cbore:
+        # stack (IZ0JNY): guide screws through the plate, tapped in the feed base (round MIL flanges) or, with
+        # feed_cbore, screws from the feed side with the head counterbored in the feed base (any flange):
+        # the feed screws straight onto the waveguide, plate in between; dowels through plate into base
         m.stack = True
         m.warnings = [w for w in m.warnings if not w.startswith("flangia MIL rotonda")]
         m.warnings.append(f"flangia MIL rotonda: la piastrina si appoggia sulla base del feed; le viti {screw} della "
@@ -213,9 +215,14 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         drill_d = eng
         lead = 0.0
         cb_d, cb_k = CBORE[screw]
+        if cb_depth:                     # counterbore depth chosen by the user (head height + margin by default)
+            cb_k = round(max(0.5, float(cb_depth)), 2)
+        if cb_dia:                       # counterbore diameter chosen by the user (never smaller than the hole)
+            cb_d = round(max(float(cb_dia), clear + 0.2), 2)
         if feed_cbore:                   # option: screws from the feed side, heads sunk in the base
             m.feed_cbore = True
-            m.warnings[-1] = (f"flangia MIL rotonda: viti {screw} dal lato del feed con la testa nella lamatura della "
+            m.warnings[-1] = (("flangia MIL rotonda: " if fl.shape == "round" else "") +
+                              f"viti {screw} dal lato del feed con la testa nella lamatura della "
                               "base; attraversano piastrina e base e si avvitano nella flangia della guida "
                               "(se la flangia ha fori passanti: dadi)")
         for x, y in screw_xy:

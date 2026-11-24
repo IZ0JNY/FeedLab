@@ -4,6 +4,7 @@ from __future__ import annotations
 import io
 import json
 import math
+import contextlib
 import os
 import tempfile
 import time
@@ -81,9 +82,10 @@ BANDS = {f"{v:g} GHz ({k})": v for k, v in HAM_BANDS_GHZ.items() if v <= 140}
 
 # ---------------------------------------------------------------- helpers
 def _defaults():
-    S.setdefault("f_ghz", 47.088)
+    S.setdefault("f_ghz", None)                       # start blank: the user picks frequency, dish, feed, material
     S.setdefault("dish", None)
-    S.setdefault("feed_kind", "pickett_potter")
+    S.setdefault("feed_kind", None)
+    S.setdefault("material", None)
     S.setdefault("overrides", {})
     S.setdefault("wall", None)
     S.setdefault("cands", None)
@@ -91,6 +93,65 @@ def _defaults():
 
 
 _defaults()
+
+
+class _Skip(Exception):
+    """raised inside a tab when frequency, dish, feed type or material are not chosen yet"""
+
+
+def _missing():
+    return [t for t, ok in (("frequenza", S.f_ghz), ("parabola", S.dish), ("tipo di feed", S.feed_kind),
+                            ("materiale", S.material)) if not ok]
+
+
+def _need():
+    """stop the current tab (not the whole page) until the start-up choices are made"""
+    miss = _missing()
+    if miss:
+        st.info(_T("Per iniziare seleziona: {what}. Frequenza e materiale nella barra laterale, la parabola nella "
+                   "Procedura guidata, il tipo di feed in Progetto feed.", what=", ".join(_T(m) for m in miss)))
+        raise _Skip
+
+
+_ANGLES = ("alpha", "a1", "a2", "angle", "flare_angle")
+
+
+def _big_changes(over, base):
+    """keys of the RF geometry changed a lot from the starting design (> 5 % on a dimension, > 2° on an angle);
+    the input guide length is left out (it does not change the radiation)"""
+    out = []
+    for k, v in (over or {}).items():
+        b = base.get(k)
+        if "input_length" in k or not isinstance(v, (int, float)) or not isinstance(b, (int, float)):
+            continue
+        if (abs(v - b) > 2.0) if (k in _ANGLES or k.endswith("_deg")) else (abs(v - b) > 0.05 * max(abs(b), 1e-6)):
+            out.append(k)
+    return out
+
+
+def _start_values(kind):
+    """dimensions of the starting design (no user changes) under the names used by the overrides"""
+    dish = S.dish or wizard.dish_from_prime(600, 0.6)
+    base = {}
+    try:
+        g0 = geometry.build_rect(S.f_ghz, dish.fD, S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall) \
+            if kind == "rect_horn" else geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall)
+        base.update({k: v for k, v in g0.params.items() if isinstance(v, (int, float))})
+    except Exception:
+        pass
+    try:
+        base.update(explore.base_values(kind, S.f_ghz, dish.fD, S.wall))
+    except Exception:
+        pass
+    return base
+
+
+def _openems_hint(keys):
+    """reminder only (never blocks): significant geometry changes are worth a full-wave check"""
+    if keys:
+        st.info(_T("Geometria modificata in modo significativo rispetto al progetto di partenza ({keys}): il simulatore "
+                   "rapido resta indicativo, è consigliabile verificarla con una simulazione openEMS (scheda Full-wave "
+                   "openEMS) prima di costruire.", keys=", ".join(keys)), icon="💡")
 
 
 def current_geometry():
@@ -153,9 +214,15 @@ def lobe3d_fig(p: patterns.Pattern, floor: float = -35):
 
 
 def model3d_fig(geo, cut: bool):
-    if isinstance(geo, geometry.RectHornGeometry):
-        v, f = cad.mesh(geo)
-    else:
+    detailed = isinstance(geo, geometry.RectHornGeometry) or getattr(geo, "mount", None) is not None or \
+        bool(geo.params.get("base_square"))
+    v = None
+    if detailed:                                  # real solid (OpenCascade): holes, counterbores, square base
+        try:
+            v, f = cad.mesh(geo, cut=cut and not isinstance(geo, geometry.RectHornGeometry))
+        except Exception:
+            v = None
+    if v is None:
         v, f = cad.profile_mesh(geo, n_phi=64, cut_deg=90 if cut else 0)
     fig = go.Figure(go.Mesh3d(x=v[:, 0], y=v[:, 1], z=v[:, 2], i=f[:, 0], j=f[:, 1], k=f[:, 2],
                               color=materials.color(S.get("material", "")), flatshading=False, lighting=dict(ambient=0.45, diffuse=0.8, specular=0.6),
@@ -247,24 +314,31 @@ with st.sidebar:
                  on_change=_set_lang)
     st.title("📡 FeedLab")
     st.subheader("Laboratorio di Progettazione di feed/illuminatori a microonde")
-    st.caption("10–134 GHz · basato su W1GHZ Antenna Book, design guide OE2IGL e letteratura")
-    band = st.selectbox("Banda", list(BANDS) + ["Altra frequenza…"],
-                        index=list(BANDS.values()).index(S.f_ghz) if S.f_ghz in BANDS.values() else len(BANDS))
-    if band == "Altra frequenza…":
-        S.f_ghz = st.number_input("Frequenza (GHz)", 10.0, 140.0, float(S.f_ghz), 0.001, format="%.3f")
+    st.caption("10–134 GHz · Software progettato da Ivan IZ0JNY")
+    _bands = list(BANDS) + ["Altra frequenza…"]
+    band = st.selectbox("Banda", _bands, index=None, placeholder="Seleziona frequenza", key="band_sel")
+    if band is None:
+        S.f_ghz = None
+    elif band == "Altra frequenza…":
+        S.f_ghz = st.number_input("Frequenza (GHz)", 10.0, 140.0, float(S.get("f_other") or 10.368), 0.001,
+                                  format="%.3f", key="f_other")
     else:
         S.f_ghz = BANDS[band]
-    st.metric("λ", f"{wavelength_mm(S.f_ghz):.3f} mm")
+    if S.f_ghz:
+        st.metric("λ", f"{wavelength_mm(S.f_ghz):.3f} mm")
     if S.dish:
         d = S.dish
         st.markdown(f"**Parabola:** {'offset' if d.kind == 'offset' else 'prime focus'} · D {d.D_mm:.0f} mm · "
                     f"f/D{' eq.' if d.kind == 'offset' else ''} {d.fD:.3f} · apertura {d.opening_deg:.1f}°")
-    st.markdown(f"**Feed:** {geometry.FEED_TYPES[S.feed_kind]}")
+    if S.feed_kind:
+        st.markdown(f"**Feed:** {geometry.FEED_TYPES[S.feed_kind]}")
     mats = list(materials.MATERIALS)
-    S.material = st.selectbox("Materiale del feed", mats, index=mats.index(S.get("material", "Ottone CuZn39Pb3")),
-                              help="conducibilità e rugosità → perdite ohmiche e rumore del feed")
-    m_ = materials.MATERIALS[S.material]
-    st.caption(f"σ = {m_.sigma / 1e7:.2f}·10⁷ S/m · δ = {materials.skin_depth_um(m_.sigma, S.f_ghz):.3f} µm · {m_.notes}")
+    S.material = st.selectbox("Materiale del feed", mats, index=None, placeholder="Seleziona materiale",
+                              key="material_sel", help="conducibilità e rugosità → perdite ohmiche e rumore del feed")
+    if S.material:
+        m_ = materials.MATERIALS[S.material]
+        st.caption(f"σ = {m_.sigma / 1e7:.2f}·10⁷ S/m" +
+                   (f" · δ = {materials.skin_depth_um(m_.sigma, S.f_ghz):.3f} µm" if S.f_ghz else "") + f" · {m_.notes}")
     geometry.COLLAR["diam"] = None                   # LNB collar option removed from the interface (0.4.9)
     geometry.MOUNT.update(S.get("mount_cfg") or {"wg": None})
     # base of the feed: round disc or square like the waveguide flange (WR-90, WR-75, WR-42… have square flanges)
@@ -273,7 +347,7 @@ with st.sidebar:
     # rectangular waveguide the feed is screwed to (through the λ/4 plate): the usual ones for the band
     # (10 GHz WR-90 or WR-75, 24 GHz WR-42, 47 GHz WR-22 or WR-19 …). It drives the matching plate, the flange
     # drilling and the square base.
-    _wgs = _sug(S.f_ghz)
+    _wgs = _sug(S.f_ghz) if S.f_ghz else []
     _wr = st.selectbox("Guida d'onda rettangolare", _wgs, key=f"wr_wg_{'_'.join(_wgs)}",
                        help="guida WR che si avvita al feed tramite la piastrina di adattamento circolare → WR: "
                             "dimensiona la piastrina, la foratura e la base quadrata") if _wgs else None
@@ -339,28 +413,31 @@ with tabs[0]:
         if src.startswith("Catalogo"):
             cat = dishes.by_label()
             makers = sorted({d.maker for d in dishes.CATALOG})
-            mk = st.selectbox("Costruttore", makers, index=makers.index("Gibertini"))
+            mk = st.selectbox("Costruttore", makers, index=None, placeholder="Seleziona parabola", key="dish_maker")
             labs = [l for l, d in cat.items() if d.maker == mk]
-            dm = cat[st.selectbox("Modello", labs)]
-            f_cat, f_src = dm.focal()
-            st.caption(f"Fonte: {dm.source}" + (f" — {dm.notes}" if dm.notes else ""))
-            info = {"Tipo": dm.kind, "Dimensioni esterne (mm)": f"{dm.width_mm:.0f} × {dm.height_mm:.0f}",
-                    "Area attiva (mm)": f"{dm.active_w_mm:.0f} × {dm.active_h_mm:.0f}" if dm.active_w_mm and dm.active_h_mm else "—",
-                    "F/D costruttore": dm.fD_maker or "—", "Focale (mm)": f"{f_cat:.0f} ({f_src})" if f_cat else f_src,
-                    "Angolo offset": f"{dm.offset_deg}°" if dm.offset_deg else "—",
-                    "Illuminazione richiesta": f"{dm.illum_deg}°" if dm.illum_deg else "—",
-                    "Efficienza dichiarata": f"{dm.efficiency_pct}%" if dm.efficiency_pct else "—",
-                    "Guadagni": ", ".join(f"{g} dBi @{f:g} GHz" for f, g in dm.gain.items()) or "—",
-                    "Collare LNB": dm.collar_mm or "—", "Materiale": dm.material or "—"}
-            st.table({"Dato": list(info), "Valore": [str(v) for v in info.values()]})
-            if dm.opening_deg() is None or st.checkbox("Ho misurato la mia parabola (più preciso del datasheet)"):
-                st.info("Misura: assi del bordo e profondità massima (righello teso sul bordo lungo l'asse lungo).")
-                la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, float(dm.height_mm))
-                sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, float(dm.width_mm))
-                dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, float(round(sa * sa / (16 * (f_cat or 0.6 * sa)) * sa / la, 1)))
-                dish = wizard.dish_from_offset_tv(la, sa, dp) if dm.kind == "offset" else wizard.dish_from_prime(sa, depth=dp)
-            else:
-                dish = wizard.dish_from_catalog(dm)
+            _ml = st.selectbox("Modello", labs, index=None, placeholder="Seleziona parabola",
+                               key=f"dish_model_{mk}", disabled=mk is None)
+            dm = cat[_ml] if _ml else None
+            if dm is not None:
+                f_cat, f_src = dm.focal()
+                st.caption(f"Fonte: {dm.source}" + (f" — {dm.notes}" if dm.notes else ""))
+                info = {"Tipo": dm.kind, "Dimensioni esterne (mm)": f"{dm.width_mm:.0f} × {dm.height_mm:.0f}",
+                        "Area attiva (mm)": f"{dm.active_w_mm:.0f} × {dm.active_h_mm:.0f}" if dm.active_w_mm and dm.active_h_mm else "—",
+                        "F/D costruttore": dm.fD_maker or "—", "Focale (mm)": f"{f_cat:.0f} ({f_src})" if f_cat else f_src,
+                        "Angolo offset": f"{dm.offset_deg}°" if dm.offset_deg else "—",
+                        "Illuminazione richiesta": f"{dm.illum_deg}°" if dm.illum_deg else "—",
+                        "Efficienza dichiarata": f"{dm.efficiency_pct}%" if dm.efficiency_pct else "—",
+                        "Guadagni": ", ".join(f"{g} dBi @{f:g} GHz" for f, g in dm.gain.items()) or "—",
+                        "Collare LNB": dm.collar_mm or "—", "Materiale": dm.material or "—"}
+                st.table({"Dato": list(info), "Valore": [str(v) for v in info.values()]})
+                if dm.opening_deg() is None or st.checkbox("Ho misurato la mia parabola (più preciso del datasheet)"):
+                    st.info("Misura: assi del bordo e profondità massima (righello teso sul bordo lungo l'asse lungo).")
+                    la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, float(dm.height_mm))
+                    sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, float(dm.width_mm))
+                    dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, float(round(sa * sa / (16 * (f_cat or 0.6 * sa)) * sa / la, 1)))
+                    dish = wizard.dish_from_offset_tv(la, sa, dp) if dm.kind == "offset" else wizard.dish_from_prime(sa, depth=dp)
+                else:
+                    dish = wizard.dish_from_catalog(dm)
         else:
             dk = st.radio("Tipo di parabola", ["Offset (TV/sat)", "Prime focus"], horizontal=True)
             if dk.startswith("Offset"):
@@ -397,28 +474,36 @@ with tabs[0]:
                     dish = wizard.dish_from_prime(D, depth=dp)
     with c2:
         pol = st.radio("Polarizzazione", ["Lineare", "Circolare"], horizontal=True)
-        prio = st.radio("Obiettivo", ["Massimo guadagno (TX/terrestre)", "Massimo G/T (RX, EME, sole)"])
+        prio = st.radio("Obiettivo", ["Massimo guadagno (TX/terrestre)", "Massimo G/T (RX, EME, sole)",
+                                      "Massime prestazioni RX (minimo rumore)"], index=1,
+                        help="G/T: equilibrio fra guadagno e rumore. Prestazioni RX: illuminazione più morbida e feed "
+                             "con lobi laterali/posteriori più bassi → meno rumore dal terreno, a costo di un po' di guadagno")
         tools = st.radio("Mezzi di costruzione", ["Tornio / CNC", "Solo lamiera e saldatura"])
         quick = st.checkbox("Stima con simulazione rapida (mode matching, ~20 s)", True)
+    if dish is not None:
+        S.dish = dish                            # the dish chosen here drives every other tab
     with c3:
         st.subheader("Parabola")
-        st.write(f"f/D {'equivalente vista dal feed' if dish.kind == 'offset' else ''}: **{dish.fD:.3f}**")
-        st.write(f"Angolo di apertura (centro→bordo ×2): **{dish.opening_deg:.1f}°**")
-        lam = wavelength_mm(S.f_ghz)
-        st.write(f"Diametro: **{dish.D_mm / lam:.0f} λ** — HPBW ≈ **{reflector.hpbw_deg(dish.D_mm, lam, 10):.2f}°** "
-                 f"(taper al bordo 10 dB; {reflector.hpbw_deg(dish.D_mm, lam, 0):.2f}° con illuminazione uniforme)")
-        st.caption("L'HPBW reale dipende dall'illuminazione del feed: dopo la scelta del feed è calcolato dal suo lobo "
-                   "nella scheda Simulazione & S11.")
-        st.write(f"Guadagno a 60%: **{reflector.gain_dbi(dish.D_mm, lam, 0.6):.1f} dBi**")
-        rms = st.number_input("Precisione superficie RMS (mm)", 0.0, 5.0, 0.2, 0.01)
-        st.write(f"Perdita Ruze: **{reflector.ruze_loss_db(rms, lam):.2f} dB**")
-        if dish.note:
-            st.info(dish.note)
-    if st.button("🔎 Trova il feed migliore", type="primary"):
+        if dish is None or not S.f_ghz:
+            st.info("Seleziona la frequenza (barra laterale) e la parabola.")
+        else:
+            st.write(f"f/D {'equivalente vista dal feed' if dish.kind == 'offset' else ''}: **{dish.fD:.3f}**")
+            st.write(f"Angolo di apertura (centro→bordo ×2): **{dish.opening_deg:.1f}°**")
+            lam = wavelength_mm(S.f_ghz)
+            st.write(f"Diametro: **{dish.D_mm / lam:.0f} λ** — HPBW ≈ **{reflector.hpbw_deg(dish.D_mm, lam, 10):.2f}°** "
+                     f"(taper al bordo 10 dB; {reflector.hpbw_deg(dish.D_mm, lam, 0):.2f}° con illuminazione uniforme)")
+            st.caption("L'HPBW reale dipende dall'illuminazione del feed: dopo la scelta del feed è calcolato dal suo lobo "
+                       "nella scheda Simulazione & S11.")
+            st.write(f"Guadagno a 60%: **{reflector.gain_dbi(dish.D_mm, lam, 0.6):.1f} dBi**")
+            rms = st.number_input("Precisione superficie RMS (mm)", 0.0, 5.0, 0.2, 0.01)
+            st.write(f"Perdita Ruze: **{reflector.ruze_loss_db(rms, lam):.2f} dB**")
+            if dish.note:
+                st.info(dish.note)
+    if st.button("🔎 Trova il feed migliore", type="primary", disabled=dish is None or not S.f_ghz):
         S.dish = dish
         with st.spinner("Valuto i candidati…"):
             S.cands = wizard.recommend(dish, S.f_ghz, "circular" if pol == "Circolare" else "linear",
-                                       "gt" if "G/T" in prio else "gain", "sheet" if "lamiera" in tools else "lathe", quick)
+                                       "gt" if "G/T" in prio else "rx" if "RX" in prio else "gain", "sheet" if "lamiera" in tools else "lathe", quick)
     if S.cands:
         rows = []
         for i, c in enumerate(S.cands):
@@ -436,14 +521,15 @@ with tabs[0]:
             st.success("Feed selezionato: apri la scheda 'Progetto feed'.")
 
 # ---------------------------------------------------------------- 2 design
-with tabs[1]:
+with tabs[1], contextlib.suppress(_Skip):
     st.header("Progetto del feed")
     kinds = list(geometry.FEED_TYPES)
-    _kind = st.selectbox("Tipo di feed", kinds, index=kinds.index(S.feed_kind),
-                         format_func=lambda k: geometry.FEED_TYPES[k])
-    if _kind != S.feed_kind:                     # rerun so the sidebar summary shows the new feed at once
+    _kind = st.selectbox("Tipo di feed", kinds, index=kinds.index(S.feed_kind) if S.feed_kind in kinds else None,
+                         placeholder="Seleziona tipo di feed", format_func=lambda k: geometry.FEED_TYPES[k])
+    if _kind is not None and _kind != S.feed_kind:   # rerun so the sidebar summary shows the new feed at once
         S.feed_kind = _kind
         st.rerun()
+    _need()
     if S.feed_kind in ("rect_horn", "axial_corrugated"):
         st.caption("Opzioni di lavorazione CNC dell'esterno (profilo semplificato, raccordi) non disponibili per questo feed.")
     else:
@@ -540,6 +626,8 @@ with tabs[1]:
         fig = section_fig(geo)
         if fig:
             st.plotly_chart(fig, width="stretch")
+        if S.overrides.get(S.feed_kind):
+            _openems_hint(_big_changes(S.overrides[S.feed_kind], _start_values(S.feed_kind)))
         lam = geo.lam
         st.write(f"Lunghezza totale **{geo.length:.2f} mm** ({geo.length / lam:.2f} λ) · "
                  f"Ø ingombro **{geo.blockage_diameter():.2f} mm** ({geo.blockage_diameter() / lam:.2f} λ) · "
@@ -551,7 +639,8 @@ with tabs[1]:
                 st.text(str(geo.design))
 
 # ---------------------------------------------------------------- 3 simulation
-with tabs[3]:
+with tabs[3], contextlib.suppress(_Skip):
+    _need()
     st.header("Simulazione rapida: S11, contenuto modale, lobo, efficienza")
     geo = current_geometry()
     is_rect = isinstance(geo, geometry.RectHornGeometry)
@@ -649,7 +738,8 @@ with tabs[3]:
                      f"**G/T = {noise.g_over_t_db(G, ta, noise.receiver_temp(nf)):.1f} dB/K**")
 
 # ---------------------------------------------------------------- 4 lobe 3D
-with tabs[4]:
+with tabs[4], contextlib.suppress(_Skip):
+    _need()
     st.header("Lobo di irradiazione 3D")
     pat = S.get("last_pattern")
     if pat is None:
@@ -659,14 +749,16 @@ with tabs[4]:
         st.plotly_chart(lobe3d_fig(pat, floor), width="stretch")
 
 # ---------------------------------------------------------------- 5 model 3D
-with tabs[5]:
+with tabs[5], contextlib.suppress(_Skip):
+    _need()
     st.header("Modello 3D del feed")
     geo = current_geometry()
     cut = st.checkbox("Sezione a quarto (vedi l'interno)", True)
     st.plotly_chart(model3d_fig(geo, cut), width="stretch")
 
 # ---------------------------------------------------------------- 6 export
-with tabs[6]:
+with tabs[6], contextlib.suppress(_Skip):
+    _need()
     st.header("Disegno meccanico (PDF) e file per la produzione")
     geo = current_geometry()
     mat = st.text_input("Materiale", f"{S.material}, interno lucidato Ra ≤ {materials.MATERIALS[S.material].rq_um} µm")
@@ -706,7 +798,8 @@ with tabs[6]:
                     unsafe_allow_html=True)
 
 # ---------------------------------------------------------------- 7 openEMS (optional deep analysis)
-with tabs[8]:
+with tabs[8], contextlib.suppress(_Skip):
+    _need()
     app_openems.render(S, current_geometry(), polar_fig)
 
 
@@ -717,7 +810,8 @@ def lab_eval(kind, f, sc_tuple, over_tuple, wall):
     return explore.evaluate(kind, f, sc, dict(over_tuple), wall)
 
 
-with tabs[2]:
+with tabs[2], contextlib.suppress(_Skip):
+    _need()
     st.header("Laboratorio: varia le quote e guarda cosa cambia")
     kind = S.feed_kind
     if kind not in explore.TUNABLE:
@@ -816,6 +910,7 @@ with tabs[2]:
         st.subheader("💡 Consigli")
         for t in explore.advice(cur, base, sc, objective, kind, S.f_ghz):
             st.markdown("- " + t)
+        _openems_hint(_big_changes(lab_over, base_vals))
         b1, b2, b3 = st.columns(3)
         if b1.button("✅ Applica queste quote al progetto", type="primary"):
             S.overrides[kind] = {**lab_over}
@@ -960,7 +1055,8 @@ with tabs[2]:
 
 
 # ---------------------------------------------------------------- matching plate
-with tabs[7]:
+with tabs[7], contextlib.suppress(_Skip):
+    _need()
     st.header("Piastrina λ/4 di adattamento: guida circolare del feed → guida rettangolare WR")
     st.caption("Il feed a simmetria circolare irradia la polarizzazione lineare imposta dall'orientamento della guida WR: "
                "il campo E è parallelo al lato corto 'b'. Metodo: design guide OE2IGL (openEMS), ottimizzazione HB9PZK.")
@@ -993,22 +1089,40 @@ with tabs[7]:
         opts = flanges.plate_screw_options(S.f_ghz)
         _round_fl = wg in flanges.FLANGES and flanges.FLANGES[wg].shape == "round"
         pscrew = st.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}",
-                              disabled=not holes_on or _round_fl,
+                              disabled=not holes_on or _round_fl or bool(S.get("mount_cbore")),
                               format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
                               help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale "
                                    "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
                                    "seguono la lunghezza della vite")
         feed_cb = st.checkbox("Viti dal lato del feed con lamatura nella base", key="mount_cbore",
-                              disabled=not (holes_on and _round_fl), value=False,
-                              help="viti 4-40 inserite dal lato del feed con la testa nella lamatura della base del feed: "
-                                   "attraversano piastrina e base e si avvitano nella flangia della guida. "
-                                   "Spento: viti della guida filettate nella base.") if _round_fl else False
+                              disabled=not holes_on, value=False,
+                              help="il feed si avvita direttamente sulla guida: le viti della flangia standard entrano "
+                                   "dal lato del feed con la testa nella lamatura della base, attraversano base e "
+                                   "piastrina e si avvitano nella flangia della guida (o con i dadi se i suoi fori sono "
+                                   "passanti). Spento: schema standard (flange quadrate: viti della guida nella "
+                                   "piastrina e viti piastrina→feed; rotonde: viti della guida filettate nella base).")
+        _scr = flanges.screw_for(wg, system) if wg in flanges.FLANGES else None
+        _cb_def = flanges.CBORE[_scr][1] if _scr in flanges.CBORE else 3.0
+        _cbd_def = flanges.CBORE[_scr][0] if _scr in flanges.CBORE else 6.0
+        cb_dia = st.number_input(_T("Diametro della lamatura (mm, standard {d:g} per la testa {s})", d=_cbd_def, s=_scr or ""),
+                                 min_value=1.0, max_value=30.0, value=float(_cbd_def), step=0.1, key=f"cb_dia_{_scr}",
+                                 disabled=not (holes_on and feed_cb),
+                                 help="diametro della sede della testa della vite; il valore proposto va bene per le viti "
+                                      "a testa cilindrica ISO 4762 / UNC: controllalo con le viti che compri") \
+            if feed_cb else None
+        cb_depth = st.number_input(_T("Profondità della lamatura (mm, standard {d:g} per la testa {s})", d=_cb_def, s=_scr or ""),
+                                   min_value=0.5, max_value=20.0, value=float(_cb_def), step=0.5, key=f"cb_depth_{_scr}",
+                                   disabled=not (holes_on and feed_cb),
+                                   help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
+                                        "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)") \
+            if feed_cb else None
         pol_c = "V" if pol_ == "Verticale" else "H"
         try:
             pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
-                                    plate_screw=pscrew)
+                                    plate_screw=pscrew, feed_cbore=bool(feed_cb), cb_depth=cb_depth, cb_dia=cb_dia)
             new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
-                       "plate_t": pl.body_t if holes_on else None, "feed_cbore": bool(feed_cb)}
+                       "plate_t": pl.body_t if holes_on else None, "feed_cbore": bool(feed_cb),
+                       "cb_depth": cb_depth, "cb_dia": cb_dia}
             if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
                 S["mount_cfg"] = new_cfg
                 geometry.MOUNT.update(new_cfg)
@@ -1101,6 +1215,29 @@ with tabs[7]:
                 v2.plotly_chart(f3, width="stretch")
             except Exception as ex_:
                 v2.caption(_T("Vista 3D non disponibile: {e}", e=ex_))
+            _gb = current_geometry()                  # the feed base, drilled like the plate: check the counterbores
+            if holes_on and getattr(_gb, "mount", None) is not None:
+                st.subheader("Base del feed forata (3D, ruotabile)")
+                _cbs = [hh for hh in _gb.mount.feed_holes if hh.kind == "cbore_back"]
+                if _cbs:
+                    st.info(_T("Lamature sul lato horn della base (dove escono le teste delle viti): Ø{d:g} mm, profonde "
+                               "{k:g} mm; base spessa {t:.2f} mm, sotto la testa restano {r:.2f} mm.",
+                               d=_cbs[0].cb_dia, k=_cbs[0].cb_depth, t=_gb.params["flange_thickness"],
+                               r=_gb.params["flange_thickness"] - _cbs[0].cb_depth))
+                try:
+                    bv, bf = cad.mesh_base(_gb)
+                    fb = go.Figure(go.Mesh3d(x=bv[:, 0], y=bv[:, 1], z=bv[:, 2], i=bf[:, 0], j=bf[:, 1], k=bf[:, 2],
+                                             color=materials.color(S.get("material", "")), flatshading=True,
+                                             lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5)))
+                    fb.update_layout(height=480, margin=dict(l=0, r=0, t=40, b=0),
+                                     title=i18n.tr("Base del feed: z = 0 faccia verso la piastrina, in alto il lato horn"),
+                                     scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
+                                                camera=dict(eye=dict(x=1.1, y=-1.3, z=1.4))))
+                    st.plotly_chart(fb, width="stretch")
+                    st.caption("Ruota la vista col mouse. Il modello completo con il feed è nella scheda Modello 3D; "
+                               "STEP/STL e disegno PDF (foglio della flangia) riportano gli stessi fori.")
+                except Exception as ex_:
+                    st.caption(_T("Vista 3D non disponibile: {e}", e=ex_))
         except ValueError as ex:
             st.error(str(ex))
 

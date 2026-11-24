@@ -20,6 +20,19 @@ def _errors(at):
     return [e.value for e in at.exception]
 
 
+def _start(at, band="24.048", feed="w2imu"):
+    """The app starts blank: choose band, material, dish (catalogue) and feed type like a user."""
+    b = next(s for s in at.selectbox if s.label == "Banda")
+    b.select(next(o for o in b.options if o.startswith(band))).run()
+    at.selectbox(key="material_sel").select("Ottone CuZn39Pb3").run()
+    at.selectbox(key="dish_maker").select("Channel Master").run()
+    m = at.selectbox(key="dish_model_Channel Master")
+    m.select(next(o for o in m.options if "243" in o)).run()
+    if feed:
+        next(s for s in at.selectbox if s.label == "Tipo di feed").select(feed).run()
+    return at
+
+
 @pytest.fixture
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("FEEDLAB_CONFIG", str(tmp_path / "cfg"))
@@ -37,6 +50,10 @@ def test_app_runs_without_openems(isolated):
     assert not at.exception, _errors(at)
     text = " ".join(m.value for m in at.markdown) + " ".join(c.value for c in at.caption)
     assert "openEMS" in text
+    assert any("Per iniziare seleziona" in i.value for i in at.info)       # blank start: nothing chosen yet
+    _start(at)
+    assert not at.exception, _errors(at)
+    assert not any("Per iniziare seleziona" in i.value for i in at.info)
 
 
 def test_app_with_openems_and_results(isolated, monkeypatch):
@@ -46,8 +63,8 @@ def test_app_with_openems_and_results(isolated, monkeypatch):
     root.mkdir(parents=True)
     (root / openems_local.EXE).write_text("")
     openems_local.save_settings(openems_root=str(root), python=sys.executable)
-    # one completed job (default app feed: Pickett-Potter 47.088 GHz)
-    geo = geometry.build("pickett_potter", 47.088, fD=0.6)
+    # one completed job (the feed chosen in _start: W2IMU 24.048 GHz)
+    geo = geometry.build("w2imu", 24.048, fD=0.6)
     jd = openems_local.create_job(geo, openems_sim.DeepConfig(cells_per_lambda=15, sphere_step=6), label="smoke")
     r = subprocess.run([sys.executable, "-u", str(jd / json.loads((jd / "job.json").read_text())["script"])], cwd=jd,
                        capture_output=True, text=True, env=os.environ.copy(), timeout=300)
@@ -55,6 +72,7 @@ def test_app_with_openems_and_results(isolated, monkeypatch):
     (jd / "runner.json").write_text(json.dumps({"state": "done"}))
     at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.run()
+    _start(at)
     assert not at.exception, _errors(at)
     text = " ".join(m.value for m in at.markdown) + " ".join(str(s.value) for s in at.success)
     assert "Binding Python funzionanti" in text
@@ -95,8 +113,7 @@ def test_waveguide_choice_per_band(isolated, band, guides, square):
     from feedlab import geometry
     at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.run()
-    b = next(s for s in at.selectbox if s.label == "Banda")
-    b.select(next(o for o in b.options if o.startswith(band))).run()
+    _start(at, band)
     wr = next(s for s in at.selectbox if s.label == "Guida d'onda rettangolare")
     assert list(wr.options) == guides
     wr.select(guides[-1]).run()
@@ -110,7 +127,7 @@ def test_dimension_edit_with_apply_button(isolated):
     """Editing a dimension and pressing "Applica modifiche" rebuilds the feed (e.g. the input guide length)."""
     at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.run()
-    next(s for s in at.selectbox if s.label == "Tipo di feed").select("iz0jny").run()
+    _start(at, feed="iz0jny")
     at.number_input(key="in_iz0jny_input_length").set_value(10.0).run()
     next(b for b in at.button if b.label == "Applica modifiche").click().run()
     assert not at.exception, _errors(at)

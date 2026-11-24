@@ -4,7 +4,14 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Lamatura delle viti sulla base del feed per tutte le flange (anche quadrate WR-90/75/42): il feed si avvita direttamente sulla guida, testa delle viti nella lamatura lato horn | ✅ fatto |
+| 2 | Diametro e profondità della lamatura indicati e modificabili (valori standard proposti dal programma); la base si ispessisce da sola | ✅ fatto |
+| 3 | Vista 3D ruotabile della base del feed forata (fori e lamature) nella scheda Piastrina WR; Modello 3D con i fori reali | ✅ fatto |
+| 4 | Disegni PDF di piastrina e flangia: diametro dei fori e filettature (M2, M3…) indicati per ogni gruppo di fori | ✅ fatto |
+| 5 | Avvio "in bianco": Seleziona frequenza / parabola / tipo di feed / materiale; le schede mostrano un invito finché non si sceglie | ✅ fatto |
+| 6 | In alto a sinistra "Software progettato da Ivan IZ0JNY" al posto di "basato su W1GHZ…" | ✅ fatto |
+| 7 | Procedura guidata: obiettivo predefinito Massimo G/T; nuova opzione "Massime prestazioni RX (minimo rumore)" | ✅ fatto |
+| 8 | Promemoria (non vincolante) nelle schede Progetto feed e Laboratorio: dopo modifiche importanti della geometria verificare con openEMS | ✅ fatto |
 
 ---
 

@@ -60,7 +60,8 @@ def _zte(k, kc):
 
 def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str = "V",
                  corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None,
-                 plate_screw: str | None = None) -> MatchingPlate:
+                 plate_screw: str | None = None, feed_cbore: bool = False,
+                 cb_depth: float | None = None, cb_dia: float | None = None) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
     (feedlab.flanges) — clearance holes for the screws and dowel holes."""
     w = RECT_WG[wg]
@@ -84,10 +85,11 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     mnt = None
     if holes:
         from .flanges import mount
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, feed_cbore=feed_cbore, cb_depth=cb_depth, cb_dia=cb_dia)
         body_t = round(max(t, mnt.plate_body_min()), 2)
         # screw length depends on the plate thickness: drill again with it (same positions)
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, feed_cbore=feed_cbore,
+                    cb_depth=cb_depth, cb_dia=cb_dia)
         outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)   # refined below, per flange shape
     from .flanges import FLANGES
     fl = FLANGES.get(wg)
@@ -185,7 +187,12 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
                 ax.add_patch(Circle((hl.x, hl.y), hl.cb_dia / 2, fill=False, lw=0.7, ec="m"))
             ax.plot([hl.x - hl.dia * 0.7, hl.x + hl.dia * 0.7], [hl.y, hl.y], lw=0.3, color="0.4")
             ax.plot([hl.x, hl.x], [hl.y - hl.dia * 0.7, hl.y + hl.dia * 0.7], lw=0.3, color="0.4")
-    ax.set_xlim(-h - 6, h + 8); ax.set_ylim(-h - 6, h + 6)
+    if p.mount is not None:
+        from .drawing import hole_labels
+        hole_labels(ax, p.mount.plate_holes, h)
+        ax.set_xlim(-2.6 * h, h + 8); ax.set_ylim(-1.3 * h - 4, 1.3 * h + 2)
+    else:
+        ax.set_xlim(-h - 6, h + 8); ax.set_ylim(-h - 6, h + 6)
     ax.set_title("Piastrina λ/4 — vista frontale (rosso = campo E)\n"
                  "tratteggio: Ø guida circolare del feed · punteggiato blu: WR", fontsize=9)
     ax2 = fig.add_axes([0.6, 0.12, 0.38, 0.8]); ax2.set_axis_off()

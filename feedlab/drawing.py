@@ -299,7 +299,8 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         if h.cb_dia:                             # counterbore on the horn side (hidden from this face): dashed
             ax.add_patch(Circle((h.x, h.y), h.cb_dia / 2, fill=False, lw=0.7, ec="m", ls="--"))
         ax.text(h.x + h.dia * 0.8, h.y + h.dia * 0.8, str(i), fontsize=7, color="b")
-    ax.set_xlim(-R * 1.25, R * 1.25); ax.set_ylim(-R * 1.25, R * 1.25)
+    hole_labels(ax, mnt.feed_holes, R)
+    ax.set_xlim(-R * 2.6, R * 1.25); ax.set_ylim(-R * 1.3, R * 1.3)
     from . import i18n
 
     def T(tpl, **kw):                          # whole sentences translated first (then wrapped), numbers after
@@ -337,6 +338,24 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
     ax2.text(0, 1, "\n".join(lines), va="top", family="monospace", fontsize=7.5)
     _title_block(fig, geo, title, material, sheet)
     return fig
+
+
+def hole_labels(ax, holes, R, fontsize=6.5):
+    """Callouts on the view: one leader per group of identical holes ('4× M3 filettato passante …'), stacked on the
+    left of the part so they never run into the text on the right (translated, then wrapped)."""
+    import textwrap as _tw
+    from collections import OrderedDict
+    from . import i18n
+    groups = OrderedDict()
+    for h in holes:
+        groups.setdefault(h.callout, []).append(h)
+    n = len(groups)
+    for i, (callout, hs) in enumerate(groups.items()):
+        h = min(hs, key=lambda q: (q.x, -q.y))                  # left-most hole of the group
+        ty = R * (1.15 - 2.3 * (i + 0.5) / max(n, 1))
+        txt = "\n".join(_tw.wrap(f"{len(hs)}× {i18n.tr(callout)}", 30))
+        ax.annotate(txt, xy=(h.x, h.y), xytext=(-1.3 * R, ty), fontsize=fontsize, color="navy", ha="right", va="center",
+                    arrowprops=dict(arrowstyle="-", lw=0.5, color="navy", shrinkA=1, shrinkB=2))
 
 
 def SCREW_MAJOR(screw: str) -> float:

@@ -77,10 +77,29 @@ def export_stl(geo, path: str | Path, tol: float | None = None) -> Path:
     return path
 
 
-def mesh(geo, tol: float | None = None) -> tuple[np.ndarray, np.ndarray]:
-    """Triangle mesh (vertices Nx3, faces Mx3) for 3D preview."""
+def mesh_base(geo, above_mm: float = 4.0, tol: float | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """Mesh of the feed base only (z from 0 to flange thickness + above_mm): holes and counterbores at a glance."""
+    cq = _cq()
+    tol = tol or max(0.02, geo.lam / 80)
+    t = float(geo.params.get("flange_thickness", 3.0))
+    R = float(getattr(geo, "outer_radius", 0) or 50.0) * 2.5 + 10.0
+    box = cq.Workplane("XY").workplane(offset=-1.0).rect(R, R).extrude(t + above_mm + 1.0)
+    shape = solid(geo).intersect(box).val()
+    verts, tris = shape.tessellate(tol, 0.2)
+    return np.array([(p.x, p.y, p.z) for p in verts]), np.array(tris, dtype=int)
+
+
+def mesh(geo, tol: float | None = None, cut: bool = False) -> tuple[np.ndarray, np.ndarray]:
+    """Triangle mesh (vertices Nx3, faces Mx3) for 3D preview: the real solid, holes, counterbores and square
+    base included. cut=True removes the x>0, y>0 quarter to show the inside."""
+    cq = _cq()
     tol = tol or max(0.02, geo.lam / 60)
-    shape = solid(geo).val()
+    body = solid(geo)
+    if cut:
+        L = float(getattr(geo, "z_aperture", 0) or geo.length) + 2.0
+        R = float(getattr(geo, "outer_radius", 0) or 50.0) * 1.6 + 5.0
+        body = body.cut(cq.Workplane("XY").workplane(offset=-1.0).center(R / 2, R / 2).rect(R, R).extrude(L + 2.0))
+    shape = body.val()
     verts, tris = shape.tessellate(tol, 0.2)
     v = np.array([(p.x, p.y, p.z) for p in verts])
     f = np.array(tris, dtype=int)

@@ -308,7 +308,8 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     if flange and MOUNT.get("wg"):
         from .flanges import mount
         mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f,
-                    MOUNT.get("plate_screw"), MOUNT.get("plate_t"), bool(MOUNT.get("feed_cbore")))
+                    MOUNT.get("plate_screw"), MOUNT.get("plate_t"), bool(MOUNT.get("feed_cbore")),
+                    MOUNT.get("cb_depth"), MOUNT.get("cb_dia"))
         d_need, t_need = mnt.feed_flange_min()
     # base (flange) thickness: chosen by the user (≥ 1 mm) or automatic (enough for the threaded holes)
     t_user = BASE.get("thickness")
