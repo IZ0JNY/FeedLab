@@ -128,3 +128,65 @@ def df_cost(x, f_ghz, sc_kw, fD_design, w_gt: float = 1.0, w_g: float = 1.0):
     if s11w > S11_MAX:
         val += 0.3 * (s11w - S11_MAX)
     return val
+
+
+# ------------------------------------------------------------------ conical corrugated horn (radial slots)
+# x = [Dap, half-angle (deg), pitch, tooth fraction, slot depth in the flare, n converter slots, Di]  (λ units)
+CG_BOUNDS = [(1.6, 3.2), (6.0, 30.0), (0.18, 0.33), (0.15, 0.45), (0.22, 0.32), (3, 7), (0.72, 0.80)]
+
+
+def corrugated_profile(x):
+    """Inner wall [(z, r)] in λ: input guide Di, a mode converter whose slot depth goes from ~λ/2 to the flare
+    depth (TE11 → HE11), then a conical flare with constant-depth slots up to the aperture Dap."""
+    Dap, half, p, tf, depth, nconv, Di = x
+    nconv = int(round(nconv))
+    t = tf * p                                   # tooth width
+    w = p - t                                    # slot width
+    r_in = Di / 2
+    ta = math.tan(math.radians(half))
+    L = max((Dap / 2 - r_in) / ta, p * (nconv + 2))
+    nslots = max(int(L / p), nconv + 2)
+    pts = [(0.0, r_in), (0.6, r_in)]
+    z = 0.6
+    for k in range(nslots):
+        r = r_in + ta * (k * p)                   # inner (tooth) radius along the flare
+        d = 0.5 - (0.5 - depth) * k / nconv if k < nconv else depth
+        r_slot = r + d
+        pts += [(z, r), (z + t, r), (z + t, r_slot), (z + t + w, r_slot), (z + t + w, r + ta * p)]
+        z += p
+    pts.append((z, r_in + ta * nslots * p))
+    return pts
+
+
+def cg_geometry(x, f_ghz):
+    lam = wavelength_mm(f_ghz)
+    prof = [(z * lam, r * lam) for z, r in corrugated_profile(x)]
+    t = geometry.wall_default(f_ghz)
+    params = {"D_aperture": 2 * prof[-1][1], "Di_input": x[6] * lam, "flare_half_deg": x[1], "pitch": x[2] * lam,
+              "tooth": x[3] * x[2] * lam, "depth": x[4] * lam, "n_conv": int(round(x[5])), "length": prof[-1][0], "wall": t}
+    return geometry._finish("eme_corrugated", f_ghz, params, prof, t, flange=False,
+                            notes=["horn corrugato conico sintetizzato da FeedLab (mode matching)"])
+
+
+def cg_evaluate(x, f_ghz, sc, band: float = 0.01, n_modes: int = 14):
+    geo = cg_geometry(x, f_ghz)
+    lam = wavelength_mm(f_ghz)
+    secs = geo.staircase(lam / 20)
+    r = modematch.simulate(secs, [f_ghz * (1 - band), f_ghz, f_ghz * (1 + band)], n_modes=n_modes)
+    pat = modematch.aperture_pattern(r, 1, f_ghz, n_rho=28, n_phi=32, n_theta=181)
+    res = explore.performance("eme_corrugated", f_ghz, sc, geo, pat, float(r.s11_db[1]), r.aperture_modes[1])
+    return res, float(np.max(r.s11_db)), geo
+
+
+def cg_cost(x, f_ghz, sc_kw):
+    try:
+        res, s11w, geo = cg_evaluate(x, f_ghz, explore.Scenario(**sc_kw))
+    except Exception:
+        return 1e3
+    val = -(res.gain_dbi + res.g_over_t)
+    if s11w > S11_MAX:
+        val += 0.3 * (s11w - S11_MAX)
+    lam = wavelength_mm(f_ghz)
+    if geo.length > 12 * lam:
+        val += 0.2 * (geo.length / lam - 12)
+    return val

@@ -106,3 +106,23 @@ def test_planner_windows_and_perigee():
 def test_moon_beam_factor():
     assert link.beam_moon_factor(0.52, 5.0) > 0.98                     # wide beam: whole Moon
     assert link.beam_moon_factor(0.52, 0.18) < link.beam_moon_factor(0.52, 0.35) < 1
+
+
+def test_focus_fit_finds_the_maximum():
+    rows = [{"kind": "focus", "value": v, "y_db": 13 - 0.05 * (v - 2.5) ** 2} for v in (-3, -1.5, 0, 1.5, 3, 4.5)]
+    ff = analysis.focus_fit(rows)
+    assert abs(ff["best_mm"] - 2.5) < 1e-6 and ff["gain_db"] > 0
+
+
+def test_humid_months_cost_g_over_t_at_24ghz():
+    rows = planner.monthly_from_means({1: (8, 75), 7: (26, 60)}, SETUP)
+    jan, jul = rows
+    assert jan["d_gt_db"] == 0 and jul["d_gt_db"] < -0.8 and jul["d_echo_db"] < jul["d_gt_db"]
+
+
+def test_planner_rows_are_moon_passes():
+    smp = planner.windows(STN, SETUP, datetime(2026, 11, 20, tzinfo=timezone.utc), days=3, step_min=15, min_el=10)
+    rows = planner.daily(smp)
+    assert all(r["end"] >= r["start"] for r in rows)
+    assert all(r["hours"] < 16 for r in rows)            # one pass, never two passes glued by the calendar day
+    assert len(rows) >= 3

@@ -41,8 +41,9 @@ def daily(samples: list[dict], sun_min_deg: float = 10.0) -> list[dict]:
     """One row per Moon pass (consecutive samples above the limits, also across midnight UTC): start, end,
     duration and the best moment (highest echo SNR with the Sun away from the Moon)."""
     passes, cur = [], []
+    step = _step(samples)
     for s in samples:
-        if cur and (s["utc"] - cur[-1]["utc"]).total_seconds() > 1.5 * _step(samples):
+        if cur and (s["utc"] - cur[-1]["utc"]).total_seconds() > 1.5 * step:
             passes.append(cur)
             cur = []
         cur.append(s)
@@ -61,7 +62,9 @@ def daily(samples: list[dict], sun_min_deg: float = 10.0) -> list[dict]:
 
 
 def _step(samples):
-    return (samples[1]["utc"] - samples[0]["utc"]).total_seconds() if len(samples) > 1 else 600.0
+    """Sampling step: the smallest gap between consecutive samples (the first two may straddle a gap)."""
+    d = [(b["utc"] - a["utc"]).total_seconds() for a, b in zip(samples, samples[1:])]
+    return min(d) if d else 600.0
 
 
 def perigees(start: datetime, days: int = 400) -> list[tuple[datetime, float, str]]:

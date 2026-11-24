@@ -20,10 +20,11 @@ Version {VERSION} BETA TEST · Software designed by Ivan De Cesaris, IZ0JNY
 11. Step 6 — WR plate (λ/4 matching plate)
 12. Step 7 — Drawing & STEP (PDF, STEP, STL)
 13. Full-wave openEMS (optional)
-14. Reference tables: materials, tolerances, flanges, screws, counterbores
-15. Worked example: a 24 GHz EME feed for a 2.4 m offset dish
-16. Troubleshooting and FAQ
-17. Glossary
+14. EMELab — EME measurements and planning (optional)
+15. Reference tables: materials, tolerances, flanges, screws, counterbores
+16. Worked example: a 24 GHz EME feed for a 2.4 m offset dish
+17. Troubleshooting and FAQ
+18. Glossary
 
 ---
 
@@ -123,10 +124,11 @@ The window has two parts:
 | **λ** | free-space wavelength | all "λ" values in FeedLab refer to it |
 | **Dish / Feed** | summary of the dish and feed you chose | appears once chosen |
 | **ℹ️ About materials** | button above the material choice | opens a comparison table: conductivity, roughness, density, losses relative to copper, and coloured-dot ratings (red = poor … green = excellent) for machinability, price, availability, weather resistance and treatments, with the pros and cons of each material. The chosen material is highlighted in yellow |
-| **Feed material** | metal (or coating) of the feed | sets conductivity σ and roughness → ohmic loss and the noise the feed adds; below: σ, **skin depth δ** at your frequency and a practical note (§14.1) |
+| **Feed material** | metal (or coating) of the feed | sets conductivity σ and roughness → ohmic loss and the noise the feed adds; below: σ, **skin depth δ** at your frequency and a practical note (§15.1) |
 | **Rectangular waveguide** | the WR guide the feed is fixed to through the λ/4 plate | only the guides of the band: 10 GHz **WR-90** or **WR-75**, 24 GHz **WR-42**, 47 GHz **WR-22** or **WR-19**… It sizes plate, drilling and square base |
 | **Feed base** | **Circular** or **Square** | square (default at 10 and 24 GHz) only for square standard flanges (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); it grows by itself if holes or counterbores need it |
 | **Language** | Italiano / English | chosen in the installer; here mainly for the portable version |
+| **📡 Enable EMELab** | switch | adds the EMELab tab (EME measurements and planning, §14); off by default, the choice is remembered |
 | **ℹ️ Credits · 🔄 Check for updates · 📖 Manual · 🐞 Report a problem** | author and sources · new versions · this manual · pre-filled GitHub issue | |
 
 
@@ -431,7 +433,7 @@ The **front view** colours the holes by function: **black** = waveguide flange h
 | Field / button | Meaning |
 |---|---|
 | **Material, Title** | printed in the title block |
-| **General machining tolerance ±** | default: recommended value for the band (§14.2); printed in feed and plate PDFs with the hole tolerances |
+| **General machining tolerance ±** | default: recommended value for the band (§15.2); printed in feed and plate PDFs with the hole tolerances |
 | **📄 Create PDF** | A4 drawing: dimensioned section, dimension table (mm and λ), title block; **sheet 2** = drilled flange; critical tolerance table (from §7.4) |
 | **🧊 Create STEP / 🖨️ Create STL** | solid for CAD/CAM (threads at tap-drill Ø) / for 3D printing |
 | **JSON parameters** | all dimensions and settings |
@@ -456,9 +458,43 @@ The **front view** colours the holes by function: **black** = waveguide flange h
 
 ---
 
-## 14. Reference tables
+## 14. EMELab — EME measurements and planning (optional)
 
-### 14.1 Materials
+EMELab is an **optional** tab: turn it on with the **📡 Enable EMELab** switch in the sidebar (the choice is remembered). It is for EME at 10, 24 and 47 GHz: **log the real measurements** of your station, compare them with what the setup should give and find where to improve. **All data stay on your PC** (a file in the settings folder): station, setups, measurements and the address of your weather station are never sent; the internet weather service only receives coordinates and time. All times are in **UTC**.
+
+![EMELab: station and setups]({IMG}/m35_emelab_station.jpg)
+
+### 14.1 Station and setups
+| Field | What it is |
+|---|---|
+| **Callsign, Locator, Latitude/Longitude, Height** | position of the station (the locator gives the coordinates) |
+| **Personal weather station** | address of your Meteotemplate / Cumulus / Weather Display site (or data file); saved only on the PC |
+| **Solar flux at 15.4 GHz** | value of the day from the RSTN observatories (NOAA SWPC): needed for the expected sun noise |
+| **Setups per band** | dish, gain, efficiency, taper, spillover (**📐 From FeedLab** button from the open design, or by hand), preamplifier/transverter NF, feed → LNA loss, TX power at the feed, RMS surface error, measured beamwidth |
+
+### 14.2 New measurement
+Choose setup, **UTC date and time** and type (sun or moon noise, cold sky, ground, echo, beacon, QSO, focusing). Enter Y or SNR, the angles read and the **offsets at the peak**. The weather comes from **🌡️ From my station** or **🌍 From Open-Meteo** and can be corrected by hand; it is saved with its UTC time and its source. Below, EMELab shows at once Sun and Moon position and distance, Sun–Moon angle, zenith and path attenuation (ITU-R P.676), sky temperature, Tsys, **expected sun and moon Y**, expected echo, Doppler and spreading.
+
+![EMELab: new measurement]({IMG}/m36_emelab_new.jpg)
+
+### 14.3 Log and analysis
+The **log** lists the measurements with expected values, differences and the G/T derived from the sun (filters by band and type, CSV export and import). The **analysis** gives plain-language advice: measured vs expected G/T, effect of elevation and humidity, **pointing model** (AZ and EL zeros, axis tilt, sag), **focusing curve** and effective reflectivity of the Moon from the echoes.
+
+![EMELab: analysis]({IMG}/m37_emelab_analysis.jpg)
+
+### 14.4 Planner
+For every **Moon pass** above the minimum elevation: start, end, best moment, distance, expected echo in 1 Hz and in the spreading bandwidth, attenuation, minimum Sun–Moon angle. With the **locator of the other station** it shows only the common windows; with **Use the weather forecast** it accounts for the forecast humidity (16 days). At the bottom: **perigees and apogees** (up to 2.2 dB on echoes) and the **most favourable months** from last year's climate at your site.
+
+![EMELab: planner]({IMG}/m38_emelab_planner.jpg)
+
+### 14.5 Measurement guide
+The last sub-tab explains the fundamental measurements (sun, moon, sky/ground, hot load, sun transit, focusing, pointing, echoes, environment) with procedure and references.
+
+---
+
+## 15. Reference tables
+
+### 15.1 Materials
 
 | Material | σ (10⁷ S/m) | skin depth δ (µm) at 10 / 24 / 47 / 76 GHz | Rq (µm) | Losses × copper | Practical note |
 |---|---|---|---|---|---|
@@ -494,7 +530,7 @@ Materials named after a service (JLCCNC, PCBWay, Weerg) are those these online C
 
 RF current flows in a layer a few δ thick: platings ≥ 3–5 δ; roughness comparable to δ increases the loss. FeedLab turns the ohmic loss into added noise temperature (Laboratory).
 
-### 14.2 General machining tolerance
+### 15.2 General machining tolerance
 
 | Band | Recommended | Notes |
 |---|---|---|
@@ -505,7 +541,7 @@ RF current flows in a layer a few δ thick: platings ≥ 3–5 δ; roughness com
 
 The λ/4 plate thickness has its own tighter tolerance (WR-42: ±0.087 mm). The tolerance analysis (§7.4) tells which dimensions need more.
 
-### 14.3 Standard flanges (Flann; MIL-DTL-3922/67C)
+### 15.3 Standard flanges (Flann; MIL-DTL-3922/67C)
 
 | WR | Flange | Shape | Size (mm) | Hole positions (mm) | Hole Ø (published → FeedLab) | Screw |
 |---|---|---|---|---|---|---|
@@ -515,7 +551,7 @@ The λ/4 plate thickness has its own tighter tolerance (WR-42: ±0.087 mm). The 
 | WR-22, WR-19 | UG-383/U | round | Ø28.55 | PCD 23.81 (4 holes + 4 dowels) | 3.05 → 3.1 | 4-40 UNC |
 | WR-15 … WR-5 | UG-385/387/U | round | Ø19.05 | PCD 14.29 (4 holes + 4 dowels) | 3.05 → 3.1 | 4-40 UNC |
 
-### 14.4 Screws, holes and heads
+### 15.4 Screws, holes and heads
 
 | Screw | Tap drill | Clearance (normal / medium) | Socket-head counterbore Ø × depth | Flat-head countersink Ø |
 |---|---|---|---|---|
@@ -532,7 +568,7 @@ Socket heads ISO 4762 / ASME B18.3; flat heads ISO 7046 (90°) / UNC 82°. Blind
 
 ---
 
-## 15. Worked example: 24 GHz EME feed for a 2.4 m offset dish
+## 16. Worked example: 24 GHz EME feed for a 2.4 m offset dish
 
 1. **Sidebar:** Band **24.048 GHz**, material **Brass CuZn39Pb3** (or silver-plated brass), waveguide **WR-42**, base **Circular**.
 2. **Guided procedure:** catalogue → **Channel Master Type 243 2.4 m**; goal **Maximum G/T**; illumination **Automatic** or e.g. 12 dB; **Find the best feed** → **Dual-Flare (IZ0JNY)** → **Use this feed**.
@@ -546,7 +582,7 @@ Socket heads ISO 4762 / ASME B18.3; flat heads ISO 7046 (90°) / UNC 82°. Blind
 
 ---
 
-## 16. Troubleshooting and FAQ
+## 17. Troubleshooting and FAQ
 
 | Problem | What to do |
 |---|---|
@@ -562,7 +598,7 @@ Socket heads ISO 4762 / ASME B18.3; flat heads ISO 7046 (90°) / UNC 82°. Blind
 
 ---
 
-## 17. Glossary
+## 18. Glossary
 
 | Term | Meaning |
 |---|---|

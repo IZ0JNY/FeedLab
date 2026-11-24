@@ -6,6 +6,9 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ("è sotto l'orizzonte in questo momento", 'is below the horizon at this moment'),
+    ('Il Sole', 'The Sun'),
+    ('La Luna', 'The Moon'),
     ('curva interpolata', 'fitted curve'),
     ('Messa a fuoco: Y in funzione dello spostamento del feed', 'Focusing: Y versus feed displacement'),
     ('Spostamento (mm)', 'Displacement (mm)'),

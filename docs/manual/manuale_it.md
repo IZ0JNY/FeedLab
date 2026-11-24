@@ -20,10 +20,11 @@ Versione {VERSION} BETA TEST · Software progettato da Ivan De Cesaris, IZ0JNY
 11. Passo 6 — Piastrina WR (piastrina λ/4)
 12. Passo 7 — Disegno & STEP (PDF, STEP, STL)
 13. Full-wave openEMS (facoltativo)
-14. Tabelle di riferimento: materiali, tolleranze, flange, viti, lamature
-15. Esempio completo: feed EME a 24 GHz per una offset da 2.4 m
-16. Problemi frequenti
-17. Glossario
+14. EMELab — misure e pianificazione EME (facoltativo)
+15. Tabelle di riferimento: materiali, tolleranze, flange, viti, lamature
+16. Esempio completo: feed EME a 24 GHz per una offset da 2.4 m
+17. Problemi frequenti
+18. Glossario
 
 ---
 
@@ -123,10 +124,11 @@ La finestra ha due parti:
 | **λ** | lunghezza d'onda nello spazio libero | tutti i valori "λ" di FeedLab si riferiscono a questa |
 | **Parabola / Feed** | riepilogo della parabola e del feed scelti | compare dopo la scelta |
 | **ℹ️ Informazioni sui materiali** | pulsante sopra la scelta del materiale | apre una tabella di confronto: conducibilità, rugosità, densità, perdite rispetto al rame, e voti a pallini colorati (rosso = scarso … verde = ottimo) per lavorabilità, prezzo, reperibilità, resistenza agli agenti atmosferici e trattamenti, con pro e contro di ogni materiale. Il materiale scelto è evidenziato in giallo |
-| **Materiale del feed** | il metallo (o il rivestimento) del feed | fissa conducibilità σ e rugosità → perdite ohmiche e rumore aggiunto; sotto: σ, **profondità di penetrazione δ** alla tua frequenza e una nota pratica (§14.1) |
+| **Materiale del feed** | il metallo (o il rivestimento) del feed | fissa conducibilità σ e rugosità → perdite ohmiche e rumore aggiunto; sotto: σ, **profondità di penetrazione δ** alla tua frequenza e una nota pratica (§15.1) |
 | **Guida d'onda rettangolare** | la guida WR a cui si fissa il feed tramite la piastrina λ/4 | solo le guide della banda: 10 GHz **WR-90** o **WR-75**, 24 GHz **WR-42**, 47 GHz **WR-22** o **WR-19**… Dimensiona piastrina, foratura e base quadrata |
 | **Base del feed** | **Circolare** o **Quadrata** | quadrata (default a 10 e 24 GHz) solo per le flange standard quadrate (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); si allarga da sola se fori o lamature lo richiedono |
 | **Lingua** | Italiano / English | si sceglie nell'installer; qui serve soprattutto per la versione portable |
+| **📡 Abilita EMELab** | interruttore | aggiunge la scheda EMELab (misure e pianificazione EME, §14); spento di default, la scelta viene ricordata |
 | **ℹ️ Credits · 🔄 Controlla aggiornamenti · 📖 Manuale · 🐞 Segnala un problema** | autore e fonti · nuove versioni · questo manuale · segnalazione GitHub precompilata | |
 
 
@@ -431,7 +433,7 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 | Campo / pulsante | Significato |
 |---|---|
 | **Materiale, Titolo** | scritti nel cartiglio |
-| **Tolleranza generale di lavorazione ±** | predefinita: il valore consigliato per la banda (§14.2); scritta nei PDF di feed e piastrina con le tolleranze dei fori |
+| **Tolleranza generale di lavorazione ±** | predefinita: il valore consigliato per la banda (§15.2); scritta nei PDF di feed e piastrina con le tolleranze dei fori |
 | **📄 Genera PDF** | disegno A4: sezione quotata, tabella delle quote (mm e λ), cartiglio; **foglio 2** = flangia forata; tabella delle tolleranze critiche (dal §7.4) |
 | **🧊 Genera STEP / 🖨️ Genera STL** | solido per CAD/CAM (filetti al Ø di preforo) / per la stampa 3D |
 | **Parametri JSON** | tutte le quote e le impostazioni |
@@ -441,6 +443,7 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 ---
 
 ## 13. Full-wave openEMS (facoltativo)
+14. EMELab — misure e pianificazione EME (facoltativo)
 
 ![openEMS]({IMG}/m32_openems.jpg)
 
@@ -456,9 +459,43 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 
 ---
 
-## 14. Tabelle di riferimento
+## 14. EMELab — misure e pianificazione EME (facoltativo)
 
-### 14.1 Materiali
+EMELab è una scheda **facoltativa**: si accende con l'interruttore **📡 Abilita EMELab** nella barra laterale (la scelta viene ricordata). Serve a chi fa EME a 10, 24 e 47 GHz per **registrare le misure vere** della stazione, confrontarle con quanto il setup dovrebbe dare e capire dove migliorare. **Tutti i dati restano sul tuo PC** (un file nella cartella delle impostazioni): stazione, setup, misure e l'indirizzo della tua stazione meteo non vengono mai inviati; il servizio meteo da internet riceve solo coordinate e ora. Tutti gli orari sono in **UTC**.
+
+![EMELab: stazione e setup]({IMG}/m35_emelab_station.jpg)
+
+### 14.1 Stazione e setup
+| Campo | Cos'è |
+|---|---|
+| **Nominativo, Locator, Latitudine/Longitudine, Quota** | posizione della stazione (dal locator si calcolano le coordinate) |
+| **Stazione meteo personale** | indirizzo del tuo sito Meteotemplate / Cumulus / Weather Display (o del file dati); salvato solo sul PC |
+| **Flusso solare a 15.4 GHz** | valore del giorno degli osservatori RSTN (NOAA SWPC): serve per il rumore solare atteso |
+| **Setup per banda** | parabola, guadagno, efficienza, taper, spillover (pulsante **📐 Da FeedLab** dal progetto aperto, oppure a mano), NF del preamplificatore/transverter, perdite feed → LNA, potenza TX al feed, errore RMS della superficie, larghezza del fascio misurata |
+
+### 14.2 Nuova misura
+Scegli setup, **data e ora UTC** e tipo (rumore solare o lunare, cielo freddo, terra, eco, beacon, QSO, messa a fuoco). Inserisci Y o SNR, gli angoli letti e gli **offset al picco**. Il meteo si prende con **🌡️ Dalla mia stazione** o **🌍 Da Open-Meteo** e si corregge a mano; viene salvato con la sua ora UTC e la sua fonte. Sotto, EMELab mostra subito posizione e distanza di Sole e Luna, angolo Sole–Luna, attenuazione allo zenit e sul percorso (ITU-R P.676), temperatura di cielo, Tsys, **Y di sole e luna attesi**, eco attesa, Doppler e spreading.
+
+![EMELab: nuova misura]({IMG}/m36_emelab_new.jpg)
+
+### 14.3 Diario e analisi
+Il **diario** elenca le misure con valori attesi, differenze e G/T ricavato dal sole (filtri per banda e tipo, esportazione e importazione CSV). L'**analisi** dà i consigli in parole semplici: G/T misurato contro atteso, effetto di elevazione e umidità, **modello di puntamento** (zero di AZ ed EL, inclinazione dell'asse, cedimento), **curva di messa a fuoco** e riflettività efficace della Luna dalle eco.
+
+![EMELab: analisi]({IMG}/m37_emelab_analysis.jpg)
+
+### 14.4 Pianificatore
+Per ogni **passaggio della Luna** sopra l'elevazione minima: inizio, fine, momento migliore, distanza, eco attesa in 1 Hz e nella banda di spreading, attenuazione, angolo minimo Sole–Luna. Con il **locator della stazione corrispondente** mostra solo le finestre comuni; con **Usa le previsioni meteo** tiene conto dell'umidità prevista (16 giorni). In fondo: **perigei e apogei** (fino a 2.2 dB sulle eco) e **mesi più favorevoli** dal clima dell'ultimo anno nel tuo luogo.
+
+![EMELab: pianificatore]({IMG}/m38_emelab_planner.jpg)
+
+### 14.5 Guida alle misure
+L'ultima sottoscheda spiega le misure fondamentali (sole, luna, cielo/terra, carico caldo, transito del sole, messa a fuoco, puntamento, eco, ambiente) con procedura e riferimenti.
+
+---
+
+## 15. Tabelle di riferimento
+
+### 15.1 Materiali
 
 | Materiale | σ (10⁷ S/m) | profondità di penetrazione δ (µm) a 10 / 24 / 47 / 76 GHz | Rq (µm) | Perdite × rame | Nota pratica |
 |---|---|---|---|---|---|
@@ -494,7 +531,7 @@ I materiali con il nome del servizio (JLCCNC, PCBWay, Weerg) sono quelli lavorab
 
 La corrente RF scorre in uno strato spesso pochi δ: i rivestimenti devono essere ≥ 3–5 δ, e una rugosità paragonabile a δ aumenta le perdite. FeedLab trasforma la perdita ohmica in temperatura di rumore aggiunta (Laboratorio).
 
-### 14.2 Tolleranza generale di lavorazione
+### 15.2 Tolleranza generale di lavorazione
 
 | Banda | Consigliata | Note |
 |---|---|---|
@@ -505,7 +542,7 @@ La corrente RF scorre in uno strato spesso pochi δ: i rivestimenti devono esser
 
 Lo spessore della piastrina λ/4 ha una sua tolleranza più stretta (WR-42: ±0.087 mm). L'analisi di tolleranza (§7.4) dice quali quote hanno bisogno di più precisione.
 
-### 14.3 Flange standard (Flann; MIL-DTL-3922/67C)
+### 15.3 Flange standard (Flann; MIL-DTL-3922/67C)
 
 | WR | Flangia | Forma | Misura (mm) | Posizione dei fori (mm) | Ø fori (pubblicato → FeedLab) | Vite |
 |---|---|---|---|---|---|---|
@@ -515,7 +552,7 @@ Lo spessore della piastrina λ/4 ha una sua tolleranza più stretta (WR-42: ±0.
 | WR-22, WR-19 | UG-383/U | rotonda | Ø28.55 | PCD 23.81 (4 fori + 4 spine) | 3.05 → 3.1 | 4-40 UNC |
 | WR-15 … WR-5 | UG-385/387/U | rotonda | Ø19.05 | PCD 14.29 (4 fori + 4 spine) | 3.05 → 3.1 | 4-40 UNC |
 
-### 14.4 Viti, fori e teste
+### 15.4 Viti, fori e teste
 
 | Vite | Preforo | Passaggio (normale / medio) | Lamatura testa cilindrica Ø × prof. | Svasatura testa piana Ø |
 |---|---|---|---|---|
@@ -532,7 +569,7 @@ Teste cilindriche ISO 4762 / ASME B18.3; teste piane ISO 7046 (90°) / UNC 82°.
 
 ---
 
-## 15. Esempio completo: feed EME a 24 GHz per una offset da 2.4 m
+## 16. Esempio completo: feed EME a 24 GHz per una offset da 2.4 m
 
 1. **Barra laterale:** Banda **24.048 GHz**, materiale **Ottone CuZn39Pb3** (o ottone argentato), guida **WR-42**, base **Circolare**.
 2. **Procedura guidata:** catalogo → **Channel Master Type 243 2.4 m**; obiettivo **Massimo G/T**; illuminazione **Automatica** o per esempio 12 dB; **Trova il feed migliore** → **Dual-Flare (IZ0JNY)** → **Usa questo feed**.
@@ -546,7 +583,7 @@ Teste cilindriche ISO 4762 / ASME B18.3; teste piane ISO 7046 (90°) / UNC 82°.
 
 ---
 
-## 16. Problemi frequenti
+## 17. Problemi frequenti
 
 | Problema | Cosa fare |
 |---|---|
@@ -562,7 +599,7 @@ Teste cilindriche ISO 4762 / ASME B18.3; teste piane ISO 7046 (90°) / UNC 82°.
 
 ---
 
-## 17. Glossario
+## 18. Glossario
 
 | Termine | Significato |
 |---|---|

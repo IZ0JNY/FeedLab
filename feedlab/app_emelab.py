@@ -164,6 +164,9 @@ def _new(D):
     setup = next(s for s in sets if s["id"] == sid)
     d0 = c[1].date_input("Data (UTC)", now.date(), key="em_n_date")
     t0 = c[2].time_input("Ora (UTC)", now.time().replace(second=0, microsecond=0), key="em_n_time", step=60)
+    if "em_n_kind" not in _st.session_state:          # by night the Moon is the natural default
+        _now = astro.sky(now, stn["lat"], stn["lon"], stn.get("height_m") or 0.0)
+        _st.session_state["em_n_kind"] = "sun" if _now.sun.el > 3 else "moon" if _now.moon.el > 3 else "cold_sky"
     kind = c[3].selectbox("Tipo di misura", list(edb.KINDS), key="em_n_kind", format_func=lambda k: edb.KINDS[k])
     dt = datetime.combine(d0, t0).replace(tzinfo=timezone.utc)
     st.caption(f"⏱️ {edb.iso_utc(dt)} UTC")
@@ -227,6 +230,9 @@ def _show_snapshot(c, kind):
     cols[0].metric("Attenuazione allo zenit", f"{c['a_zen_db']:.2f} dB", help=f"O₂ {c['a_zen_o2']:.2f} + H₂O {c['a_zen_h2o']:.2f} dB, "
                    f"vapore {c['rho']:.1f} g/m³")
     src = s if kind == "sun" else m
+    if src["el"] < 0:
+        st.warning(("Il Sole" if kind == "sun" else "La Luna") + " " + i18n.tr("è sotto l'orizzonte in questo momento") +
+                   f" (EL {src['el']:.1f}°).")
     cols[1].metric("Attenuazione sul percorso", _fmt(src["a_slant_db"], "{:.2f} dB"))
     cols[2].metric("Temperatura di cielo", _fmt(src["t_sky"], "{:.0f} K"))
     cols[3].metric("Tsys (cielo freddo)", _fmt(src["tsys"], "{:.0f} K"))

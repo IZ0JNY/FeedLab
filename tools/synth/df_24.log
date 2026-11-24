@@ -1,2 +1,25 @@
    1      45s  EME=86.268  (IZ0JNY 86.268)  conv=0.001
    2      68s  EME=86.268  (IZ0JNY 86.268)  conv=0.002
+   3      90s  EME=86.273  (IZ0JNY 86.268)  conv=0.002
+   4     112s  EME=86.273  (IZ0JNY 86.268)  conv=0.003
+   5     136s  EME=86.278  (IZ0JNY 86.268)  conv=0.009
+   6     164s  EME=86.278  (IZ0JNY 86.268)  conv=0.011
+   7     189s  EME=86.278  (IZ0JNY 86.268)  conv=0.017
+   8     215s  EME=86.278  (IZ0JNY 86.268)  conv=0.018
+   9     242s  EME=86.278  (IZ0JNY 86.268)  conv=0.025
+  10     269s  EME=86.278  (IZ0JNY 86.268)  conv=0.028
+  11     292s  EME=86.278  (IZ0JNY 86.268)  conv=0.029
+  12     317s  EME=86.278  (IZ0JNY 86.268)  conv=0.030
+  13     342s  EME=86.278  (IZ0JNY 86.268)  conv=0.036
+  14     367s  EME=86.278  (IZ0JNY 86.268)  conv=0.042
+  15     391s  EME=86.278  (IZ0JNY 86.268)  conv=0.045
+  16     418s  EME=86.278  (IZ0JNY 86.268)  conv=0.048
+  17     448s  EME=86.279  (IZ0JNY 86.268)  conv=0.054
+  18     473s  EME=86.279  (IZ0JNY 86.268)  conv=0.059
+  19     501s  EME=86.281  (IZ0JNY 86.268)  conv=0.061
+  20     528s  EME=86.281  (IZ0JNY 86.268)  conv=0.090
+  21     554s  EME=86.281  (IZ0JNY 86.268)  conv=0.108
+  22     578s  EME=86.281  (IZ0JNY 86.268)  conv=0.109
+  23     603s  EME=86.282  (IZ0JNY 86.268)  conv=0.144
+/usr/local/lib/python3.13/multiprocessing/resource_tracker.py:479: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown: {'/mp-o3z0ui5n', '/mp-rf28igv2', '/mp-zwukfsin', '/mp-fsqj_u0l', '/mp-tqnnuxa_', '/mp-k9s4u5fk'}
+  warnings.warn(
