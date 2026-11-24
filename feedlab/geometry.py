@@ -30,8 +30,8 @@ FEED_TYPES = {
     "conical": "Horn conico",
     "ve4ma": "VE4MA / Super-VE4MA (choke)",
     "chaparral": "Chaparral 3 anelli",
-    "axial_corrugated": "Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)",
-    "rect_horn": "Horn rettangolare (G3RPE)",
+    "axial_corrugated": "Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL)",
+    "rect_horn": "Tromba rettangolare (G3RPE)",
     "iz0jny": "Dual-Flare (IZ0JNY)",
 }
 

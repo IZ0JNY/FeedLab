@@ -337,6 +337,53 @@ def section_fig(geo):
     return fig
 
 
+# readable name of each feed dimension (the code next to it is the label on the section drawing)
+PARAM_NAMES = {
+    'A_input': "diametro della guida d'ingresso",
+    'B_aperture': "diametro dell'apertura",
+    'C_phasing': 'lunghezza della sezione di fase',
+    'D_aperture': "diametro dell'apertura",
+    'Di': "diametro d'ingresso",
+    'Di_input': "diametro d'ingresso",
+    'Ds': 'diametro dopo il gradino',
+    'Ds_step': 'diametro dopo il gradino',
+    'Dm': 'diametro del cilindro di fase',
+    'Ls': 'lunghezza del gradino',
+    'L1': 'lunghezza del 1° cono',
+    'Lp': 'lunghezza della sezione di fase',
+    'L2': 'lunghezza del 2° cono',
+    'L_guide': "lunghezza della guida d'ingresso",
+    'input_length': "lunghezza della guida d'ingresso",
+    'las': "lunghezza della guida d'ingresso",
+    'length': 'lunghezza',
+    'diam': 'diametro',
+    'flare_length': 'lunghezza del cono',
+    'flare_half_deg': 'semi-angolo del cono',
+    'cone1_half_deg': 'semi-angolo del 1° cono',
+    'cone2_half_deg': 'semi-angolo del 2° cono',
+    'horn_diam': 'diametro della tromba',
+    'ring_width': "larghezza dell'anello (choke)",
+    'ring_depth': "profondità dell'anello (choke)",
+    'ring_setback': "arretramento dell'anello (choke)",
+    'ring_wall': "spessore della parete dell'anello",
+    'aperture_H': 'apertura sul piano H',
+    'aperture_E': 'apertura sul piano E',
+    'axial_length': 'lunghezza della tromba',
+    'pitch': 'passo radiale delle scanalature',
+    'w': 'larghezza delle scanalature',
+    'axi': 'passo assiale delle scanalature',
+    'delta': 'labbro prima della 1ª scanalatura',
+    'd1': 'profondità della scanalatura 1',
+    'd2': 'profondità della scanalatura 2',
+    'd3': 'profondità della scanalatura 3',
+    'd4': 'profondità della scanalatura 4',
+    'd5': 'profondità della scanalatura 5',
+    'd6': 'profondità della scanalatura 6',
+    'd7': 'profondità della scanalatura 7',
+    'd8': 'profondità della scanalatura 8',
+}
+
+
 # ---------------------------------------------------------------- sidebar
 def _set_lang():
     i18n.set_lang(S.lang)
@@ -448,8 +495,11 @@ with st.sidebar:
     _bwg = None
     _fl_wr = _fl.FLANGES.get(_wr) if _wr else None
     if _fl_wr is not None and _fl_wr.shape == "square":
+        if S.get("base_shape_band") != S.f_ghz:       # new band: square like the flange (10, 24 GHz); round from 47 GHz
+            S["base_shape"] = "square"
+            S["base_shape_band"] = S.f_ghz
         _shape = st.radio("Base del feed", ["round", "square"], horizontal=True, key="base_shape",
-                          format_func=lambda x: {"round": "Circolare", "square": "Quadrata (flangia guida)"}[x],
+                          format_func=lambda x: {"round": "Circolare", "square": "Quadrata"}[x],
                           help="quadrata: lato uguale alla flangia quadrata della guida rettangolare che si avvita "
                                "(WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm)")
         if _shape == "square":
@@ -502,6 +552,17 @@ with st.sidebar:
                    help="apre la pagina GitHub delle segnalazioni (issue) con versione e progetto già compilati")
     st.caption("openEMS (opzionale): " + ("✅ pronto" if (S.get("oems_env") or {}).get("py") else
                                          "vedi scheda Full-wave openEMS"))
+
+# whoever plays with the settings is invited, every few changes, to validate the design with openEMS
+if not _missing():
+    _sig = repr((S.feed_kind, S.f_ghz, S.dish, S.material, S.get("overrides", {}).get(S.feed_kind),
+                 S.get("ill_taper"), S.get("ill_mode"), S.get("fd_design"), S.get("wall"), S.get("base_t"),
+                 S.get("base_shape"), S.get("wr_wg"), S.get("mount_cfg")))
+    if S.get("tweak_sig") not in (None, _sig):
+        S["tweaks"] = S.get("tweaks", 0) + 1
+        if S["tweaks"] % 5 == 0:
+            _st.toast(i18n.tr("Hai cambiato parecchie impostazioni: è il momento di una validazione con openEMS. Lancia una simulazione full-wave nella scheda 🖥️ Full-wave openEMS: è più lenta ma più precisa del simulatore veloce, valida i dati e verifica che i due risultati convergano."), icon="🖥️", duration=12)
+    S["tweak_sig"] = _sig
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
                 "🧊 Modello 3D", "🔩 Montaggio feed + piastrina", "🔌 Piastrina WR", "📄 Disegno & STEP",
@@ -764,17 +825,18 @@ with tabs[1], contextlib.suppress(_Skip):
             if k not in map_keys:
                 continue
             if S.feed_kind in ("w2imu", "w2imu_oe2igl", "large_w2imu") and k == "flare_length":
-                st.text(f"flare_length (calcolata) {v:.3f}")
+                st.text(f"{i18n.tr('lunghezza del cono')} · flare_length ({i18n.tr('calcolata')}) {v:.3f}")
                 continue
             if S.feed_kind == "conical" and k == "flare_length":
                 continue
             # same colours as the dimensions on the section: blue lengths, green diameters, red angles
+            _nm = f"{i18n.tr(PARAM_NAMES[k])} · {k}" if k in PARAM_NAMES else k
             if k.endswith("_deg"):
-                lab = f":red[{k} (°)]"
+                lab = f":red[{_nm} (°)]"
             elif k.startswith(("D", "d_", "A_", "B_")) or "diam" in k:
-                lab = f":green[{k} (mm)]"
+                lab = f":green[{_nm} (mm)]"
             else:
-                lab = f":blue[{k} (mm)]"
+                lab = f":blue[{_nm} (mm)]"
             _guide = k in ("input_length", "L_guide") or (k == "length" and S.feed_kind in ("open_circular", "ve4ma", "chaparral"))
             nv = st.number_input(lab, value=float(round(v, 4)), format="%.4f", key=f"in_{S.feed_kind}_{k}",
                                  help="angolo del cono: cambiandolo FeedLab ricalcola la lunghezza del cono "
@@ -919,7 +981,7 @@ with tabs[3], contextlib.suppress(_Skip):
         m1.metric("η sulla tua parabola", f"{100 * here.total:.1f} %")
         m2.metric("Taper al bordo", f"{here.edge_taper_db:.1f} dB")
         m3.metric("f/D ottimo del feed", f"{best.fD:.2f}", f"{100 * best.total:.1f} %")
-        m4.metric("Centro di fase", f"{pc * lam:+.2f} mm", "davanti all'apertura" if pc > 0 else "dentro l'horn")
+        m4.metric("Centro di fase", f"{pc * lam:+.2f} mm", "davanti all'apertura" if pc > 0 else "dentro la tromba")
         beam = efficiency.dish_beam(pat.shifted(pc), dish.fD, dish.D_mm, lam, blk)
         b1, b2, b3 = st.columns(3)
         b1.metric("HPBW della parabola", f"{beam.hpbw_deg:.3f}°",
@@ -1043,7 +1105,7 @@ with tabs[2], contextlib.suppress(_Skip):
     kind = S.feed_kind
     if kind not in explore.TUNABLE:
         st.warning("Il laboratorio interattivo usa il simulatore rapido: disponibile per guida aperta, W2IMU, "
-                   "Large W2IMU, Skobelev, Pickett-Potter, conico e horn rettangolare. Per VE4MA/Chaparral usa openEMS.")
+                   "Large W2IMU, Skobelev, Pickett-Potter, conico e tromba rettangolare. Per VE4MA/Chaparral usa openEMS.")
     else:
         dish = S.dish or wizard.dish_from_prime(600, 0.6)
         lam = wavelength_mm(S.f_ghz)
@@ -1201,7 +1263,7 @@ with tabs[2], contextlib.suppress(_Skip):
         st.divider()
         st.subheader("🎯 Tolleranze di lavorazione e resa")
         if kind not in tolerance.TOL_KEYS:
-            st.info("L'analisi di tolleranza usa il simulatore rapido a guida circolare: non disponibile per l'horn rettangolare.")
+            st.info("L'analisi di tolleranza usa il simulatore rapido a guida circolare: non disponibile per la tromba rettangolare.")
         else:
             st.caption("Ogni quota lavorata varia dentro la sua tolleranza: FeedLab stima come si distribuiscono efficienza, "
                        "guadagno, G/T e S11 dei pezzi prodotti (Monte Carlo), quali quote sono critiche e quale tolleranza "
@@ -1305,7 +1367,7 @@ with tabs[6], contextlib.suppress(_Skip):
     geo = current_geometry()
     wg = S.get("wr_wg")
     if isinstance(geo, geometry.RectHornGeometry):
-        st.info("L'horn rettangolare si collega direttamente alla guida WR: piastrina non necessaria.")
+        st.info("La tromba rettangolare si collega direttamente alla guida WR: piastrina non necessaria.")
     elif wg not in flanges.FLANGES:
         st.info("Scegli la guida d'onda rettangolare nella barra laterale.")
     else:
@@ -1340,7 +1402,7 @@ with tabs[6], contextlib.suppress(_Skip):
                                                     min_value=float(_dmin), max_value=float(_dmax), value=float(min(_dfl, _dmax)),
                                                     step=0.1, key=f"adv_bdia_{k_}",
                                                     help="il massimo lascia almeno 1 mm di metallo verso il bordo più vicino")
-                    d["cbore"] = st.checkbox("Lamatura per la testa della vite (lato horn della base)", value=d["cbore"],
+                    d["cbore"] = st.checkbox("Lamatura per la testa della vite (lato tromba della base)", value=d["cbore"],
                                              key=f"adv_cb_{k_}")
                     if d["cbore"] and _scr in flanges.CBORE:
                         _cd, _ck = flanges.CBORE[_scr]
@@ -1449,7 +1511,7 @@ with tabs[7], contextlib.suppress(_Skip):
     geo = current_geometry()
     from feedlab.waveguide import RECT_WG, suggest_rect_wg
     if isinstance(geo, geometry.RectHornGeometry):
-        st.info("L'horn rettangolare si collega direttamente alla guida WR: piastrina non necessaria.")
+        st.info("La tromba rettangolare si collega direttamente alla guida WR: piastrina non necessaria.")
     else:
         c1, c2, c3, c4 = st.columns(4)
         if S.get("wr_wg"):                       # chosen once, in the sidebar (plate, drilling, square base)
@@ -1606,9 +1668,9 @@ with tabs[7], contextlib.suppress(_Skip):
                 _cbs = [hh for hh in _gb.mount.feed_holes if hh.kind == "cbore_back"]
                 if _cbs and not _cbs[0].cb_depth:
                     st.info(_T("Fori passanti Ø{d:g} mm senza lamatura: la testa della vite si appoggia sulla base "
-                               "(lato horn); base spessa {t:.2f} mm.", d=_cbs[0].dia, t=_gb.params["flange_thickness"]))
+                               "(lato tromba); base spessa {t:.2f} mm.", d=_cbs[0].dia, t=_gb.params["flange_thickness"]))
                 elif _cbs:
-                    st.info(_T("Lamature sul lato horn della base (dove escono le teste delle viti): Ø{d:g} mm, profonde "
+                    st.info(_T("Lamature sul lato tromba della base (dove escono le teste delle viti): Ø{d:g} mm, profonde "
                                "{k:g} mm; base spessa {t:.2f} mm, sotto la testa restano {r:.2f} mm.",
                                d=_cbs[0].cb_dia, k=_cbs[0].cb_depth, t=_gb.params["flange_thickness"],
                                r=_gb.params["flange_thickness"] - _cbs[0].cb_depth))

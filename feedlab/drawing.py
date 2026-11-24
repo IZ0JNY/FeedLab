@@ -329,7 +329,7 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         head = [T("Fori della flangia filettati {th} passanti: le viti entrano dal lato della guida, attraversano "
                   "flangia e piastrina e si avvitano in questa base.", th=mnt.thread)]
     elif any(h.cb_dia for h in mnt.feed_holes):
-        head = [T("Viti {screw} inserite dal lato del feed, con la testa nella lamatura (tratteggio magenta, lato horn): "
+        head = [T("Viti {screw} inserite dal lato del feed, con la testa nella lamatura (tratteggio magenta, lato tromba): "
                   "attraversano base e piastrina e si avvitano nella flangia della guida.", screw=mnt.screw)]
     else:
         head = [T("Fori della flangia passanti: viti {screw} inserite dal lato del feed con la testa appoggiata sulla "

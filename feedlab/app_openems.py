@@ -96,7 +96,7 @@ def _install_section(S):
         else:
             st.warning("openEMS non è installato su questo PC.")
         if py:
-            st.success(f"Binding Python funzionanti: openEMS {py['openems']}, CSXCAD {py['csxcad']} con `{py['python']}`")
+            st.success(f"Binding Python funzionanti: openEMS {py['openems']}, CSXCAD {py['csxcad']} · Python `{py['python']}`")
         elif inst.found:
             st.warning("I binding Python di openEMS non si importano ancora.")
     if c[1].button("🔄 Verifica di nuovo", key="oems_recheck"):
@@ -203,7 +203,7 @@ def _install_progress(S):
 def _new_section(S, geo, dish):
     env = _env_state(S)
     if isinstance(geo, geometry.RectHornGeometry):
-        st.warning("L'analisi full-wave automatica copre i feed a simmetria di rotazione (non l'horn rettangolare).")
+        st.warning("L'analisi full-wave automatica copre i feed a simmetria di rotazione (non la tromba rettangolare).")
         return
     f0 = geo.f_ghz
     st.markdown(f"**Feed:** {geometry.FEED_TYPES[geo.kind]} a {f0:g} GHz · apertura Ø{2 * geo.r_aperture:.2f} mm · "
@@ -338,7 +338,7 @@ def _jobs_list(jobs):
                 openems_local.open_folder(j["dir"])
             if j["state"] not in ("running", "queued") and st.button("🗑️ Elimina", key="del" + j["name"]):
                 openems_local.delete_job(j["dir"])
-            st.code(j["log_tail"][-1500:] or "(nessun log)")
+            st.code(j["log_tail"][-1500:] or i18n.tr("(nessun log)"))
 
 
 # ================================================================== 4. results

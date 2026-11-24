@@ -155,9 +155,9 @@ Tre colonne: **parabola** (sinistra), **opzioni** (centro), **riepilogo della pa
 
 | Campo | Scelte | Cosa cambia |
 |---|---|---|
-| **Polarizzazione** | Lineare / Circolare | la circolare aggiunge un polarizzatore (septum o dielettrico) ai consigli; esclude l'horn rettangolare |
+| **Polarizzazione** | Lineare / Circolare | la circolare aggiunge un polarizzatore (septum o dielettrico) ai consigli; esclude la tromba rettangolare |
 | **Obiettivo** | Massimo guadagno (TX/terrestre) · **Massimo G/T (RX, EME, sole)** — predefinito · Massime prestazioni RX (minimo rumore) | G/T e RX progettano il feed per un f/D un po' più grande (illuminazione più morbida al bordo: meno spillover e meno rumore dal terreno); RX preferisce anche i feed con lobi laterali e posteriori bassi |
-| **Mezzi di costruzione** | Tornio / CNC · Solo lamiera e saldatura | con la lamiera vengono preferiti guida aperta, horn rettangolare e W2IMU |
+| **Mezzi di costruzione** | Tornio / CNC · Solo lamiera e saldatura | con la lamiera vengono preferiti guida aperta, tromba rettangolare e W2IMU |
 | **Stima con simulazione rapida** | sì/no | fa girare il mode matching su ogni candidato (~20 s) |
 | **Illuminazione della parabola** | **Automatica (consigliata)** · Taper al bordo scelto da me | vedi 5.3 |
 | **Taper al bordo (dB)** | 6–25 dB, predefinito **10 dB** | attivo con "Taper al bordo scelto da me" |
@@ -213,7 +213,7 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | miglior G/T sulle offset |
 | **Guida circolare aperta** | parabole piccole e profonde | blocking minimo, F/B scarso |
 | **Pickett-Potter** | f/D 0.5–0.95, anche oltre 76 GHz | ~80 % (OE2IGL) |
-| **Horn rettangolare** | polarizzazione lineare, < 40 GHz | lamiera, direttamente dalla WR |
+| **Tromba rettangolare** | polarizzazione lineare, < 40 GHz | lamiera, direttamente dalla WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke; openEMS |
 | **W2IMU dual-mode / W2IMU ottimizzato** | offset / f/D 0.5–0.95 | classico W1GHZ / ottimizzazione OE2IGL |
 

@@ -198,7 +198,7 @@ def axial_corrugated_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
              "valido 10–76 GHz, prime focus f/D 0.33–0.90, offset 0.33–0.80"]
     if not 10 <= f_ghz <= 76:
         notes.append("ATTENZIONE: fuori dall'intervallo di frequenza validato (10–76 GHz)")
-    return Design("Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)", f_ghz, {**d, **eff}, "OE2IGL high-performance-axial-corrugated-feed v1.4", notes)
+    return Design("Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL)", f_ghz, {**d, **eff}, "OE2IGL high-performance-axial-corrugated-feed v1.4", notes)
 
 
 # ---------------- choke-ring feeds ----------------

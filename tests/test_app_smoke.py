@@ -195,3 +195,31 @@ def test_lab_taper_slider_follows_and_drives_the_wizard(isolated):
     assert at.slider(key="ill_taper").value == 16.0 and at.session_state["fd_design"] != fd0
     at.slider(key="ill_taper").set_value(9.0).run()
     assert at.slider(key="lab_ill_taper").value == 9.0
+
+
+@pytest.mark.parametrize("band,square", [("10.368", True), ("24.048", True), ("47.088", False)])
+def test_base_default_square_at_10_and_24_ghz(isolated, band, square):
+    """Feed base: just "Circolare" / "Quadrata"; square by default with the square flanges (10, 24 GHz), round from 47."""
+    from feedlab import geometry
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    _start(at, band)
+    assert not at.exception, _errors(at)
+    assert geometry.BASE["shape"] == ("square" if square else "round")
+    radios = [r for r in at.radio if r.label == "Base del feed"]
+    assert bool(radios) == square
+    if radios:
+        assert list(radios[0].options) == ["Circolare", "Quadrata"]
+    geometry.BASE.update({"shape": "round", "wg": None})
+
+
+def test_openems_invitation_after_some_changes(isolated):
+    """Every 5 changes of the design the user is invited to validate it with openEMS."""
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    _start(at)
+    shown = []
+    for m in ["Ottone argentato", "Ottone CuZn39Pb3"] * 3:
+        at.selectbox(key="material_sel").select(m).run()
+        shown += [t.value for t in at.toast]
+    assert any("openEMS" in t for t in shown)

@@ -113,7 +113,7 @@ def mesh_estimate(geo: FeedGeometry, cfg: DeepConfig) -> dict:
 def make_deep_script(geo: FeedGeometry, out_dir: str | Path, cfg: DeepConfig | None = None,
                      name: str | None = None) -> Path:
     if not hasattr(geo, "polygons"):
-        raise ValueError("lo script full-wave copre i feed a simmetria di rotazione (non l'horn rettangolare)")
+        raise ValueError("lo script full-wave copre i feed a simmetria di rotazione (non la tromba rettangolare)")
     cfg = (cfg or DeepConfig()).resolved(geo.f_ghz)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

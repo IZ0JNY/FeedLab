@@ -1,4 +1,4 @@
-"""Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL, v1.4 spreadsheet) as a FeedLab feed type."""
+"""Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL, v1.4 spreadsheet) as a FeedLab feed type."""
 import pytest
 
 from feedlab import geometry, wizard

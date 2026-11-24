@@ -230,10 +230,10 @@ def advice(r: Result, base: Result | None, sc: Scenario, objective: str, kind: s
     tips = []
     lam = wavelength_mm(f_ghz)
     if r.edge_taper_db < 9:
-        tips.append(f"Taper al bordo {r.edge_taper_db:.1f} dB: il dish è sovra-illuminato (spillover {100 * (1 - r.spill):.0f}%). "
+        tips.append(f"Taper al bordo {r.edge_taper_db:.1f} dB: la parabola è sovra-illuminata (spillover {100 * (1 - r.spill):.0f}%). "
                     "Aumenta il diametro d'apertura del feed (fascio più stretto) per ridurre spillover e rumore di terra.")
     elif r.edge_taper_db > 16:
-        tips.append(f"Taper al bordo {r.edge_taper_db:.1f} dB: dish sotto-illuminato (illuminazione {100 * r.illum:.0f}%). "
+        tips.append(f"Taper al bordo {r.edge_taper_db:.1f} dB: parabola sotto-illuminata (illuminazione {100 * r.illum:.0f}%). "
                     "Riduci l'apertura del feed per guadagnare in TX; per RX/EME un po' di sotto-illuminazione è utile.")
     else:
         tips.append(f"Taper al bordo {r.edge_taper_db:.1f} dB: nella zona buona (10 dB per guadagno, 12–16 dB per G/T).")
@@ -263,7 +263,7 @@ def advice(r: Result, base: Result | None, sc: Scenario, objective: str, kind: s
                     "Addolcisci flare/gradini o allunga la transizione d'ingresso.")
     if sc.dish_kind == "prime":
         tips.append(f"Posiziona il centro di fase sul fuoco: {abs(r.pc_mm):.2f} mm "
-                    f"{'davanti' if r.pc_mm > 0 else 'dentro'} all'apertura (errore λ/4 = {lam / 4:.2f} mm costa ~1 dB su dish profondi).")
+                    f"{'davanti' if r.pc_mm > 0 else 'dentro'} all'apertura (errore λ/4 = {lam / 4:.2f} mm costa ~1 dB su parabole profonde).")
     else:
         tips.append("Sull'offset la posizione assiale è poco critica (inclina il fascio); punta il feed verso il punto più profondo.")
     if base is not None:

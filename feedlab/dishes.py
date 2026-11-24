@@ -182,7 +182,7 @@ CATALOG: list[DishModel] = [
               None, None, {}, "", "", "W1GHZ Antenna Book App. 5A", "tilt 67.5° dall'orizzontale, stringa sup. 1018 mm, f/D eq. 0.68"),
     # --- dishes measured in the W1GHZ Antenna Book (App. 5A) ---
     DishModel("RCA", "DSS 18\" (SMC)", "offset", 457, 495, None, None, None, 278, "misurata", None, None, 63, {}, "", "SMC",
-              "W1GHZ App. 5A / cap. 5", "63% misurato a 10 GHz con horn rettangolare"),
+              "W1GHZ App. 5A / cap. 5", "63% misurato a 10 GHz con tromba rettangolare"),
     DishModel("Dish Network", "18\"", "offset", 460, 504, None, None, None, 287, "misurata", None, None, None, {}, "", "",
               "W1GHZ App. 5A"),
     # --- prime focus ---

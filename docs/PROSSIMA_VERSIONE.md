@@ -10,6 +10,10 @@
 | 4 | Viste 3D senza l'effetto "a stella" (righe scure che partono dai fori): Plotly scartava i triangoli lunghi e sottili della tessellazione; ora vengono disegnati tutti | ✅ fatto |
 | 5 | Cursore del taper al bordo anche nel Laboratorio, collegato a quello della Procedura guidata (muovendo uno si muove l'altro); il feed si riprogetta e le simulazioni si aggiornano subito | ✅ fatto |
 | 6 | Materiali dei servizi CNC online JLCCNC, PCBWay e Weerg (alluminio 6061/6082/7075/5083/5052/2011/2024, ottone H59/H62/C360/OT58, rame T2/C101/C110, bronzo CuSn12, inox 316L, titanio) con conducibilità e rugosità della finitura di serie | ✅ fatto |
+| 7 | Pulsante «ℹ️ Informazioni sui materiali» sopra la scelta del materiale: finestra con tabella di confronto (conducibilità, rugosità, densità, perdite rispetto al rame, lavorabilità, prezzo, reperibilità, agenti atmosferici, trattamenti, pro e contro) con voti a pallini colorati | ✅ fatto |
+| 8 | Lingue coerenti: in italiano solo italiano, in inglese solo inglese (nomi delle quote del feed con descrizione tradotta, «parabola» al posto di «dish», «lato tromba» al posto di «lato horn», nomi dei feed tradotti poco (Dual-mode, Horn conico, Large W2IMU flare restano), messaggi openEMS); nuovo test automatico sul catalogo e strumento tools/lang_audit.py che controlla tutta l'interfaccia | ✅ fatto |
+| 9 | Base del feed: solo «Circolare» / «Quadrata»; quadrata di default a 10 e 24 GHz (flange quadrate), circolare da 47 GHz in su | ✅ fatto |
+| 10 | Ogni 5 modifiche al progetto un avviso invita a validare il feed con una simulazione openEMS (più precisa del simulatore veloce) | ✅ fatto |
 
 ---
 

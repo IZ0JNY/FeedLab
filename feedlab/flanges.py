@@ -337,7 +337,7 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
             m.feed_holes.append(Hole(x, y, tap, "tap", f"FLANGIA GUIDA: {thread} filettato passante (preforo Ø{tap:g})"))
         else:
             m.feed_holes.append(Hole(x, y, d_hole, "cbore_back",
-                                     f"FLANGIA GUIDA: Ø{d_hole:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} lato horn"
+                                     f"FLANGIA GUIDA: Ø{d_hole:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} lato tromba"
                                      if cbore else f"FLANGIA GUIDA: Ø{d_hole:g} passante", cb_dia=cb_d, cb_depth=cb_k))
     if pins and dowel_xy:
         for x, y in dowel_xy:
