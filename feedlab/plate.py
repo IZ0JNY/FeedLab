@@ -62,7 +62,7 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
                  corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None,
                  plate_screw: str | None = None, base_holes: str = "flange", hole_dia: float | None = None,
                  thread: str | None = None, cbore: bool = False, cb_depth: float | None = None,
-                 cb_dia: float | None = None, pins: bool = True) -> MatchingPlate:
+                 cb_dia: float | None = None, pins: bool = True, plate_t: float | None = None) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
     (feedlab.flanges.mount: same 4 holes in plate and feed base, optional plate→feed screws, optional pins)."""
     w = RECT_WG[wg]
@@ -88,28 +88,17 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
         from .flanges import mount
         kw = dict(base_holes=base_holes, hole_dia=hole_dia, thread=thread, cbore=cbore, cb_depth=cb_depth,
                   cb_dia=cb_dia, pins=pins)
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, **kw)
-        body_t = round(max(t, mnt.plate_body_min()), 2)
-        # screw length depends on the plate thickness: drill again with it (same positions)
+        # the plate keeps the λ/4 thickness unless the user sets a thicker body (feed-side pocket)
+        body_t = round(max(t, float(plate_t or 0.0)), 2)
         mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, **kw)
-        outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)   # refined below, per flange shape
+        outer = max(outer, mnt.flange.A)
     from .flanges import FLANGES
     fl = FLANGES.get(wg)
     if fl is not None:
-        # same outline and size as the waveguide's standard flange (square WR-90/75/42…, round MIL from WR-22),
-        # larger only where the plate→feed screws do not fit inside it (0.5 mm of metal at the edge, as their placement)
+        # always the outline and size of the waveguide's standard flange (square WR-90/75/42…, round MIL from
+        # WR-22): holes and countersinks are placed inside it
         outer = fl.A
-        if mnt is not None:
-            if fl.shape == "round":
-                need = max(math.hypot(h.x, h.y) + max(h.dia, h.cb_dia) / 2 for h in mnt.plate_holes)
-            else:
-                need = max(max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 for h in mnt.plate_holes)
-            outer = max(outer, 2 * (need + 0.5))
-            if outer > fl.A + 0.01:
-                mnt.warnings.append(f"la piastrina misura {outer:.2f} mm invece di {fl.A:.2f} mm come la flangia {wg}: le lamature delle "
-                                    "viti piastra→feed non ci stanno; con viti piastra→feed più piccole può restare "
-                                    "uguale alla flangia")
-    body_t = max(t, mnt.plate_body_min()) if mnt else t
+    body_t = max(t, float(plate_t or 0.0))
     return MatchingPlate(f_ghz, wg, circ_diam_mm, a_opt, b, r, t, lg / 200, z0, polarization, outer, basic, mnt,
                          round(body_t, 2))
 
@@ -134,6 +123,10 @@ def plate_solid(p: MatchingPlate):
             if h.kind == "cbore":
                 body = body.cut(cq.Workplane("XY").workplane(offset=T - h.cb_depth).center(h.x, h.y)
                                 .circle(h.cb_dia / 2).extrude(h.cb_depth))
+            elif h.kind == "csk":                # countersink for the flat head, on the WR side (z = T)
+                cone = cq.Solid.makeCone(h.cb_dia / 2, h.dia / 2, h.cb_depth, cq.Vector(h.x, h.y, T),
+                                         cq.Vector(0, 0, -1))
+                body = body.cut(cq.Workplane("XY").add(cone))
     return body
 
 
@@ -181,13 +174,14 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
         ax.arrow(-aa * 0.3, 0, aa * 0.5, 0, width=0.05 * aa, color="r")
     if p.mount is not None:
         for hl in p.mount.plate_holes:
-            ax.add_patch(Circle((hl.x, hl.y), hl.dia / 2, fill=False, lw=0.9, ec="g" if hl.kind in ("dowel", "pin") else "k"))
+            from .flanges import ROLE_COLOR, hole_role
+            ax.add_patch(Circle((hl.x, hl.y), hl.dia / 2, fill=False, lw=0.9, ec=ROLE_COLOR[hole_role(hl)]))
             if hl.kind == "tap":
                 from .flanges import SCREWS
                 from matplotlib.patches import Arc
                 dM = SCREWS[p.mount.screw][0]
                 ax.add_patch(Arc((hl.x, hl.y), dM, dM, theta1=0, theta2=270, lw=0.6))
-            if hl.kind == "cbore":
+            if hl.kind in ("cbore", "csk"):
                 ax.add_patch(Circle((hl.x, hl.y), hl.cb_dia / 2, fill=False, lw=0.7, ec="m"))
             ax.plot([hl.x - hl.dia * 0.7, hl.x + hl.dia * 0.7], [hl.y, hl.y], lw=0.3, color="0.4")
             ax.plot([hl.x, hl.x], [hl.y - hl.dia * 0.7, hl.y + hl.dia * 0.7], lw=0.3, color="0.4")
@@ -197,8 +191,11 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
         ax.set_xlim(-2.6 * h, h + 8); ax.set_ylim(-1.3 * h - 4, 1.3 * h + 2)
     else:
         ax.set_xlim(-h - 6, h + 8); ax.set_ylim(-h - 6, h + 6)
-    ax.set_title("Piastrina λ/4 — vista frontale (rosso = campo E)\n"
-                 "tratteggio: Ø guida circolare del feed · punteggiato blu: WR", fontsize=9)
+    from .flanges import role_legend
+    ax.set_title(i18n.tr("Piastrina λ/4 — vista frontale (rosso = campo E)") + "\n" +
+                 i18n.tr("tratteggio: Ø guida circolare del feed · punteggiato blu: WR") +
+                 ("\n" + "\n".join(textwrap.wrap(role_legend(p.mount.plate_holes, i18n.tr), 70))
+                  if p.mount is not None else ""), fontsize=8)
     ax2 = fig.add_axes([0.6, 0.12, 0.38, 0.8]); ax2.set_axis_off()
     txt = (f"PIASTRINA DI ADATTAMENTO λ/4\n\n"
            f"Frequenza           {p.f_ghz:g} GHz\n"
@@ -242,7 +239,9 @@ def _holes_text(p: MatchingPlate) -> str:
     lines = ["", T("FORATURA flangia {wg} {name}", wg=m.flange.wg, name=m.flange.name)]
     lines += textwrap.wrap(T("(stessi 4 fori della flangia nella piastrina e nella base del feed; coordinate dal centro)"), 58)
     for h in m.plate_holes:
-        lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {i18n.tr(h.callout)}")
+        cw = textwrap.wrap(i18n.tr(h.callout), 38) or [""]
+        lines.append(f"  x {h.x:+7.2f}  y {h.y:+7.2f}  {cw[0]}")
+        lines += [" " * 22 + c for c in cw[1:]]
     if m.base_holes == "tap":
         lines += ["  " + x for x in textwrap.wrap(T("base del feed: fori filettati {th} passanti; viti della guida: flangia "
                                                     "guida + {t:.1f} mm di piastrina + {s:.1f} mm nella base",
@@ -257,7 +256,7 @@ def _holes_text(p: MatchingPlate) -> str:
                                                     sc=m.screw, t=p.body_t), 58)]
     if m.plate_screw:
         drill = max((h.depth or 0.0 for h in m.feed_holes if h.kind == "tap" and h.depth), default=0.0)
-        for x in (T("viti piastra→feed: 4 × {ps} × {ln} a testa cilindrica", ps=m.plate_screw, ln=m.screw_len_label),
+        for x in (T("viti piastra→feed: 4 × {ps} × {ln} a testa piana Phillips (svasate, a filo)", ps=m.plate_screw, ln=m.screw_len_label),
                   T("(2 × spessore {t:.2f} → {ln}); nel feed: vite {s:.1f}, foro prof. {d:.0f} (pari), filetto prof. {tp:.1f}",
                     t=p.body_t, ln=m.screw_len_label, s=m.screw_in, d=drill, tp=m.tap_depth)):
             lines += ["  " + y for y in textwrap.wrap(x, 58)]

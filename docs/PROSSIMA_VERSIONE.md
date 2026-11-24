@@ -11,6 +11,7 @@
 | 5 | Procedura guidata: illuminazione della parabola scelta dall'utente (taper al bordo in dB, default quella attuale), grafico e disco 3D della parabola con la superficie illuminata ombreggiata | ⏳ da fare |
 | 6 | Tolleranza generale di lavorazione impostabile (scheda Disegno & STEP) e tolleranze dei fori scritte nei PDF di feed e piastrina | ✅ fatto |
 | 7 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
+| 8 | PDF di piastrina e feed: fori distinti per funzione (FLANGIA GUIDA nero, FISSAGGIO PIASTRINA magenta, PIN verde) con legenda; tabelle dei fori a capo | ✅ fatto |
 
 ---
 

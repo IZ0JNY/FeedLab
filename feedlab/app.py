@@ -1124,12 +1124,18 @@ with tabs[6], contextlib.suppress(_Skip):
                                    "sulla guida esterna (relè, LNA) con viti dal lato del feed; filettati: le viti della "
                                    "guida attraversano flangia e piastrina e si avvitano nella base")
         hole_dia = thread = None
-        if base_holes == "clear":
-            hole_dia = h2.number_input(_T("Ø fori maggiorati (mm, proposto {d:g} per {s})",
-                                          d=flanges.clear_hole(wg, system), s=_scr or ""),
-                                       min_value=float(_dfl), max_value=12.0, step=0.1,
-                                       value=float(flanges.clear_hole(wg, system)), key=f"hole_dia_{wg}_{system}",
-                                       disabled=not holes_on)
+        if base_holes in ("flange", "clear") and wg in flanges.FLANGES:
+            _dmax = flanges.max_hole_dia(wg, dcirc)
+            _ddef = _dfl if base_holes == "flange" else flanges.clear_hole(wg, system)
+            _dmin = round(flanges.SCREWS[_scr][0] + 0.1, 1)
+            hole_dia = h2.number_input(_T("Ø fori passanti (mm, proposto {d:g}; da {a:g} a {b:g}: almeno 1 mm dal bordo)",
+                                          d=_ddef, a=_dmin, b=_dmax),
+                                       min_value=float(_dmin), max_value=float(_dmax), step=0.1,
+                                       value=float(min(_ddef, _dmax)), key=f"hole_dia_{base_holes}_{wg}_{system}",
+                                       disabled=not holes_on,
+                                       help="stesso diametro nella piastrina e nella base del feed; il massimo lascia "
+                                            "almeno 1 mm di metallo verso il bordo più vicino (contorno, guida circolare, "
+                                            "foro vicino), mai meno del foro della flangia standard")
         elif base_holes == "tap":
             _th = flanges.base_thread_options(wg, S.f_ghz, system)
             thread = h2.selectbox("Filettatura dei fori nella base", _th, key=f"base_thread_{'_'.join(_th)}",
@@ -1160,19 +1166,29 @@ with tabs[6], contextlib.suppress(_Skip):
         else:
             opts = flanges.plate_screw_options(S.f_ghz)
             p1, p2 = st.columns(2)
-            if p1.checkbox("4 viti piastrina → feed con lamatura (nei 4 punti liberi)", key="mount_plate_screws",
-                           disabled=not holes_on,
-                           help="fissano la piastrina alla base del feed; la testa sta nella lamatura della piastrina "
-                                "(lato guida), così non fa spessore. Nel feed: fori filettati ciechi"):
-                pscrew = p2.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{opts[0]}", disabled=not holes_on,
-                                      format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
-                                      help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale; "
-                                           "la lamatura segue la testa della vite scelta")
+            if p1.checkbox("4 viti piastrina → feed a testa piana Phillips (svasate, nei 4 punti liberi)",
+                           key="mount_plate_screws", disabled=not holes_on,
+                           help="fissano la piastrina alla base del feed; la testa piana sta a filo nella svasatura della "
+                                "piastrina (lato guida), così non fa spessore e la piastrina resta uguale. Nel feed: fori "
+                                "filettati ciechi"):
+                _fit = flanges.fitting_plate_screws(wg, S.f_ghz, dcirc, system, "V" if pol_ == "Verticale" else "H") \
+                    if wg in flanges.FLANGES else opts
+                pscrew = p2.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{wg}_{'_'.join(opts)}",
+                                      index=opts.index(_fit[0]) if _fit else 0, disabled=not holes_on,
+                                      format_func=lambda m_: (m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})")
+                                      + ("" if m_ in _fit else " — " + i18n.tr("non sta nella piastrina")),
+                                      help="viti a testa piana Phillips (ISO 7046 / UNC 82°); lunghezza = 2 × spessore della "
+                                           "piastrina, arrotondata alla misura commerciale; la svasatura segue la testa")
+        _pt = st.number_input("Spessore della piastrina (mm, vuoto = λ/4 calcolato)", min_value=0.5, max_value=30.0,
+                              value=None, step=0.1, key=f"plate_t_user_{wg}", placeholder=i18n.tr("automatico (λ/4)"),
+                              help="la piastrina resta spessa λ/4 a meno che tu non la voglia più spessa: in quel caso "
+                                   "sul lato feed si ricava una tasca del diametro della guida circolare (la parte λ/4 "
+                                   "non cambia)")
         pol_c = "V" if pol_ == "Verticale" else "H"
         try:
             pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
                                     plate_screw=pscrew, base_holes=base_holes, hole_dia=hole_dia, thread=thread,
-                                    cbore=_cbore, cb_depth=cb_depth, cb_dia=cb_dia, pins=pins)
+                                    cbore=_cbore, cb_depth=cb_depth, cb_dia=cb_dia, pins=pins, plate_t=_pt)
             new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
                        "plate_t": pl.body_t if holes_on else None, "base_holes": base_holes, "hole_dia": hole_dia,
                        "thread": thread, "cbore": _cbore, "cb_depth": cb_depth, "cb_dia": cb_dia, "pins": pins}
@@ -1209,7 +1225,7 @@ with tabs[6], contextlib.suppress(_Skip):
                                "feed con la testa appoggiata sulla base, avvitate nella flangia della guida.",
                                wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw)]
                 if mm_.plate_screw:
-                    _txt += [_T("4 viti piastra→feed {ps} × {ln} con testa nella lamatura (lato guida).",
+                    _txt += [_T("4 viti piastra→feed {ps} × {ln} a testa piana Phillips, a filo nella svasatura (lato guida).",
                                 ps=mm_.plate_screw, ln=mm_.screw_len_label),
                              _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
                                 a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]
@@ -1247,10 +1263,10 @@ with tabs[6], contextlib.suppress(_Skip):
             fig.add_shape(type="rect", x0=-wa / 2, y0=-wb / 2, x1=wa / 2, y1=wb / 2, line=dict(dash="dot", color="blue"))
             if pl.mount is not None:
                 for hl in pl.mount.plate_holes:
-                    col_ = {"tap": "black", "dowel": "green", "pin": "green", "cbore": "black"}.get(hl.kind, "black")
+                    col_ = {"flange": "black", "plate": "magenta", "pin": "green"}[flanges.hole_role(hl)]
                     fig.add_shape(type="circle", x0=hl.x - hl.dia / 2, y0=hl.y - hl.dia / 2, x1=hl.x + hl.dia / 2,
                                   y1=hl.y + hl.dia / 2, line=dict(color=col_))
-                    if hl.kind == "cbore":
+                    if hl.kind in ("cbore", "csk"):
                         fig.add_shape(type="circle", x0=hl.x - hl.cb_dia / 2, y0=hl.y - hl.cb_dia / 2, x1=hl.x + hl.cb_dia / 2,
                                       y1=hl.y + hl.cb_dia / 2, line=dict(color="magenta"))
             fig.add_annotation(x=0, y=0, ax=0 if pl.polarization == "V" else -40, ay=40 if pl.polarization == "V" else 0,

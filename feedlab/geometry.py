@@ -347,7 +347,7 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         if fl_t < t_need - 1e-9 and mnt.screw_len:
             # plate→feed screws: the longest commercial one whose tip stays inside the base
             from .flanges import CBORE, LENGTHS_IN, LENGTHS_MM
-            grip = max((MOUNT.get("plate_t") or 0.0) - CBORE[mnt.plate_screw][1], 0.0)
+            grip = MOUNT.get("plate_t") or 0.0          # flat-head screws, flush: the whole plate is the grip
             short_in = [(1 / 8, '1/8"'), (3 / 16, '3/16"'), (1 / 4, '1/4"'), (5 / 16, '5/16"')]
             opts = ([(v * 25.4, lab) for v, lab in short_in + list(LENGTHS_IN)] if MOUNT.get("system") == "imperial"
                     else [(float(v), f"{v} mm") for v in [3, 4, 5, 6, 8] + list(LENGTHS_MM)])

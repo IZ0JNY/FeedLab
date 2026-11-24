@@ -302,7 +302,8 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
     ax.plot([-R * 1.1, R * 1.1], [0, 0], lw=0.4, ls="-.", color="0.4")
     ax.plot([0, 0], [-R * 1.1, R * 1.1], lw=0.4, ls="-.", color="0.4")
     for i, h in enumerate(mnt.feed_holes, 1):
-        ax.add_patch(Circle((h.x, h.y), h.dia / 2, fill=False, lw=0.9, ec="k" if h.kind == "tap" else "g"))  # dowel/pin in green
+        from .flanges import ROLE_COLOR, hole_role
+        ax.add_patch(Circle((h.x, h.y), h.dia / 2, fill=False, lw=0.9, ec=ROLE_COLOR[hole_role(h)]))
         if h.kind == "tap":                      # thread: 3/4 circle at the major diameter (drawing convention)
             from matplotlib.patches import Arc
             dM = SCREW_MAJOR((mnt.plate_screw if h.depth else mnt.thread) or mnt.screw)
@@ -318,11 +319,12 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         return i18n.tr(tpl).format(**kw)
     size = f"□ {side:.2f} × {side:.2f}" if side else f"Ø{2 * R:.2f}"
     pol = T("verticale" if mnt.polarization == "V" else "orizzontale")
+    from .flanges import role_legend
     ax.set_title(T("Flangia d'ingresso: vista dalla faccia z = 0 ({size}, spessore {t:.2f} mm)", size=size,
                    t=geo.params["flange_thickness"]) + "\n" +
-                 T("lato largo della guida {wg} lungo x (polarizzazione {pol})", wg=mnt.flange.wg, pol=pol), fontsize=9)
+                 T("lato largo della guida {wg} lungo x (polarizzazione {pol})", wg=mnt.flange.wg, pol=pol) + "\n" +
+                 "\n".join(textwrap.wrap(role_legend(mnt.feed_holes, i18n.tr), 70)), fontsize=8)
     ax2 = fig.add_axes([0.58, 0.25, 0.4, 0.68]); ax2.set_axis_off()
-    import textwrap
     if mnt.base_holes == "tap":
         head = [T("Fori della flangia filettati {th} passanti: le viti entrano dal lato della guida, attraversano "
                   "flangia e piastrina e si avvitano in questa base.", th=mnt.thread)]
@@ -333,13 +335,15 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         head = [T("Fori della flangia passanti: viti {screw} inserite dal lato del feed con la testa appoggiata sulla "
                   "base; attraversano base e piastrina e si avvitano nella flangia della guida.", screw=mnt.screw)]
     if mnt.plate_screw:
-        head.append(T("Viti piastra → feed: {ps} (testa nella lamatura della piastra).", ps=mnt.plate_screw))
+        head.append(T("Viti piastra → feed: {ps} a testa piana Phillips (svasate nella piastrina).", ps=mnt.plate_screw))
     lines = [T("FORATURA per flangia {wg} {name}", wg=mnt.flange.wg, name=mnt.flange.name)]
     for h_ in head:
         lines += textwrap.wrap(h_, 62)
     lines += ["", f"{'#':>2s} {'x':>8s} {'y':>8s}  " + T("lavorazione")]
     for i, h in enumerate(mnt.feed_holes, 1):
-        lines.append(f"{i:>2d} {h.x:>8.2f} {h.y:>8.2f}  {i18n.tr(h.callout)}")
+        cw = textwrap.wrap(i18n.tr(h.callout), 44) or [""]
+        lines.append(f"{i:>2d} {h.x:>8.2f} {h.y:>8.2f}  {cw[0]}")
+        lines += [" " * 22 + c for c in cw[1:]]
     lines.append("")
     notes_ = [T("Coordinate in mm dal centro della guida.")]
     if any(h.kind == "tap" for h in mnt.feed_holes):
