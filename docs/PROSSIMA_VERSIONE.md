@@ -5,6 +5,7 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 2 | Progetto feed: spessore parete e spessore base si applicano solo con "Applica modifiche", come tutte le altre quote ("Ripristina progetto" li riporta ad automatico) | ✅ fatto |
+| 3 | L'illuminazione scelta nella procedura guidata (taper al bordo o obiettivo) cambia davvero il feed: tutte le schede lo costruiscono per l'f/D di progetto, che si aggiorna subito cambiando il taper; riga "Progettato per f/D…" in Progetto feed | ✅ fatto |
 | 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
 
 ---

@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ("Progettato per f/D {fd:.3f}: taper al bordo {t:.1f} dB sulla parabola (f/D {f0:.3f}) — si cambia con l'illuminazione nella Procedura guidata.", 'Designed for f/D {fd:.3f}: edge taper {t:.1f} dB on the dish (f/D {f0:.3f}) — change it with the illumination in the Guided procedure.'),
     ('Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastrina (6H); nella base del feed fori passanti Ø{d:g}.', 'Flange {wg} {name}: the waveguide screws ({screw}) go into the plate (6H); through holes Ø{d:g} in the feed base.'),
     ('Illuminazione della parabola', 'Dish illumination'),
     ('Automatica (consigliata)', 'Automatic (recommended)'),

@@ -163,3 +163,19 @@ def test_wall_and_base_apply_only_with_button(isolated):
     next(b for b in at.button if b.label == "Applica modifiche").click().run()
     assert not at.exception, _errors(at)
     assert at.session_state["base_t"] == 5.0 and at.session_state["wall"] == 1.5
+
+
+def test_illumination_changes_the_feed(isolated):
+    """Changing the edge taper in the wizard rebuilds the feed at once (designed for the new f/D)."""
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    _start(at)
+    fd_auto = at.session_state["fd_design"]
+    next(r for r in at.radio if r.key == "ill_mode").set_value("taper").run()
+    at.slider(key="ill_taper").set_value(16.0).run()
+    assert not at.exception, _errors(at)
+    fd16 = at.session_state["fd_design"]
+    at.slider(key="ill_taper").set_value(8.0).run()
+    fd8 = at.session_state["fd_design"]
+    assert fd8 < fd_auto < fd16 or fd8 < fd16
+    assert any("Progettato per f/D" in c.value for c in at.caption)

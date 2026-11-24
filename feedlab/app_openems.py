@@ -252,7 +252,7 @@ def _new_section(S, geo, dish):
         k, lab, vals = sweep
         ov = dict(S.overrides.get(geo.kind, {}))
         for v in vals:
-            g = geometry.build(geo.kind, f0, fD=dish.fD, wall=S.wall, **{**ov, k: float(v)})
+            g = geometry.build(geo.kind, f0, fD=float(S.get("fd_design") or dish.fD), wall=S.wall, **{**ov, k: float(v)})
             plan.append((f"{k}={v:.3f}", g, cfg_for(cells_list[0])))
     else:
         for cl in sorted(cells_list):

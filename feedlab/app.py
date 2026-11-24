@@ -134,13 +134,13 @@ def _start_values(kind):
     dish = S.dish or wizard.dish_from_prime(600, 0.6)
     base = {}
     try:
-        g0 = geometry.build_rect(S.f_ghz, dish.fD, S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall) \
-            if kind == "rect_horn" else geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall)
+        g0 = geometry.build_rect(S.f_ghz, _fd_design(), S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall) \
+            if kind == "rect_horn" else geometry.build(kind, S.f_ghz, fD=_fd_design(), wall=S.wall)
         base.update({k: v for k, v in g0.params.items() if isinstance(v, (int, float))})
     except Exception:
         pass
     try:
-        base.update(explore.base_values(kind, S.f_ghz, dish.fD, S.wall))
+        base.update(explore.base_values(kind, S.f_ghz, _fd_design(), S.wall))
     except Exception:
         pass
     return base
@@ -154,13 +154,19 @@ def _openems_hint(keys):
                    "openEMS) prima di costruire.", keys=", ".join(keys)), icon="💡")
 
 
+def _fd_design() -> float:
+    """f/D the feed is designed for: from the illumination chosen in the wizard (edge taper or goal), else the
+    dish f/D. Every tab builds the feed with it; the efficiency is always evaluated on the real dish."""
+    return float(S.get("fd_design") or (S.dish.fD if S.dish else 0.6))
+
+
 def current_geometry():
     dish = S.dish or wizard.dish_from_prime(600, 0.6)
     kind = S.feed_kind
     ov = dict(S.overrides.get(kind, {}))
     if kind == "rect_horn":
-        return geometry.build_rect(S.f_ghz, dish.fD, S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall, **ov)
-    return geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **ov)
+        return geometry.build_rect(S.f_ghz, _fd_design(), S.get("wr_wg") or wizard._wg_for(S.f_ghz), wall=S.wall, **ov)
+    return geometry.build(kind, S.f_ghz, fD=_fd_design(), wall=S.wall, **ov)
 
 
 @st.cache_data(show_spinner=False)
@@ -526,6 +532,12 @@ with tabs[0]:
     if dish is not None:
         from feedlab import illumination as _illum
         _ill = _illum.setting(dish.fD, _prio_k, ill_taper if ill_mode == "taper" else None)
+        # the feed follows the illumination at once: every tab builds it for this f/D
+        if abs(float(S.get("fd_design") or 0) - _ill["fD_design"]) > 1e-6:
+            S["fd_design"] = _ill["fD_design"]
+            for _k in ("pdf", "step", "stl", "plate_pdf", "plate_step"):
+                S.pop(_k, None)
+        S["ill_info"] = (_ill["fD_design"], _ill["edge_db"], dish.fD, ill_mode)
         with st.expander(_T("☀️ Illuminazione della parabola: taper al bordo {t:.1f} dB, efficienza {e:.0f}%",
                             t=_ill["edge_db"], e=100 * _ill["total"]), expanded=True):
             g1, g2 = st.columns(2)
@@ -588,7 +600,7 @@ with tabs[0]:
         with st.spinner("Valuto i candidati…"):
             S.cands = wizard.recommend(dish, S.f_ghz, "circular" if pol == "Circolare" else "linear",
                                        _prio_k, "sheet" if "lamiera" in tools else "lathe", quick,
-                                       fd_factor=_ill["factor"] if ill_mode == "taper" else None)
+                                       fd_factor=_ill["factor"])
     if S.cands:
         rows = []
         for i, c in enumerate(S.cands):
@@ -721,6 +733,10 @@ with tabs[1], contextlib.suppress(_Skip):
         fig = section_fig(geo)
         if fig:
             st.plotly_chart(fig, width="stretch")
+        _ii = S.get("ill_info")
+        if _ii:
+            st.caption(_T("Progettato per f/D {fd:.3f}: taper al bordo {t:.1f} dB sulla parabola (f/D {f0:.3f}) — "
+                          "si cambia con l'illuminazione nella Procedura guidata.", fd=_ii[0], t=_ii[1], f0=_ii[2]))
         if S.overrides.get(S.feed_kind):
             _openems_hint(_big_changes(S.overrides[S.feed_kind], _start_values(S.feed_kind)))
         lam = geo.lam
@@ -911,9 +927,9 @@ with tabs[8], contextlib.suppress(_Skip):
 
 # ---------------------------------------------------------------- 3 laboratory
 @st.cache_data(show_spinner=False, max_entries=500)
-def lab_eval(kind, f, sc_tuple, over_tuple, wall):
+def lab_eval(kind, f, sc_tuple, over_tuple, wall, fd_design=None):
     sc = explore.Scenario(*sc_tuple)
-    return explore.evaluate(kind, f, sc, dict(over_tuple), wall)
+    return explore.evaluate(kind, f, sc, dict(over_tuple), wall, fd_design)
 
 
 with tabs[2], contextlib.suppress(_Skip):
@@ -938,7 +954,8 @@ with tabs[2], contextlib.suppress(_Skip):
         sc = explore.Scenario(dish.kind, dish.D_mm, dish.fD, max(elev, 1), noise.receiver_temp(nf), azen, 290.0, rms, line,
                               material=S.material)
         sc_t = tuple(sc.__dict__.values())
-        base_vals = explore.base_values(kind, S.f_ghz, dish.fD, S.wall)
+        _fdd = _fd_design()
+        base_vals = explore.base_values(kind, S.f_ghz, _fdd, S.wall)
         cur_over = dict(S.overrides.get(kind, {}))
         start = {**base_vals, **cur_over}
         st.subheader("Quote del feed")
@@ -955,20 +972,20 @@ with tabs[2], contextlib.suppress(_Skip):
             if abs(v - x0) > 1e-9:
                 lab_over[key] = v
         if kind == "iz0jny":
-            g_lab = geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **lab_over)
+            g_lab = geometry.build(kind, S.f_ghz, fD=_fdd, wall=S.wall, **lab_over)
             p_lab = g_lab.params
             st.caption(_T("Coni: semiangolo 1 {a1:.2f}° → L1 {l1:.3f} mm · semiangolo 2 {a2:.2f}° → L2 {l2:.3f} mm "
                           "· lunghezza totale {L:.2f} mm (se cambi l'angolo, la lunghezza del cono segue; "
                           "l'angolo prevale sulla lunghezza)", a1=p_lab["cone1_half_deg"], l1=p_lab["L1"],
                           a2=p_lab["cone2_half_deg"], l2=p_lab["L2"], L=g_lab.z_aperture))
         elif any(k == "alpha" for k, _, _ in explore.TUNABLE[kind]):
-            g_lab = geometry.build(kind, S.f_ghz, fD=dish.fD, wall=S.wall, **lab_over)
+            g_lab = geometry.build(kind, S.f_ghz, fD=_fdd, wall=S.wall, **lab_over)
             p_lab = g_lab.params
             st.caption(f"Flare: semiangolo {p_lab['flare_half_deg']:.2f}° → lunghezza flare {p_lab['flare_length']:.3f} mm "
                        f"({p_lab['flare_length'] / lam:.3f} λ), lunghezza totale {g_lab.z_aperture:.2f} mm")
         with st.spinner("Calcolo…"):
-            base = lab_eval(kind, S.f_ghz, sc_t, tuple(sorted({}.items())), S.wall)
-            cur = lab_eval(kind, S.f_ghz, sc_t, tuple(sorted(lab_over.items())), S.wall)
+            base = lab_eval(kind, S.f_ghz, sc_t, tuple(sorted({}.items())), S.wall, _fdd)
+            cur = lab_eval(kind, S.f_ghz, sc_t, tuple(sorted(lab_over.items())), S.wall, _fdd)
         st.subheader("Risultato rispetto al progetto di partenza")
         m = st.columns(7)
         def met(col, lab, v, b, fmt, unit, better_up=True):
@@ -1025,7 +1042,7 @@ with tabs[2], contextlib.suppress(_Skip):
         st.subheader("🔬 Sensibilità: cosa succede variando ogni quota")
         if st.button("Calcola sensibilità (≈ 7 punti per quota)"):
             with st.spinner("Scansione…"):
-                S["sens"] = (objective, explore.sensitivity(kind, S.f_ghz, sc, lab_over, objective, 7, S.wall))
+                S["sens"] = (objective, explore.sensitivity(kind, S.f_ghz, sc, lab_over, objective, 7, S.wall, _fdd))
         if S.get("sens") and S["sens"][0] == objective:
             sens = S["sens"][1]
             cols = st.columns(len(sens))
@@ -1056,7 +1073,7 @@ with tabs[2], contextlib.suppress(_Skip):
         s11lim = c2.slider("S11 massimo accettato (dB)", -30, -10, -18)
         if st.button(f"Ottimizza per: {explore.OBJECTIVES[objective]}") and keys:
             bar = st.progress(0.0, "ottimizzazione…")
-            over, res = explore.optimize(kind, S.f_ghz, sc, lab_over, objective, keys, nev, S.wall,
+            over, res = explore.optimize(kind, S.f_ghz, sc, lab_over, objective, keys, nev, S.wall, _fdd,
                                          s11_limit_db=s11lim,
                                          progress=lambda i, n, v: bar.progress(min(i / n, 1.0), f"valutazione {i}/{n}"))
             S["opt"] = (over, res)
@@ -1091,7 +1108,7 @@ with tabs[2], contextlib.suppress(_Skip):
             s11t = c[3].slider("S11 massimo (dB)", -30, -10, -18, key="tol_s11")
             if st.button("🎲 Analizza tolleranze (≈ 20 simulazioni rapide)", key="tol_go"):
                 bar = st.progress(0.0, "modello delle tolleranze…")
-                rep = tolerance.analyse(kind, S.f_ghz, sc, lab_over, objective, tol_in, dist, 5000, 6, budget, s11t, S.wall,
+                rep = tolerance.analyse(kind, S.f_ghz, sc, lab_over, objective, tol_in, dist, 5000, 6, budget, s11t, S.wall, _fdd,
                                         progress=lambda i, n: bar.progress(min(i / n, 1.0), f"simulazione {i}/{n}"))
                 bar.empty()
                 S["tol"] = (kind, objective, rep)
@@ -1143,7 +1160,7 @@ with tabs[2], contextlib.suppress(_Skip):
             if st.button("🛡️ Ottimizzazione robusta", key="rob_go") and rkeys:
                 bar = st.progress(0.0, "ottimo nominale, poi ricerca robusta…")
                 over_r, info = tolerance.robust_optimize(kind, S.f_ghz, sc, lab_over, objective, rkeys, tol_in, ks, rnev,
-                                                         s11t, S.wall,
+                                                         s11t, S.wall, _fdd,
                                                          progress=lambda i, n, v: bar.progress(min(i / n, 1.0), f"valutazione {i}/{n}"))
                 bar.empty()
                 S["ropt"] = (kind, over_r, info)
