@@ -349,7 +349,7 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         for h in m.feed_holes:
             gap = math.hypot(h.x, h.y) - max(h.dia, h.cb_dia) / 2 - feed_input_diam / 2
             if gap < 0.8:
-                m.warnings.append(f"foro Ø{h.dia:g} a {gap:.2f} mm dalla guida circolare Ø{feed_input_diam:.2f}: "
+                m.warnings.append(f"Ø{h.dia:g}: distanza dalla guida circolare Ø{feed_input_diam:.2f} di soli {gap:.2f} mm, "
                                   "troppo vicino, usa una flangia più grande o una guida diversa")
                 break
     return m
@@ -392,7 +392,7 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
         L, L_lab = screw_length(plate_t, system)
         eng = L - (plate_t - grip_cut)
         if eng < 1.5 * d_major:
-            m.warnings.append(f"vite {screw} × {L_lab}: solo {eng:.1f} mm di filetto nel feed (< 1.5 d)")
+            m.warnings.append(f"{screw} × {L_lab}: filetto nel feed di soli {eng:.1f} mm (< 1.5 d)")
         if cs_k > plate_t - (0.5 if head == "flat" else 0.8):
             m.warnings.append(f"{'svasatura' if head == 'flat' else 'lamatura'} {screw} profonda {cs_k:.2f} mm in una "
                               f"piastrina di {plate_t:.2f} mm: usa viti più piccole o aumenta lo spessore della piastrina")

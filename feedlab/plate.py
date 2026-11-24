@@ -111,7 +111,7 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
             outer = max(outer, math.ceil(2 * (need + 1.0) * 10 - 1e-6) / 10)
         if outer_mm:
             if mnt is not None and float(outer_mm) < outer - 1e-9:
-                mnt.warnings.append(f"piastrina {float(outer_mm):.2f} mm troppo piccola per i fori: minimo {outer:.2f} mm")
+                mnt.warnings.append(f"misura della piastrina {float(outer_mm):.2f} mm troppo piccola per i fori: minimo {outer:.2f} mm")
             else:
                 outer = float(outer_mm)
     body_t = max(t, float(plate_t or 0.0))

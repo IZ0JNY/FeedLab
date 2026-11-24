@@ -320,7 +320,7 @@ def main(post_only=False):
     t0 = time.time()
     if post_only:
         if not os.path.isdir(sim_path):
-            raise RuntimeError("--post: sim_data non trovata, serve prima la simulazione completa")
+            raise RuntimeError("--post: sim_data not found, run the full simulation first")
     else:
         status("fdtd", **m["info"])
         kw = {"numThreads": int(C["threads"])} if int(C.get("threads") or 0) > 0 else {}

@@ -1,12 +1,24 @@
-# Modifiche per la prossima versione (0.4.20)
+# Modifiche per la prossima versione (0.4.21)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 2 | Progetto feed: spessore parete e spessore base si applicano solo con "Applica modifiche", come tutte le altre quote ("Ripristina progetto" li riporta ad automatico) | ✅ fatto |
-| 3 | L'illuminazione scelta nella procedura guidata (taper al bordo o obiettivo) cambia davvero il feed: tutte le schede lo costruiscono per l'f/D di progetto, che si aggiorna subito cambiando il taper; riga "Progettato per f/D…" in Progetto feed | ✅ fatto |
-| 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
+| 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (bozza inglese in revisione) | ⏳ in corso |
+| 2 | Semplificare la scelta dei fori di feed e piastrina (proposta: scelta per "tipo di montaggio") | 💬 da decidere |
+
+---
+
+# Archivio: versione 0.4.20 (pubblicata, BETA TEST)
+
+Pubblicata con 4 modifiche (il manuale dettagliato è passato alla 0.4.21).
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Progetto feed: spessore parete e spessore base si applicano solo con "Applica modifiche", come tutte le altre quote ("Ripristina progetto" li riporta ad automatico) | ✅ fatto |
+| 2 | L'illuminazione scelta nella procedura guidata (taper al bordo o obiettivo) cambia davvero il feed: tutte le schede lo costruiscono per l'f/D di progetto, che si aggiorna subito cambiando il taper; riga "Progettato per f/D…" in Progetto feed | ✅ fatto |
+| 3 | Fori nella base del feed spostati nella scheda Progetto feed (fissaggio di feed + piastrina al tronchetto di guida esterno; stessa foratura nella piastrina) | ✅ fatto |
+| 4 | Testi uniformi: tutto in inglese o tutto in italiano (interfaccia, avvisi, PDF), eliminate le frasi miste | ✅ fatto |
 
 ---
 

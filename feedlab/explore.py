@@ -253,8 +253,8 @@ def advice(r: Result, base: Result | None, sc: Scenario, objective: str, kind: s
     q = tm11_power_ratio(r.modes)
     if kind in STEP_HORNS and q is not None and not (TM11_TARGET[0] <= q <= TM11_TARGET[1]):
         tips.append(f"TM11 all'apertura {100 * q:.0f}% del TE11 in potenza: Jeff WA6KBL indica ~15% per un "
-                    f"Pickett-Potter. {'Aumenta' if q < TM11_TARGET[0] else 'Riduci'} il gradino (Ø dopo il gradino) "
-                    "e poi riallinea la lunghezza del flare perché i due modi arrivino in fase alla bocca.")
+                    f"Pickett-Potter. " + ("Aumenta" if q < TM11_TARGET[0] else "Riduci") + " il gradino (Ø dopo il "
+                    "gradino) e poi riallinea la lunghezza del flare perché i due modi arrivino in fase alla bocca.")
     if r.s11_db is not None and r.s11_db > -18:
         tips.append(f"S11 {r.s11_db:.1f} dB: adattamento scarso (in TX potenza riflessa {100 * 10 ** (r.s11_db / 10):.1f}%). "
                     "Addolcisci flare/gradini o allunga la transizione d'ingresso.")

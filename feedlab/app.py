@@ -154,6 +154,74 @@ def _openems_hint(keys):
                    "openEMS) prima di costruire.", keys=", ".join(keys)), icon="💡")
 
 
+def _base_holes_ui(wg: str, dcirc: float) -> dict:
+    """Holes of the feed base at the positions of the waveguide flange (same pattern in the λ/4 plate): the feed
+    + plate are screwed onto an external waveguide section with that flange (WR-90, WR-75, WR-42…)."""
+    from feedlab import flanges
+    c1, c2 = st.columns(2)
+    holes_on = c1.checkbox("Fori di fissaggio della flangia (feed + piastrina → guida esterna)",
+                           bool((S.get("mount_cfg") or {}).get("wg")), disabled=wg not in flanges.FLANGES, key="mount_on",
+                           help="riproduce nella base del feed e nella piastrina λ/4 i fori della flangia standard della "
+                                "guida: nel PDF, nello STEP e nell'STL di feed e piastrina")
+    system = c2.radio("Viti", ["metric", "imperial"], horizontal=True, key="mount_sys",
+                      format_func=lambda x: {"metric": "Metriche (M)", "imperial": "Pollici (UNC)"}[x])
+    _round_fl = wg in flanges.FLANGES and flanges.FLANGES[wg].shape == "round"
+    _scr = flanges.screw_for(wg, system) if wg in flanges.FLANGES else None
+    _dfl = flanges.flange_hole(wg) if wg in flanges.FLANGES else 3.0
+    st.markdown(_T("**Fori della flangia {wg}** (stessa posizione nella piastrina e nella base del feed)", wg=wg))
+    h1, h2 = st.columns(2)
+    _modes = ["flange", "clear", "tap"]
+    base_holes = h1.radio("Fori nella base del feed", _modes, key="base_holes_mode", disabled=not holes_on,
+                          format_func=lambda k: {"flange": _T("Come la flangia (Ø{d:g} passanti)", d=_dfl),
+                                                 "clear": i18n.tr("Maggiorati (passanti, anche nella piastrina)"),
+                                                 "tap": i18n.tr("Filettati passanti")}[k],
+                          help="come la flangia: stessi fori della flangia standard; maggiorati: il feed si avvita "
+                               "sulla guida esterna (relè, LNA) con viti dal lato del feed; filettati: le viti della "
+                               "guida attraversano flangia e piastrina e si avvitano nella base")
+    hole_dia = thread = None
+    if base_holes in ("flange", "clear") and wg in flanges.FLANGES:
+        _dmax = flanges.max_hole_dia(wg, dcirc)
+        _ddef = _dfl if base_holes == "flange" else flanges.clear_hole(wg, system)
+        _dmin = round(flanges.SCREWS[_scr][0] + 0.1, 1)
+        hole_dia = h2.number_input(_T("Ø fori passanti (mm, proposto {d:g}; da {a:g} a {b:g}: almeno 1 mm dal bordo)",
+                                      d=_ddef, a=_dmin, b=_dmax),
+                                   min_value=float(_dmin), max_value=float(_dmax), step=0.1,
+                                   value=float(min(_ddef, _dmax)), key=f"hole_dia_{base_holes}_{wg}_{system}",
+                                   disabled=not holes_on,
+                                   help="stesso diametro nella piastrina e nella base del feed; il massimo lascia "
+                                        "almeno 1 mm di metallo verso il bordo più vicino (contorno, guida circolare, "
+                                        "foro vicino), mai meno del foro della flangia standard")
+    elif base_holes == "tap":
+        _th = flanges.base_thread_options(wg, S.f_ghz, system)
+        thread = h2.selectbox("Filettatura dei fori nella base", _th, key=f"base_thread_{'_'.join(_th)}",
+                              disabled=not holes_on)
+    _cbore = False
+    if base_holes != "tap":
+        _cbore = h2.checkbox("Lamatura per la testa della vite (lato horn della base)", key="mount_cbore",
+                             disabled=not holes_on,
+                             help="la testa della vite resta incassata nella base; senza lamatura si appoggia sulla base")
+    cb_dia = cb_depth = None
+    if _cbore and _scr in flanges.CBORE:
+        _cbd_def, _cb_def = flanges.CBORE[_scr]
+        cb_dia = h2.number_input(_T("Diametro della lamatura (mm, standard {d:g} per la testa {s})", d=_cbd_def, s=_scr),
+                                 min_value=1.0, max_value=30.0, value=float(_cbd_def), step=0.1, key=f"cb_dia_{_scr}",
+                                 disabled=not holes_on,
+                                 help="diametro della sede della testa della vite; il valore proposto va bene per le viti "
+                                      "a testa cilindrica ISO 4762 / UNC: controllalo con le viti che compri")
+        cb_depth = h2.number_input(_T("Profondità della lamatura (mm, standard {d:g} per la testa {s})", d=_cb_def, s=_scr),
+                                   min_value=0.5, max_value=20.0, value=float(_cb_def), step=0.5, key=f"cb_depth_{_scr}",
+                                   disabled=not holes_on,
+                                   help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
+                                        "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)")
+    pins = True
+    if _round_fl:
+        pins = st.checkbox("Fori per i pin di allineamento (piastrina e base del feed)", True, key="mount_pins",
+                           disabled=not holes_on, help="i 4 fori spina della flangia MIL: passanti nella piastrina, "
+                                                       "profondi 3 mm nella base")
+    return {"holes_on": holes_on, "system": system, "base_holes": base_holes, "hole_dia": hole_dia, "thread": thread,
+            "cbore": _cbore, "cb_dia": cb_dia, "cb_depth": cb_depth, "pins": pins}
+
+
 def _fd_design() -> float:
     """f/D the feed is designed for: from the illumination chosen in the wizard (edge taper or goal), else the
     dish f/D. Every tab builds the feed with it; the efficiency is always evaluated on the real dish."""
@@ -645,6 +713,19 @@ with tabs[1], contextlib.suppress(_Skip):
             st.caption("Le scelte si applicano al disegno PDF, al modello 3D e ai file STEP/STL.")
     geometry.OUTER_PROFILE.update(mode=S.get("outer_mode", "wall"), fillet=float(S.get("outer_fillet") or 0.0))
     geo = current_geometry()
+    if not isinstance(geo, geometry.RectHornGeometry) and S.get("wr_wg"):
+        from feedlab import flanges as _flg
+        _wgx = S["wr_wg"]
+        _sq = _wgx in _flg.FLANGES and _flg.FLANGES[_wgx].shape == "square"
+        with st.expander(_T("🔩 Fori nella base del feed (flangia {wg})", wg=_wgx),
+                         expanded=bool((S.get("mount_cfg") or {}).get("wg"))):
+            st.caption(_T("I fori riproducono la flangia standard {wg}: servono a fissare il feed + la piastrina di "
+                          "adattamento a un tronchetto di guida d'onda esterno {wg} (relè, LNA). La piastrina λ/4 ha lo "
+                          "stesso pattern di foratura.", wg=_wgx) if _sq else
+                       _T("I fori riproducono la flangia rotonda MIL della {wg}: feed + piastrina si fissano alla guida "
+                          "d'onda esterna {wg}; la piastrina ha lo stesso pattern di foratura e, se vuoi, i fori per i "
+                          "pin di allineamento.", wg=_wgx))
+            S["base_holes_ui"] = _base_holes_ui(_wgx, 2 * geo.r_input)
     c1, c2 = st.columns([1, 2])
     with c1:
         st.subheader("Quote (modificabili)")
@@ -891,8 +972,8 @@ with tabs[7], contextlib.suppress(_Skip):
         st.success(_T("Foratura della base attiva per la flangia {wg} {name}: {n} fori nel PDF (foglio della flangia), "
                       "nello STEP e nell'STL.", wg=_m.flange.wg, name=_m.flange.name, n=len(_m.feed_holes)))
     elif not isinstance(geo, geometry.RectHornGeometry):
-        st.info(i18n.tr("Base del feed senza fori: per forarla come la flangia della guida attiva \"Fori di fissaggio "
-                        "guida → piastrina → feed\" nella scheda Piastrina WR, poi rigenera STEP/STL."))
+        st.info(i18n.tr("Base del feed senza fori: per forarla come la flangia della guida apri \"Fori nella base del "
+                        "feed\" nella scheda Progetto feed, poi rigenera STEP/STL."))
     c1, c2, c3, c4 = st.columns(4)
     if c1.button("📄 Genera PDF"):
         tt = S.get("tol_table")
@@ -1202,67 +1283,19 @@ with tabs[6], contextlib.suppress(_Skip):
                              help="raggio della fresa: angoli arrotondati compensati sulla larghezza (HB9PZK)")
         opt = st.checkbox("Versione ottimizzata (b e spessore corretti con openEMS)", True)
         from feedlab import flanges
-        c1, c2 = st.columns(2)
-        holes_on = c1.checkbox("Fori di fissaggio guida → piastrina → feed", bool((S.get("mount_cfg") or {}).get("wg")),
-                               disabled=wg not in flanges.FLANGES, key="mount_on",
-                               help="foratura della flangia standard della guida, viti piastrina→feed con la testa nella "
-                                    "lamatura e spine di centraggio: nel PDF e nello STEP di piastrina e feed")
-        system = c2.radio("Viti", ["metric", "imperial"], horizontal=True, key="mount_sys",
-                          format_func=lambda x: {"metric": "Metriche (M)", "imperial": "Pollici (UNC)"}[x])
+        _bh = S.get("base_holes_ui") or {}
+        holes_on, system = bool(_bh.get("holes_on")), _bh.get("system", "metric")
+        base_holes, hole_dia, thread = _bh.get("base_holes", "flange"), _bh.get("hole_dia"), _bh.get("thread")
+        _cbore, cb_dia, cb_depth = bool(_bh.get("cbore")), _bh.get("cb_dia"), _bh.get("cb_depth")
         _round_fl = wg in flanges.FLANGES and flanges.FLANGES[wg].shape == "round"
         _scr = flanges.screw_for(wg, system) if wg in flanges.FLANGES else None
-        _dfl = flanges.flange_hole(wg) if wg in flanges.FLANGES else 3.0
-        st.markdown(_T("**Fori della flangia {wg}** (stessa posizione nella piastrina e nella base del feed)", wg=wg))
-        h1, h2 = st.columns(2)
-        _modes = ["flange", "clear", "tap"]
-        base_holes = h1.radio("Fori nella base del feed", _modes, key="base_holes_mode", disabled=not holes_on,
-                              format_func=lambda k: {"flange": _T("Come la flangia (Ø{d:g} passanti)", d=_dfl),
-                                                     "clear": i18n.tr("Maggiorati (passanti, anche nella piastrina)"),
-                                                     "tap": i18n.tr("Filettati passanti")}[k],
-                              help="come la flangia: stessi fori della flangia standard; maggiorati: il feed si avvita "
-                                   "sulla guida esterna (relè, LNA) con viti dal lato del feed; filettati: le viti della "
-                                   "guida attraversano flangia e piastrina e si avvitano nella base")
-        hole_dia = thread = None
-        if base_holes in ("flange", "clear") and wg in flanges.FLANGES:
-            _dmax = flanges.max_hole_dia(wg, dcirc)
-            _ddef = _dfl if base_holes == "flange" else flanges.clear_hole(wg, system)
-            _dmin = round(flanges.SCREWS[_scr][0] + 0.1, 1)
-            hole_dia = h2.number_input(_T("Ø fori passanti (mm, proposto {d:g}; da {a:g} a {b:g}: almeno 1 mm dal bordo)",
-                                          d=_ddef, a=_dmin, b=_dmax),
-                                       min_value=float(_dmin), max_value=float(_dmax), step=0.1,
-                                       value=float(min(_ddef, _dmax)), key=f"hole_dia_{base_holes}_{wg}_{system}",
-                                       disabled=not holes_on,
-                                       help="stesso diametro nella piastrina e nella base del feed; il massimo lascia "
-                                            "almeno 1 mm di metallo verso il bordo più vicino (contorno, guida circolare, "
-                                            "foro vicino), mai meno del foro della flangia standard")
-        elif base_holes == "tap":
-            _th = flanges.base_thread_options(wg, S.f_ghz, system)
-            thread = h2.selectbox("Filettatura dei fori nella base", _th, key=f"base_thread_{'_'.join(_th)}",
-                                  disabled=not holes_on)
-        _cbore = False
-        if base_holes != "tap":
-            _cbore = h2.checkbox("Lamatura per la testa della vite (lato horn della base)", key="mount_cbore",
-                                 disabled=not holes_on,
-                                 help="la testa della vite resta incassata nella base; senza lamatura si appoggia sulla base")
-        cb_dia = cb_depth = None
-        if _cbore and _scr in flanges.CBORE:
-            _cbd_def, _cb_def = flanges.CBORE[_scr]
-            cb_dia = h2.number_input(_T("Diametro della lamatura (mm, standard {d:g} per la testa {s})", d=_cbd_def, s=_scr),
-                                     min_value=1.0, max_value=30.0, value=float(_cbd_def), step=0.1, key=f"cb_dia_{_scr}",
-                                     disabled=not holes_on,
-                                     help="diametro della sede della testa della vite; il valore proposto va bene per le viti "
-                                          "a testa cilindrica ISO 4762 / UNC: controllalo con le viti che compri")
-            cb_depth = h2.number_input(_T("Profondità della lamatura (mm, standard {d:g} per la testa {s})", d=_cb_def, s=_scr),
-                                       min_value=0.5, max_value=20.0, value=float(_cb_def), step=0.5, key=f"cb_depth_{_scr}",
-                                       disabled=not holes_on,
-                                       help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
-                                            "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)")
-        pscrew, pins, plate_head, plate_tap = None, True, "allen", False
-        if _round_fl:
-            pins = st.checkbox("Fori per i pin di allineamento (piastrina e base del feed)", True, key="mount_pins",
-                               disabled=not holes_on, help="i 4 fori spina della flangia MIL: passanti nella piastrina, "
-                                                           "profondi 3 mm nella base")
+        if holes_on:
+            st.info(_T("Foratura della flangia {wg}: la piastrina ha lo stesso pattern di fori della base del feed "
+                       "(si imposta nella scheda Progetto feed → Fori nella base del feed).", wg=wg))
         else:
+            st.caption(i18n.tr("Fori della flangia spenti: si attivano nella scheda Progetto feed → Fori nella base del feed."))
+        pscrew, pins, plate_head, plate_tap = None, bool(_bh.get("pins", True)), "allen", False
+        if not _round_fl:
             opts = flanges.plate_screw_options(S.f_ghz)
             p1, p2, p3 = st.columns(3)
             if p1.checkbox("4 viti piastrina → feed (nei 4 punti liberi)", key="mount_plate_screws", disabled=not holes_on,
