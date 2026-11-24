@@ -5,6 +5,7 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Manuale dettagliato in italiano e inglese: ogni scheda e ogni campo spiegati con screenshot nuovi (33 per lingua), scheda Montaggio, illuminazione, Tsys, angolo a −10 dB, tabelle di materiali, tolleranze, flange e viti, esempio completo, problemi frequenti, glossario | ✅ fatto (in revisione) |
+| 2 | Montaggio: la didascalia sotto la sezione non si sovrappone più alla flangia della guida esterna (più spazio sotto il disegno) | ✅ fatto |
 
 ---
 

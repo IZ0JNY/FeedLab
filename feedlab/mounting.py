@@ -62,8 +62,8 @@ def section_fig(scheme: str, tr=lambda s: s, screw: str = "", plate_screw: str =
     import matplotlib.pyplot as plt
     from matplotlib.patches import Polygon, Rectangle
 
-    fig, ax = plt.subplots(figsize=(5.2, 3.4), dpi=110)
-    ax.set_xlim(-12, 14); ax.set_ylim(-4.6, 13.2); ax.set_aspect("equal"); ax.axis("off")
+    fig, ax = plt.subplots(figsize=(5.2, 4.0), dpi=110)
+    ax.set_xlim(-12, 14); ax.set_ylim(-8.2, 13.2); ax.set_aspect("equal"); ax.axis("off")
     layers = [("guide", -3.0, 0.0, "#9fb7d6", tr("flangia della guida esterna")),
               ("plate", 0.0, 2.2, "#e0c46c", tr("piastrina λ/4")),
               ("base", 2.2, 5.0, "#c9a227", tr("base del feed"))]
@@ -74,7 +74,7 @@ def section_fig(scheme: str, tr=lambda s: s, screw: str = "", plate_screw: str =
     # feed horn above the base
     ax.add_patch(Polygon([(-2.2, 5), (-2.2, 9), (-5.5, 12.5), (-6.5, 12.5), (-3.2, 9), (-3.2, 5)], fc="#c9a227", ec="k", lw=0.8))
     ax.add_patch(Polygon([(2.2, 5), (2.2, 9), (5.5, 12.5), (6.5, 12.5), (3.2, 9), (3.2, 5)], fc="#c9a227", ec="k", lw=0.8))
-    ax.text(0, 11.6, tr("feed"), ha="center", fontsize=7)
+    ax.text(0, 11.6, tr("feed"), ha="center", fontsize=7, bbox=dict(fc="white", ec="none", pad=0.5))
     ax.annotate("", (0, -4.2), (0, 12.8), arrowprops=dict(arrowstyle="-", ls="-.", lw=0.5, color="0.4"))
 
     def screw(x, y_head, y_tip, up=True, head_w=2.4, head_h=1.2, col="#555"):
@@ -116,6 +116,7 @@ def section_fig(scheme: str, tr=lambda s: s, screw: str = "", plate_screw: str =
         ax.add_patch(Rectangle((-8.4, -1.5), 0.8, 5.0, fc="#3a9a3a", ec="k", lw=0.5))
         notes.append(tr("pin di allineamento (verde)"))
     import textwrap
-    ax.text(-11.5, -4.3, "\n".join(textwrap.wrap(" · ".join(notes), 80)), fontsize=6.5, va="bottom")
+    # notes well below the stack (screw heads under the waveguide flange reach about −4.5)
+    ax.text(-11.5, -5.8, "\n".join(textwrap.wrap(" · ".join(notes), 70)), fontsize=6.5, va="top")
     fig.tight_layout()
     return fig
