@@ -67,7 +67,7 @@ All'avvio non c'è nessuna scelta predefinita: **Seleziona frequenza** e **Selez
 2. **Dati della parabola custom:**
    - offset: da diametro + f/D, da diametro + focale, da **misure sul campo** (asse lungo, asse corto, profondità) o da angolo di illuminazione;
    - prime focus: da f/D o da profondità.
-3. **Polarizzazione, obiettivo e lavorazione:** lineare o circolare; **guadagno** (TX), **G/T** (RX/EME, predefinito) o **massime prestazioni RX** (minimo rumore: illuminazione più morbida e feed con lobi laterali e posteriori bassi); tornio o lamiera.
+3. **Polarizzazione, obiettivo e lavorazione:** lineare o circolare; **guadagno** (TX), **G/T** (RX/EME, predefinito) o **massime prestazioni RX** (minimo rumore: illuminazione più morbida e feed con lobi laterali e posteriori bassi); tornio o lamiera. **Illuminazione della parabola:** automatica (consigliata) o **taper al bordo** scelto in dB (default 10 dB); un grafico mostra l'illuminazione lungo il diametro e un disco 3D la superficie illuminata, con spillover, efficienza e superficie entro −3/−10 dB.
 4. **Trova il feed migliore:** FeedLab confronta i feed adatti e li ordina per efficienza stimata, con motivazioni e avvertenze.
 5. **Usa questo feed:** le altre schede lavorano su quel progetto.
 
@@ -149,12 +149,15 @@ La **piastrina λ/4** collega la guida circolare del feed alla guida rettangolar
 
 1. **Dati:** polarizzazione, Ø della guida circolare, raggio della fresa negli angoli. La **guida WR** si sceglie nella barra laterale.
 2. **Risultato:** apertura a × b, spessore (con tolleranza) e Z0 intermedia.
-3. La piastrina ha **la forma e la misura della flangia** della guida: **quadrata** a 10 e 24 GHz (WR-90, WR-75, WR-42), **rotonda** (flange MIL) da 47 GHz in su.
-4. **Fori di fissaggio guida → piastrina → feed**, con viti **metriche** o **in pollici**:
-   - **10 e 24 GHz (flange quadrate):** la foratura della flangia standard (Flann) è **filettata nella piastra**; **4 viti piastra → feed** con la **testa nella lamatura** sul lato guida, così la superficie verso la guida resta piana; se la piastra è troppo sottile, FeedLab ne ingrossa il corpo e ricava sul lato feed una **tasca** del diametro della guida circolare;
-   - **da 47 GHz (flange rotonde UG-383/385/387):** nessuna vite piastrina → feed. La piastrina si **appoggia sulla base del feed**; le viti 4-40 della guida la attraversano e si avvitano nella base, filettata passante. Le spine standard della flangia allineano guida, piastrina e feed.
-   - **opzione per tutte le flange:** "viti dal lato del feed (fori passanti nella base)": il feed si avvita direttamente sulla guida; le viti entrano dal lato del feed, attraversano base e piastrina e si avvitano nella flangia della guida. I fori nella base possono essere **con lamatura** (testa incassata sul lato horn) o **senza lamatura** (testa appoggiata sulla base). **Diametro e profondità della lamatura** sono proposti da FeedLab e si possono cambiare; la base si ispessisce da sola (lamatura + 1,5 mm sotto la testa) e, se è quadrata e le lamature non ci stanno (per esempio WR-42 con M3), si allarga quanto basta. Una **vista 3D ruotabile del feed con la base forata** mostra fori e lamature.
-5. La stessa foratura viene applicata alla **base del feed**. Accanto alla vista frontale c'è la **vista 3D** della piastrina; nei PDF di piastrina e flangia ogni gruppo di fori riporta **diametro e filettatura** (M2, M3…). Lo **spessore della base** si imposta nella scheda Progetto feed (minimo 1 mm, vuoto = automatico): fori filettati e lunghezza delle viti si adattano.
+3. La piastrina ha **la forma della flangia** della guida: **quadrata** a 10 e 24 GHz (WR-90, WR-75, WR-42), **rotonda** (flange MIL) da 47 GHz in su. È grande come la flangia, o di più quando servono le viti di fissaggio (1 mm di metallo fuori dalla lamatura); la **misura esterna** e il **raggio degli angoli** si possono impostare. Lo **spessore resta λ/4** a meno che tu non lo imposti più grande (allora sul lato feed c'è una tasca del diametro della guida circolare).
+4. **Fori della flangia** (stessa posizione nella piastrina e nella base del feed), con viti **metriche** o **in pollici**. Nella base del feed:
+   - **come la flangia:** passanti, Ø della flangia arrotondato al decimo (WR-42 3.07 → 3.1), modificabile fino a lasciare 1 mm dal bordo;
+   - **maggiorati:** passanti, anche nella piastrina, per avvitare il feed sulla guida esterna (relè, LNA) con viti dal lato del feed;
+   - **filettati passanti:** 10 GHz M4/M3, 24 GHz M3/M2.5/M2 (o pollici); da 47 GHz 4-40.
+   - sui fori passanti, **lamatura** opzionale per la testa della vite (lato horn, Ø e profondità modificabili).
+   - opzione **fori della flangia filettati nella piastrina** (la guida si avvita alla piastrina, M3 6H su WR-42).
+5. **Viti piastrina → feed** (10 e 24 GHz, nei 4 punti liberi): **a brugola con lamatura** o **a testa piana Phillips svasate**; WR-42: M2.5 o M2. Da 47 GHz: **fori per i pin di allineamento** della flangia (opzionali).
+6. La stessa foratura viene applicata alla **base del feed** (vista 3D ruotabile del feed con la base forata). Nei PDF i fori sono distinti per funzione (**FLANGIA GUIDA** nero, **FISSAGGIO PIASTRINA** magenta, **PIN** verde) e il disegno della piastrina è quotato: misure esterne, posizione dei fori, apertura a × b, raggi. La **tolleranza generale** si imposta nella scheda Disegno & STEP ed è scritta nei PDF con le tolleranze dei fori.
 
 ![Disegno della piastrina a 47 GHz](img/plate_drawing_47GHz.png)
 ![Flangia del feed forata, foglio 2](img/feed_flange_47GHz.png)

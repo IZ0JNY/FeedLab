@@ -67,7 +67,7 @@ At start-up nothing is preselected: **Select frequency** and **Select material**
 2. **Custom dish data:**
    - offset: from diameter + f/D, diameter + focal length, **field measurements** (long axis, short axis, depth) or illumination angle;
    - prime focus: from f/D or depth.
-3. **Polarisation, goal and tools:** linear or circular; **gain** (TX), **G/T** (RX/EME, default) or **maximum RX performance** (minimum noise: softer illumination and feeds with low side and back lobes); lathe or sheet metal.
+3. **Polarisation, goal and tools:** linear or circular; **gain** (TX), **G/T** (RX/EME, default) or **maximum RX performance** (minimum noise: softer illumination and feeds with low side and back lobes); lathe or sheet metal. **Dish illumination:** automatic (recommended) or an **edge taper** chosen in dB (default 10 dB); a chart shows the illumination across the diameter and a 3D disc the illuminated surface, with spillover, efficiency and surface within −3/−10 dB.
 4. **Find the best feed:** FeedLab compares the suitable feeds and ranks them by estimated efficiency, with reasons and warnings.
 5. **Use this feed:** the other tabs work on that design.
 
@@ -149,12 +149,15 @@ The **λ/4 plate** joins the feed's circular waveguide to the rectangular WR wav
 
 1. **Data:** polarisation, circular waveguide Ø, cutter radius in the corners. The **WR waveguide** is chosen in the sidebar.
 2. **Result:** a × b aperture, thickness (with tolerance) and intermediate Z0.
-3. The plate has **the shape and size of the waveguide flange**: **square** at 10 and 24 GHz (WR-90, WR-75, WR-42), **round** (MIL flanges) from 47 GHz up.
-4. **Fixing holes waveguide → plate → feed**, with **metric** or **inch** screws:
-   - **10 and 24 GHz (square flanges):** the standard flange pattern (Flann) is **tapped in the plate**; **4 plate → feed screws** with the **head in a counterbore** on the waveguide side, so the face towards the waveguide stays flat; if the plate is too thin, FeedLab thickens its body and cuts a **pocket** of the circular-waveguide diameter on the feed side;
-   - **from 47 GHz (round UG-383/385/387 flanges):** no plate → feed screws. The plate **rests on the feed base**; the waveguide's 4-40 screws pass through it and are screwed into the base, tapped through. The standard flange dowels align waveguide, plate and feed.
-   - **option for every flange:** "screws from the feed side (through holes in the base)": the feed screws directly onto the waveguide; the screws enter from the feed side, pass through base and plate and screw into the waveguide flange. The holes in the base can be **counterbored** (head sunk on the horn side) or **plain** (head resting on the base). **Counterbore diameter and depth** are proposed by FeedLab and can be changed; the base thickens automatically (counterbore + 1.5 mm under the head) and, if it is square and the counterbores do not fit (for example WR-42 with M3), it grows as needed. A **rotatable 3D view of the feed with its drilled base** shows holes and counterbores.
-5. The same pattern is applied to the **feed base**. Next to the front view there is a **3D view** of the plate; in the plate and flange PDFs every group of holes shows its **diameter and thread** (M2, M3…). The **base thickness** is set in the Feed design tab (minimum 1 mm, empty = automatic): threaded holes and screw lengths follow it.
+3. The plate has **the shape of the waveguide flange**: **square** at 10 and 24 GHz (WR-90, WR-75, WR-42), **round** (MIL flanges) from 47 GHz up. It is as large as the flange, or larger when the fixing screws need it (1 mm of metal outside the counterbore); the **outer size** and the **corner radius** can be set. The **thickness stays λ/4** unless you set it larger (then a pocket of the circular-guide diameter is cut on the feed side).
+4. **Flange holes** (same position in the plate and in the feed base), with **metric** or **inch** screws. In the feed base:
+   - **as the flange:** through, flange Ø rounded up to the tenth (WR-42 3.07 → 3.1), adjustable up to leaving 1 mm to the edge;
+   - **enlarged:** through, also in the plate, to screw the feed onto the external waveguide (relay, LNA) from the feed side;
+   - **threaded through:** 10 GHz M4/M3, 24 GHz M3/M2.5/M2 (or inch); from 47 GHz 4-40.
+   - on through holes, optional **counterbore** for the screw head (horn side, Ø and depth adjustable).
+   - option **flange holes threaded in the plate** (the waveguide screws into the plate, M3 6H on WR-42).
+5. **Plate → feed screws** (10 and 24 GHz, in the 4 free spots): **socket head in a counterbore** or **Phillips flat head, countersunk**; WR-42: M2.5 or M2. From 47 GHz: optional **alignment-pin holes** of the flange.
+6. The same pattern is applied to the **feed base** (rotatable 3D view of the feed with its drilled base). In the PDFs the holes are told apart by function (**WAVEGUIDE FLANGE** black, **PLATE FIXING** magenta, **PIN** green) and the plate drawing is dimensioned: outer size, hole positions, a × b aperture, radii. The **general tolerance** is set in the Drawing & STEP tab and printed in the PDFs with the hole tolerances.
 
 ![47 GHz plate drawing](img/plate_drawing_47GHz.png)
 ![Drilled feed flange, sheet 2](img/feed_flange_47GHz.png)

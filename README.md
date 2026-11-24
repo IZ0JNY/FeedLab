@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.4.18 BETA TEST**, software libero con licenza **GPLv3**, senza scadenza. Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4.19 BETA TEST**, software libero con licenza **GPLv3**, senza scadenza. Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |

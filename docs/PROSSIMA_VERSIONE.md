@@ -1,6 +1,16 @@
-# Modifiche per la prossima versione (0.4.19)
+# Modifiche per la prossima versione (0.4.20)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
+
+---
+
+# Archivio: versione 0.4.19 (pubblicata, BETA TEST)
+
+Pubblicata con 8 modifiche (il manuale dettagliato è passato alla 0.4.20).
 
 | # | Richiesta | Stato |
 |---|---|---|
