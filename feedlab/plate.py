@@ -33,7 +33,8 @@ class MatchingPlate:
     outer: float           # plate outer side (mm)
     basic: dict
     mount: object = None   # flanges.Mount when the fixing holes are drilled
-    body_t: float = 0.0    # total plate thickness (> thickness when a pocket makes room for counterbores)
+    body_t: float = 0.0    # total plate thickness (> thickness only when the user wants it: feed-side pocket)
+    outer_r: float = 0.0   # corner radius of the square outline
 
     @property
     def pocket_depth(self) -> float:
@@ -62,7 +63,9 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
                  corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None,
                  plate_screw: str | None = None, base_holes: str = "flange", hole_dia: float | None = None,
                  thread: str | None = None, cbore: bool = False, cb_depth: float | None = None,
-                 cb_dia: float | None = None, pins: bool = True, plate_t: float | None = None) -> MatchingPlate:
+                 cb_dia: float | None = None, pins: bool = True, plate_t: float | None = None,
+                 plate_head: str = "allen", plate_tap: bool = False, outer_mm: float | None = None,
+                 outer_r: float = 0.0) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
     (feedlab.flanges.mount: same 4 holes in plate and feed base, optional plate→feed screws, optional pins)."""
     w = RECT_WG[wg]
@@ -87,7 +90,7 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     if holes:
         from .flanges import mount
         kw = dict(base_holes=base_holes, hole_dia=hole_dia, thread=thread, cbore=cbore, cb_depth=cb_depth,
-                  cb_dia=cb_dia, pins=pins)
+                  cb_dia=cb_dia, pins=pins, plate_head=plate_head, plate_tap=plate_tap)
         # the plate keeps the λ/4 thickness unless the user sets a thicker body (feed-side pocket)
         body_t = round(max(t, float(plate_t or 0.0)), 2)
         mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, **kw)
@@ -95,12 +98,26 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     from .flanges import FLANGES
     fl = FLANGES.get(wg)
     if fl is not None:
-        # always the outline and size of the waveguide's standard flange (square WR-90/75/42…, round MIL from
-        # WR-22): holes and countersinks are placed inside it
+        # outline of the waveguide's standard flange (square WR-90/75/42…, round MIL from WR-22), larger when the
+        # plate→feed screws need it (1 mm of metal outside their counterbore/countersink), or the user's size
         outer = fl.A
+        from .flanges import hole_role
+        fix = [h for h in (mnt.plate_holes if mnt is not None else []) if hole_role(h) == "plate"]
+        if fix:                       # only the plate→feed screws can make the plate grow
+            if fl.shape == "round":
+                need = max(math.hypot(h.x, h.y) + max(h.dia, h.cb_dia) / 2 for h in fix)
+            else:
+                need = max(max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 for h in fix)
+            outer = max(outer, math.ceil(2 * (need + 1.0) * 10 - 1e-6) / 10)
+        if outer_mm:
+            if mnt is not None and float(outer_mm) < outer - 1e-9:
+                mnt.warnings.append(f"piastrina {float(outer_mm):.2f} mm troppo piccola per i fori: minimo {outer:.2f} mm")
+            else:
+                outer = float(outer_mm)
     body_t = max(t, float(plate_t or 0.0))
+    sq = fl is None or fl.shape == "square"
     return MatchingPlate(f_ghz, wg, circ_diam_mm, a_opt, b, r, t, lg / 200, z0, polarization, outer, basic, mnt,
-                         round(body_t, 2))
+                         round(body_t, 2), min(float(outer_r or 0.0), outer / 4) if sq else 0.0)
 
 
 def plate_solid(p: MatchingPlate):
@@ -110,6 +127,8 @@ def plate_solid(p: MatchingPlate):
     T = p.body_t or p.thickness
     body = (cq.Workplane("XY").circle(p.outer / 2) if p.shape == "round" else
             cq.Workplane("XY").rect(p.outer, p.outer)).extrude(T)
+    if p.shape != "round" and p.outer_r > 0.01:
+        body = body.edges("|Z").fillet(p.outer_r)
     hole = (cq.Workplane("XY").workplane(offset=T - p.thickness).sketch().rect(p.a, p.b).vertices()
             .fillet(max(p.corner_r, 0.01)).finalize().extrude(p.thickness))
     if p.polarization == "H":
@@ -158,7 +177,11 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     if p.shape == "round":
         ax.add_patch(Circle((0, 0), h, fill=False, lw=1.2))
     else:
-        ax.add_patch(Rectangle((-h, -h), p.outer, p.outer, fill=False, lw=1.2))
+        if p.outer_r > 0.01:
+            ax.add_patch(FancyBboxPatch((-h + p.outer_r, -h + p.outer_r), p.outer - 2 * p.outer_r, p.outer - 2 * p.outer_r,
+                                        boxstyle=f"round,pad={p.outer_r}", fill=False, lw=1.2))
+        else:
+            ax.add_patch(Rectangle((-h, -h), p.outer, p.outer, fill=False, lw=1.2))
     aa, bb = (p.a, p.b) if p.polarization == "V" else (p.b, p.a)
     ax.add_patch(FancyBboxPatch((-aa / 2 + p.corner_r, -bb / 2 + p.corner_r), aa - 2 * p.corner_r, bb - 2 * p.corner_r,
                                 boxstyle=f"round,pad={p.corner_r}", fill=True, fc="0.85", ec="k", lw=1))
@@ -176,7 +199,7 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
         for hl in p.mount.plate_holes:
             from .flanges import ROLE_COLOR, hole_role
             ax.add_patch(Circle((hl.x, hl.y), hl.dia / 2, fill=False, lw=0.9, ec=ROLE_COLOR[hole_role(hl)]))
-            if hl.kind == "tap":
+            if hl.kind == "tap":                 # flange holes threaded in the plate
                 from .flanges import SCREWS
                 from matplotlib.patches import Arc
                 dM = SCREWS[p.mount.screw][0]
@@ -209,7 +232,7 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
               f"                    prof. {p.pocket_depth:.2f} mm (prolunga la guida circolare)\n"
               if p.pocket_depth > 0.005 else "") +
            (f"Ø esterno           {p.outer:.2f} mm (flangia rotonda)\n" if p.shape == "round" else
-              f"Lato esterno        {p.outer:.1f} mm\n") +
+              f"Lato esterno        {p.outer:.2f} mm" + (f", angoli R{p.outer_r:g}" if p.outer_r > 0.01 else "") + "\n") +
            f"Z0 intermedia       {p.z0:.1f} Ω\n\n"
            f"Versione base: a {p.basic['a']:.3f}, b {p.basic['b']:.3f}, t {p.basic['thickness']:.3f} mm\n\n"
            f"Materiale: {material}\nTolleranza generale ±{general_tolerance(p.f_ghz):g} mm\n"
@@ -256,7 +279,10 @@ def _holes_text(p: MatchingPlate) -> str:
                                                     sc=m.screw, t=p.body_t), 58)]
     if m.plate_screw:
         drill = max((h.depth or 0.0 for h in m.feed_holes if h.kind == "tap" and h.depth), default=0.0)
-        for x in (T("viti piastra→feed: 4 × {ps} × {ln} a testa piana Phillips (svasate, a filo)", ps=m.plate_screw, ln=m.screw_len_label),
+        for x in ((T("viti piastra→feed: 4 × {ps} × {ln} a testa piana Phillips (svasate, a filo)", ps=m.plate_screw,
+                     ln=m.screw_len_label) if m.plate_head == "flat" else
+                   T("viti piastra→feed: 4 × {ps} × {ln} a brugola ISO 4762 (testa nella lamatura)", ps=m.plate_screw,
+                     ln=m.screw_len_label)),
                   T("(2 × spessore {t:.2f} → {ln}); nel feed: vite {s:.1f}, foro prof. {d:.0f} (pari), filetto prof. {tp:.1f}",
                     t=p.body_t, ln=m.screw_len_label, s=m.screw_in, d=drill, tp=m.tap_depth)):
             lines += ["  " + y for y in textwrap.wrap(x, 58)]

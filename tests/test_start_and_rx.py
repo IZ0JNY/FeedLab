@@ -42,3 +42,18 @@ def test_feed_through_holes_without_counterbore():
     finally:
         geometry.MOUNT.clear()
         geometry.MOUNT.update({"wg": None})
+
+
+def test_illumination_edge_taper():
+    """User edge taper → design f/D; 10–11 dB gives the classic ~81 % (cos^q, Balanis); more taper → less spillover."""
+    from feedlab import illumination as I
+    for fD in (0.35, 0.6, 0.69):
+        for t in (8.0, 11.0, 16.0):
+            s = I.setting(fD, "gain", t)
+            assert abs(s["edge_db"] - t) < 0.05
+        s10, s16 = I.setting(fD, "gain", 10.0), I.setting(fD, "gain", 16.0)
+        assert 0.78 < s10["total"] < 0.85 and s16["spillover"] > s10["spillover"] and s16["area10"] < s10["area10"]
+    assert I.setting(0.6, "gt")["factor"] == 1.08                    # automatic = the wizard default
+    d = wizard.dish_from_prime(2400, 0.6)
+    a = wizard.recommend(d, 24.048, quick_sim=False, fd_factor=I.setting(0.6, "gain", 16.0)["factor"])
+    assert a

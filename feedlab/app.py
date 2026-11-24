@@ -493,6 +493,16 @@ with tabs[0]:
                              "con lobi laterali/posteriori più bassi → meno rumore dal terreno, a costo di un po' di guadagno")
         tools = st.radio("Mezzi di costruzione", ["Tornio / CNC", "Solo lamiera e saldatura"])
         quick = st.checkbox("Stima con simulazione rapida (mode matching, ~20 s)", True)
+        ill_mode = st.radio("Illuminazione della parabola", ["auto", "taper"], horizontal=True, key="ill_mode",
+                            format_func=lambda k: {"auto": i18n.tr("Automatica (consigliata)"),
+                                                   "taper": i18n.tr("Taper al bordo scelto da me")}[k],
+                            help="automatica: il feed è progettato come oggi per l'obiettivo scelto; taper al bordo: "
+                                 "quanto è più debole il segnale sul bordo della parabola rispetto al centro (dB). "
+                                 "Più taper = meno spillover e meno rumore dal terreno, ma meno superficie sfruttata")
+        ill_taper = st.slider("Taper al bordo (dB)", 6.0, 25.0, 11.0, 0.5, key="ill_taper",
+                              disabled=ill_mode != "taper",
+                              help="10–12 dB: massimo guadagno (classico); 12–16 dB: più G/T (EME, RX); < 10 dB: parabola "
+                                   "molto illuminata, più spillover")
     if dish is not None:
         S.dish = dish                            # the dish chosen here drives every other tab
     with c3:
@@ -512,11 +522,55 @@ with tabs[0]:
             st.write(f"Perdita Ruze: **{reflector.ruze_loss_db(rms, lam):.2f} dB**")
             if dish.note:
                 st.info(dish.note)
+    _prio_k = "gt" if "G/T" in prio else "rx" if "RX" in prio else "gain"
+    if dish is not None:
+        from feedlab import illumination as _illum
+        _ill = _illum.setting(dish.fD, _prio_k, ill_taper if ill_mode == "taper" else None)
+        with st.expander(_T("☀️ Illuminazione della parabola: taper al bordo {t:.1f} dB, efficienza {e:.0f}%",
+                            t=_ill["edge_db"], e=100 * _ill["total"]), expanded=True):
+            g1, g2 = st.columns(2)
+            _rho, _lev = _illum.profile_db(dish.fD, _ill["q"])
+            fi = go.Figure()
+            fi.add_trace(go.Scatter(x=np.concatenate([-_rho[::-1], _rho]), y=np.concatenate([_lev[::-1], _lev]),
+                                    mode="lines", line=dict(color="#d4a017", width=3), fill="tozeroy",
+                                    fillcolor="rgba(212,160,23,0.25)", name=i18n.tr("illuminazione")))
+            for lv, col in ((-3, "green"), (-10, "red")):
+                fi.add_hline(y=lv, line_dash="dot", line_color=col, annotation_text=f"{lv} dB")
+            fi.update_layout(height=330, margin=dict(l=10, r=10, t=40, b=10), showlegend=False,
+                             title=i18n.tr("Illuminazione lungo il diametro della parabola"),
+                             xaxis_title=i18n.tr("posizione sul diametro (bordo = ±1)"), yaxis_title="dB",
+                             yaxis_range=[min(-30.0, float(_lev.min()) - 2), 1])
+            g1.plotly_chart(fi, width="stretch")
+            g1.caption(_T("Spillover {s:.0f}% · illuminazione (taper) {t:.0f}% · totale {e:.0f}% (modello cos^q, senza "
+                          "blocking e perdite). Superficie entro −3 dB: {a3:.0f}% · entro −10 dB: {a10:.0f}%. "
+                          "Feed progettato per f/D {fd:.2f} (parabola {f0:.2f}).",
+                          s=100 * _ill["spillover"], t=100 * _ill["taper"], e=100 * _ill["total"],
+                          a3=100 * _ill["area3"], a10=100 * _ill["area10"], fd=_ill["fD_design"], f0=dish.fD))
+            # 3D disc of the dish, shaded by the illumination
+            _R = dish.D_mm / 2
+            _f = dish.fD * dish.D_mm
+            rr = np.linspace(0, 1, 40)
+            pp = np.linspace(0, 2 * np.pi, 73)
+            RR, PP = np.meshgrid(rr, pp)
+            X, Y = _R * RR * np.cos(PP), _R * RR * np.sin(PP)
+            Z = (X ** 2 + Y ** 2) / (4 * _f)
+            C = np.interp(RR, _rho, _lev)
+            fd3 = go.Figure(go.Surface(x=X / 1000, y=Y / 1000, z=Z / 1000, surfacecolor=C, cmin=-20, cmax=0,
+                                       colorscale=[[0, "#1b1b3a"], [0.5, "#b8860b"], [1, "#fff4b0"]],
+                                       colorbar=dict(title="dB", len=0.7), showscale=True))
+            fd3.update_layout(height=360, margin=dict(l=0, r=0, t=40, b=0),
+                              title=i18n.tr("Parabola illuminata (chiaro = più segnale)"),
+                              scene=dict(aspectmode="data", xaxis_title="m", yaxis_title="m", zaxis_title="m",
+                                         camera=dict(eye=dict(x=0.0, y=-1.2, z=1.6))))
+            g2.plotly_chart(fd3, width="stretch")
+            if dish.kind == "offset":
+                g2.caption(i18n.tr("Parabola offset: mostrata come apertura circolare equivalente (f/D visto dal feed)."))
     if st.button("🔎 Trova il feed migliore", type="primary", disabled=dish is None or not S.f_ghz):
         S.dish = dish
         with st.spinner("Valuto i candidati…"):
             S.cands = wizard.recommend(dish, S.f_ghz, "circular" if pol == "Circolare" else "linear",
-                                       "gt" if "G/T" in prio else "rx" if "RX" in prio else "gain", "sheet" if "lamiera" in tools else "lathe", quick)
+                                       _prio_k, "sheet" if "lamiera" in tools else "lathe", quick,
+                                       fd_factor=_ill["factor"] if ill_mode == "taper" else None)
     if S.cands:
         rows = []
         for i, c in enumerate(S.cands):
@@ -1158,28 +1212,35 @@ with tabs[6], contextlib.suppress(_Skip):
                                        disabled=not holes_on,
                                        help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
                                             "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)")
-        pscrew, pins = None, True
+        pscrew, pins, plate_head, plate_tap = None, True, "allen", False
         if _round_fl:
             pins = st.checkbox("Fori per i pin di allineamento (piastrina e base del feed)", True, key="mount_pins",
                                disabled=not holes_on, help="i 4 fori spina della flangia MIL: passanti nella piastrina, "
                                                            "profondi 3 mm nella base")
         else:
             opts = flanges.plate_screw_options(S.f_ghz)
-            p1, p2 = st.columns(2)
-            if p1.checkbox("4 viti piastrina → feed a testa piana Phillips (svasate, nei 4 punti liberi)",
-                           key="mount_plate_screws", disabled=not holes_on,
-                           help="fissano la piastrina alla base del feed; la testa piana sta a filo nella svasatura della "
-                                "piastrina (lato guida), così non fa spessore e la piastrina resta uguale. Nel feed: fori "
-                                "filettati ciechi"):
-                _fit = flanges.fitting_plate_screws(wg, S.f_ghz, dcirc, system, "V" if pol_ == "Verticale" else "H") \
-                    if wg in flanges.FLANGES else opts
-                pscrew = p2.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{wg}_{'_'.join(opts)}",
-                                      index=opts.index(_fit[0]) if _fit else 0, disabled=not holes_on,
-                                      format_func=lambda m_: (m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})")
-                                      + ("" if m_ in _fit else " — " + i18n.tr("non sta nella piastrina")),
-                                      help="viti a testa piana Phillips (ISO 7046 / UNC 82°); lunghezza = 2 × spessore della "
-                                           "piastrina, arrotondata alla misura commerciale; la svasatura segue la testa")
-        _pt = st.number_input("Spessore della piastrina (mm, vuoto = λ/4 calcolato)", min_value=0.5, max_value=30.0,
+            p1, p2, p3 = st.columns(3)
+            if p1.checkbox("4 viti piastrina → feed (nei 4 punti liberi)", key="mount_plate_screws", disabled=not holes_on,
+                           help="fissano la piastrina alla base del feed; la testa sta nella piastrina (lato guida), così "
+                                "non fa spessore. Nel feed: fori filettati ciechi. La piastrina si allarga quanto serve"):
+                pscrew = p2.selectbox("Viti piastrina → feed", opts, key=f"plate_screw_{'_'.join(opts)}", disabled=not holes_on,
+                                      format_func=lambda m_: m_ if system == "metric" else f"{flanges.UNC_FOR_METRIC[m_]} (≈ {m_})",
+                                      help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale")
+                plate_head = p3.radio("Testa delle viti", ["allen", "flat"], key="plate_head", disabled=not holes_on,
+                                      format_func=lambda k: {"allen": i18n.tr("A brugola con lamatura (ISO 4762)"),
+                                                             "flat": i18n.tr("Testa piana Phillips svasata (ISO 7046)")}[k])
+            plate_tap = st.checkbox(_T("Fori della flangia filettati {s} nella piastrina (la guida si avvita alla piastrina)",
+                                       s=_scr or ""), key="plate_tap", disabled=not holes_on,
+                                    help="come nello schema IZ0JNY: le viti della guida si avvitano nella piastrina (6H); "
+                                         "spento: fori passanti come nella base del feed")
+        o1, o2, o3 = st.columns(3)
+        _outer = o1.number_input("Misura esterna della piastrina (mm, vuoto = automatica)", min_value=5.0, max_value=200.0,
+                                 value=None, step=0.1, key=f"plate_outer_{wg}", placeholder=i18n.tr("automatica"),
+                                 help="automatica: come la flangia della guida, più grande se servono le viti di fissaggio "
+                                      "(1 mm di metallo fuori dalla lamatura)")
+        _outer_r = o2.number_input("Raggio angoli esterni (mm)", min_value=0.0, max_value=10.0, value=2.0 if not _round_fl else 0.0,
+                                   step=0.5, key=f"plate_outer_r_{wg}", disabled=_round_fl)
+        _pt = o3.number_input("Spessore della piastrina (mm, vuoto = λ/4 calcolato)", min_value=0.5, max_value=30.0,
                               value=None, step=0.1, key=f"plate_t_user_{wg}", placeholder=i18n.tr("automatico (λ/4)"),
                               help="la piastrina resta spessa λ/4 a meno che tu non la voglia più spessa: in quel caso "
                                    "sul lato feed si ricava una tasca del diametro della guida circolare (la parte λ/4 "
@@ -1188,10 +1249,12 @@ with tabs[6], contextlib.suppress(_Skip):
         try:
             pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
                                     plate_screw=pscrew, base_holes=base_holes, hole_dia=hole_dia, thread=thread,
-                                    cbore=_cbore, cb_depth=cb_depth, cb_dia=cb_dia, pins=pins, plate_t=_pt)
+                                    cbore=_cbore, cb_depth=cb_depth, cb_dia=cb_dia, pins=pins, plate_t=_pt,
+                                    plate_head=plate_head, plate_tap=plate_tap, outer_mm=_outer, outer_r=_outer_r)
             new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
                        "plate_t": pl.body_t if holes_on else None, "base_holes": base_holes, "hole_dia": hole_dia,
-                       "thread": thread, "cbore": _cbore, "cb_depth": cb_depth, "cb_dia": cb_dia, "pins": pins}
+                       "thread": thread, "cbore": _cbore, "cb_depth": cb_depth, "cb_dia": cb_dia, "pins": pins,
+                       "plate_head": plate_head, "plate_tap": plate_tap}
             if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
                 S["mount_cfg"] = new_cfg
                 geometry.MOUNT.update(new_cfg)
@@ -1224,8 +1287,13 @@ with tabs[6], contextlib.suppress(_Skip):
                     _txt = [_T("Flangia {wg} {name}: fori passanti nella base e nella piastrina; viti {screw} dal lato del "
                                "feed con la testa appoggiata sulla base, avvitate nella flangia della guida.",
                                wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw)]
+                if any(h.kind == "tap" for h in mm_.plate_holes):
+                    _txt.append(_T("Fori della flangia filettati {s} 6H nella piastrina: la guida si avvita alla piastrina.",
+                                   s=mm_.screw))
                 if mm_.plate_screw:
                     _txt += [_T("4 viti piastra→feed {ps} × {ln} a testa piana Phillips, a filo nella svasatura (lato guida).",
+                                ps=mm_.plate_screw, ln=mm_.screw_len_label) if mm_.plate_head == "flat" else
+                             _T("4 viti piastra→feed {ps} × {ln} a brugola, con la testa nella lamatura (lato guida).",
                                 ps=mm_.plate_screw, ln=mm_.screw_len_label),
                              _T("Nel feed la vite entra {a} mm; foro profondo {b} mm, filettato per {c} mm.",
                                 a=f"{mm_.screw_in:.1f}", b=f"{_deep:.0f}", c=f"{mm_.tap_depth:.1f}")]

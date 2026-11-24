@@ -8,10 +8,11 @@
 | 2 | Controllo aggiornamenti: la verifica del certificato di GitHub la fa Windows stesso (truststore, come il browser), così funziona anche con antivirus che ispezionano le connessioni HTTPS; ultima riserva PowerShell; l'errore mostra tutti i tentativi | ✅ fatto |
 | 3 | Scheda Piastrina WR spostata prima di Disegno & STEP | ✅ fatto |
 | 4 | Fori sulla base del feed alla posizione della flangia: come la flangia, maggiorati (Ø proposto e modificabile, anche sulla piastrina) o filettati passanti (10 GHz M4/M3, 24 GHz M3/M2.5/M2, o pollici), con lamatura opzionale; piastrine quadrate con gli stessi 4 fori del feed + 4 viti piastrina→feed opzionali con lamatura; piastrine e basi rotonde (da 47 GHz) con fori della flangia e pin di allineamento opzionali | ✅ fatto |
-| 5 | Procedura guidata: illuminazione della parabola scelta dall'utente (taper al bordo in dB, default quella attuale), grafico e disco 3D della parabola con la superficie illuminata ombreggiata | ⏳ da fare |
+| 5 | Procedura guidata: illuminazione della parabola scelta dall'utente (taper al bordo in dB, default quella attuale), grafico e disco 3D della parabola con la superficie illuminata ombreggiata | ✅ fatto |
 | 6 | Tolleranza generale di lavorazione impostabile (scheda Disegno & STEP) e tolleranze dei fori scritte nei PDF di feed e piastrina | ✅ fatto |
-| 7 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
+| 7 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏸ rinviato alla prossima versione |
 | 8 | PDF di piastrina e feed: fori distinti per funzione (FLANGIA GUIDA nero, FISSAGGIO PIASTRINA magenta, PIN verde) con legenda; tabelle dei fori a capo | ✅ fatto |
+| 9 | Piastrina: viti piastrina→feed a brugola con lamatura (default) o a testa piana Phillips svasate; WR-42 M2.5/M2 (M3 troppo grande); posizioni su griglia 0.5 mm (M2.5 a 9.00 come il CAD IZ0JNY); piastrina più grande della flangia quando servono le viti (1 mm dal bordo) o della misura scelta, angoli esterni arrotondati; spessore λ/4 che cambia solo se lo imposta l'utente; fori della flangia filettati nella piastrina come opzione; fori passanti arrotondati al decimo (3.07 → 3.1) e modificabili con 1 mm dal bordo | ✅ fatto |
 
 ---
 

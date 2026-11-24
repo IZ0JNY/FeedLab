@@ -66,7 +66,7 @@ PITCH = {"M2": 0.4, "M2.5": 0.45, "M3": 0.5, "M4": 0.7, "2-56 UNC": 25.4 / 56, "
 
 # ---- screws holding the λ/4 plate on the feed (user's choice, IZ0JNY) ----
 PLATE_SCREWS_10GHZ = ["M3", "M4"]              # 10 GHz band
-PLATE_SCREWS_HIGH = ["M2.5", "M3", "M2"]       # 24 GHz and up (first = default)
+PLATE_SCREWS_HIGH = ["M2.5", "M2"]             # 24 GHz and up (first = default); M3 is too big on WR-42
 TEN_GHZ_MAX = 15.0                             # below this the 10 GHz choices apply
 SCREW_FACTOR = 2.0                             # screw length = 2 × plate thickness, commercial (IZ0JNY)
 # imperial equivalents (nearest UNC size): M2→#2-56 (Ø2.18), M2.5→#3-48 (Ø2.51, less common than 4-40),
@@ -158,6 +158,8 @@ class Mount:
     base_holes: str = "flange"   # "flange" | "clear" | "tap" (see mount)
     thread: str = ""             # thread of the base holes (base_holes "tap")
     guide_in: float = 0.0        # length of the flange screw inside / through the feed base
+    plate_head: str = ""         # plate→feed screws: "allen" (counterbore) | "flat" (countersink)
+    plate_grip_cut: float = 0.0  # depth of their counterbore (the grip is the plate under the head)
 
     @property
     def plate_radius(self) -> float:
@@ -250,17 +252,6 @@ def clear_hole(wg: str, system: str = "metric") -> float:
                      max_hole_dia(wg)), 2)
 
 
-def fitting_plate_screws(wg: str, f_ghz: float | None, feed_input_diam: float, system: str = "metric",
-                         pol: str = "V") -> list[str]:
-    """Plate → feed screw sizes (metric names) whose countersunk heads fit in the plate with 1 mm to the edge."""
-    out = []
-    for sc in plate_screw_options(f_ghz):
-        m = mount(wg, system, pol, feed_input_diam, f_ghz, plate_screw=sc)
-        if m.plate_screw:
-            out.append(sc)
-    return out
-
-
 def base_thread_options(wg: str, f_ghz: float | None, system: str = "metric") -> list[str]:
     """Threads offered for the feed-base holes: 10 GHz M4/M3, 24 GHz M3/M2.5/M2 (or the UNC equivalents);
     round MIL flanges: 4-40 UNC (their captive screws)."""
@@ -274,7 +265,7 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
           f_ghz: float | None = None, plate_screw: str | None = None, plate_t: float | None = None,
           base_holes: str = "flange", hole_dia: float | None = None, thread: str | None = None,
           cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None,
-          pins: bool = True) -> Mount:
+          pins: bool = True, plate_head: str = "allen", plate_tap: bool = False) -> Mount:
     """Holes of the plate and of the feed base for waveguide `wg`.
 
     The 4 holes of the standard flange are reproduced, at the same positions, in the plate and in the feed base:
@@ -286,7 +277,9 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
       cbore: through holes only — counterbore for the screw head on the horn side of the base.
       plate_screw: square flanges — 4 extra screws plate→feed in the free spots, heads in counterbores of the
                    plate (WR side), blind tapped holes in the feed. None = no plate screws.
-      pins: round MIL flanges — the 4 dowel holes of the flange, through the plate and into the base."""
+      pins: round MIL flanges — the 4 dowel holes of the flange, through the plate and into the base.
+      plate_head: plate→feed screws "allen" (socket head in a counterbore) or "flat" (Phillips countersunk).
+      plate_tap: the flange holes are threaded in the plate (the waveguide screws into the plate)."""
     if wg not in FLANGES:
         raise ValueError(f"nessuna flangia standard in tabella per {wg}")
     if base_holes not in BASE_HOLE_MODES:
@@ -328,7 +321,11 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
             cb_d = round(max(float(cb_dia), d_hole + 0.2), 2)
     for x, y in screw_xy:
         x, y = _rot(x, y, polarization)
-        m.plate_holes.append(Hole(x, y, d_plate, "clear", f"FLANGIA GUIDA: Ø{d_plate:g} passante"))
+        if plate_tap:
+            _, p_tap, _ = SCREWS[screw]
+            m.plate_holes.append(Hole(x, y, p_tap, "tap", f"FLANGIA GUIDA: {screw} filettato passante 6H (preforo Ø{p_tap:g})"))
+        else:
+            m.plate_holes.append(Hole(x, y, d_plate, "clear", f"FLANGIA GUIDA: Ø{d_plate:g} passante"))
         if base_holes == "tap":
             m.feed_holes.append(Hole(x, y, tap, "tap", f"FLANGIA GUIDA: {thread} filettato passante (preforo Ø{tap:g})"))
         else:
@@ -345,7 +342,8 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         choices = plate_screw_options(f_ghz)
         metric = plate_screw if plate_screw in choices else (
             next((k for k, v in UNC_FOR_METRIC.items() if v == plate_screw), choices[0]))
-        _plate_screws(m, system, feed_input_diam, wg, screw=plate_screw_name(metric, system), plate_t=plate_t)
+        _plate_screws(m, system, feed_input_diam, wg, screw=plate_screw_name(metric, system), plate_t=plate_t,
+                      head=plate_head)
     # interference with the feed's circular input guide
     if feed_input_diam:
         for h in m.feed_holes:
@@ -358,7 +356,7 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
 
 
 def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang: int = 36,
-                  screw: str | None = None, plate_t: float | None = None) -> None:
+                  screw: str | None = None, plate_t: float | None = None, head: str = "allen") -> None:
     """Four Phillips flat-head (countersunk) screws holding the plate on the feed (θ + k·90°), heads flush in
     countersinks on the WR side: the plate keeps its thickness. Smallest radius whose countersinks keep ≥ 0.6 mm
     from every other hole, from the circular guide and from the WR aperture, and ≥ 1 mm from the outline of the
@@ -367,23 +365,22 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
     screw = screw or ("M2.5" if system != "imperial" else "2-56 UNC")
     d_major, tap, clear = SCREWS[screw]
     dk, k, ang = CSK[screw]
-    cs_d = round(dk + 0.2, 1)                                 # countersink diameter at the surface
-    cs_k = round((cs_d - clear) / 2 / math.tan(math.radians(ang / 2)), 2)   # countersink depth
+    if head == "flat":
+        cs_d = round(dk + 0.2, 1)                             # countersink diameter at the surface
+        cs_k = round((cs_d - clear) / 2 / math.tan(math.radians(ang / 2)), 2)   # countersink depth
+        grip_cut = 0.0                                        # flush: the whole plate is the grip
+    else:                                                     # socket head cap screw in a counterbore
+        cs_d, cs_k = CBORE[screw]
+        grip_cut = cs_k
     w = RECT_WG.get(wg)
     a, b = (w.a_mm, w.b_mm) if w else (0.0, 0.0)
     if m.polarization == "H":
         a, b = b, a
     others = [(h.x, h.y, max(h.dia, h.cb_dia)) for h in m.plate_holes]
-    half = m.flange.A / 2
-    square = m.flange.shape == "square"
-
     def ok(x, y):
         if math.hypot(x, y) - cs_d / 2 < feed_input_diam / 2 + 0.6:
             return False
         if abs(x) < a / 2 + cs_d / 2 + 0.6 and abs(y) < b / 2 + cs_d / 2 + 0.6:
-            return False
-        edge = (max(abs(x), abs(y)) if square else math.hypot(x, y)) + cs_d / 2
-        if edge > half - 1.0:
             return False
         return all(math.hypot(x - ox, y - oy) > (cs_d + od) / 2 + 0.6 for ox, oy, od in others)
 
@@ -391,30 +388,34 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
     eng = max(2.0 * d_major, 4.0)
     L, L_lab = 0.0, ""
     if plate_t:
-        # screw length = 2 × plate thickness, commercial; the flat head is flush: the whole plate is the grip
+        # screw length = 2 × plate thickness, commercial; grip = plate under the head
         L, L_lab = screw_length(plate_t, system)
-        eng = L - plate_t
+        eng = L - (plate_t - grip_cut)
         if eng < 1.5 * d_major:
             m.warnings.append(f"vite {screw} × {L_lab}: solo {eng:.1f} mm di filetto nel feed (< 1.5 d)")
-        if cs_k > plate_t - 0.5:
-            m.warnings.append(f"svasatura {screw} profonda {cs_k:.2f} mm in una piastrina di {plate_t:.2f} mm: "
-                              "usa viti più piccole o aumenta lo spessore della piastrina")
+        if cs_k > plate_t - (0.5 if head == "flat" else 0.8):
+            m.warnings.append(f"{'svasatura' if head == 'flat' else 'lamatura'} {screw} profonda {cs_k:.2f} mm in una "
+                              f"piastrina di {plate_t:.2f} mm: usa viti più piccole o aumenta lo spessore della piastrina")
     # hole in the feed (IZ0JNY): even whole millimetres; the thread must reach the screw end and stops
     # 3 pitches (≥ 1 mm) before the bottom of the blind hole (tap lead)
     lead = max(1.0, 3 * PITCH.get(screw, 0.5))
     drill_d = float(2 * math.ceil((eng + lead) / 2 - 1e-9))
     tap_d = drill_d - lead
-    cands = [(r + 0.1 * j, th) for th in (0.0, math.pi / 4) for j in range(600)]
+    r = math.ceil(r * 2 - 1e-9) / 2                          # radius on a 0.5 mm grid (9.0 on WR-42, as IZ0JNY)
+    cands = [(r + 0.5 * j, th) for th in (0.0, math.pi / 4) for j in range(120)]
     cands += [(r + 0.1 * j, 0.5 * math.pi * i / (n_ang // 4)) for j in range(600) for i in range(n_ang // 4)]
     std = "ISO 7046" if ang == 90 else "UNC 82°"
     for r, th in cands:
         pts = [(r * math.cos(th + q * math.pi / 2), r * math.sin(th + q * math.pi / 2)) for q in range(4)]
         if all(ok(x, y) for x, y in pts):
             for x, y in pts:
-                m.plate_holes.append(Hole(x, y, clear, "csk",
-                                          f"FISSAGGIO PIASTRINA: Ø{clear:g} passante, svasatura {ang}° Ø{cs_d:g} lato guida "
-                                          f"({screw}" + (f" × {L_lab}" if L_lab else "") + f" testa piana Phillips {std})",
-                                          cb_dia=cs_d, cb_depth=cs_k))
+                lab = f" × {L_lab}" if L_lab else ""
+                m.plate_holes.append(
+                    Hole(x, y, clear, "csk", f"FISSAGGIO PIASTRINA: Ø{clear:g} passante, svasatura {ang}° Ø{cs_d:g} lato guida "
+                                             f"({screw}{lab} testa piana Phillips {std})", cb_dia=cs_d, cb_depth=cs_k)
+                    if head == "flat" else
+                    Hole(x, y, clear, "cbore", f"FISSAGGIO PIASTRINA: Ø{clear:g} passante, lamatura Ø{cs_d:g} prof. {cs_k:g} "
+                                               f"lato guida ({screw}{lab} a brugola ISO 4762)", cb_dia=cs_d, cb_depth=cs_k))
                 m.feed_holes.append(Hole(x, y, tap, "tap", f"FISSAGGIO PIASTRINA: {screw} filetto prof. {tap_d:.1f} "
                                          f"(preforo Ø{tap:g} prof. {drill_d:.0f})", depth=drill_d))
             m.plate_screw = screw
@@ -422,8 +423,9 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
             m.tap_depth = tap_d
             m.screw_in = eng
             m.screw_len, m.screw_len_label = L, L_lab
+            m.plate_head, m.plate_grip_cut = head, grip_cut
             return
-    m.warnings.append(f"le viti piastrina→feed {screw} non stanno nella piastrina (con 1 mm dal bordo): scegli viti più piccole")
+    m.warnings.append(f"nessuna posizione libera per le viti piastrina→feed {screw}")
 
 
 def _alignment_pins(m: Mount, feed_input_diam: float, wg: str, n_ang: int = 72) -> None:

@@ -335,7 +335,9 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
         head = [T("Fori della flangia passanti: viti {screw} inserite dal lato del feed con la testa appoggiata sulla "
                   "base; attraversano base e piastrina e si avvitano nella flangia della guida.", screw=mnt.screw)]
     if mnt.plate_screw:
-        head.append(T("Viti piastra → feed: {ps} a testa piana Phillips (svasate nella piastrina).", ps=mnt.plate_screw))
+        head.append(T("Viti piastra → feed: {ps} a testa piana Phillips (svasate nella piastrina).", ps=mnt.plate_screw)
+                    if mnt.plate_head == "flat" else
+                    T("Viti piastra → feed: {ps} a brugola (testa nella lamatura della piastrina).", ps=mnt.plate_screw))
     lines = [T("FORATURA per flangia {wg} {name}", wg=mnt.flange.wg, name=mnt.flange.name)]
     for h_ in head:
         lines += textwrap.wrap(h_, 62)

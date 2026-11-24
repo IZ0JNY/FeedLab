@@ -97,13 +97,14 @@ DESIGN_GUIDE_ETA = {   # typical calculated efficiencies from W1GHZ/OE2IGL simul
 
 
 def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: str = "gain",
-              tools: str = "lathe", quick_sim: bool = True) -> list[Candidate]:
+              tools: str = "lathe", quick_sim: bool = True, fd_factor: float | None = None) -> list[Candidate]:
     lam = wavelength_mm(f_ghz)
     D_l = dish.D_mm / lam
     fD = dish.fD
     # G/T priority -> design the feed for a slightly larger f/D (under-illuminate, W1GHZ 2014/2024)
     # RX (minimum noise) -> under-illuminate a bit more: lower spillover towards the warm ground
-    fD_feed = fD * {"gt": 1.08, "rx": 1.12}.get(priority, 1.0)
+    # fd_factor: the user's illumination (edge taper in dB → design f/D, feedlab.illumination)
+    fD_feed = fD * (fd_factor or {"gt": 1.08, "rx": 1.12}.get(priority, 1.0))
     cands = []
 
     def add(kind, why, warn=(), **kw):

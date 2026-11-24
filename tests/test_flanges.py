@@ -26,8 +26,8 @@ def test_flann_patterns():
 def test_mount_every_waveguide(wg, system):
     d_circ = 1.1 * RECT_WG[wg].a_mm
     square = flanges.FLANGES[wg].shape == "square"
-    fit = flanges.fitting_plate_screws(wg, None, d_circ, system) if square else []
-    m = flanges.mount(wg, system, "V", d_circ, plate_screw=fit[0] if fit else None)
+    fit = square
+    m = flanges.mount(wg, system, "V", d_circ, plate_screw="M2.5" if square else None)
     kinds = [h.kind for h in m.plate_holes]
     # the 4 holes of the flange, same size and position in plate and feed base
     assert kinds.count("clear") == 4
@@ -35,7 +35,7 @@ def test_mount_every_waveguide(wg, system):
     assert flanges.flange_hole(wg) == pytest.approx(math.ceil((flanges.FLANGES[wg].hole or flanges.MIL_HOLE) * 10 - 1e-6) / 10)
     assert sum(h.kind == "cbore_back" for h in m.feed_holes) == 4
     if square and fit:                           # + 4 optional plate→feed flat-head screws, countersunk in the plate
-        assert kinds.count("csk") == 4 and kinds.count("dowel") == 0
+        assert kinds.count("cbore") == 4 and kinds.count("dowel") == 0
         assert m.plate_screw.startswith("M") == (system == "metric")
         assert m.screw.startswith("M") == (system == "metric")
     elif not square:                             # round MIL: no plate screws, the 4 alignment-pin holes
@@ -100,17 +100,22 @@ def test_issue_url():
 
 
 def test_iz0jny_24ghz_plate():
-    """WR-42 plate for a 24 GHz W2IMU (IZ0JNY): circular guide Ø9.50, corner radius 2, thickness 3.59 (unchanged),
-    flange holes Ø3.1 at (±8.13, ±8.51), 4 M2 flat-head screws countersunk on the axes, outline = flange 22.41."""
-    p = plate.design_plate(24.048, "WR-42", 9.5, "V", 2.0, True, holes="metric", plate_screw="M2")
+    """IZ0JNY's WR-42 plate (his CAD): aperture 9.50 × 6.21 R2, thickness 3.59, flange holes at (±8.13, ±8.51),
+    4 M2.5 socket screws Ø2.8 in Ø5.5 × 2.5 counterbores on the axes at 9.00; the plate is larger than the flange."""
+    p = plate.design_plate(24.048, "WR-42", 9.5, "V", 2.0, True, holes="metric", plate_screw="M2.5", plate_tap=True)
+    assert p.a == pytest.approx(9.50, abs=0.01) and p.b == pytest.approx(6.21, abs=0.01)
     assert p.thickness == pytest.approx(3.59, abs=0.02) and p.body_t == pytest.approx(p.thickness, abs=0.01)
-    assert p.outer == pytest.approx(22.41)
-    assert p.mount.screw == "M3" and p.mount.plate_screw == "M2"
-    assert sorted({(abs(round(h.x, 2)), abs(round(h.y, 2))) for h in p.mount.plate_holes if h.kind == "clear"}) == [(8.13, 8.51)]
-    cs = [h for h in p.mount.plate_holes if h.kind == "csk"]
-    assert len(cs) == 4 and all(h.cb_dia == 4.0 for h in cs)
-    assert all(max(abs(h.x), abs(h.y)) + h.cb_dia / 2 <= 22.41 / 2 - 1.0 + 1e-9 for h in cs)   # ≥ 1 mm to the edge
-    assert flanges.fitting_plate_screws("WR-42", 24.048, 9.5) == ["M2"]
+    assert p.mount.screw == "M3" and p.mount.plate_screw == "M2.5"
+    taps = [h for h in p.mount.plate_holes if h.kind == "tap"]
+    assert sorted({(abs(round(h.x, 2)), abs(round(h.y, 2))) for h in taps}) == [(8.13, 8.51)] and len(taps) == 4
+    cb = [h for h in p.mount.plate_holes if h.kind == "cbore"]
+    assert len(cb) == 4 and all(h.dia == 2.8 and h.cb_dia == 5.5 and h.cb_depth == 2.5 for h in cb)
+    assert sorted({(abs(round(h.x, 2)), abs(round(h.y, 2))) for h in cb}) == [(0.0, 9.0), (9.0, 0.0)]
+    assert p.outer >= 2 * (9.0 + 2.75 + 1.0) - 1e-9 > flanges.FLANGES["WR-42"].A
+    p2 = plate.design_plate(24.048, "WR-42", 9.5, "V", 2.0, True, holes="metric", plate_screw="M2.5", outer_mm=27.86, outer_r=2)
+    assert p2.outer == pytest.approx(27.86) and p2.outer_r == 2
+    p3 = plate.design_plate(24.048, "WR-42", 9.5, "V", 2.0, True, holes="metric", plate_screw="M2", plate_head="flat")
+    assert all(h.kind == "csk" for h in p3.mount.plate_holes if "FISSAGGIO" in h.callout)
     assert not [h for h in p.mount.plate_holes if h.kind == "pin"]           # below 47 GHz: no pins
 
 
@@ -134,7 +139,7 @@ def test_pawlan_tm11_ratio_pickett_potter():
 def test_plate_screw_choices_and_length():
     from feedlab import flanges, plate
     assert flanges.plate_screw_options(10.368) == ["M3", "M4"]
-    assert flanges.plate_screw_options(24.048) == ["M2.5", "M3", "M2"]
+    assert flanges.plate_screw_options(24.048) == ["M2.5", "M2"]
     assert flanges.screw_length(3.67) == (10.0, "10 mm")          # 7.3 -> 10 (shortest)
     assert flanges.screw_length(7.5)[0] == 16.0                   # 15 -> 16 (tie 14/16 goes up)
     assert flanges.screw_length(8.85)[0] == 18.0                  # 17.7 -> 18
@@ -142,13 +147,14 @@ def test_plate_screw_choices_and_length():
     assert flanges.screw_length(6.0, "imperial")[1] == '1/2"'
     for f, wg, d in ((10.368, "WR-90", 21.0), (24.048, "WR-42", 9.2)):
         for system in ("metric", "imperial"):
-            for sc in flanges.fitting_plate_screws(wg, f, d, system):
+            for sc in flanges.plate_screw_options(f):
                 p = plate.design_plate(f, wg, d, "V", None, True, holes=system, plate_screw=sc)
                 m = p.mount
                 assert m.plate_screw == (sc if system == "metric" else flanges.UNC_FOR_METRIC[sc])
                 assert m.screw_len == pytest.approx(flanges.screw_length(p.body_t, system)[0])
                 # the screw reaches the end of the thread minus margin: length = grip + thread
-                assert m.screw_in == pytest.approx(m.screw_len - p.body_t, abs=1e-6)    # flush flat head
+                cb = flanges.CBORE[m.plate_screw][1]
+                assert m.screw_in == pytest.approx(m.screw_len - (p.body_t - cb), abs=1e-6)
                 taps = [h for h in m.feed_holes if h.kind == "tap" and m.plate_screw in h.callout]
                 assert len(taps) == 4
                 for h in taps:          # blind hole: even whole millimetres, thread reaches the screw end
@@ -162,7 +168,7 @@ def test_plate_screws_symmetric(wg, d):
     import math
     for pol in "VH":
         m = flanges.mount(wg, "metric", pol, d, 10.368, plate_screw="M3", plate_t=4.0)
-        cb = [h for h in m.plate_holes if h.kind == "csk"]
+        cb = [h for h in m.plate_holes if h.kind == "cbore"]
         ang = math.degrees(math.atan2(cb[0].y, cb[0].x)) % 90
         assert min(abs(ang), abs(ang - 45), abs(ang - 90)) < 1e-6, (wg, pol, ang)
 
@@ -178,7 +184,7 @@ def test_plate_has_the_shape_and_size_of_the_flange(f, wg, shape, side):
     p = plate.design_plate(f, wg, d, "V")
     assert p.shape == shape and p.outer == pytest.approx(side)
     ph = plate.design_plate(f, wg, d, "V", holes="metric", plate_screw="M2")
-    assert ph.shape == shape and ph.outer == pytest.approx(side)              # never larger than the flange
+    assert ph.shape == shape and ph.outer >= side - 1e-9        # larger than the flange only for the fixing screws
 
 
 def test_round_flange_stack_no_plate_screws():

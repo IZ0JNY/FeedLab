@@ -310,7 +310,8 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f,
                     MOUNT.get("plate_screw"), MOUNT.get("plate_t"), MOUNT.get("base_holes") or "flange",
                     MOUNT.get("hole_dia"), MOUNT.get("thread"), bool(MOUNT.get("cbore")),
-                    MOUNT.get("cb_depth"), MOUNT.get("cb_dia"), MOUNT.get("pins", True))
+                    MOUNT.get("cb_depth"), MOUNT.get("cb_dia"), MOUNT.get("pins", True),
+                    MOUNT.get("plate_head") or "allen", bool(MOUNT.get("plate_tap")))
         d_need, t_need = mnt.feed_flange_min()
     # base (flange) thickness: chosen by the user (≥ 1 mm) or automatic (enough for the threaded holes)
     t_user = BASE.get("thickness")
@@ -347,7 +348,7 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         if fl_t < t_need - 1e-9 and mnt.screw_len:
             # plate→feed screws: the longest commercial one whose tip stays inside the base
             from .flanges import CBORE, LENGTHS_IN, LENGTHS_MM
-            grip = MOUNT.get("plate_t") or 0.0          # flat-head screws, flush: the whole plate is the grip
+            grip = max((MOUNT.get("plate_t") or 0.0) - mnt.plate_grip_cut, 0.0)   # plate under the head
             short_in = [(1 / 8, '1/8"'), (3 / 16, '3/16"'), (1 / 4, '1/4"'), (5 / 16, '5/16"')]
             opts = ([(v * 25.4, lab) for v, lab in short_in + list(LENGTHS_IN)] if MOUNT.get("system") == "imperial"
                     else [(float(v), f"{v} mm") for v in [3, 4, 5, 6, 8] + list(LENGTHS_MM)])
