@@ -4,3 +4,4 @@ matplotlib>=3.7
 plotly>=5.18
 streamlit>=1.35
 cadquery>=2.4
+pyerfa>=2.0

@@ -533,6 +533,12 @@ with st.sidebar:
     st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
     st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
                  on_change=_set_lang)       # chosen in the installer; here for the portable version
+    if "emelab_on" not in S:
+        S["emelab_on"] = bool(openems_local.load_settings().get("emelab", False))
+    st.toggle("📡 Abilita EMELab", key="emelab_on",
+              on_change=lambda: openems_local.save_settings(emelab=bool(S.get("emelab_on"))),
+              help="aggiunge la scheda EMELab: diario delle misure EME (sole, luna, eco, meteo), analisi e "
+                   "pianificazione a 10, 24 e 47 GHz. I dati restano su questo PC")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
     if st.button("🔄 Controlla aggiornamenti", key="upd_btn", help="chiede a GitHub se c'è una versione più nuova"):
@@ -572,7 +578,7 @@ if not _missing():
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
                 "🧊 Modello 3D", "🔩 Montaggio feed + piastrina", "🔌 Piastrina WR", "📄 Disegno & STEP",
-                "🖥️ Full-wave openEMS", "ℹ️ Credits"])
+                "🖥️ Full-wave openEMS"] + (["📡 EMELab"] if S.get("emelab_on") else []) + ["ℹ️ Credits"])
 
 # ---------------------------------------------------------------- 1 wizard
 with tabs[0]:
@@ -1705,6 +1711,11 @@ with tabs[7], contextlib.suppress(_Skip):
 
 
 # ---------------------------------------------------------------- credits
-with tabs[10]:
+if S.get("emelab_on"):
+    with tabs[10]:
+        from feedlab import app_emelab
+        app_emelab.render(S, current_geometry)
+
+with tabs[-1]:
     from feedlab import credits as _credits
     _credits.render(st)
