@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (bozza inglese in revisione) | ⏳ in corso |
+| 1 | Manuale dettagliato in italiano e inglese: ogni scheda e ogni campo spiegati con screenshot nuovi (33 per lingua), scheda Montaggio, illuminazione, Tsys, angolo a −10 dB, tabelle di materiali, tolleranze, flange e viti, esempio completo, problemi frequenti, glossario | ✅ fatto (in revisione) |
 
 ---
 
