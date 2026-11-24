@@ -133,3 +133,20 @@ def test_dimension_edit_with_apply_button(isolated):
     assert not at.exception, _errors(at)
     assert at.session_state["overrides"]["iz0jny"]["input_length"] == 10.0
     assert at.number_input(key="in_iz0jny_input_length").value == 10.0
+
+
+def test_square_flange_feed_counterbore_in_plate_tab(isolated):
+    """24 GHz, WR-42, square base, holes + counterbores in the feed base: no error (0.4.17 'max() … empty')."""
+    from feedlab import geometry
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    _start(at)
+    next(r for r in at.radio if r.label == "Base del feed").set_value("square").run()
+    next(c for c in at.checkbox if "Fori di fissaggio" in c.label).check().run()
+    at.checkbox(key="mount_cbore").check().run()
+    assert not at.exception, _errors(at)
+    assert not [e.value for e in at.error]
+    assert any("Feed con la base forata" in s.value for s in at.subheader)
+    geometry.BASE.update({"shape": "round", "wg": None})
+    geometry.MOUNT.clear()
+    geometry.MOUNT.update({"wg": None})

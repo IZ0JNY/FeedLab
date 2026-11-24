@@ -178,25 +178,13 @@ CATALOG: list[DishModel] = [
               "Prodelin 2.4M Series 1251 datasheet (kusat.com); manuale Series 1250 (4096-663 rev. A, 2005): "
               "'22.3° elevation offset angle'",
               "focale e f/D non pubblicati; asse lungo 2594 mm stimato (2400/cos 22.3°): misura assi e profondità al centro"),
-    DishModel("RW3BP", "2.4 m offset EME 77 GHz", "offset", 2400, 2560, None, None, None, 1380,
-              "Sergei RW3BP, EME 2014", None, None, None, {77.0: 62.5}, "", "Alu 2.5 mm",
-              "Sergei RW3BP, EME antenna and Jupiter noise on 77 GHz (EME 2014)",
-              "HPBW 0.11° a 77 GHz; feed Skobelev DMH (RA3AQ); superficie 0.31 mm rms (−4.3 dB Ruze), corretta con "
-              "una lente in PTFE davanti al feed (+0.4 dB); efficienza del fascio principale 0.65 dal rumore solare; "
-              "asse lungo stimato"),
-    DishModel("Channel Master", "1 m (W1GHZ)", "offset", 997, 1083, None, None, None, 604, "misurata W1GHZ (App.5A)", None,
+    DishModel("Channel Master", "1 m", "offset", 997, 1083, None, None, None, 604, "misurata", None,
               None, None, {}, "", "", "W1GHZ Antenna Book App. 5A", "tilt 67.5° dall'orizzontale, stringa sup. 1018 mm, f/D eq. 0.68"),
-    # --- dishes measured by W1GHZ (App. 5A) ---
-    DishModel("Sony", "DSS 18\"", "offset", 451, 521, None, None, None, 266, "misurata W1GHZ", None, None, None, {}, "", "",
-              "W1GHZ App. 5A", "tilt 65.9°, f/D eq. 0.68"),
-    DishModel("RCA", "DSS 18\" (SMC)", "offset", 457, 495, None, None, None, 278, "misurata W1GHZ", None, None, 63, {}, "", "SMC",
+    # --- dishes measured in the W1GHZ Antenna Book (App. 5A) ---
+    DishModel("RCA", "DSS 18\" (SMC)", "offset", 457, 495, None, None, None, 278, "misurata", None, None, 63, {}, "", "SMC",
               "W1GHZ App. 5A / cap. 5", "63% misurato a 10 GHz con horn rettangolare"),
-    DishModel("Dish Network", "18\"", "offset", 460, 504, None, None, None, 287, "misurata W1GHZ", None, None, None, {}, "", "",
+    DishModel("Dish Network", "18\"", "offset", 460, 504, None, None, None, 287, "misurata", None, None, None, {}, "", "",
               "W1GHZ App. 5A"),
-    DishModel("generico", "offset 60 cm acciaio (W1GHZ)", "offset", 600, 640, None, None, None, 403, "misurata W1GHZ", None,
-              None, None, {}, "", "acciaio", "W1GHZ App. 5A"),
-    DishModel("generico", "offset 80 cm metallo (W1GHZ)", "offset", 797, 848, None, None, None, 593, "misurata W1GHZ", None,
-              None, None, {}, "", "", "W1GHZ App. 5A", "f/D eq. 0.81"),
     # --- prime focus ---
     DishModel("Edmund Optics", "parabolic 12\" (305 mm)", "prime", 305, 305, None, None, 0.25, None, "", None, None, None,
               {}, "", "Alu quasi ottico", "Edmund Optics / W1GHZ MUD 2023", "ideale per Cassegrain 47-122 GHz"),
@@ -206,8 +194,7 @@ CATALOG: list[DishModel] = [
               {}, "", "Alu", "Edmund Optics / W1GHZ / VE2UG 47 GHz Cassegrain"),
     DishModel("SHF Microwave", "300 mm f/D 0.6", "prime", 300, 300, None, None, 0.6, None, "", None, None, None,
               {}, "", "Alu", "W1GHZ 'Optimized Cassegrain' 2023 (47 GHz)"),
-    DishModel("link 38 GHz", "30 cm f/D 0.3 (OE2IGL)", "prime", 300, 300, None, None, 0.3, 90, "OE2IGL", None, None, None,
-              {}, "", "Alu tornito", "OE2IGL pagina 241/134/122 GHz", "superficie adatta a 122-241 GHz"),
+
 ]
 
 

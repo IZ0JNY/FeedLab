@@ -40,7 +40,7 @@ feedlab-gui
 ```
 
 ### Language
-At the top of the sidebar: **Lingua / Language** (Italiano or English). The installer asks for the language; the **📖 Manual** button opens the manual in the chosen language.
+At the bottom of the sidebar, above Credits: **Lingua / Language** (Italiano or English). The installer asks for the language; the **📖 Manual** button opens the manual in the chosen language.
 
 ## 4. The sidebar
 At start-up nothing is preselected: **Select frequency** and **Select material** in the sidebar, **Select dish** in the wizard, **Select feed type** in Feed design. Until every choice is made, the tabs show what to choose and where.
@@ -81,7 +81,7 @@ At start-up nothing is preselected: **Select frequency** and **Select material**
 | **W2IMU, Pickett-Potter, Skobelev, Large W2IMU** | dual-mode for offset dishes and f/D 0.5–0.95; Pickett-Potter and large W2IMU also above 76 GHz |
 | **Super-VE4MA, Chaparral, open waveguide** | deep prime-focus dishes (f/D < 0.5) |
 | **Rectangular horn** | linear polarisation only, fed directly from WR waveguide |
-| **IZ0JNY Dual-Flare** | f/D 0.6–0.9, EME: step + cone + phasing cylinder + second cone, designed with the FeedLab solver. Colder antenna and better G/T than the classic dual-mode feeds, very low S11; cones and cylinders only. New design: checked with openEMS at 24 GHz (G/T as predicted, cross-pol −27 dB, S11 < −23 dB over ±10 %) |
+| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME: step + cone + phasing cylinder + second cone, designed with the FeedLab solver. Colder antenna and better G/T than the classic dual-mode feeds, very low S11; cones and cylinders only. New design: checked with openEMS at 24 GHz (G/T as predicted, cross-pol −27 dB, S11 < −23 dB over ±10 %) |
 
 1296 MHz feeds (for example Zdeněk OK1DFC's septum) are outside FeedLab's range, which starts at 10 GHz.
 
@@ -152,7 +152,7 @@ The **λ/4 plate** joins the feed's circular waveguide to the rectangular WR wav
 4. **Fixing holes waveguide → plate → feed**, with **metric** or **inch** screws:
    - **10 and 24 GHz (square flanges):** the standard flange pattern (Flann) is **tapped in the plate**; **4 plate → feed screws** with the **head in a counterbore** on the waveguide side, so the face towards the waveguide stays flat; if the plate is too thin, FeedLab thickens its body and cuts a **pocket** of the circular-waveguide diameter on the feed side;
    - **from 47 GHz (round UG-383/385/387 flanges):** no plate → feed screws. The plate **rests on the feed base**; the waveguide's 4-40 screws pass through it and are screwed into the base, tapped through. The standard flange dowels align waveguide, plate and feed.
-   - **option for every flange:** "screws from the feed side, counterbored in the base": the feed screws directly onto the waveguide; the screws enter from the feed side with the head in a base counterbore (horn side), pass through base and plate and screw into the waveguide flange. **Counterbore diameter and depth** are proposed by FeedLab and can be changed; the base thickens automatically (counterbore + 1.5 mm under the head). A **rotatable 3D view of the drilled base** shows holes and counterbores.
+   - **option for every flange:** "screws from the feed side, counterbored in the base": the feed screws directly onto the waveguide; the screws enter from the feed side with the head in a base counterbore (horn side), pass through base and plate and screw into the waveguide flange. **Counterbore diameter and depth** are proposed by FeedLab and can be changed; the base thickens automatically (counterbore + 1.5 mm under the head). A **rotatable 3D view of the feed with its drilled base** shows holes and counterbores.
 5. The same pattern is applied to the **feed base**. Next to the front view there is a **3D view** of the plate; in the plate and flange PDFs every group of holes shows its **diameter and thread** (M2, M3…). The **base thickness** is set in the Feed design tab (minimum 1 mm, empty = automatic): threaded holes and screw lengths follow it.
 
 ![47 GHz plate drawing](img/plate_drawing_47GHz.png)

@@ -6,6 +6,14 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('(più larga se le lamature non ci stanno)', '(larger if the counterbores do not fit)'),
+    ('(flangia ', '(flange '),
+    ('la svasatura del feed sovrasta le viti: per serrarle serve una chiave a brugola a L (non un cacciavite dritto)', 'the feed flare overhangs the screws: tighten them with an L hex key (not a straight screwdriver)'),
+    ('base quadrata allargata a', 'square base enlarged to'),
+    ("per tenere fori e lamature all'interno", 'to keep holes and counterbores inside'),
+    ('Feed con la base forata (3D, ruotabile)', 'Feed with the drilled base (3D, rotatable)'),
+    ("Feed: in basso la base (faccia verso la piastrina, z = 0) con fori e lamature, in alto l'apertura", 'Feed: the base at the bottom (face towards the plate, z = 0) with holes and counterbores, the aperture on top'),
+    ('Ruota la vista col mouse e usa la rotellina per avvicinarti alla base. STEP/STL e disegno PDF (foglio della flangia) riportano gli stessi fori.', 'Rotate the view with the mouse and use the wheel to zoom in on the base. STEP/STL and the PDF drawing (flange sheet) show the same holes.'),
     ('🔄 Controlla aggiornamenti', '🔄 Check for updates'),
     ("chiede a GitHub se c'è una versione più nuova", 'asks GitHub whether a newer version exists'),
     ('Impossibile contattare GitHub ({e}). Controlla la connessione o scarica da {url}', 'Cannot reach GitHub ({e}). Check the connection or download from {url}'),
@@ -203,7 +211,6 @@ ENTRIES = [
     ('base quadrata', 'square base'),
     ('come la flangia', 'like the flange'),
     ('feed a scalino + doppio cono con sezione di fasatura, ottimizzato per EME con il solutore di FeedLab', 'step + double-cone feed with a phasing section, optimised for EME with the FeedLab solver'),
-    ('IZ0JNY Dual-Flare (scalino + doppio cono)', 'IZ0JNY Dual-Flare (step + double cone)'),
     ('scalino + cono 1 generano il TM11; il cilindro Dm lo rimette in fase col TE11', 'step + cone 1 generate TM11; the Dm cylinder brings it back in phase with TE11'),
     ("il cono 2 forma l'apertura: bordo ≈ -12 dB, centro di fase vicino all'apertura", 'cone 2 shapes the aperture: edge ≈ -12 dB, phase centre near the aperture'),
     ('ottimizzato per EME col solutore rapido: ΔG + ΔG/T, S11 < -30 dB su ±1 %', 'optimised for EME with the fast solver: ΔG + ΔG/T, S11 < -30 dB over ±1 %'),

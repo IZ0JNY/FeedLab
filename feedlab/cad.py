@@ -34,14 +34,13 @@ def solid(geo) -> "object":
     mnt = getattr(geo, "mount", None)
     if mnt is not None:                    # holes in the input flange (z = 0 face, axis = Z)
         t = float(geo.params.get("flange_thickness", 3.0))
-        z_top = float(geo.z_aperture) + 1.0
         for h in mnt.feed_holes:
             depth = t if h.kind in ("tap", "cbore_back") else min(t, h.depth or t)
             body = body.cut(cq.Workplane("XY").center(h.x, h.y).circle(h.dia / 2).extrude(depth))
-            if h.kind == "cbore_back":           # head counterbore on the horn side + free column for the tool
-                z0 = t - h.cb_depth
+            if h.kind == "cbore_back":           # head counterbore on the horn side, in the base only: the horn
+                z0 = t - h.cb_depth                  # body is never cut (if it covers a head, geometry warns)
                 body = body.cut(cq.Workplane("XY").workplane(offset=z0).center(h.x, h.y)
-                                .circle(h.cb_dia / 2).extrude(z_top - z0))
+                                .circle(h.cb_dia / 2).extrude(h.cb_depth))
     return body
 
 

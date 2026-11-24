@@ -32,7 +32,7 @@ FEED_TYPES = {
     "chaparral": "Chaparral 3 anelli",
     "axial_corrugated": "Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)",
     "rect_horn": "Horn rettangolare (G3RPE)",
-    "iz0jny": "IZ0JNY Dual-Flare (scalino + doppio cono)",
+    "iz0jny": "Dual-Flare (IZ0JNY)",
 }
 
 # feeds whose interior is a single circular guide with steps/cones -> mode-matching simulation possible
@@ -323,10 +323,17 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
                                          "la testa) + spessore piastrina + ~4 mm nella flangia della guida"]
             if fl_t < cbk + 0.8:
                 notes = list(notes) + [f"base {fl_t:.2f} mm troppo sottile per la lamatura ({cbk:g} mm): aumentala"]
-            r_body = max(r for _, r in profile) + t + 0.3       # horn wall seen from the screw-head side
-            if any(math.hypot(h.x, h.y) - h.cb_dia / 2 < r_body for h in mnt.feed_holes if h.kind == "cbore_back"):
+            # horn body around the screw heads: close to the base (head + hex key, ~12 mm) it must leave them
+            # free; higher up a flare may overhang them (an L hex key still reaches the screw)
+            heads = [math.hypot(h.x, h.y) - h.cb_dia / 2 for h in mnt.feed_holes if h.kind == "cbore_back"]
+            r_low = max((r for z, r in profile if z <= fl_t + 12.0), default=profile[0][1]) + t + 0.3
+            r_all = max(r for _, r in profile) + t + 0.3
+            if any(d < r_low for d in heads):
                 notes = list(notes) + ["le teste delle viti toccano il corpo del feed: allunga la guida d'ingresso "
                                        "o usa le viti filettate nella base"]
+            elif any(d < r_all for d in heads):
+                notes = list(notes) + ["la svasatura del feed sovrasta le viti: per serrarle serve una chiave a "
+                                       "brugola a L (non un cacciavite dritto)"]
         elif mnt.stack:                            # through-tapped base: the thread is the whole base
             mnt.engagement = mnt.screw_in = mnt.tap_depth = fl_t
         elif fl_t < t_need - 1e-9 and mnt.screw_len:
@@ -395,12 +402,18 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
             notes = list(notes or []) + [f"base quadrata {side:.2f} mm troppo piccola per questo feed: base circolare"]
             side = None
         else:
+            # holes and counterbores always inside the base, with at least 0.8 mm of wall: if the standard
+            # flange is too small for them (e.g. WR-42 22.41 mm with M3 counterbores) the square grows
+            need = 2 * (max((max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 for h in mnt.feed_holes),
+                            default=0.0) + 0.8) if mnt is not None else 0.0
+            wg_name = BASE.get('wg') or MOUNT.get('wg')
+            if need > side + 1e-9:
+                notes = list(notes or []) + [f"base quadrata allargata a {math.ceil(need * 10) / 10:.2f} mm "
+                                             f"per tenere fori e lamature all'interno (flangia {wg_name}: {side:.2f} mm)"]
+                side = math.ceil(need * 10) / 10
+            else:
+                notes = list(notes or []) + [f"base quadrata {side:.2f} × {side:.2f} mm come la flangia {wg_name}"]
             fl_r = side / 2
-            notes = list(notes or []) + [f"base quadrata {side:.2f} × {side:.2f} mm come la flangia "
-                                         f"{BASE.get('wg') or MOUNT.get('wg')}"]
-            if mnt is not None and any(max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 > side / 2 - 0.5
-                                       for h in mnt.feed_holes):
-                notes = list(notes) + ["fori troppo vicini al bordo della base quadrata"]
     if mnt is not None:
         notes = list(notes or []) + [f"flangia forata per {mnt.flange.wg} {mnt.flange.name}: {mnt.screw}, "
                                      f"{sum(h.kind == 'dowel' for h in mnt.feed_holes)} fori spina"] + mnt.warnings

@@ -6,6 +6,12 @@
 |---|---|---|
 | 1 | Controllo aggiornamenti più robusto su Windows (certificati di GitHub anche dal pacchetto certifi) e pulsante "🔄 Controlla aggiornamenti" nella barra laterale che mostra l'esito o l'errore | ✅ fatto |
 | 2 | Installer: aggiornamento pulito (cartella python svuotata prima di copiare la nuova, così non restano pacchetti vecchi) e niente voce "nel browser" doppia nel menu Start se si cambia lingua | ✅ fatto |
+| 3 | Scelta della lingua spostata dalla cima della barra laterale in fondo, sopra Credits (la lingua si sceglie già nell'installer; serve per la versione portable) | ✅ fatto |
+| 4 | Materiali e marche di parabole in ordine alfabetico; tolte dal catalogo RW3BP 2.4 m, Sony DSS, le due "generico" e il link 38 GHz; tolti i nominativi dai nomi delle parabole (le fonti restano citate) | ✅ fatto |
+| 5 | Tipi di feed in ordine alfabetico; il feed IZ0JNY si chiama "Dual-Flare (IZ0JNY)" | ✅ fatto |
+| 6 | Scheda Piastrina WR: la vista 3D mostra tutto il feed con la base forata, non solo la base | ✅ fatto |
+| 7 | Correzione errore "max() iterable argument is empty" con lamatura e flange quadrate (WR-42 ecc.) | ✅ fatto |
+| 8 | Lamature: non tagliano più il corpo del feed (prima lasciavano fessure nel 3D/STEP); fori e lamature sempre dentro la base (base quadrata allargata quando la flangia standard è troppo piccola, es. WR-42 con M3 → 25.2 mm); avviso se serve una chiave a brugola a L | ✅ fatto |
 
 ---
 

@@ -40,7 +40,7 @@ def test_overrides_and_tunables():
 def test_in_wizard_and_translated():
     d = wizard.dish_from_prime(1200, 0.8)
     assert "iz0jny" in [c.kind for c in wizard.recommend(d, 10.368, quick_sim=False)]
-    assert i18n.tr(geometry.FEED_TYPES["iz0jny"], "en") == "IZ0JNY Dual-Flare (step + double cone)"
+    assert i18n.tr(geometry.FEED_TYPES["iz0jny"], "en") == "Dual-Flare (IZ0JNY)"
 
 
 def test_openems_script(tmp_path):

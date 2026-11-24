@@ -310,8 +310,6 @@ def _credits_dialog():
 
 
 with st.sidebar:
-    st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
-                 on_change=_set_lang)
     st.title("📡 FeedLab")
     st.subheader("Laboratorio di Progettazione di feed/illuminatori a microonde")
     st.caption("10–134 GHz · Software progettato da Ivan IZ0JNY")
@@ -332,7 +330,7 @@ with st.sidebar:
                     f"f/D{' eq.' if d.kind == 'offset' else ''} {d.fD:.3f} · apertura {d.opening_deg:.1f}°")
     if S.feed_kind:
         st.markdown(f"**Feed:** {geometry.FEED_TYPES[S.feed_kind]}")
-    mats = list(materials.MATERIALS)
+    mats = sorted(materials.MATERIALS, key=lambda m_: i18n.tr(m_).lower())   # alphabetical in the chosen language
     S.material = st.selectbox("Materiale del feed", mats, index=None, placeholder="Seleziona materiale",
                               key="material_sel", help="conducibilità e rugosità → perdite ohmiche e rumore del feed")
     if S.material:
@@ -365,7 +363,8 @@ with st.sidebar:
                                "(WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm)")
         if _shape == "square":
             _bwg = _wr
-            st.caption(_T("Base quadrata {a:.2f} × {a:.2f} mm come la flangia {wg}", a=_fl_wr.A, wg=_wr))
+            st.caption(_T("Base quadrata {a:.2f} × {a:.2f} mm come la flangia {wg}", a=_fl_wr.A, wg=_wr) +
+                       (" " + i18n.tr("(più larga se le lamature non ci stanno)") if S.get("mount_cbore") else ""))
     else:
         _shape = "round"
         if _fl_wr is not None:
@@ -385,6 +384,8 @@ with st.sidebar:
             st.write("FeedLab chiuso: puoi chiudere questa scheda del browser.")
             os._exit(0)
     st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
+    st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
+                 on_change=_set_lang)       # chosen in the installer; here for the portable version
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
     if st.button("🔄 Controlla aggiornamenti", key="upd_btn", help="chiede a GitHub se c'è una versione più nuova"):
@@ -424,7 +425,7 @@ with tabs[0]:
         dish = None
         if src.startswith("Catalogo"):
             cat = dishes.by_label()
-            makers = sorted({d.maker for d in dishes.CATALOG})
+            makers = sorted({d.maker for d in dishes.CATALOG}, key=str.lower)
             mk = st.selectbox("Costruttore", makers, index=None, placeholder="Seleziona parabola", key="dish_maker")
             labs = [l for l, d in cat.items() if d.maker == mk]
             _ml = st.selectbox("Modello", labs, index=None, placeholder="Seleziona parabola",
@@ -535,7 +536,7 @@ with tabs[0]:
 # ---------------------------------------------------------------- 2 design
 with tabs[1], contextlib.suppress(_Skip):
     st.header("Progetto del feed")
-    kinds = list(geometry.FEED_TYPES)
+    kinds = sorted(geometry.FEED_TYPES, key=lambda k: i18n.tr(geometry.FEED_TYPES[k]).lower())   # alphabetical
     _kind = st.selectbox("Tipo di feed", kinds, index=kinds.index(S.feed_kind) if S.feed_kind in kinds else None,
                          placeholder="Seleziona tipo di feed", format_func=lambda k: geometry.FEED_TYPES[k])
     if _kind is not None and _kind != S.feed_kind:   # rerun so the sidebar summary shows the new feed at once
@@ -1154,7 +1155,7 @@ with tabs[7], contextlib.suppress(_Skip):
                      f"(fc TE11 {299.792458 / (1.706 * dcirc):.2f} GHz)")
             if pl.mount is not None:
                 mm_ = pl.mount
-                _deep = max((h.depth or 0.0) for h in mm_.feed_holes if h.kind == 'tap')
+                _deep = max(((h.depth or 0.0) for h in mm_.feed_holes if h.kind == 'tap'), default=0.0)
                 if mm_.stack and (S.get("mount_cfg") or {}).get("feed_cbore"):
                     _txt = [_T("Flangia {wg} {name}: viti {screw} dal lato del feed, con la testa nella lamatura della base; "
                                "attraversano base e piastrina e si avvitano nella flangia della guida.",
@@ -1229,24 +1230,29 @@ with tabs[7], contextlib.suppress(_Skip):
                 v2.caption(_T("Vista 3D non disponibile: {e}", e=ex_))
             _gb = current_geometry()                  # the feed base, drilled like the plate: check the counterbores
             if holes_on and getattr(_gb, "mount", None) is not None:
-                st.subheader("Base del feed forata (3D, ruotabile)")
+                st.subheader("Feed con la base forata (3D, ruotabile)")
                 _cbs = [hh for hh in _gb.mount.feed_holes if hh.kind == "cbore_back"]
                 if _cbs:
                     st.info(_T("Lamature sul lato horn della base (dove escono le teste delle viti): Ø{d:g} mm, profonde "
                                "{k:g} mm; base spessa {t:.2f} mm, sotto la testa restano {r:.2f} mm.",
                                d=_cbs[0].cb_dia, k=_cbs[0].cb_depth, t=_gb.params["flange_thickness"],
                                r=_gb.params["flange_thickness"] - _cbs[0].cb_depth))
+                    for _n in getattr(_gb, "notes", []) or []:          # heads under the horn, counterbore past the edge
+                        if "teste delle viti" in _n or "troppo sottile per la lamatura" in _n or "sovrasta" in _n:
+                            st.warning(_n)
+                        elif "allargata" in _n:
+                            st.info(_n)
                 try:
-                    bv, bf = cad.mesh_base(_gb)
+                    bv, bf = cad.mesh(_gb)                 # whole feed, base drilled like the plate
                     fb = go.Figure(go.Mesh3d(x=bv[:, 0], y=bv[:, 1], z=bv[:, 2], i=bf[:, 0], j=bf[:, 1], k=bf[:, 2],
                                              color=materials.color(S.get("material", "")), flatshading=True,
                                              lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5)))
-                    fb.update_layout(height=480, margin=dict(l=0, r=0, t=40, b=0),
-                                     title=i18n.tr("Base del feed: z = 0 faccia verso la piastrina, in alto il lato horn"),
+                    fb.update_layout(height=620, margin=dict(l=0, r=0, t=40, b=0),
+                                     title=i18n.tr("Feed: in basso la base (faccia verso la piastrina, z = 0) con fori e lamature, in alto l'apertura"),
                                      scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
-                                                camera=dict(eye=dict(x=1.1, y=-1.3, z=1.4))))
+                                                camera=dict(eye=dict(x=1.6, y=-1.6, z=0.6))))   # whole feed, base visible
                     st.plotly_chart(fb, width="stretch")
-                    st.caption("Ruota la vista col mouse. Il modello completo con il feed è nella scheda Modello 3D; "
+                    st.caption("Ruota la vista col mouse e usa la rotellina per avvicinarti alla base. "
                                "STEP/STL e disegno PDF (foglio della flangia) riportano gli stessi fori.")
                 except Exception as ex_:
                     st.caption(_T("Vista 3D non disponibile: {e}", e=ex_))

@@ -40,7 +40,7 @@ feedlab-gui
 ```
 
 ### Lingua
-In alto nella barra laterale: **Lingua / Language** (italiano o English). L'installer propone la lingua all'installazione; il pulsante **📖 Manuale** apre il manuale nella lingua scelta.
+In fondo alla barra laterale, sopra Credits: **Lingua / Language** (italiano o English). L'installer propone la lingua all'installazione; il pulsante **📖 Manuale** apre il manuale nella lingua scelta.
 
 ## 4. La barra laterale
 All'avvio non c'è nessuna scelta predefinita: **Seleziona frequenza** e **Seleziona materiale** nella barra laterale, **Seleziona parabola** nella procedura guidata, **Seleziona tipo di feed** in Progetto feed. Finché manca una scelta, le schede mostrano cosa scegliere e dove.
@@ -81,7 +81,7 @@ All'avvio non c'è nessuna scelta predefinita: **Seleziona frequenza** e **Selez
 | **W2IMU, Pickett-Potter, Skobelev, Large W2IMU** | dual-mode per offset e f/D 0.5–0.95; Pickett-Potter e W2IMU grande anche oltre 76 GHz |
 | **Super-VE4MA, Chaparral, guida aperta** | prime focus profonde (f/D < 0.5) |
 | **Horn rettangolare** | solo polarizzazione lineare, diretto da guida WR |
-| **IZ0JNY Dual-Flare** | f/D 0.6–0.9, EME: scalino + cono + cilindro di fasatura + secondo cono, progettato con il solutore di FeedLab. Antenna più fredda e G/T migliore dei dual-mode classici, S11 molto basso; solo coni e cilindri. Progetto nuovo: verificato con openEMS a 24 GHz (G/T come previsto, cross-polare −27 dB, S11 < −23 dB su ±10 %) |
+| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME: scalino + cono + cilindro di fasatura + secondo cono, progettato con il solutore di FeedLab. Antenna più fredda e G/T migliore dei dual-mode classici, S11 molto basso; solo coni e cilindri. Progetto nuovo: verificato con openEMS a 24 GHz (G/T come previsto, cross-polare −27 dB, S11 < −23 dB su ±10 %) |
 
 I feed per 1296 MHz (per esempio il septum di Zdeněk OK1DFC) sono fuori dal campo di FeedLab, che parte da 10 GHz.
 
@@ -152,7 +152,7 @@ La **piastrina λ/4** collega la guida circolare del feed alla guida rettangolar
 4. **Fori di fissaggio guida → piastrina → feed**, con viti **metriche** o **in pollici**:
    - **10 e 24 GHz (flange quadrate):** la foratura della flangia standard (Flann) è **filettata nella piastra**; **4 viti piastra → feed** con la **testa nella lamatura** sul lato guida, così la superficie verso la guida resta piana; se la piastra è troppo sottile, FeedLab ne ingrossa il corpo e ricava sul lato feed una **tasca** del diametro della guida circolare;
    - **da 47 GHz (flange rotonde UG-383/385/387):** nessuna vite piastrina → feed. La piastrina si **appoggia sulla base del feed**; le viti 4-40 della guida la attraversano e si avvitano nella base, filettata passante. Le spine standard della flangia allineano guida, piastrina e feed.
-   - **opzione per tutte le flange:** "viti dal lato del feed con lamatura nella base": il feed si avvita direttamente sulla guida; le viti entrano dal lato del feed con la testa nella lamatura della base (lato horn), attraversano base e piastrina e si avvitano nella flangia della guida. **Diametro e profondità della lamatura** sono proposti da FeedLab e si possono cambiare; la base si ispessisce da sola (lamatura + 1,5 mm sotto la testa). Una **vista 3D ruotabile della base forata** mostra fori e lamature.
+   - **opzione per tutte le flange:** "viti dal lato del feed con lamatura nella base": il feed si avvita direttamente sulla guida; le viti entrano dal lato del feed con la testa nella lamatura della base (lato horn), attraversano base e piastrina e si avvitano nella flangia della guida. **Diametro e profondità della lamatura** sono proposti da FeedLab e si possono cambiare; la base si ispessisce da sola (lamatura + 1,5 mm sotto la testa). Una **vista 3D ruotabile del feed con la base forata** mostra fori e lamature.
 5. La stessa foratura viene applicata alla **base del feed**. Accanto alla vista frontale c'è la **vista 3D** della piastrina; nei PDF di piastrina e flangia ogni gruppo di fori riporta **diametro e filettatura** (M2, M3…). Lo **spessore della base** si imposta nella scheda Progetto feed (minimo 1 mm, vuoto = automatico): fori filettati e lunghezza delle viti si adattano.
 
 ![Disegno della piastrina a 47 GHz](img/plate_drawing_47GHz.png)

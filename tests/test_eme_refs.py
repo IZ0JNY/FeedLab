@@ -5,7 +5,7 @@ import math
 import pytest
 
 from feedlab import balanis as B
-from feedlab import dishes, noise, reflector
+from feedlab import noise, reflector
 
 
 def test_rw3bp_ruze_and_lens():
@@ -23,8 +23,6 @@ def test_rw3bp_main_beam_efficiency_from_sun():
 
 def test_rw3bp_jupiter_and_dish():
     assert noise.small_source_y_db(0.33, 44, 400) == pytest.approx(0.004, abs=0.0005)
-    d = [x for x in dishes.CATALOG if x.maker == "RW3BP"][0]
-    assert d.focal()[0] == 1380
     # 62.5 dBi on 2.4 m at 77 GHz ↔ aperture efficiency ≈ 0.47
     assert B.aperture_efficiency_from_gain(62.5, 2.4, 77.0) == pytest.approx(0.47, abs=0.01)
 
