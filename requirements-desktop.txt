@@ -3,3 +3,4 @@
 -r requirements.txt
 pywebview>=5.0
 h5py>=3.10
+truststore>=0.9

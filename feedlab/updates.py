@@ -50,16 +50,39 @@ LAST_ERROR: str | None = None          # why the last check failed (shown by the
 
 
 def _contexts():
-    """TLS contexts to try: the system store first, then certifi's bundle. The embedded Python of the Windows
-    build reads the Windows certificate store, which may not hold GitHub's root yet (Windows downloads roots on
-    demand): that made the check fail silently on some PCs."""
+    """TLS contexts to try, best first.
+    1. truststore: the certificate check is done by Windows itself (CryptoAPI), exactly like the browser. It
+       downloads missing root certificates on demand and accepts the certificate an antivirus with "HTTPS
+       scanning" (or a company proxy) puts in front of GitHub. The embedded Python of the Windows build reads the
+       Windows store on its own and fails in both cases (CERTIFICATE_VERIFY_FAILED).
+    2. Python's default (system store) and 3. certifi's bundle, for Linux/macOS and as a fallback."""
     import ssl
-    yield None
+    try:
+        import truststore
+        yield "truststore", truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    except Exception:
+        pass
+    yield "system", None
     try:
         import certifi
-        yield ssl.create_default_context(cafile=certifi.where())
+        yield "certifi", ssl.create_default_context(cafile=certifi.where())
     except Exception:
         return
+
+
+def _powershell_json(url: str, timeout: float) -> dict | None:
+    """Last resort on Windows: let PowerShell (Windows' own HTTP and certificate stack) fetch the JSON."""
+    import subprocess
+    import sys
+    if sys.platform != "win32":
+        return None
+    cmd = ("[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;"
+           f"(Invoke-WebRequest -UseBasicParsing -Headers @{{'User-Agent'='FeedLab-update-check'}} '{url}').Content")
+    r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", cmd], capture_output=True,
+                       timeout=timeout + 10, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    if r.returncode != 0:
+        raise RuntimeError((r.stderr or b"").decode("utf-8", "replace").strip().splitlines()[-1:] or "PowerShell")
+    return json.loads(r.stdout.decode("utf-8"))
 
 
 def latest_release(timeout: float = 6.0) -> dict | None:
@@ -71,15 +94,25 @@ def latest_release(timeout: float = 6.0) -> dict | None:
         return None
     req = urllib.request.Request(API_URL, headers={"Accept": "application/vnd.github+json",
                                                    "User-Agent": "FeedLab-update-check"})
-    for ctx in _contexts():
+    errors = []
+    data = None
+    for name, ctx in _contexts():
         try:
             with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
                 data = json.loads(r.read().decode("utf-8"))
-            return {"version": data.get("tag_name", ""), "url": data.get("html_url") or RELEASES_URL,
-                    "body": data.get("body") or ""}
+            break
         except Exception as ex:
-            LAST_ERROR = f"{type(ex).__name__}: {ex}"
-    return None
+            errors.append(f"{name}: {type(ex).__name__}: {ex}")
+    if data is None:
+        try:
+            data = _powershell_json(API_URL, timeout)
+        except Exception as ex:
+            errors.append(f"powershell: {type(ex).__name__}: {ex}")
+    if data is None:
+        LAST_ERROR = " | ".join(errors) or "?"
+        return None
+    return {"version": data.get("tag_name", ""), "url": data.get("html_url") or RELEASES_URL,
+            "body": data.get("body") or ""}
 
 
 def check(current: str, lang: str = "it") -> dict | None:

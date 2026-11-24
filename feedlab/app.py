@@ -413,7 +413,7 @@ with st.sidebar:
                                          "vedi scheda Full-wave openEMS"))
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
-                "🧊 Modello 3D", "📄 Disegno & STEP", "🔌 Piastrina WR",
+                "🧊 Modello 3D", "🔌 Piastrina WR", "📄 Disegno & STEP",
                 "🖥️ Full-wave openEMS", "ℹ️ Credits"])
 
 # ---------------------------------------------------------------- 1 wizard
@@ -770,7 +770,7 @@ with tabs[5], contextlib.suppress(_Skip):
     st.plotly_chart(model3d_fig(geo, cut), width="stretch")
 
 # ---------------------------------------------------------------- 6 export
-with tabs[6], contextlib.suppress(_Skip):
+with tabs[7], contextlib.suppress(_Skip):
     _need()
     st.header("Disegno meccanico (PDF) e file per la produzione")
     geo = current_geometry()
@@ -1068,7 +1068,7 @@ with tabs[2], contextlib.suppress(_Skip):
 
 
 # ---------------------------------------------------------------- matching plate
-with tabs[7], contextlib.suppress(_Skip):
+with tabs[6], contextlib.suppress(_Skip):
     _need()
     st.header("Piastrina λ/4 di adattamento: guida circolare del feed → guida rettangolare WR")
     st.caption("Il feed a simmetria circolare irradia la polarizzazione lineare imposta dall'orientamento della guida WR: "

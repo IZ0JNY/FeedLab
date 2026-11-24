@@ -33,3 +33,10 @@ def test_offline_or_disabled_is_silent(monkeypatch):
     monkeypatch.setenv("FEEDLAB_NO_UPDATE_CHECK", "1")
     assert updates.latest_release() is None
     assert updates.check("0.0.1") is None
+
+
+def test_tls_contexts_prefer_the_os_verifier():
+    """Windows: the OS certificate check (truststore) comes first; it accepts antivirus/proxy HTTPS scanning."""
+    from feedlab import updates
+    names = [n for n, _ in updates._contexts()]
+    assert names[0] == "truststore" and "certifi" in names
