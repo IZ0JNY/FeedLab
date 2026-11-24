@@ -1,22 +1,19 @@
-## FeedLab 0.4.15 BETA TEST per Windows / for Windows
+## FeedLab 0.4.16 BETA TEST per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.15.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.15-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
-
-> 🧪 **BETA TEST senza scadenza:** da questa versione FeedLab non si disattiva più dopo 30 giorni e ti avvisa da solo quando esce una versione nuova.
-> 🧪 **BETA TEST with no expiry:** from this version FeedLab no longer deactivates after 30 days and tells you itself when a new version is out.
+**Installazione / Installation:** `FeedLab-Setup-0.4.16.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.16-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
 
 ### 🇮🇹 Novità
-- **Nessuna scadenza:** tolto il limite di 30 giorni e il pop-up all'avvio.
-- **Licenza GPLv3:** FeedLab è software libero con licenza GNU GPL v3.0 o successiva (file `LICENSE`, mostrato anche dall'installer). Nella finestra **ℹ️ Credits** ci sono la licenza, le licenze delle librerie usate e la nuova sezione **Contributori e beta tester**.
-- **Avviso di nuova versione:** all'avvio FeedLab controlla GitHub e, se c'è una versione più recente, mostra cosa c'è di nuovo e il pulsante per scaricarla.
-- **Lavorazione CNC dell'esterno per tutti i feed:** le proposte di profilo esterno semplificato (prima solo per il Dual-Flare) e i nuovi **raccordi esterni** a raggio scelto, al posto degli spigoli vivi. Sono facoltativi, l'interno non cambia e valgono per disegno PDF, 3D e STEP/STL.
-- **Contribuire:** regole in `CONTRIBUTING.md`; chi aiuta con prove, misure o codice viene citato in `CONTRIBUTORS.md` e nei Credits.
+- **Spessore della base del feed** ora nella scheda **Progetto feed**, sotto lo spessore della parete (non più nella barra laterale).
+- **Flange rotonde (da 47 GHz):** nuova opzione "viti dal lato del feed con lamatura nella base": testa della vite nella lamatura sul lato horn, vite avvitata nella flangia della guida. Nello STEP/STL del feed e nel foglio della flangia del PDF.
+- **Piastrina WR:** vista 3D della piastrina accanto alla vista frontale.
+- **Cartiglio dei PDF:** i testi lunghi (nome del feed, materiale) vanno a capo invece di uscire dal riquadro.
+- **Inglese:** Credits e catalogo parabole (note e fonti) completamente tradotti; il modulo di segnalazione problemi usa la lingua scelta.
 
 ### 🇬🇧 What's new
-- **No expiry:** removed the 30-day limit and the start-up popup.
-- **GPLv3 licence:** FeedLab is free software under the GNU GPL v3.0 or later (`LICENSE` file, also shown by the installer). The **ℹ️ Credits** window shows the licence, the licences of the libraries used and the new **Contributors and beta testers** section.
-- **New-version notice:** at start FeedLab checks GitHub and, if a newer version exists, shows what's new and a download button.
-- **CNC machining of the outside for every feed:** the simplified outer-profile options (before, Dual-Flare only) and new **outer fillets** with a chosen radius instead of sharp edges. Optional; the inside does not change; they apply to PDF drawing, 3D and STEP/STL.
-- **Contributing:** rules in `CONTRIBUTING.md`; everyone who helps with tests, measurements or code is credited in `CONTRIBUTORS.md` and in the Credits.
+- **Feed base thickness** is now in the **Feed design** tab, below the wall thickness (no longer in the sidebar).
+- **Round flanges (from 47 GHz):** new option "screws from the feed side, counterbored in the base": screw head in a counterbore on the horn side, screw into the waveguide flange. In the feed STEP/STL and in the flange sheet of the PDF.
+- **WR plate:** 3D view of the plate next to the front view.
+- **PDF title block:** long texts (feed name, material) wrap instead of overflowing the box.
+- **English:** Credits and dish catalogue (notes and sources) fully translated; the problem-report form uses the chosen language.
 
 Requisiti / Requirements: Windows 10/11 64-bit.

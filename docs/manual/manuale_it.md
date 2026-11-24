@@ -51,7 +51,6 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 | **Materiale del feed** | rame, rame argentato, ottone, alluminio, stampa 3D metallizzata…: FeedLab calcola perdite e rumore aggiunto |
 | **Guida d'onda rettangolare** | la guida WR che si avvita al feed, fra quelle della banda: 10 GHz WR-90 o WR-75, 24 GHz WR-42, 47 GHz WR-22 o WR-19. Dimensiona piastrina, foratura e base |
 | **Base del feed** | circolare oppure **quadrata** con il lato della flangia della guida (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm); solo per le guide con flangia quadrata |
-| **Spessore base del feed** | minimo 1 mm; vuoto = automatico (quanto serve ai fori filettati) |
 | **ℹ️ Credits** | autore, versione e tutte le fonti |
 | **📖 Manuale** | scarica questo manuale in PDF |
 | **🐞 Segnala un problema** | apre la pagina GitHub delle segnalazioni con versione e progetto già compilati |
@@ -85,7 +84,7 @@ In alto nella barra laterale: **Lingua / Language** (italiano o English). L'inst
 I feed per 1296 MHz (per esempio il septum di Zdeněk OK1DFC) sono fuori dal campo di FeedLab, che parte da 10 GHz.
 
 ## 6. Progetto feed
-Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano; **input_length** (o *length* per guida aperta, VE4MA e Chaparral, *L_guide* per il corrugato) allunga la guida circolare d'ingresso se vuoi un feed più lungo, senza cambiare le prestazioni. Per l'IZ0JNY è quotato anche lo **scalino interno** (altezza h e lunghezza Ls). Nella sezione e nella tabella le **lunghezze sono in blu**, i **diametri in verde** e gli **angoli dei flare in rosso**; cambiando l'angolo di un cono FeedLab ricalcola la sua lunghezza (i diametri restano).
+Mostra le quote del feed (in mm e in λ), la sezione assiale e la regola di progetto usata (W1GHZ, OE2IGL, Skobelev…). Le quote si possono modificare a mano. Sotto lo spessore della parete c'è lo **spessore della base** del feed (minimo 1 mm; vuoto = automatico, quanto serve ai fori filettati: fori e viti si adattano); **input_length** (o *length* per guida aperta, VE4MA e Chaparral, *L_guide* per il corrugato) allunga la guida circolare d'ingresso se vuoi un feed più lungo, senza cambiare le prestazioni. Per l'IZ0JNY è quotato anche lo **scalino interno** (altezza h e lunghezza Ls). Nella sezione e nella tabella le **lunghezze sono in blu**, i **diametri in verde** e gli **angoli dei flare in rosso**; cambiando l'angolo di un cono FeedLab ricalcola la sua lunghezza (i diametri restano).
 
 - **🛠️ Lavorazione CNC dell'esterno** (facoltativa, per tutti i feed circolari tranne l'Axial Corrugated; l'interno non cambia mai):
   - **profilo esterno:** parete costante, *proposta 1* pieno dalla base fino alla fine del primo cono, *proposta 2* esterno senza rientranze. Le proposte sono più semplici ed economiche da fare al tornio/CNC;
@@ -151,7 +150,8 @@ La **piastrina λ/4** collega la guida circolare del feed alla guida rettangolar
 4. **Fori di fissaggio guida → piastrina → feed**, con viti **metriche** o **in pollici**:
    - **10 e 24 GHz (flange quadrate):** la foratura della flangia standard (Flann) è **filettata nella piastra**; **4 viti piastra → feed** con la **testa nella lamatura** sul lato guida, così la superficie verso la guida resta piana; se la piastra è troppo sottile, FeedLab ne ingrossa il corpo e ricava sul lato feed una **tasca** del diametro della guida circolare;
    - **da 47 GHz (flange rotonde UG-383/385/387):** nessuna vite piastrina → feed. La piastrina si **appoggia sulla base del feed**; le viti 4-40 della guida la attraversano e si avvitano nella base, filettata passante. Le spine standard della flangia allineano guida, piastrina e feed.
-5. La stessa foratura viene applicata alla **base del feed**. Lo **spessore della base** si imposta nella barra laterale (minimo 1 mm, vuoto = automatico): fori filettati e lunghezza delle viti si adattano.
+   - **opzione da 47 GHz:** "viti dal lato del feed con lamatura nella base": le viti entrano dal lato del feed con la testa nella lamatura della base (lato horn) e si avvitano nella flangia della guida.
+5. La stessa foratura viene applicata alla **base del feed**. Accanto alla vista frontale c'è la **vista 3D** della piastrina. Lo **spessore della base** si imposta nella barra laterale (minimo 1 mm, vuoto = automatico): fori filettati e lunghezza delle viti si adattano.
 
 ![Disegno della piastrina a 47 GHz](img/plate_drawing_47GHz.png)
 ![Flangia del feed forata, foglio 2](img/feed_flange_47GHz.png)

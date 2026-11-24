@@ -1,12 +1,24 @@
-# Modifiche per la prossima versione (0.4.16)
+# Modifiche per la prossima versione (0.4.17)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.16 (pubblicata, BETA TEST)
+
+Pubblicata con 5 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Cartiglio dei disegni PDF: i testi lunghi (nome del feed, materiale) vanno a capo e la riga si allarga invece di uscire dal riquadro | ✅ fatto |
 | 2 | Flange rotonde (da 47 GHz): opzione "viti dal lato del feed con lamatura nella base" (testa nella lamatura sul lato horn, viti avvitate nella flangia della guida); riportata nello STEP/STL del feed e nel foglio della flangia del PDF | ✅ fatto |
 | 3 | Scheda Piastrina WR: vista 3D della piastrina accanto alla vista frontale | ✅ fatto |
+| 4 | Inglese completo nei Credits e nel catalogo parabole (note e fonti dei datasheet); modulo di segnalazione problemi nella lingua scelta | ✅ fatto |
+| 5 | Spessore della base del feed spostato dalla barra laterale alla scheda Progetto feed (sotto lo spessore della parete) | ✅ fatto |
 
 ---
 

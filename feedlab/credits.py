@@ -81,9 +81,11 @@ def issue_url(feed_kind: str = "", f_ghz=None) -> str:
     """GitHub 'new issue' page with version, system and current design filled in."""
     import platform
     from urllib.parse import urlencode
-    body = (f"**Versione FeedLab:** {__version__}\n**Sistema:** {platform.system()} {platform.release()}\n"
-            f"**Feed / frequenza:** {feed_kind} {f_ghz if f_ghz is not None else ''} GHz\n\n"
-            "**Cosa è successo:**\n\n**Cosa ti aspettavi:**\n\n**Passi per riprodurre:**\n1. \n")
+    from . import i18n
+    T = i18n.tr
+    body = (f"**{T('Versione FeedLab:')}** {__version__}\n**{T('Sistema:')}** {platform.system()} {platform.release()}\n"
+            f"**{T('Feed / frequenza:')}** {feed_kind} {f_ghz if f_ghz is not None else ''} GHz\n\n"
+            f"**{T('Cosa è successo:')}**\n\n**{T('Cosa ti aspettavi:')}**\n\n**{T('Passi per riprodurre:')}**\n1. \n")
     return f"{REPO}/issues/new?" + urlencode({"title": "", "body": body})
 
 

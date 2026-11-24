@@ -296,10 +296,7 @@ with st.sidebar:
         _shape = "round"
         if _fl_wr is not None:
             st.caption(_T("Flangia {wg} rotonda ({name}): base del feed circolare", wg=_wr, name=_fl_wr.name))
-    _bt = st.number_input("Spessore base del feed (mm)", min_value=1.0, max_value=30.0, value=None, step=0.5,
-                          key="base_t", placeholder="automatico",
-                          help="vuoto = automatico (quanto serve ai fori filettati della flangia); minimo 1 mm. "
-                               "Più sottile: i fori filettati diventano passanti e il filetto utile è lo spessore")
+    _bt = S.get("base_t")                            # set in the Feed design tab (spessore della base)
     geometry.BASE.update({"shape": _shape, "wg": _bwg, "thickness": _bt})
     geometry.OUTER_PROFILE.update(mode=S.get("outer_mode", "wall"),          # options in the Feed design tab
                                   fillet=float(S.get("outer_fillet") or 0.0))
@@ -469,6 +466,11 @@ with tabs[1]:
     with c1:
         st.subheader("Quote (modificabili)")
         S.wall = st.number_input("Spessore parete (mm)", 0.2, 10.0, float(geo.params.get("wall", 1.0)), 0.05)
+        if not isinstance(geo, geometry.RectHornGeometry):
+            st.number_input("Spessore base del feed (mm)", min_value=1.0, max_value=30.0, value=None, step=0.5,
+                            key="base_t", placeholder=i18n.tr("automatico") + f" ({geo.params.get('flange_thickness', 0):.2f})",
+                            help="vuoto = automatico (quanto serve ai fori filettati della flangia); minimo 1 mm. "
+                                 "Più sottile: i fori filettati diventano passanti e il filetto utile è lo spessore")
         editable = {k: v for k, v in geo.params.items() if isinstance(v, (int, float)) and k not in ("wall", "rings", "flange_diam", "flange_thickness", "outer_fillet_R")}
         newv = {}
         map_keys = {"A_input": "A", "B_aperture": "B", "flare_half_deg": "alpha", "C_phasing": "C",
