@@ -6,6 +6,15 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('Viti dal lato del feed (fori passanti nella base)', 'Screws from the feed side (through holes in the base)'),
+    ('Fori nella base del feed', 'Holes in the feed base'),
+    ('Con lamatura (testa incassata)', 'Counterbored (head sunk)'),
+    ('Senza lamatura (testa appoggiata sulla base)', 'No counterbore (head resting on the base)'),
+    ('il feed si avvita direttamente sulla guida: le viti della flangia standard entrano dal lato del feed (testa nella lamatura o appoggiata sulla base), attraversano base e piastrina e si avvitano nella flangia della guida (o con i dadi se i suoi fori sono passanti). Spento: schema standard (flange quadrate: viti della guida nella piastrina e viti piastrina→feed; rotonde: viti della guida filettate nella base).',
+     "the feed screws directly onto the waveguide: the standard flange screws go in from the feed side (head in a counterbore or resting on the base), pass through base and plate and are screwed into the waveguide flange (or with nuts if its holes are through). Off: standard scheme (square flanges: waveguide screws in the plate and plate→feed screws; round: waveguide screws threaded into the base)."),
+    ('Fori passanti Ø{d:g} mm senza lamatura: la testa della vite si appoggia sulla base (lato horn); base spessa {t:.2f} mm.', 'Through holes Ø{d:g} mm without counterbore: the screw head rests on the base (horn side); base {t:.2f} mm thick.'),
+    ('dal lato del feed con la testa appoggiata sulla base (fori passanti senza lamatura); ', 'from the feed side with the head resting on the base (through holes, no counterbore); '),
+    ('attraversano piastrina e base e si avvitano nella flangia della guida (se la flangia ha fori passanti: dadi)', 'they pass through plate and base and are screwed into the waveguide flange (nuts if the flange has through holes)'),
     ('(più larga se le lamature non ci stanno)', '(larger if the counterbores do not fit)'),
     ('(flangia ', '(flange '),
     ('la svasatura del feed sovrasta le viti: per serrarle serve una chiave a brugola a L (non un cacciavite dritto)', 'the feed flare overhangs the screws: tighten them with an L hex key (not a straight screwdriver)'),

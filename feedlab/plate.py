@@ -61,7 +61,7 @@ def _zte(k, kc):
 def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str = "V",
                  corner_r_mm: float | None = None, optimized: bool = True, holes: str | None = None,
                  plate_screw: str | None = None, feed_cbore: bool = False,
-                 cb_depth: float | None = None, cb_dia: float | None = None) -> MatchingPlate:
+                 cb_depth: float | None = None, cb_dia: float | None = None, cbore: bool = True) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
     (feedlab.flanges) — clearance holes for the screws and dowel holes."""
     w = RECT_WG[wg]
@@ -85,11 +85,12 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     mnt = None
     if holes:
         from .flanges import mount
-        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, feed_cbore=feed_cbore, cb_depth=cb_depth, cb_dia=cb_dia)
+        mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, feed_cbore=feed_cbore, cb_depth=cb_depth, cb_dia=cb_dia,
+                    cbore=cbore)
         body_t = round(max(t, mnt.plate_body_min()), 2)
         # screw length depends on the plate thickness: drill again with it (same positions)
         mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, feed_cbore=feed_cbore,
-                    cb_depth=cb_depth, cb_dia=cb_dia)
+                    cb_depth=cb_depth, cb_dia=cb_dia, cbore=cbore)
         outer = max(outer, mnt.flange.A, 2 * mnt.plate_radius + 3.0)   # refined below, per flange shape
     from .flanges import FLANGES
     fl = FLANGES.get(wg)

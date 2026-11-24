@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| — | (nessuna ancora) | |
+| 1 | Fori nella base del feed (viti dal lato del feed): scelta fra **con lamatura** (testa incassata, diametro e profondità modificabili) e **senza lamatura** (fori passanti, testa appoggiata sulla base) | ✅ fatto |
 
 ---
 

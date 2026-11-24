@@ -1107,35 +1107,41 @@ with tabs[7], contextlib.suppress(_Skip):
                               help="lunghezza = 2 × spessore della piastrina, arrotondata alla misura commerciale "
                                    "(10, 12, 14, 16, 18, 20, 25 mm; in pollici 3/8\" … 1\"); i fori filettati nel feed "
                                    "seguono la lunghezza della vite")
-        feed_cb = st.checkbox("Viti dal lato del feed con lamatura nella base", key="mount_cbore",
+        feed_cb = st.checkbox("Viti dal lato del feed (fori passanti nella base)", key="mount_cbore",
                               disabled=not holes_on, value=False,
                               help="il feed si avvita direttamente sulla guida: le viti della flangia standard entrano "
-                                   "dal lato del feed con la testa nella lamatura della base, attraversano base e "
+                                   "dal lato del feed (testa nella lamatura o appoggiata sulla base), attraversano base e "
                                    "piastrina e si avvitano nella flangia della guida (o con i dadi se i suoi fori sono "
                                    "passanti). Spento: schema standard (flange quadrate: viti della guida nella "
                                    "piastrina e viti piastrina→feed; rotonde: viti della guida filettate nella base).")
+        _cbore = st.radio("Fori nella base del feed", ["cbore", "plain"], horizontal=True, key="mount_cbore_kind",
+                          disabled=not (holes_on and feed_cb),
+                          format_func=lambda k: {"cbore": "Con lamatura (testa incassata)",
+                                                 "plain": "Senza lamatura (testa appoggiata sulla base)"}[k]) == "cbore"
+        feed_cbk = bool(feed_cb) and _cbore
         _scr = flanges.screw_for(wg, system) if wg in flanges.FLANGES else None
         _cb_def = flanges.CBORE[_scr][1] if _scr in flanges.CBORE else 3.0
         _cbd_def = flanges.CBORE[_scr][0] if _scr in flanges.CBORE else 6.0
         cb_dia = st.number_input(_T("Diametro della lamatura (mm, standard {d:g} per la testa {s})", d=_cbd_def, s=_scr or ""),
                                  min_value=1.0, max_value=30.0, value=float(_cbd_def), step=0.1, key=f"cb_dia_{_scr}",
-                                 disabled=not (holes_on and feed_cb),
+                                 disabled=not (holes_on and feed_cbk),
                                  help="diametro della sede della testa della vite; il valore proposto va bene per le viti "
                                       "a testa cilindrica ISO 4762 / UNC: controllalo con le viti che compri") \
-            if feed_cb else None
+            if feed_cbk else None
         cb_depth = st.number_input(_T("Profondità della lamatura (mm, standard {d:g} per la testa {s})", d=_cb_def, s=_scr or ""),
                                    min_value=0.5, max_value=20.0, value=float(_cb_def), step=0.5, key=f"cb_depth_{_scr}",
-                                   disabled=not (holes_on and feed_cb),
+                                   disabled=not (holes_on and feed_cbk),
                                    help="più profonda: la testa della vite resta più incassata e la vite è più corta; "
                                         "la base del feed si ispessisce da sola (lamatura + 1,5 mm sotto la testa)") \
-            if feed_cb else None
+            if feed_cbk else None
         pol_c = "V" if pol_ == "Verticale" else "H"
         try:
             pl = plate.design_plate(S.f_ghz, wg, dcirc, pol_c, rr, opt, holes=system if holes_on else None,
-                                    plate_screw=pscrew, feed_cbore=bool(feed_cb), cb_depth=cb_depth, cb_dia=cb_dia)
+                                    plate_screw=pscrew, feed_cbore=bool(feed_cb), cb_depth=cb_depth, cb_dia=cb_dia,
+                                    cbore=_cbore)
             new_cfg = {"wg": wg if holes_on else None, "system": system, "pol": pol_c, "plate_screw": pscrew,
                        "plate_t": pl.body_t if holes_on else None, "feed_cbore": bool(feed_cb),
-                       "cb_depth": cb_depth, "cb_dia": cb_dia}
+                       "cb_depth": cb_depth, "cb_dia": cb_dia, "feed_nocb": bool(feed_cb) and not _cbore}
             if new_cfg != (S.get("mount_cfg") or {"wg": None}) and (holes_on or (S.get("mount_cfg") or {}).get("wg")):
                 S["mount_cfg"] = new_cfg
                 geometry.MOUNT.update(new_cfg)
@@ -1232,11 +1238,15 @@ with tabs[7], contextlib.suppress(_Skip):
             if holes_on and getattr(_gb, "mount", None) is not None:
                 st.subheader("Feed con la base forata (3D, ruotabile)")
                 _cbs = [hh for hh in _gb.mount.feed_holes if hh.kind == "cbore_back"]
-                if _cbs:
+                if _cbs and not _cbs[0].cb_depth:
+                    st.info(_T("Fori passanti Ø{d:g} mm senza lamatura: la testa della vite si appoggia sulla base "
+                               "(lato horn); base spessa {t:.2f} mm.", d=_cbs[0].dia, t=_gb.params["flange_thickness"]))
+                elif _cbs:
                     st.info(_T("Lamature sul lato horn della base (dove escono le teste delle viti): Ø{d:g} mm, profonde "
                                "{k:g} mm; base spessa {t:.2f} mm, sotto la testa restano {r:.2f} mm.",
                                d=_cbs[0].cb_dia, k=_cbs[0].cb_depth, t=_gb.params["flange_thickness"],
                                r=_gb.params["flange_thickness"] - _cbs[0].cb_depth))
+                if _cbs:
                     for _n in getattr(_gb, "notes", []) or []:          # heads under the horn, counterbore past the edge
                         if "teste delle viti" in _n or "troppo sottile per la lamatura" in _n or "sovrasta" in _n:
                             st.warning(_n)

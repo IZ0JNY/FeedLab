@@ -157,7 +157,9 @@ class Mount:
         drill = max((h.depth or 0.0 for h in self.feed_holes if h.kind == "tap"), default=0.0)
         if self.stack and self.feed_cbore:   # counterbore + at least 1.5 mm of seat under the screw head
             cb = max(h.cb_depth for h in self.feed_holes if h.kind == "cbore_back")
-            return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(cb + 1.5, 3.0)
+            head = CBORE[self.screw][0] / 2 if not cb else 0.0          # no counterbore: the head rests on the base
+            return 2 * (max(self.radius, max(math.hypot(h.x, h.y) for h in self.feed_holes) + head)
+                        + max(1.5, 0.75 * d_major)), max(cb + 1.5, 3.0)
         if self.stack:                    # through-tapped base: the thread engagement is all it needs
             return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(self.engagement, 3.0)
         return 2 * (self.radius + max(1.5, 0.75 * d_major)), max(self.engagement + 1.0, drill + 0.8, 3.0)
@@ -181,7 +183,8 @@ PIN_FROM_GHZ = 47.0             # alignment pins plate ↔ feed from 47 GHz up (
 
 def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_diam: float = 0.0,
           f_ghz: float | None = None, plate_screw: str | None = None, plate_t: float | None = None,
-          feed_cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None) -> Mount:
+          feed_cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None,
+          cbore: bool = True) -> Mount:
     """Hole patterns of the plate and of the feed flange for waveguide `wg` (see module docstring)."""
     if wg not in FLANGES:
         raise ValueError(f"nessuna flangia standard in tabella per {wg}")
@@ -219,18 +222,23 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
             cb_k = round(max(0.5, float(cb_depth)), 2)
         if cb_dia:                       # counterbore diameter chosen by the user (never smaller than the hole)
             cb_d = round(max(float(cb_dia), clear + 0.2), 2)
-        if feed_cbore:                   # option: screws from the feed side, heads sunk in the base
+        if feed_cbore and not cbore:     # plain through holes: the screw head rests on the base (horn side)
+            cb_d, cb_k = 0.0, 0.0
+        if feed_cbore:                   # option: screws from the feed side, heads sunk in the base (or resting on it)
             m.feed_cbore = True
             m.warnings[-1] = (("flangia MIL rotonda: " if fl.shape == "round" else "") +
-                              f"viti {screw} dal lato del feed con la testa nella lamatura della "
-                              "base; attraversano piastrina e base e si avvitano nella flangia della guida "
+                              (f"viti {screw} dal lato del feed con la testa nella lamatura della base; " if cbore else
+                               f"viti {screw} dal lato del feed con la testa appoggiata sulla base (fori passanti "
+                               "senza lamatura); ") +
+                              "attraversano piastrina e base e si avvitano nella flangia della guida "
                               "(se la flangia ha fori passanti: dadi)")
         for x, y in screw_xy:
             x, y = _rot(x, y, polarization)
             m.plate_holes.append(Hole(x, y, clear, "clear", f"Ø{clear:g} passante, viti guida {screw}"))
             if feed_cbore:
-                m.feed_holes.append(Hole(x, y, clear, "cbore_back", f"Ø{clear:g} passante, lamatura Ø{cb_d:g} prof. "
-                                         f"{cb_k:g} lato horn", cb_dia=cb_d, cb_depth=cb_k))
+                m.feed_holes.append(Hole(x, y, clear, "cbore_back",
+                                         f"Ø{clear:g} passante, lamatura Ø{cb_d:g} prof. {cb_k:g} lato horn" if cbore else
+                                         f"Ø{clear:g} passante, viti {screw}", cb_dia=cb_d, cb_depth=cb_k))
             else:
                 m.feed_holes.append(Hole(x, y, tap, "tap", f"{screw} filettato passante (preforo Ø{tap:g})"))
         for x, y in dowel_xy:

@@ -37,7 +37,7 @@ def solid(geo) -> "object":
         for h in mnt.feed_holes:
             depth = t if h.kind in ("tap", "cbore_back") else min(t, h.depth or t)
             body = body.cut(cq.Workplane("XY").center(h.x, h.y).circle(h.dia / 2).extrude(depth))
-            if h.kind == "cbore_back":           # head counterbore on the horn side, in the base only: the horn
+            if h.kind == "cbore_back" and h.cb_depth > 0:           # head counterbore on the horn side, in the base only: the horn
                 z0 = t - h.cb_depth                  # body is never cut (if it covers a head, geometry warns)
                 body = body.cut(cq.Workplane("XY").workplane(offset=z0).center(h.x, h.y)
                                 .circle(h.cb_dia / 2).extrude(h.cb_depth))

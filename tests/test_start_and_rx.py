@@ -27,3 +27,18 @@ def test_feed_base_mesh_has_counterbores():
     finally:
         geometry.MOUNT.clear()
         geometry.MOUNT.update({"wg": None})
+
+
+def test_feed_through_holes_without_counterbore():
+    m = flanges.mount("WR-42", "metric", "V", 9.47, f_ghz=24.048, feed_cbore=True, cbore=False)
+    assert m.feed_cbore and all(h.kind == "cbore_back" and h.cb_depth == 0 and h.cb_dia == 0 for h in m.feed_holes)
+    geometry.MOUNT.clear()
+    geometry.MOUNT.update({"wg": "WR-42", "system": "metric", "polarization": "V", "feed_cbore": True, "feed_nocb": True})
+    try:
+        g = geometry.build("w2imu", 24.048, fD=0.6)
+        assert g.params["flange_thickness"] >= 3.0
+        v, f = cad.mesh(g)
+        assert len(v) > 0
+    finally:
+        geometry.MOUNT.clear()
+        geometry.MOUNT.update({"wg": None})

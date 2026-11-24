@@ -309,7 +309,7 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         from .flanges import mount
         mnt = mount(MOUNT["wg"], MOUNT.get("system", "metric"), MOUNT.get("pol", "V"), 2 * profile[0][1], f,
                     MOUNT.get("plate_screw"), MOUNT.get("plate_t"), bool(MOUNT.get("feed_cbore")),
-                    MOUNT.get("cb_depth"), MOUNT.get("cb_dia"))
+                    MOUNT.get("cb_depth"), MOUNT.get("cb_dia"), not MOUNT.get("feed_nocb"))
         d_need, t_need = mnt.feed_flange_min()
     # base (flange) thickness: chosen by the user (≥ 1 mm) or automatic (enough for the threaded holes)
     t_user = BASE.get("thickness")
@@ -321,11 +321,13 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
             mnt.screw_in = max(fl_t - cbk, 0.0)
             notes = list(notes or []) + [f"viti {mnt.screw} dal lato del feed: lunghezza ≈ {max(fl_t - cbk, 0):.1f} mm (base sotto "
                                          "la testa) + spessore piastrina + ~4 mm nella flangia della guida"]
-            if fl_t < cbk + 0.8:
+            if cbk and fl_t < cbk + 0.8:
                 notes = list(notes) + [f"base {fl_t:.2f} mm troppo sottile per la lamatura ({cbk:g} mm): aumentala"]
             # horn body around the screw heads: close to the base (head + hex key, ~12 mm) it must leave them
             # free; higher up a flare may overhang them (an L hex key still reaches the screw)
-            heads = [math.hypot(h.x, h.y) - h.cb_dia / 2 for h in mnt.feed_holes if h.kind == "cbore_back"]
+            from .flanges import CBORE
+            heads = [math.hypot(h.x, h.y) - (h.cb_dia or CBORE[mnt.screw][0]) / 2
+                     for h in mnt.feed_holes if h.kind == "cbore_back"]
             r_low = max((r for z, r in profile if z <= fl_t + 12.0), default=profile[0][1]) + t + 0.3
             r_all = max(r for _, r in profile) + t + 0.3
             if any(d < r_low for d in heads):
@@ -404,8 +406,10 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
         else:
             # holes and counterbores always inside the base, with at least 0.8 mm of wall: if the standard
             # flange is too small for them (e.g. WR-42 22.41 mm with M3 counterbores) the square grows
-            need = 2 * (max((max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia) / 2 for h in mnt.feed_holes),
-                            default=0.0) + 0.8) if mnt is not None else 0.0
+            from .flanges import CBORE
+            head = CBORE[mnt.screw][0] if mnt is not None and mnt.feed_cbore else 0.0   # plain holes: head on the base
+            need = 2 * (max((max(abs(h.x), abs(h.y)) + max(h.dia, h.cb_dia, head if h.kind == "cbore_back" else 0) / 2
+                             for h in mnt.feed_holes), default=0.0) + 0.8) if mnt is not None else 0.0
             wg_name = BASE.get('wg') or MOUNT.get('wg')
             if need > side + 1e-9:
                 notes = list(notes or []) + [f"base quadrata allargata a {math.ceil(need * 10) / 10:.2f} mm "
