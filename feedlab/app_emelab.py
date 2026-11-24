@@ -57,7 +57,7 @@ def _station(D):
         D.save_station(callsign=call.strip().upper(), locator=loc.strip(), lat=lat, lon=lon, height_m=h)
         openems_local.save_settings(emelab_wx_url=url.strip(), emelab_flux=flux)
         st.success("Stazione salvata (solo su questo PC).")
-    st.caption("Tutti i dati di EMELab (stazione, setup, misure, indirizzo della stazione meteo) restano in un file sul "
+    st.caption("Tutti i dati di EMELab (stazione, configurazioni, misure, indirizzo della stazione meteo) restano in un file sul "
                "tuo PC e non vengono mai inviati: il meteo da internet riceve solo coordinate e ora.")
 
 
@@ -79,13 +79,13 @@ def _setup_from_feedlab(S, current_geometry, name, band, extra) -> dict | None:
 
 
 def _setups(D, S, current_geometry):
-    st.subheader("Setup per banda")
-    st.caption("Un setup per ogni banda: parabola, feed, perdite, preamplificatore/transverter e potenza. Il pulsante "
+    st.subheader("Configurazioni per banda")
+    st.caption("Una configurazione per ogni banda: parabola, feed, perdite, preamplificatore/transverter e potenza. Il pulsante "
                "«Da FeedLab» prende guadagno, efficienza, spillover e taper dal progetto aperto in FeedLab.")
     c = st.columns(4)
     band_l = c[0].selectbox("Banda", list(BANDS), key="em_setup_band")
     band = BANDS[band_l]
-    name = c[1].text_input("Nome del setup", f"{band_l} — 2.4 m", key="em_setup_name")
+    name = c[1].text_input("Nome della configurazione", f"{band_l} — 2.4 m", key="em_setup_name")
     nf = c[2].number_input("NF preamplificatore / transverter (dB)", 0.2, 10.0, 1.5 if band < 30 else 3.0, 0.1, key="em_nf")
     line = c[3].number_input("Perdite feed → LNA (dB)", 0.0, 5.0, 0.2, 0.05, key="em_line",
                              help="relè, guida, adattatori tra il feed e l'ingresso del preamplificatore")
@@ -103,25 +103,25 @@ def _setups(D, S, current_geometry):
             st.warning("Scegli prima parabola e feed in FeedLab (procedura guidata).")
         else:
             D.save_setup(name, band, stp)
-            st.success("Setup salvato da FeedLab.")
+            st.success("Configurazione salvata da FeedLab.")
     with b[1].popover("✍️ Inserisci a mano"):
         Dm = st.number_input("Diametro della parabola (m)", 0.3, 20.0, 2.4, 0.05, key="em_m_D")
         eta = st.number_input("Efficienza d'apertura (%)", 20.0, 90.0, 60.0, 1.0, key="em_m_eta")
         et = st.number_input("Taper al bordo (dB)", 5.0, 25.0, 12.0, 0.5, key="em_m_et")
-        if st.button("💾 Salva setup", key="em_m_save"):
+        if st.button("💾 Salva configurazione", key="em_m_save"):
             lam = 299.792458 / band
             g = 10 * math.log10(eta / 100 * (math.pi * Dm * 1000 / lam) ** 2)
             D.save_setup(name, band, {"band_ghz": band, "D_m": Dm, "eta_ap": eta / 100, "gain_dbi": g, "edge_taper_db": et,
                                       "spill": 0.9, "ground_frac": 0.25, "source": "manuale", **extra})
-            st.success("Setup salvato.")
+            st.success("Configurazione salvata.")
     rows = D.setups()
     if rows:
         st.dataframe([{"ID": r["id"], "Nome": r["name"], "Banda (GHz)": r["band_ghz"], "Parabola (m)": r.get("D_m"),
                        "Guadagno (dBi)": round(r.get("gain_dbi", 0), 2), "Efficienza (%)": round(100 * r.get("eta_ap", 0), 1),
                        "Taper (dB)": round(r.get("edge_taper_db", 0), 1), "NF (dB)": r.get("nf_db"),
                        "Perdite (dB)": r.get("line_loss_db"), "TX (W)": r.get("tx_w"), "Origine": r.get("source")}
-                      for r in rows], hide_index=True, use_container_width=True)
-        dl = st.selectbox("Elimina setup", [None] + [r["id"] for r in rows], key="em_del_setup",
+                      for r in rows], hide_index=True, width="stretch")
+        dl = st.selectbox("Elimina configurazione", [None] + [r["id"] for r in rows], key="em_del_setup",
                           format_func=lambda i: "—" if i is None else next(r["name"] for r in rows if r["id"] == i))
         if dl and st.button("🗑️ Elimina", key="em_del_setup_btn"):
             D.delete_setup(dl)
@@ -152,14 +152,14 @@ def _new(D):
     stn = D.station()
     sets = D.setups()
     if not stn.get("lat") and not stn.get("lon"):
-        st.info("Inserisci e salva prima la stazione (posizione) nella sezione Stazione e setup.")
+        st.info("Inserisci e salva prima la stazione (posizione) nella sezione Stazione e configurazioni.")
         return
     if not sets:
-        st.info("Crea prima un setup per la banda (sezione Stazione e setup).")
+        st.info("Crea prima una configurazione per la banda (sezione Stazione e configurazioni).")
         return
     now = datetime.now(timezone.utc)
     c = st.columns(4)
-    sid = c[0].selectbox("Setup", [s["id"] for s in sets], key="em_n_setup",
+    sid = c[0].selectbox("Configurazione", [s["id"] for s in sets], key="em_n_setup",
                          format_func=lambda i: next(s["name"] for s in sets if s["id"] == i))
     setup = next(s for s in sets if s["id"] == sid)
     d0 = c[1].date_input("Data (UTC)", now.date(), key="em_n_date")
@@ -179,9 +179,9 @@ def _new(D):
     c = st.columns(5)
     azr = c[0].number_input("AZ letto (°)", 0.0, 360.0, None, 0.01, key="em_n_azr")
     elr = c[1].number_input("EL letto (°)", -5.0, 95.0, None, 0.01, key="em_n_elr")
-    azo = c[2].number_input("Offset AZ al picco (°)", -10.0, 10.0, None, 0.005, key="em_n_azo",
+    azo = c[2].number_input("Correzione AZ al picco (°)", -10.0, 10.0, None, 0.005, key="em_n_azo",
                             help="correzione che hai dovuto dare rispetto alla posizione calcolata per avere il massimo")
-    elo = c[3].number_input("Offset EL al picco (°)", -10.0, 10.0, None, 0.005, key="em_n_elo")
+    elo = c[3].number_input("Correzione EL al picco (°)", -10.0, 10.0, None, 0.005, key="em_n_elo")
     partner = c[4].text_input("Stazione corrispondente", "", key="em_n_partner", help="nominativo e locator, per eco/QSO")
     st.markdown("**Meteo al momento della misura**")
     b = st.columns(3)
@@ -242,10 +242,10 @@ def _show_snapshot(c, kind):
     cols[2].metric("Fascio a −3 dB", f"{c['hpbw_deg']:.3f}°")
     e = c.get("echo")
     cols[3].metric("Eco attesa (SNR in 1 Hz)", _fmt(e["snr_1hz_db"], "{:.1f} dB") if e else "—",
-                   help=(i18n.tr("in banda di spreading") + f" {e['spread_hz']:.0f} Hz: {e['snr_spread_db']:.1f} dB · "
+                   help=(i18n.tr("nella banda di allargamento") + f" {e['spread_hz']:.0f} Hz: {e['snr_spread_db']:.1f} dB · "
                          + i18n.tr("perdita di tratta") + f" {e['path_loss_db']:.2f} dB · " + i18n.tr("fascio più stretto della Luna")
                          + f" {e['beam_moon_db']:.1f} dB") if e else None)
-    st.caption(i18n.tr("Doppler eco") + f" {c['doppler_hz']:+.0f} Hz · " + i18n.tr("spreading") + f" {c['spread_hz']:.0f} Hz · "
+    st.caption(i18n.tr("Doppler eco") + f" {c['doppler_hz']:+.0f} Hz · " + i18n.tr("allargamento") + f" {c['spread_hz']:.0f} Hz · "
                + i18n.tr("fase lunare") + f" {c['moon_phase_deg']:+.0f}° ({100 * c['moon_illum']:.0f} %)")
 
 
@@ -271,7 +271,10 @@ def _log(D):
                         "SNR atteso": _r(ev.get("snr_expected")), "EL": _r(src.get("el")), "AZ": _r(src.get("az")),
                         "°C": r["t_c"], "UR %": r["rh"], "hPa": r["p_hpa"], "Meteo": r["wx_source"], "Note": r["notes"]})
         import pandas as pd
-        st.dataframe(pd.DataFrame(tab), hide_index=True, use_container_width=True)
+        tr = i18n.tr                                   # pandas tables are not translated by the streamlit proxy
+        df = pd.DataFrame([{tr(k): (tr(v) if k in ("Tipo", "Meteo") and isinstance(v, str) else v) for k, v in row.items()}
+                           for row in tab])
+        st.dataframe(df, hide_index=True, width="stretch")
         c = st.columns(3)
         dl = c[0].selectbox("Elimina misura (ID)", [None] + [r["id"] for r in rows], key="em_del_m",
                             format_func=lambda i: "—" if i is None else str(i))
@@ -293,20 +296,20 @@ def _r(v, n=2):
 def _analysis(D):
     sets = D.setups()
     if not sets:
-        st.info("Nessun setup.")
+        st.info("Nessuna configurazione.")
         return
-    sid = st.selectbox("Setup", [s["id"] for s in sets], key="em_a_setup",
+    sid = st.selectbox("Configurazione", [s["id"] for s in sets], key="em_a_setup",
                        format_func=lambda i: next(s["name"] for s in sets if s["id"] == i))
     setup = next(s for s in sets if s["id"] == sid)
     rows = [r for r in D.measurements() if r.get("setup_id") == sid]
     for t in analysis.advice(rows, setup):
         st.markdown("- " + i18n.tr(t))
-    with st.expander("📊 Dove guadagnare dB con questo setup", expanded=not rows):
+    with st.expander("📊 Dove guadagnare dB con questa configurazione", expanded=not rows):
         st.caption("Quanto cambiano G/T (ricezione) e SNR delle eco con miglioramenti realistici, a 30° di elevazione e "
                    "UR 60 %, con lo stesso modello usato per i valori attesi.")
         st.dataframe([{"Miglioramento": i18n.tr(r["label"]), "ΔG/T (dB)": round(r["d_gt"], 2), "ΔEco (dB)": round(r["d_echo"], 2)}
                       for r in sorted(analysis.improvements(setup), key=lambda r: -abs(r["d_echo"]))],
-                     hide_index=True, use_container_width=True)
+                     hide_index=True, width="stretch")
     ev = [(r, analysis.evaluate_measurement(r, setup)) for r in rows]
     sun = [(r, e) for r, e in ev if "gt_delta" in e]
     if sun:
@@ -317,14 +320,14 @@ def _analysis(D):
         fig.add_hline(y=0, line_dash="dot")
         fig.update_layout(title="G/T misurato − atteso vs elevazione del sole", xaxis_title="Elevazione (°)",
                           yaxis_title="ΔG/T (dB)", height=360, margin=dict(l=10, r=10, t=40, b=10))
-        c[0].plotly_chart(fig, use_container_width=True)
+        c[0].plotly_chart(fig, width="stretch")
         fig = go.Figure(go.Scatter(x=[r["utc"] for r, _ in sun], y=[e["gt_measured"] for _, e in sun], mode="markers",
                                    name="misurato"))
         fig.add_trace(go.Scatter(x=[r["utc"] for r, _ in sun], y=[e["gt_expected"] for _, e in sun], mode="lines",
                                  name="atteso", line=dict(dash="dot")))
         fig.update_layout(title="G/T dal sole nel tempo", yaxis_title="G/T (dB/K)", height=360,
                           margin=dict(l=10, r=10, t=40, b=10))
-        c[1].plotly_chart(fig, use_container_width=True)
+        c[1].plotly_chart(fig, width="stretch")
     ff = analysis.focus_fit(rows)
     if ff:
         fig = go.Figure(go.Scatter(x=ff["x"], y=ff["y"], mode="markers", name="misurato"))
@@ -333,7 +336,7 @@ def _analysis(D):
         fig.add_trace(go.Scatter(x=xs, y=a * xs ** 2 + b * xs + c0, mode="lines", name="curva interpolata"))
         fig.update_layout(title="Messa a fuoco: Y in funzione dello spostamento del feed", xaxis_title="Spostamento (mm)",
                           yaxis_title="Y (dB)", height=340, margin=dict(l=10, r=10, t=40, b=10))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         if ff["best_mm"] is not None:
             st.success(i18n.tr("Fuoco migliore a") + f" {ff['best_mm']:+.1f} mm " + i18n.tr("dalla posizione di partenza") +
                        f" ({ff['gain_db']:+.2f} dB " + i18n.tr("di Y in più") + ").")
@@ -344,10 +347,10 @@ def _analysis(D):
                                    colorscale="Plasma", showscale=True, colorbar=dict(title="EL"))))
         hp = analysis.hpbw_of(setup)
         fig.add_shape(type="circle", x0=-hp / 2, x1=hp / 2, y0=-hp / 2, y1=hp / 2, line=dict(dash="dot"))
-        fig.update_layout(title="Offset di puntamento al picco (cerchio = fascio a −3 dB)", xaxis_title="Offset AZ (°)",
-                          yaxis_title="Offset EL (°)", height=380, margin=dict(l=10, r=10, t=40, b=10))
+        fig.update_layout(title="Correzioni di puntamento al picco (cerchio = fascio a −3 dB)", xaxis_title="Correzione AZ (°)",
+                          yaxis_title="Correzione EL (°)", height=380, margin=dict(l=10, r=10, t=40, b=10))
         fig.update_yaxes(scaleanchor="x")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
 
 # ------------------------------------------------------------------ planner
@@ -355,10 +358,10 @@ def _planner(D):
     stn = D.station()
     sets = D.setups()
     if not sets or (not stn.get("lat") and not stn.get("lon")):
-        st.info("Servono stazione e setup.")
+        st.info("Servono stazione e configurazione.")
         return
     c = st.columns(5)
-    sid = c[0].selectbox("Setup", [s["id"] for s in sets], key="em_p_setup",
+    sid = c[0].selectbox("Configurazione", [s["id"] for s in sets], key="em_p_setup",
                          format_func=lambda i: next(s["name"] for s in sets if s["id"] == i))
     setup = next(s for s in sets if s["id"] == sid)
     days = c[1].number_input("Giorni", 1, 60, 14, key="em_p_days")
@@ -393,15 +396,15 @@ def _planner(D):
         st.dataframe([{"Inizio (UTC)": r["start"].strftime("%Y-%m-%d %H:%M"), "Fine (UTC)": r["end"].strftime("%Y-%m-%d %H:%M"),
                        "Ore": round(r["hours"], 1), "Momento migliore (UTC)": r["best_utc"].strftime("%Y-%m-%d %H:%M"),
                        "EL max (°)": round(r["best_el"], 1), "Distanza (km)": round(r["dist_km"]),
-                       "Eco SNR 1 Hz (dB)": _r(r["snr_1hz"], 1), "Eco SNR nello spreading (dB)": _r(r["snr_spread"], 1),
-                       "Spreading (Hz)": round(r["spread_hz"]), "Attenuazione (dB)": round(r["a_slant_db"], 2),
-                       "Sole–Luna min (°)": round(r["sun_moon_deg"], 1)} for r in rows], hide_index=True, use_container_width=True)
+                       "Eco SNR 1 Hz (dB)": _r(r["snr_1hz"], 1), "Eco SNR nell'allargamento (dB)": _r(r["snr_spread"], 1),
+                       "Allargamento (Hz)": round(r["spread_hz"]), "Attenuazione (dB)": round(r["a_slant_db"], 2),
+                       "Sole–Luna min (°)": round(r["sun_moon_deg"], 1)} for r in rows], hide_index=True, width="stretch")
         fig = go.Figure(go.Scatter(x=[s["utc"] for s in smp], y=[s["snr_1hz"] for s in smp], mode="markers",
                                    marker=dict(size=4, color=[s["el"] for s in smp], colorscale="Viridis", showscale=True,
                                                colorbar=dict(title="EL"))))
         fig.update_layout(title="SNR atteso delle eco (1 Hz) nelle finestre", yaxis_title="dB", height=360,
                           margin=dict(l=10, r=10, t=40, b=10))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     with st.expander("🌡️ Mesi più favorevoli (clima dell'ultimo anno nel tuo luogo)"):
         st.caption("Medie mensili di temperatura e umidità dall'archivio Open-Meteo: vapore acqueo, attenuazione, "
                    "temperatura di cielo a 30° e quanto perdi rispetto al mese migliore (G/T e eco).")
@@ -415,13 +418,13 @@ def _planner(D):
             st.dataframe([{"Mese": i18n.tr(planner.MONTHS_IT[r["month"] - 1]), "°C": round(r["t_c"], 1), "UR %": round(r["rh"]),
                            "Vapore (g/m³)": round(r["rho"], 1), "Attenuazione zenit (dB)": round(r["a_zen_db"], 2),
                            "Cielo a 30° (K)": round(r["t_sky"]), "ΔG/T (dB)": round(r["d_gt_db"], 2),
-                           "ΔEco (dB)": round(r["d_echo_db"], 2)} for r in cl], hide_index=True, use_container_width=True)
+                           "ΔEco (dB)": round(r["d_echo_db"], 2)} for r in cl], hide_index=True, width="stretch")
     with st.expander("📅 Perigei e apogei dei prossimi mesi"):
         if st.button("Calcola perigei", key="em_p_peri"):
             pts = planner.perigees(datetime.now(timezone.utc), 200)
             st.dataframe([{"UTC": t.strftime("%Y-%m-%d %H:%M"), "Tipo": k, "Distanza (km)": round(d),
                            "Eco rispetto al perigeo (dB)": round(-40 * math.log10(d / min(x[1] for x in pts)), 2)}
-                          for t, d, k in pts], hide_index=True, use_container_width=True)
+                          for t, d, k in pts], hide_index=True, width="stretch")
         st.caption("Al perigeo le eco sono fino a 2.2 dB più forti che all'apogeo (la perdita di tratta va con R⁴).")
 
 
@@ -438,9 +441,9 @@ def render(S, current_geometry):
     D = _db()
     st.header("📡 EMELab — stazione EME, misure e pianificazione")
     st.caption("Registra misure di sole, luna, cielo freddo, terra ed eco con posizione di sole e luna, distanza, "
-               "meteo e attenuazione atmosferica (tutto in UTC); EMELab le confronta con quanto il tuo setup dovrebbe "
+               "meteo e attenuazione atmosferica (tutto in UTC); EMELab le confronta con quanto la tua configurazione dovrebbe "
                "dare e ti dice dove migliorare.")
-    t = st.tabs(["① Stazione e setup", "② Nuova misura", "③ Diario", "④ Analisi", "⑤ Pianificatore", "⑥ Guida alle misure"])
+    t = st.tabs(["① Stazione e configurazioni", "② Nuova misura", "③ Diario", "④ Analisi", "⑤ Pianificatore", "⑥ Guida alle misure"])
     with t[0]:
         _station(D)
         st.divider()

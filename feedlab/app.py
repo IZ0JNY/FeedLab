@@ -470,7 +470,7 @@ with st.sidebar:
                     f"f/D{' eq.' if d.kind == 'offset' else ''} {d.fD:.3f} · apertura {d.opening_deg:.1f}°")
     if S.feed_kind:
         st.markdown(f"**Feed:** {geometry.FEED_TYPES[S.feed_kind]}")
-    if st.button("ℹ️ Informazioni sui materiali", key="mat_info_btn", use_container_width=True,
+    if st.button("ℹ️ Informazioni sui materiali", key="mat_info_btn", width="stretch",
                  help="tabella per scegliere il materiale: conducibilità, rugosità, peso, lavorabilità, prezzo, "
                       "reperibilità, resistenza agli agenti atmosferici, pro e contro"):
         _materials_dialog()

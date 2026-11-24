@@ -152,7 +152,7 @@ def advice(rows: list[dict], setup: dict) -> list[str]:
                     f"{np.mean([e['gt_expected'] for _, e in sun]):.2f} dB/K (differenza media {d.mean():+.2f} dB su {len(d)} misure).")
         if d.mean() < -1.0:
             tips.append("Ti mancano più di 1 dB rispetto al previsto: controlla nell'ordine fuoco del feed (spostamento "
-                        "assiale), perdite tra feed e LNA, NF reale del preamplificatore, puntamento (offset al picco) "
+                        "assiale), perdite tra feed e LNA, NF reale del preamplificatore, puntamento (correzione al picco) "
                         "e superficie della parabola.")
         if len(d) >= 4 and np.ptp(el) > 15:
             k = np.polyfit(el, d, 1)[0]

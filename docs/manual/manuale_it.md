@@ -461,20 +461,20 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 
 ## 14. EMELab — misure e pianificazione EME (facoltativo)
 
-EMELab è una scheda **facoltativa**: si accende con l'interruttore **📡 Abilita EMELab** nella barra laterale (la scelta viene ricordata). Serve a chi fa EME a 10, 24 e 47 GHz per **registrare le misure vere** della stazione, confrontarle con quanto il setup dovrebbe dare e capire dove migliorare. **Tutti i dati restano sul tuo PC** (un file nella cartella delle impostazioni): stazione, setup, misure e l'indirizzo della tua stazione meteo non vengono mai inviati; il servizio meteo da internet riceve solo coordinate e ora. Tutti gli orari sono in **UTC**.
+EMELab è una scheda **facoltativa**: si accende con l'interruttore **📡 Abilita EMELab** nella barra laterale (la scelta viene ricordata). Serve a chi fa EME a 10, 24 e 47 GHz per **registrare le misure vere** della stazione, confrontarle con quanto la configurazione dovrebbe dare e capire dove migliorare. **Tutti i dati restano sul tuo PC** (un file nella cartella delle impostazioni): stazione, configurazioni, misure e l'indirizzo della tua stazione meteo non vengono mai inviati; il servizio meteo da internet riceve solo coordinate e ora. Tutti gli orari sono in **UTC**.
 
-![EMELab: stazione e setup]({IMG}/m35_emelab_station.jpg)
+![EMELab: stazione e configurazioni]({IMG}/m35_emelab_station.jpg)
 
-### 14.1 Stazione e setup
+### 14.1 Stazione e configurazioni
 | Campo | Cos'è |
 |---|---|
 | **Nominativo, Locator, Latitudine/Longitudine, Quota** | posizione della stazione (dal locator si calcolano le coordinate) |
 | **Stazione meteo personale** | indirizzo del tuo sito Meteotemplate / Cumulus / Weather Display (o del file dati); salvato solo sul PC |
 | **Flusso solare a 15.4 GHz** | valore del giorno degli osservatori RSTN (NOAA SWPC): serve per il rumore solare atteso |
-| **Setup per banda** | parabola, guadagno, efficienza, taper, spillover (pulsante **📐 Da FeedLab** dal progetto aperto, oppure a mano), NF del preamplificatore/transverter, perdite feed → LNA, potenza TX al feed, errore RMS della superficie, larghezza del fascio misurata |
+| **Configurazioni per banda** | parabola, guadagno, efficienza, taper, spillover (pulsante **📐 Da FeedLab** dal progetto aperto, oppure a mano), NF del preamplificatore/transverter, perdite feed → LNA, potenza TX al feed, errore RMS della superficie, larghezza del fascio misurata |
 
 ### 14.2 Nuova misura
-Scegli setup, **data e ora UTC** e tipo (rumore solare o lunare, cielo freddo, terra, eco, beacon, QSO, messa a fuoco). Inserisci Y o SNR, gli angoli letti e gli **offset al picco**. Il meteo si prende con **🌡️ Dalla mia stazione** o **🌍 Da Open-Meteo** e si corregge a mano; viene salvato con la sua ora UTC e la sua fonte. Sotto, EMELab mostra subito posizione e distanza di Sole e Luna, angolo Sole–Luna, attenuazione allo zenit e sul percorso (ITU-R P.676), temperatura di cielo, Tsys, **Y di sole e luna attesi**, eco attesa, Doppler e spreading.
+Scegli configurazione, **data e ora UTC** e tipo (rumore solare o lunare, cielo freddo, terra, eco, beacon, QSO, messa a fuoco). Inserisci Y o SNR, gli angoli letti e le **correzioni al picco**. Il meteo si prende con **🌡️ Dalla mia stazione** o **🌍 Da Open-Meteo** e si corregge a mano; viene salvato con la sua ora UTC e la sua fonte. Sotto, EMELab mostra subito posizione e distanza di Sole e Luna, angolo Sole–Luna, attenuazione allo zenit e sul percorso (ITU-R P.676), temperatura di cielo, Tsys, **Y di sole e luna attesi**, eco attesa, Doppler e allargamento.
 
 ![EMELab: nuova misura]({IMG}/m36_emelab_new.jpg)
 
@@ -484,7 +484,7 @@ Il **diario** elenca le misure con valori attesi, differenze e G/T ricavato dal 
 ![EMELab: analisi]({IMG}/m37_emelab_analysis.jpg)
 
 ### 14.4 Pianificatore
-Per ogni **passaggio della Luna** sopra l'elevazione minima: inizio, fine, momento migliore, distanza, eco attesa in 1 Hz e nella banda di spreading, attenuazione, angolo minimo Sole–Luna. Con il **locator della stazione corrispondente** mostra solo le finestre comuni; con **Usa le previsioni meteo** tiene conto dell'umidità prevista (16 giorni). In fondo: **perigei e apogei** (fino a 2.2 dB sulle eco) e **mesi più favorevoli** dal clima dell'ultimo anno nel tuo luogo.
+Per ogni **passaggio della Luna** sopra l'elevazione minima: inizio, fine, momento migliore, distanza, eco attesa in 1 Hz e nella banda di allargamento, attenuazione, angolo minimo Sole–Luna. Con il **locator della stazione corrispondente** mostra solo le finestre comuni; con **Usa le previsioni meteo** tiene conto dell'umidità prevista (16 giorni). In fondo: **perigei e apogei** (fino a 2.2 dB sulle eco) e **mesi più favorevoli** dal clima dell'ultimo anno nel tuo luogo.
 
 ![EMELab: pianificatore]({IMG}/m38_emelab_planner.jpg)
 
