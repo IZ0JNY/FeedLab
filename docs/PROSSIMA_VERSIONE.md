@@ -1,6 +1,16 @@
-# Modifiche per la prossima versione (0.4.18)
+# Modifiche per la prossima versione (0.4.19)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
+
+| # | Richiesta | Stato |
+|---|---|---|
+| — | (nessuna ancora) | |
+
+---
+
+# Archivio: versione 0.4.18 (pubblicata, BETA TEST)
+
+Pubblicata con 8 modifiche.
 
 | # | Richiesta | Stato |
 |---|---|---|

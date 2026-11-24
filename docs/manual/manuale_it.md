@@ -53,6 +53,7 @@ All'avvio non c'è nessuna scelta predefinita: **Seleziona frequenza** e **Selez
 | **Materiale del feed** | rame, rame argentato, ottone, alluminio, stampa 3D metallizzata…: FeedLab calcola perdite e rumore aggiunto |
 | **Guida d'onda rettangolare** | la guida WR che si avvita al feed, fra quelle della banda: 10 GHz WR-90 o WR-75, 24 GHz WR-42, 47 GHz WR-22 o WR-19. Dimensiona piastrina, foratura e base |
 | **Base del feed** | circolare oppure **quadrata** con il lato della flangia della guida (WR-90 41.40, WR-75 38.30, WR-42 22.41 mm); solo per le guide con flangia quadrata |
+| **🔄 Controlla aggiornamenti** | chiede a GitHub se c'è una versione più nuova (il controllo avviene anche a ogni avvio) |
 | **ℹ️ Credits** | autore, versione e tutte le fonti |
 | **📖 Manuale** | scarica questo manuale in PDF |
 | **🐞 Segnala un problema** | apre la pagina GitHub delle segnalazioni con versione e progetto già compilati |
@@ -152,7 +153,7 @@ La **piastrina λ/4** collega la guida circolare del feed alla guida rettangolar
 4. **Fori di fissaggio guida → piastrina → feed**, con viti **metriche** o **in pollici**:
    - **10 e 24 GHz (flange quadrate):** la foratura della flangia standard (Flann) è **filettata nella piastra**; **4 viti piastra → feed** con la **testa nella lamatura** sul lato guida, così la superficie verso la guida resta piana; se la piastra è troppo sottile, FeedLab ne ingrossa il corpo e ricava sul lato feed una **tasca** del diametro della guida circolare;
    - **da 47 GHz (flange rotonde UG-383/385/387):** nessuna vite piastrina → feed. La piastrina si **appoggia sulla base del feed**; le viti 4-40 della guida la attraversano e si avvitano nella base, filettata passante. Le spine standard della flangia allineano guida, piastrina e feed.
-   - **opzione per tutte le flange:** "viti dal lato del feed con lamatura nella base": il feed si avvita direttamente sulla guida; le viti entrano dal lato del feed con la testa nella lamatura della base (lato horn), attraversano base e piastrina e si avvitano nella flangia della guida. **Diametro e profondità della lamatura** sono proposti da FeedLab e si possono cambiare; la base si ispessisce da sola (lamatura + 1,5 mm sotto la testa). Una **vista 3D ruotabile del feed con la base forata** mostra fori e lamature.
+   - **opzione per tutte le flange:** "viti dal lato del feed con lamatura nella base": il feed si avvita direttamente sulla guida; le viti entrano dal lato del feed con la testa nella lamatura della base (lato horn), attraversano base e piastrina e si avvitano nella flangia della guida. **Diametro e profondità della lamatura** sono proposti da FeedLab e si possono cambiare; la base si ispessisce da sola (lamatura + 1,5 mm sotto la testa) e, se è quadrata e le lamature non ci stanno (per esempio WR-42 con M3), si allarga quanto basta. Una **vista 3D ruotabile del feed con la base forata** mostra fori e lamature.
 5. La stessa foratura viene applicata alla **base del feed**. Accanto alla vista frontale c'è la **vista 3D** della piastrina; nei PDF di piastrina e flangia ogni gruppo di fori riporta **diametro e filettatura** (M2, M3…). Lo **spessore della base** si imposta nella scheda Progetto feed (minimo 1 mm, vuoto = automatico): fori filettati e lunghezza delle viti si adattano.
 
 ![Disegno della piastrina a 47 GHz](img/plate_drawing_47GHz.png)

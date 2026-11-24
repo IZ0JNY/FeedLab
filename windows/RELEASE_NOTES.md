@@ -1,25 +1,23 @@
-## FeedLab 0.4.17 BETA TEST per Windows / for Windows
+## FeedLab 0.4.18 BETA TEST per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.17.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.17-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+**Installazione / Installation:** `FeedLab-Setup-0.4.18.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.18-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
 
 ### 🇮🇹 Novità
-- **Lamature nella base del feed per tutte le flange** (anche quadrate WR-90/75/42): il feed si avvita direttamente sulla guida, con la testa delle viti nella lamatura sul lato horn.
-- **Diametro e profondità della lamatura** indicati e modificabili (valori standard proposti da FeedLab); la base si ispessisce da sola.
-- **Vista 3D ruotabile della base del feed forata** nella scheda Piastrina WR; il Modello 3D mostra i fori reali.
-- **Disegni PDF di piastrina e flangia:** diametro dei fori e filettature (M2, M3…).
-- **Avvio senza scelte predefinite:** Seleziona frequenza, parabola, tipo di feed e materiale.
-- **Procedura guidata:** obiettivo predefinito Massimo G/T e nuova opzione **Massime prestazioni RX (minimo rumore)**.
-- **Promemoria openEMS** (solo un consiglio) dopo modifiche importanti della geometria, nelle schede Progetto feed e Laboratorio.
-- In alto a sinistra: "Software progettato da Ivan IZ0JNY".
+- **Controllo aggiornamenti** più affidabile su Windows e nuovo pulsante **🔄 Controlla aggiornamenti** nella barra laterale.
+- **Lamature delle viti:** corretto l'errore "max() iterable argument is empty" con le flange quadrate; le lamature non tagliano più il corpo del feed; fori e lamature sempre dentro la base (la base quadrata si allarga se serve, es. WR-42 con M3 → 25.2 mm).
+- **Scheda Piastrina WR:** la vista 3D mostra tutto il feed con la base forata.
+- **Elenchi in ordine alfabetico:** materiali, marche di parabole e tipi di feed; catalogo parabole ripulito.
+- Il feed IZ0JNY si chiama **Dual-Flare (IZ0JNY)**.
+- Scelta della lingua spostata in fondo alla barra laterale, sopra Credits.
+- Installer: aggiornamento pulito della versione precedente.
 
 ### 🇬🇧 What's new
-- **Counterbores in the feed base for every flange** (square WR-90/75/42 too): the feed screws directly onto the waveguide, with the screw heads in counterbores on the horn side.
-- **Counterbore diameter and depth** shown and adjustable (standard values proposed by FeedLab); the base thickens automatically.
-- **Rotatable 3D view of the drilled feed base** in the WR plate tab; the 3D model shows the real holes.
-- **Plate and flange PDF drawings:** hole diameters and threads (M2, M3…).
-- **Blank start-up:** select frequency, dish, feed type and material.
-- **Wizard:** default goal Max G/T and new option **Maximum RX performance (minimum noise)**.
-- **openEMS reminder** (advice only) after significant geometry changes, in the Feed design and Laboratory tabs.
-- Top left: "Software designed by Ivan IZ0JNY".
+- More reliable **update check** on Windows and new **🔄 Check for updates** button in the sidebar.
+- **Screw counterbores:** fixed the "max() iterable argument is empty" error with square flanges; counterbores no longer cut the feed body; holes and counterbores always inside the base (the square base grows if needed, e.g. WR-42 with M3 → 25.2 mm).
+- **WR plate tab:** the 3D view shows the whole feed with its drilled base.
+- **Alphabetical lists:** materials, dish makers and feed types; dish catalogue cleaned up.
+- The IZ0JNY feed is now called **Dual-Flare (IZ0JNY)**.
+- Language choice moved to the bottom of the sidebar, above Credits.
+- Installer: clean update of the previous version.
 
 Requisiti / Requirements: Windows 10/11 64-bit.
