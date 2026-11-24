@@ -362,7 +362,7 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
     return fig
 
 
-def hole_labels(ax, holes, R, fontsize=6.5):
+def hole_labels(ax, holes, R, fontsize=6.5, x_text=None):
     """Callouts on the view: one leader per group of identical holes ('4× M3 filettato passante …'), stacked on the
     left of the part so they never run into the text on the right (translated, then wrapped)."""
     import textwrap as _tw
@@ -376,7 +376,8 @@ def hole_labels(ax, holes, R, fontsize=6.5):
         h = min(hs, key=lambda q: (q.x, -q.y))                  # left-most hole of the group
         ty = R * (1.15 - 2.3 * (i + 0.5) / max(n, 1))
         txt = "\n".join(_tw.wrap(f"{len(hs)}× {i18n.tr(callout)}", 30))
-        ax.annotate(txt, xy=(h.x, h.y), xytext=(-1.3 * R, ty), fontsize=fontsize, color="navy", ha="right", va="center",
+        ax.annotate(txt, xy=(h.x, h.y), xytext=(x_text if x_text is not None else -1.3 * R, ty), fontsize=fontsize,
+                    color="navy", ha="right", va="center",
                     arrowprops=dict(arrowstyle="-", lw=0.5, color="navy", shrinkA=1, shrinkB=2))
 
 

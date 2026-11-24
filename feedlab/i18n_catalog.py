@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastrina (6H); nella base del feed fori passanti Ø{d:g}.', 'Flange {wg} {name}: the waveguide screws ({screw}) go into the plate (6H); through holes Ø{d:g} in the feed base.'),
     ('Illuminazione della parabola', 'Dish illumination'),
     ('Automatica (consigliata)', 'Automatic (recommended)'),
     ('Taper al bordo scelto da me', 'Edge taper chosen by me'),

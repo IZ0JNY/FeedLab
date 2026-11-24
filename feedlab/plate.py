@@ -172,7 +172,7 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     from . import i18n
     from .drawing import HOLE_TOLERANCES, general_tolerance
     fig = plt.figure(figsize=(11.69, 8.27))
-    ax = fig.add_axes([0.05, 0.12, 0.5, 0.8]); ax.set_aspect("equal"); ax.set_axis_off()
+    ax = fig.add_axes([0.01, 0.06, 0.58, 0.86]); ax.set_aspect("equal"); ax.set_axis_off()
     h = p.outer / 2
     if p.shape == "round":
         ax.add_patch(Circle((0, 0), h, fill=False, lw=1.2))
@@ -189,10 +189,8 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     w = RECT_WG[p.wg]
     wa, wb = (w.a_mm, w.b_mm) if p.polarization == "V" else (w.b_mm, w.a_mm)
     ax.add_patch(Rectangle((-wa / 2, -wb / 2), wa, wb, fill=False, ls=":", lw=0.8, ec="b"))
-    ax.annotate("", (-aa / 2, -h - 2), (aa / 2, -h - 2), arrowprops=dict(arrowstyle="<->"))
-    ax.text(0, -h - 1.5, f"{aa:.3f}", ha="center", fontsize=8)
-    ax.annotate("", (h + 2, -bb / 2), (h + 2, bb / 2), arrowprops=dict(arrowstyle="<->"))
-    ax.text(h + 3, 0, f"{bb:.3f}", va="center", rotation=90, fontsize=8)
+    g = max(1.8, 0.09 * p.outer)                        # spacing of the dimension lines
+    _plate_dims(ax, p, aa, bb, h, g)
     ax.arrow(0, -bb / 2 * 0.6, 0, bb * 0.5, width=0.05 * bb, color="r") if p.polarization == "V" else \
         ax.arrow(-aa * 0.3, 0, aa * 0.5, 0, width=0.05 * aa, color="r")
     if p.mount is not None:
@@ -210,10 +208,10 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
             ax.plot([hl.x, hl.x], [hl.y - hl.dia * 0.7, hl.y + hl.dia * 0.7], lw=0.3, color="0.4")
     if p.mount is not None:
         from .drawing import hole_labels
-        hole_labels(ax, p.mount.plate_holes, h)
-        ax.set_xlim(-2.6 * h, h + 8); ax.set_ylim(-1.3 * h - 4, 1.3 * h + 2)
+        hole_labels(ax, p.mount.plate_holes, h, fontsize=6.2, x_text=-h - 5.0 * g)
+        ax.set_xlim(-h - 5.0 * g - 1.7 * h, h + 2.0 * g); ax.set_ylim(-h - 3.0 * g, h + 4.6 * g)
     else:
-        ax.set_xlim(-h - 6, h + 8); ax.set_ylim(-h - 6, h + 6)
+        ax.set_xlim(-h - 5 * g, h + 2.2 * g); ax.set_ylim(-h - 3.4 * g, h + 4.2 * g)
     from .flanges import role_legend
     ax.set_title(i18n.tr("Piastrina λ/4 — vista frontale (rosso = campo E)") + "\n" +
                  i18n.tr("tratteggio: Ø guida circolare del feed · punteggiato blu: WR") +
@@ -250,6 +248,88 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     fig.savefig(path)
     plt.close(fig)
     return path
+
+
+def _dim_h(ax, x0, x1, y, yref, txt, fs=6.5, below=False):
+    """Horizontal dimension x0…x1 at height y, extension lines from yref (ISO style: arrows, text above)."""
+    for x in (x0, x1):
+        ax.plot([x, x], [yref, y + (0.6 if y > yref else -0.6)], lw=0.35, color="0.25")
+    ax.annotate("", (x0, y), (x1, y), arrowprops=dict(arrowstyle="<|-|>", lw=0.5, color="k", mutation_scale=5,
+                                                      shrinkA=0, shrinkB=0))
+    ax.text((x0 + x1) / 2, y - 0.25 if below else y + 0.25, txt, ha="center", va="top" if below else "bottom",
+            fontsize=fs, bbox=dict(fc="white", ec="none", pad=0.3))
+
+
+def _dim_v(ax, y0, y1, x, xref, txt, fs=6.5):
+    """Vertical dimension y0…y1 at abscissa x, extension lines from xref (text rotated, left of the line)."""
+    for y in (y0, y1):
+        ax.plot([xref, x + (0.6 if x > xref else -0.6)], [y, y], lw=0.35, color="0.25")
+    ax.annotate("", (x, y0), (x, y1), arrowprops=dict(arrowstyle="<|-|>", lw=0.5, color="k", mutation_scale=5,
+                                                      shrinkA=0, shrinkB=0))
+    ax.text(x - 0.25, (y0 + y1) / 2, txt, ha="right", va="center", rotation=90, fontsize=fs,
+            bbox=dict(fc="white", ec="none", pad=0.3))
+
+
+def _plate_dims(ax, p: MatchingPlate, aa: float, bb: float, h: float, g: float) -> None:
+    """Dimensions of the plate as in IZ0JNY's CAD drawing: outline (with halves), positions of the flange holes
+    and of the plate→feed screws from the centre, aperture a × b, corner radii."""
+    from .flanges import hole_role
+    holes = p.mount.plate_holes if p.mount is not None else []
+    fl = [q for q in holes if hole_role(q) == "flange"]
+    fx = [q for q in holes if hole_role(q) == "plate"]
+    # aperture a (below the plate) and b (right of the plate)
+    _dim_h(ax, -aa / 2, aa / 2, -bb / 2 - 0.55 * g, -bb / 2, f"{aa:.2f}", below=True)   # inside, under the aperture
+    _dim_v(ax, -bb / 2, bb / 2, h + 1.0 * g, aa / 2, f"{bb:.2f}")
+    ax.text(h + 1.0 * g + 0.4, 0, "", fontsize=6)
+    if p.shape == "round":
+        _dim_h(ax, -h, h, h + 2.2 * g, 0, f"Ø{p.outer:.2f}")
+        if fl:
+            r = math.hypot(fl[0].x, fl[0].y)
+            _dim_h(ax, -r, r, h + 1.0 * g, 0, f"Ø{2 * r:.2f}")
+        return
+    # outline: overall and halves (top, left)
+    _dim_h(ax, -h, h, h + 3.4 * g, h, f"{p.outer:.2f}")
+    _dim_h(ax, -h, 0, h + 2.2 * g, h, f"{h:.2f}")
+    _dim_h(ax, 0, h, h + 2.2 * g, h, f"{h:.2f}")
+    _dim_v(ax, -h, h, -h - 4.4 * g, -h, f"{p.outer:.2f}")
+    _dim_v(ax, -h, 0, -h - 3.3 * g, -h, f"{h:.2f}")
+    _dim_v(ax, 0, h, -h - 3.3 * g, -h, f"{h:.2f}")
+    # flange holes from the centre (top: x, left: y)
+    if fl:
+        xs = sorted({round(abs(q.x), 3) for q in fl}); ys = sorted({round(abs(q.y), 3) for q in fl})
+        top = max(q.y for q in fl)
+        for x in xs[-1:]:
+            if x > 0.05:
+                _dim_h(ax, -x, 0, h + 1.0 * g, top, f"{x:.2f}")
+                _dim_h(ax, 0, x, h + 1.0 * g, top, f"{x:.2f}")
+        left = min(q.x for q in fl)
+        for y in ys[-1:]:
+            if y > 0.05:
+                _dim_v(ax, -y, 0, -h - 2.2 * g, left, f"{y:.2f}")
+                _dim_v(ax, 0, y, -h - 2.2 * g, left, f"{y:.2f}")
+    # plate→feed screws from the centre (bottom: on the x axis, left: on the y axis)
+    if fx:
+        rx = max((abs(q.x) for q in fx if abs(q.y) < 0.05), default=0.0)
+        ry = max((abs(q.y) for q in fx if abs(q.x) < 0.05), default=0.0)
+        if rx > 0:
+            _dim_h(ax, -rx, 0, -h - 2.2 * g, 0, f"{rx:.2f}")
+            _dim_h(ax, 0, rx, -h - 2.2 * g, 0, f"{rx:.2f}")
+        if ry > 0:
+            _dim_v(ax, -ry, 0, -h - 1.1 * g, 0, f"{ry:.2f}")
+            _dim_v(ax, 0, ry, -h - 1.1 * g, 0, f"{ry:.2f}")
+        if not rx and not ry:                       # diagonal pattern: coordinates of one screw
+            q = max(fx, key=lambda k: (k.x, k.y))
+            _dim_h(ax, 0, q.x, -h - 2.2 * g, q.y, f"{q.x:.2f}")
+            _dim_v(ax, 0, q.y, -h - 1.1 * g, q.x, f"{q.y:.2f}")
+    # corner radii
+    if p.outer_r > 0.01:
+        c = p.outer_r * (1 - 1 / math.sqrt(2))
+        ax.annotate(f"R{p.outer_r:g}", xy=(h - c, -h + c), xytext=(h + 0.4 * g, -h - 0.8 * g), fontsize=6.5,
+                    arrowprops=dict(arrowstyle="-", lw=0.4))
+    if p.corner_r > 0.01:
+        c = p.corner_r * (1 - 1 / math.sqrt(2))
+        ax.annotate(f"R{p.corner_r:g}", xy=(-aa / 2 + c, bb / 2 - c), xytext=(-aa / 2 - 0.6 * g, bb / 2 + 0.9 * g),
+                    fontsize=6.5, ha="right", arrowprops=dict(arrowstyle="-", lw=0.4))
 
 
 def _holes_text(p: MatchingPlate) -> str:

@@ -499,7 +499,7 @@ with tabs[0]:
                             help="automatica: il feed è progettato come oggi per l'obiettivo scelto; taper al bordo: "
                                  "quanto è più debole il segnale sul bordo della parabola rispetto al centro (dB). "
                                  "Più taper = meno spillover e meno rumore dal terreno, ma meno superficie sfruttata")
-        ill_taper = st.slider("Taper al bordo (dB)", 6.0, 25.0, 11.0, 0.5, key="ill_taper",
+        ill_taper = st.slider("Taper al bordo (dB)", 6.0, 25.0, 10.0, 0.5, key="ill_taper",
                               disabled=ill_mode != "taper",
                               help="10–12 dB: massimo guadagno (classico); 12–16 dB: più G/T (EME, RX); < 10 dB: parabola "
                                    "molto illuminata, più spillover")
@@ -556,12 +556,30 @@ with tabs[0]:
             Z = (X ** 2 + Y ** 2) / (4 * _f)
             C = np.interp(RR, _rho, _lev)
             fd3 = go.Figure(go.Surface(x=X / 1000, y=Y / 1000, z=Z / 1000, surfacecolor=C, cmin=-20, cmax=0,
-                                       colorscale=[[0, "#1b1b3a"], [0.5, "#b8860b"], [1, "#fff4b0"]],
-                                       colorbar=dict(title="dB", len=0.7), showscale=True))
-            fd3.update_layout(height=360, margin=dict(l=0, r=0, t=40, b=0),
+                                       colorscale=[[0, "#14143c"], [0.35, "#3b4cc0"], [0.6, "#d4a017"], [1, "#fff6b0"]],
+                                       colorbar=dict(title="dB", len=0.7), showscale=True,
+                                       lighting=dict(ambient=0.75, diffuse=0.5), hoverinfo="skip"))
+            _psi = np.radians(_ill["half_angle"])
+            for lv, col, nm in ((-3, "#00a000", "−3 dB"), (-10, "#d00000", "−10 dB")):       # rings on the dish
+                below = np.where(_lev <= lv)[0]
+                if below.size:
+                    r_lv = _rho[below[0]] * _R
+                    ph = np.linspace(0, 2 * np.pi, 121)
+                    fd3.add_trace(go.Scatter3d(x=r_lv * np.cos(ph) / 1000, y=r_lv * np.sin(ph) / 1000,
+                                               z=np.full_like(ph, r_lv ** 2 / (4 * _f) / 1000 + 0.002),
+                                               mode="lines", line=dict(color=col, width=6), name=nm))
+            # feed at the focus and the illumination cone to the rim
+            zr = _R ** 2 / (4 * _f)
+            for a_ in np.linspace(0, 2 * np.pi, 9)[:-1]:
+                fd3.add_trace(go.Scatter3d(x=[0, _R * np.cos(a_) / 1000], y=[0, _R * np.sin(a_) / 1000],
+                                           z=[_f / 1000, zr / 1000], mode="lines", showlegend=False,
+                                           line=dict(color="rgba(212,160,23,0.55)", width=2)))
+            fd3.add_trace(go.Scatter3d(x=[0], y=[0], z=[_f / 1000], mode="markers+text", text=["feed"],
+                                       textposition="top center", marker=dict(size=6, color="black"), showlegend=False))
+            fd3.update_layout(height=430, margin=dict(l=0, r=0, t=40, b=0), legend=dict(x=0, y=1),
                               title=i18n.tr("Parabola illuminata (chiaro = più segnale)"),
                               scene=dict(aspectmode="data", xaxis_title="m", yaxis_title="m", zaxis_title="m",
-                                         camera=dict(eye=dict(x=0.0, y=-1.2, z=1.6))))
+                                         camera=dict(eye=dict(x=1.35, y=-1.35, z=0.75))))
             g2.plotly_chart(fd3, width="stretch")
             if dish.kind == "offset":
                 g2.caption(i18n.tr("Parabola offset: mostrata come apertura circolare equivalente (f/D visto dal feed)."))
@@ -1279,6 +1297,10 @@ with tabs[6], contextlib.suppress(_Skip):
                     _txt = [_T("Flangia {wg} {name}: fori filettati {th} passanti nella base; le viti della guida "
                                "attraversano flangia e piastrina e si avvitano nella base.",
                                wg=mm_.flange.wg, name=mm_.flange.name, th=mm_.thread)]
+                elif any(h.kind == "tap" for h in mm_.plate_holes):
+                    _txt = [_T("Flangia {wg} {name}: le viti della guida ({screw}) si avvitano nella piastrina (6H); "
+                               "nella base del feed fori passanti Ø{d:g}.", wg=mm_.flange.wg, name=mm_.flange.name,
+                               screw=mm_.screw, d=max(h.dia for h in mm_.feed_holes if h.kind == "cbore_back"))]
                 elif any(h.cb_dia for h in mm_.feed_holes):
                     _txt = [_T("Flangia {wg} {name}: viti {screw} dal lato del feed, con la testa nella lamatura della base; "
                                "attraversano base e piastrina e si avvitano nella flangia della guida.",
@@ -1287,9 +1309,6 @@ with tabs[6], contextlib.suppress(_Skip):
                     _txt = [_T("Flangia {wg} {name}: fori passanti nella base e nella piastrina; viti {screw} dal lato del "
                                "feed con la testa appoggiata sulla base, avvitate nella flangia della guida.",
                                wg=mm_.flange.wg, name=mm_.flange.name, screw=mm_.screw)]
-                if any(h.kind == "tap" for h in mm_.plate_holes):
-                    _txt.append(_T("Fori della flangia filettati {s} 6H nella piastrina: la guida si avvita alla piastrina.",
-                                   s=mm_.screw))
                 if mm_.plate_screw:
                     _txt += [_T("4 viti piastra→feed {ps} × {ln} a testa piana Phillips, a filo nella svasatura (lato guida).",
                                 ps=mm_.plate_screw, ln=mm_.screw_len_label) if mm_.plate_head == "flat" else
@@ -1322,8 +1341,15 @@ with tabs[6], contextlib.suppress(_Skip):
             # front view preview
             fig = go.Figure()
             h = pl.outer / 2
-            fig.add_shape(type="circle" if pl.shape == "round" else "rect", x0=-h, y0=-h, x1=h, y1=h,
-                          line=dict(color="black"), fillcolor="rgba(201,162,39,0.5)")
+            if pl.shape != "round" and pl.outer_r > 0.01:        # square with rounded corners
+                rc = pl.outer_r
+                fig.add_shape(type="path", line=dict(color="black"), fillcolor="rgba(201,162,39,0.5)",
+                              path=(f"M {-h + rc},{-h} L {h - rc},{-h} Q {h},{-h} {h},{-h + rc} L {h},{h - rc} "
+                                    f"Q {h},{h} {h - rc},{h} L {-h + rc},{h} Q {-h},{h} {-h},{h - rc} "
+                                    f"L {-h},{-h + rc} Q {-h},{-h} {-h + rc},{-h} Z"))
+            else:
+                fig.add_shape(type="circle" if pl.shape == "round" else "rect", x0=-h, y0=-h, x1=h, y1=h,
+                              line=dict(color="black"), fillcolor="rgba(201,162,39,0.5)")
             aa, bb = (pl.a, pl.b) if pl.polarization == "V" else (pl.b, pl.a)
             fig.add_shape(type="rect", x0=-aa / 2, y0=-bb / 2, x1=aa / 2, y1=bb / 2, line=dict(color="black"), fillcolor="white")
             fig.add_shape(type="circle", x0=-dcirc / 2, y0=-dcirc / 2, x1=dcirc / 2, y1=dcirc / 2, line=dict(dash="dash", color="gray"))
