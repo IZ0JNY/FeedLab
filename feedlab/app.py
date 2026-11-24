@@ -352,6 +352,46 @@ def _credits_dialog():
     _cr.render(st, header=False)
 
 
+@_st.dialog(i18n.tr("ℹ️ Informazioni sui materiali"), width="large")
+def _materials_dialog():
+    """Table that helps choosing the feed material: conductivity, roughness, density, losses and pros / cons."""
+    import html as _h
+    tr = i18n.tr
+    stars = lambda n: "★" * n + "☆" * (5 - n)
+    st.markdown("Voti da ★☆☆☆☆ (scarso) a ★★★★★ (ottimo); **Prezzo**: ★★★★★ = il più economico. "
+                "**Perdite**: perdite ohmiche di una parete liscia rispetto al rame (1.0×); la rugosità le aumenta "
+                "ancora, soprattutto sopra 24 GHz.")
+    st.markdown("💡 **Per iniziare:** alluminio 6061/6082 (economico, leggero) con l'interno lucidato; per le "
+                "perdite più basse ottone argentato o rame argentato; all'aperto proteggi il feed (vernice, "
+                "radome o coperchio).")
+    head = ["Materiale", "σ (10⁷ S/m)", "Rq (µm)", "Densità (g/cm³)", "Perdite × rame", "Lavorabilità", "Prezzo",
+            "Reperibilità", "Agenti atmosferici", "Trattamenti (argentatura, doratura…)", "Pro", "Contro"]
+    rows = []
+    for m in sorted(materials.MATERIALS.values(), key=lambda m_: -m_.sigma):
+        g = materials.GUIDE.get(m.name)
+        if not g:
+            continue
+        sel = ' class="sel"' if m.name == S.get("material") else ""
+        cells = [f"<b>{_h.escape(tr(m.name))}</b>", f"{m.sigma / 1e7:.2f}", f"{m.rq_um:g}", f"{m.density:.2f}",
+                 f"{materials.loss_vs_copper(m):.1f}×"] + [f'<span class="st">{stars(v)}</span>' for v in g[:5]] + \
+                [_h.escape(tr(g[5])), _h.escape(tr(g[6]))]
+        rows.append(f"<tr{sel}>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
+    _st.html("""<style>
+      .mt {max-height:65vh; overflow:auto; border:1px solid #ccc4; border-radius:6px}
+      .mt table {border-collapse:collapse; font-size:12px; min-width:1100px}
+      .mt th {position:sticky; top:0; background:#2e5c8a; color:#fff; padding:5px 6px; text-align:left; z-index:1}
+      .mt td {padding:4px 6px; border-top:1px solid #ccc5; vertical-align:top}
+      .mt td:first-child {min-width:170px}
+      .mt tr:nth-child(even) td {background:#8881}
+      .mt tr.sel td {background:#ffe9a8 !important; color:#000}
+      .mt .st {color:#d4a017; letter-spacing:-1px; white-space:nowrap}
+      .mt td:nth-child(11), .mt td:nth-child(12) {min-width:200px}
+    </style><div class="mt"><table><tr>""" + "".join(f"<th>{_h.escape(tr(h))}</th>" for h in head) + "</tr>"
+             + "".join(rows) + "</table></div>")
+    st.caption("Conducibilità: valori tipici della lega. Rugosità: finitura di serie dei servizi CNC (Ra 1.6–3.2 µm) "
+               "o di un interno lucidato; ordinando chiedi Ra ≤ 0.8 µm all'interno del feed.")
+
+
 with st.sidebar:
     st.title("📡 FeedLab")
     st.subheader("Laboratorio di Progettazione di feed/illuminatori a microonde")
@@ -373,6 +413,10 @@ with st.sidebar:
                     f"f/D{' eq.' if d.kind == 'offset' else ''} {d.fD:.3f} · apertura {d.opening_deg:.1f}°")
     if S.feed_kind:
         st.markdown(f"**Feed:** {geometry.FEED_TYPES[S.feed_kind]}")
+    if st.button("ℹ️ Informazioni sui materiali", key="mat_info_btn", use_container_width=True,
+                 help="tabella per scegliere il materiale: conducibilità, rugosità, peso, lavorabilità, prezzo, "
+                      "reperibilità, resistenza agli agenti atmosferici, pro e contro"):
+        _materials_dialog()
     mats = sorted(materials.MATERIALS, key=lambda m_: i18n.tr(m_).lower())   # alphabetical in the chosen language
     S.material = st.selectbox("Materiale del feed", mats, index=None, placeholder="Seleziona materiale",
                               key="material_sel", help="conducibilità e rugosità → perdite ohmiche e rumore del feed")
