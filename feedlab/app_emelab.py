@@ -301,6 +301,12 @@ def _analysis(D):
     rows = [r for r in D.measurements() if r.get("setup_id") == sid]
     for t in analysis.advice(rows, setup):
         st.markdown("- " + i18n.tr(t))
+    with st.expander("📊 Dove guadagnare dB con questo setup", expanded=not rows):
+        st.caption("Quanto cambiano G/T (ricezione) e SNR delle eco con miglioramenti realistici, a 30° di elevazione e "
+                   "UR 60 %, con lo stesso modello usato per i valori attesi.")
+        st.dataframe([{"Miglioramento": i18n.tr(r["label"]), "ΔG/T (dB)": round(r["d_gt"], 2), "ΔEco (dB)": round(r["d_echo"], 2)}
+                      for r in sorted(analysis.improvements(setup), key=lambda r: -abs(r["d_echo"]))],
+                     hide_index=True, use_container_width=True)
     ev = [(r, analysis.evaluate_measurement(r, setup)) for r in rows]
     sun = [(r, e) for r, e in ev if "gt_delta" in e]
     if sun:

@@ -6,6 +6,20 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('umidità', 'humidity'),
+    ('📊 Dove guadagnare dB con questo setup', '📊 Where to gain dB with this setup'),
+    ('Quanto cambiano G/T (ricezione) e SNR delle eco con miglioramenti realistici, a 30° di elevazione e UR 60 %, con lo stesso modello usato per i valori attesi.', 'How much G/T (receive) and echo SNR change with realistic improvements, at 30° elevation and 60 % RH, with the same model used for the expected values.'),
+    ('Miglioramento', 'Improvement'),
+    ('Perdite feed → LNA', 'Feed → LNA loss'),
+    ('LNA sul feed', 'LNA on the feed'),
+    ('Superficie della parabola', 'Dish surface'),
+    ('Errore di puntamento di 1/4 del fascio', 'Pointing error of 1/4 of the beam'),
+    ('corretto', 'corrected'),
+    ('Elevazione', 'Elevation'),
+    ('Aria secca', 'Dry air'),
+    ('Aria umida', 'Humid air'),
+    ('invece di', 'instead of'),
+    ('UR', 'RH'),
     ("è sotto l'orizzonte in questo momento", 'is below the horizon at this moment'),
     ('Il Sole', 'The Sun'),
     ('La Luna', 'The Moon'),

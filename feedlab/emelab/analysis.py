@@ -202,3 +202,55 @@ def focus_fit(rows: list[dict]) -> dict | None:
     xb = -b / (2 * a)
     return {"n": len(pts), "best_mm": float(xb), "y_best": float(c - b * b / (4 * a)), "gain_db": float(-b * b / (4 * a)),
             "x": x.tolist(), "y": y.tolist(), "coef": [float(a), float(b), float(c)]}
+
+
+def improvements(setup: dict, el_deg: float = 30.0, t_c: float = 15.0, rh: float = 60.0) -> list[dict]:
+    """Where the dB are: change of G/T (receive) and of the own-echo SNR for realistic improvements of the setup,
+    from the same model used for the expected values."""
+    from . import atmos
+    f = float(setup["band_ghz"])
+    lam = sky.C / (f * 1e9) * 1000                     # mm
+    z = atmos.zenith_attenuation(f, t_c, rh)["total"]
+
+    def figures(s, el=el_deg, rms=None, point_err=0.0):
+        a = atmos.slant_attenuation(z, el)
+        ts = tsys_cold(s, atmos.sky_temperature(a, t_c))["sys"]
+        g = float(s.get("gain_dbi", 0)) - float(s.get("line_loss_db", 0))
+        if rms is not None:                            # Ruze relative to the setup's own surface error
+            r0 = float(s.get("rms_mm", 0.0))
+            g += -10 * math.log10(math.e) * ((4 * math.pi * rms / lam) ** 2 - (4 * math.pi * r0 / lam) ** 2)
+        hp = hpbw_of(s)
+        pl = 12.04 * (point_err / hp) ** 2
+        gt = g - pl - 10 * math.log10(ts)
+        echo = 2 * (g - pl) - 2 * a - 10 * math.log10(ts)        # TX gain + RX gain, atmosphere twice, noise
+        return gt, echo
+
+    gt0, e0 = figures(setup)
+    out = []
+
+    def add(label, s=None, **kw):
+        gt, e = figures(s or setup, **kw)
+        out.append({"label": label, "d_gt": gt - gt0, "d_echo": e - e0})
+
+    nf = float(setup.get("nf_db", 1.5))
+    add(f"NF {nf:.1f} → {max(nf - 0.5, 0.3):.1f} dB", {**setup, "nf_db": max(nf - 0.5, 0.3)})
+    ll = float(setup.get("line_loss_db", 0.0))
+    if ll > 0:
+        add(f"Perdite feed → LNA {ll:.2f} → {ll / 2:.2f} dB (LNA sul feed)", {**setup, "line_loss_db": ll / 2})
+    r0 = float(setup.get("rms_mm", 0.3))
+    add(f"Superficie della parabola {r0:.2f} → {r0 / 2:.2f} mm RMS", rms=r0 / 2)
+    hp = hpbw_of(setup)
+    add(f"Errore di puntamento di 1/4 del fascio ({hp / 4:.3f}°) corretto", point_err=0.0)
+    out[-1]["d_gt"], out[-1]["d_echo"] = -(figures(setup, point_err=hp / 4)[0] - gt0), -(figures(setup, point_err=hp / 4)[1] - e0)
+    add(f"Elevazione {el_deg:.0f}° → 60°", el=60.0)
+    add(f"Elevazione {el_deg:.0f}° → 15°", el=15.0)
+    dry = figures(setup)
+    za = z
+    z = atmos.zenith_attenuation(f, t_c, 30.0)["total"]
+    gt_d, e_d = figures(setup)
+    z = atmos.zenith_attenuation(f, t_c, 90.0)["total"]
+    gt_w, e_w = figures(setup)
+    z = za
+    out.append({"label": f"Aria secca: umidità 30 % invece di {rh:.0f} %", "d_gt": gt_d - gt0, "d_echo": e_d - e0})
+    out.append({"label": f"Aria umida: umidità 90 % invece di {rh:.0f} %", "d_gt": gt_w - gt0, "d_echo": e_w - e0})
+    return out

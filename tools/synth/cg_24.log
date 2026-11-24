@@ -1,1 +1,24 @@
    1      37s  EME=86.232  conv=0.001
+   2      55s  EME=86.240  conv=0.001
+   3      71s  EME=86.240  conv=0.001
+   4      86s  EME=86.240  conv=0.002
+   5     103s  EME=86.256  conv=0.002
+   6     121s  EME=86.256  conv=0.004
+   7     137s  EME=86.256  conv=0.005
+   8     156s  EME=86.256  conv=0.007
+   9     175s  EME=86.259  conv=0.011
+  10     195s  EME=86.259  conv=0.015
+  11     214s  EME=86.260  conv=0.017
+  12     233s  EME=86.260  conv=0.020
+  13     251s  EME=86.260  conv=0.024
+  14     270s  EME=86.260  conv=0.037
+  15     290s  EME=86.261  conv=0.045
+  16     309s  EME=86.261  conv=0.056
+  17     328s  EME=86.266  conv=0.060
+  18     349s  EME=86.266  conv=0.073
+  19     370s  EME=86.267  conv=0.085
+  20     390s  EME=86.267  conv=0.095
+  21     410s  EME=86.267  conv=0.102
+  22     431s  EME=86.267  conv=0.101
+/usr/local/lib/python3.13/multiprocessing/resource_tracker.py:479: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown: {'/mp-7twfxdm_', '/mp-gpdr2vi1', '/mp-s39b2eub', '/mp-pbhg0m4k', '/mp-qsd7atsy', '/mp-2uj9n32b'}
+  warnings.warn(
