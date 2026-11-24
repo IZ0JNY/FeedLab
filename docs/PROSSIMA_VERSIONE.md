@@ -5,6 +5,7 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Controllo aggiornamenti più robusto su Windows (certificati di GitHub anche dal pacchetto certifi) e pulsante "🔄 Controlla aggiornamenti" nella barra laterale che mostra l'esito o l'errore | ✅ fatto |
+| 2 | Installer: rimuove da solo la versione precedente (icone, voce in App, pacchetti vecchi) prima di installare la nuova; avvisa se c'è anche una copia "per tutti gli utenti" che richiede l'amministratore | ✅ fatto (da provare sulla build Windows) |
 
 ---
 
