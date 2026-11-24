@@ -181,3 +181,17 @@ def test_illumination_changes_the_feed(isolated):
     fd8 = at.session_state["fd_design"]
     assert fd8 < fd_auto < fd16 or fd8 < fd16
     assert any("Progettato per f/D" in c.value for c in at.caption)
+
+
+def test_lab_taper_slider_follows_and_drives_the_wizard(isolated):
+    """The Laboratory has the same edge-taper slider as the wizard: moving it redesigns the feed at once."""
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    _start(at)
+    fd0 = at.session_state["fd_design"]
+    at.slider(key="lab_ill_taper").set_value(16.0).run()
+    assert not at.exception, _errors(at)
+    assert at.session_state["ill_mode"] == "taper" and at.session_state["ill_taper"] == 16.0
+    assert at.slider(key="ill_taper").value == 16.0 and at.session_state["fd_design"] != fd0
+    at.slider(key="ill_taper").set_value(9.0).run()
+    assert at.slider(key="lab_ill_taper").value == 9.0

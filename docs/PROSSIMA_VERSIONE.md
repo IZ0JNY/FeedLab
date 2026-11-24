@@ -8,6 +8,7 @@
 | 2 | Montaggio: la didascalia sotto la sezione non si sovrappone più alla flangia della guida esterna (più spazio sotto il disegno) | ✅ fatto |
 | 3 | Schema di montaggio rinominato "Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata alla piastrina)" / "Plate screwed to the feed base with counterbored screws (waveguide screwed into the plate)", senza IZ0JNY | ✅ fatto |
 | 4 | Viste 3D senza l'effetto "a stella" (righe scure che partono dai fori): Plotly scartava i triangoli lunghi e sottili della tessellazione; ora vengono disegnati tutti | ✅ fatto |
+| 5 | Cursore del taper al bordo anche nel Laboratorio, collegato a quello della Procedura guidata (muovendo uno si muove l'altro); il feed si riprogetta e le simulazioni si aggiornano subito | ✅ fatto |
 
 ---
 

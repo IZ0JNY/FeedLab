@@ -154,6 +154,14 @@ def _openems_hint(keys):
                    "openEMS) prima di costruire.", keys=", ".join(keys)), icon="💡")
 
 
+def _sync_taper(src: str, dst: str):
+    """The edge-taper slider exists in the wizard and in the Laboratory: moving one moves the other and switches the
+    illumination to the user's taper (the feed is redesigned at once for it)."""
+    S[dst] = S[src]
+    S["ill_taper"] = S[src]
+    S["ill_mode"] = "taper"
+
+
 def _fd_design() -> float:
     """f/D the feed is designed for: from the illumination chosen in the wizard (edge taper or goal), else the
     dish f/D. Every tab builds the feed with it; the efficiency is always evaluated on the real dish."""
@@ -534,8 +542,10 @@ with tabs[0]:
                             help="automatica: il feed è progettato come oggi per l'obiettivo scelto; taper al bordo: "
                                  "quanto è più debole il segnale sul bordo della parabola rispetto al centro (dB). "
                                  "Più taper = meno spillover e meno rumore dal terreno, ma meno superficie sfruttata")
-        ill_taper = st.slider("Taper al bordo (dB)", 6.0, 25.0, 10.0, 0.5, key="ill_taper",
-                              disabled=ill_mode != "taper",
+        if "ill_taper" not in S:
+            S["ill_taper"] = 10.0
+        ill_taper = st.slider("Taper al bordo (dB)", 6.0, 25.0, step=0.5, key="ill_taper",
+                              disabled=ill_mode != "taper", on_change=_sync_taper, args=("ill_taper", "lab_ill_taper"),
                               help="10–12 dB: massimo guadagno (classico); 12–16 dB: più G/T (EME, RX); < 10 dB: parabola "
                                    "molto illuminata, più spillover")
     if dish is not None:
@@ -971,6 +981,17 @@ def lab_eval(kind, f, sc_tuple, over_tuple, wall, fd_design=None):
 with tabs[2], contextlib.suppress(_Skip):
     _need()
     st.header("Laboratorio: varia le quote e guarda cosa cambia")
+    if "lab_ill_taper" not in S:
+        S["lab_ill_taper"] = float(S.get("ill_taper", 10.0))
+    _lt1, _lt2 = st.columns([2, 3])
+    _lt1.slider("Taper al bordo (dB) — come nella Procedura guidata", 6.0, 25.0, step=0.5, key="lab_ill_taper",
+                on_change=_sync_taper, args=("lab_ill_taper", "ill_taper"),
+                help="lo stesso cursore della Procedura guidata: spostandolo il feed viene riprogettato per il nuovo "
+                     "taper e tutte le simulazioni si aggiornano (l'illuminazione passa a 'Taper al bordo scelto da me')")
+    _ii = S.get("ill_info")
+    if _ii:
+        _lt2.caption(_T("Illuminazione: {m} · taper al bordo {t:.1f} dB · feed progettato per f/D {fd:.3f} (parabola {f0:.3f})",
+                        m=i18n.tr("taper scelto" if _ii[3] == "taper" else "automatica"), t=_ii[1], fd=_ii[0], f0=_ii[2]))
     kind = S.feed_kind
     if kind not in explore.TUNABLE:
         st.warning("Il laboratorio interattivo usa il simulatore rapido: disponibile per guida aperta, W2IMU, "

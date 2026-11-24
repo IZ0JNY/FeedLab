@@ -6,6 +6,10 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('Taper al bordo (dB) — come nella Procedura guidata', 'Edge taper (dB) — same as in the Guided procedure'),
+    ("lo stesso cursore della Procedura guidata: spostandolo il feed viene riprogettato per il nuovo taper e tutte le simulazioni si aggiornano (l'illuminazione passa a 'Taper al bordo scelto da me')", "the same slider as in the Guided procedure: moving it redesigns the feed for the new taper and every simulation is updated (the illumination switches to 'Edge taper chosen by me')"),
+    ('Illuminazione: {m} · taper al bordo {t:.1f} dB · feed progettato per f/D {fd:.3f} (parabola {f0:.3f})', 'Illumination: {m} · edge taper {t:.1f} dB · feed designed for f/D {fd:.3f} (dish {f0:.3f})'),
+    ('taper scelto', 'chosen taper'),
     ('−10 dB: {e} (E) / {h} (H)', '−10 dB: {e} (E) / {h} (H)'),
     ('parabola: {a:.1f}°', 'dish: {a:.1f}°'),
     ('Tsys = T antenna {a:.1f} K + preamplificatore {r:.1f} K (NF {nf:.2f} dB) = {s:.1f} K. Con 1 dB di NF in più: {s2:.1f} K → G/T {d:+.2f} dB.', 'Tsys = antenna {a:.1f} K + preamplifier {r:.1f} K (NF {nf:.2f} dB) = {s:.1f} K. With 1 dB more NF: {s2:.1f} K → G/T {d:+.2f} dB.'),
