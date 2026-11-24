@@ -6,6 +6,10 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('−10 dB: {e} (E) / {h} (H)', '−10 dB: {e} (E) / {h} (H)'),
+    ('parabola: {a:.1f}°', 'dish: {a:.1f}°'),
+    ('Tsys = T antenna {a:.1f} K + preamplificatore {r:.1f} K (NF {nf:.2f} dB) = {s:.1f} K. Con 1 dB di NF in più: {s2:.1f} K → G/T {d:+.2f} dB.', 'Tsys = antenna {a:.1f} K + preamplifier {r:.1f} K (NF {nf:.2f} dB) = {s:.1f} K. With 1 dB more NF: {s2:.1f} K → G/T {d:+.2f} dB.'),
+    ('**Tsys {s:.1f} K** = antenna {a0:.1f} K attenuata dalle perdite ({l:.2f} dB) → {a:.1f} K + rumore delle perdite (feed + linea) {ln:.1f} K + preamplificatore {r:.1f} K (NF {nf:.2f} dB). G/T = G − 10·log10(Tsys).', '**Tsys {s:.1f} K** = antenna {a0:.1f} K attenuated by the losses ({l:.2f} dB) → {a:.1f} K + noise of the losses (feed + line) {ln:.1f} K + preamplifier {r:.1f} K (NF {nf:.2f} dB). G/T = G − 10·log10(Tsys).'),
     ('Base del feed senza fori: scegli lo schema di montaggio nella scheda 🔩 Montaggio feed + piastrina, poi rigenera STEP/STL.', 'Feed base without holes: choose the assembly scheme in the 🔩 Feed + matching plate assembly tab, then generate STEP/STL again.'),
     ('🔩 Montaggio feed + piastrina', '🔩 Feed + matching plate assembly'),
     ("Montaggio feed + piastrina sulla guida d'onda", 'Feed + matching plate assembly on the waveguide'),

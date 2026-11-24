@@ -187,13 +187,42 @@ def quick_pattern(kind: str, sections: tuple, f0: float, rect_params: tuple | No
     return modematch.aperture_pattern(r, 0, f0, n_rho=48, n_phi=60, n_theta=361), r.aperture_modes[0]
 
 
-def polar_fig(p: patterns.Pattern, title: str, floor: float = -40):
+def angle_at_db(theta_deg, level_db, at=-10.0) -> float | None:
+    """Total angle (°) between the two directions where the pattern first falls to `at` dB (linear interpolation)."""
+    th = np.asarray(theta_deg, float); v = np.asarray(level_db, float)
+    idx = np.where(v <= at)[0]
+    if not idx.size or idx[0] == 0:
+        return None
+    i = idx[0]
+    t = th[i - 1] + (at - v[i - 1]) * (th[i] - th[i - 1]) / (v[i] - v[i - 1])
+    return 2 * float(t)
+
+
+def polar_fig(p: patterns.Pattern, title: str, floor: float = -40, dish_fD: float | None = None):
     e, h = p.db()
     fig = go.Figure()
-    for name, v, col in (("Piano E (φ=0°)", e, "#d62728"), ("Piano H (φ=90°)", h, "#1f77b4")):
+    ang = {}
+    for name, v, col, key in (("Piano E (φ=0°)", e, "#d62728", "E"), ("Piano H (φ=90°)", h, "#1f77b4", "H")):
         th = np.concatenate([-p.theta_deg[::-1], p.theta_deg])
         vv = np.clip(np.concatenate([v[::-1], v]), floor, 0) - floor
         fig.add_trace(go.Scatterpolar(theta=th, r=vv, mode="lines", name=name, line=dict(color=col)))
+        a = angle_at_db(p.theta_deg, v, -10.0)
+        ang[key] = a
+        if a:                                  # the two −10 dB points of this plane
+            fig.add_trace(go.Scatterpolar(theta=[a / 2, -a / 2], r=[-10 - floor] * 2, mode="markers",
+                                          marker=dict(color=col, size=9, symbol="diamond"), showlegend=False,
+                                          hovertemplate="−10 dB: %{theta:.1f}°<extra></extra>"))
+    sub = []
+    if ang.get("E") or ang.get("H"):
+        sub.append(_T("−10 dB: {e} (E) / {h} (H)", e=f"{ang['E']:.1f}°" if ang.get("E") else "—",
+                      h=f"{ang['H']:.1f}°" if ang.get("H") else "—"))
+    if dish_fD:
+        psi = reflector.half_angle_from_fD(dish_fD)
+        fig.add_trace(go.Scatterpolar(theta=[psi, psi, None, -psi, -psi], r=[0, -floor, None, 0, -floor], mode="lines",
+                                      line=dict(color="green", dash="dot"), name=i18n.tr("bordo parabola")))
+        sub.append(_T("parabola: {a:.1f}°", a=2 * psi))
+    if sub:
+        title = f"{title}<br><sup>{' · '.join(sub)}</sup>"
     fig.update_layout(title=title, height=460, polar=dict(
         angularaxis=dict(rotation=90, direction="clockwise", tickmode="array",
                          tickvals=list(range(0, 360, 30))),
@@ -801,7 +830,8 @@ with tabs[3], contextlib.suppress(_Skip):
         S["last_pattern"] = pat
         c1, c2 = st.columns(2)
         with c1:
-            st.plotly_chart(polar_fig(pat, f"Lobo del feed @ {S.f_ghz:g} GHz"), width="stretch")
+            st.plotly_chart(polar_fig(pat, f"Lobo del feed @ {S.f_ghz:g} GHz",
+                                      dish_fD=(S.dish or wizard.dish_from_prime(600, 0.6)).fD), width="stretch")
         with c2:
             e, h = pat.db()
             fig = go.Figure([go.Scatter(x=pat.theta_deg, y=e, name="E"), go.Scatter(x=pat.theta_deg, y=h, name="H")])
@@ -821,7 +851,7 @@ with tabs[3], contextlib.suppress(_Skip):
                                      line=dict(width=3 if key == "total" else 1.5)))
         fig.add_vline(x=dish.fD, line_dash="dot", annotation_text="tua parabola")
         fig.update_layout(height=400, title="Efficienza della parabola vs f/D (prime focus o equivalente offset)",
-                          xaxis_title="f/D", yaxis_title="%", yaxis_range=[0, 101])
+                          xaxis_title="f/D", yaxis_title="%", yaxis_range=[0, 101], xaxis=dict(dtick=0.1))
         st.plotly_chart(fig, width="stretch")
         here = efficiency.dish_efficiency(pat, dish.fD, blk)
         best = max(effs, key=lambda x: x.total)
@@ -849,6 +879,10 @@ with tabs[3], contextlib.suppress(_Skip):
             ta = noise.antenna_temp_prime_focus(pat, dish.fD, el, tsky)
             st.write(f"T_cielo {tsky:.1f} K · T_antenna {ta:.1f} K · T_rx {noise.receiver_temp(nf):.0f} K → "
                      f"**G/T = {noise.g_over_t_db(G, ta, noise.receiver_temp(nf)):.1f} dB/K**")
+            st.caption(_T("Tsys = T antenna {a:.1f} K + preamplificatore {r:.1f} K (NF {nf:.2f} dB) = {s:.1f} K. Con 1 dB di "
+                          "NF in più: {s2:.1f} K → G/T {d:+.2f} dB.", a=ta, r=noise.receiver_temp(nf), nf=nf,
+                          s=ta + noise.receiver_temp(nf), s2=ta + noise.receiver_temp(nf + 1),
+                          d=-10 * math.log10((ta + noise.receiver_temp(nf + 1)) / (ta + noise.receiver_temp(nf)))))
 
 # ---------------------------------------------------------------- 4 lobe 3D
 with tabs[4], contextlib.suppress(_Skip):
@@ -996,6 +1030,12 @@ with tabs[2], contextlib.suppress(_Skip):
                        delta_color="normal" if better_up else "inverse")
         snr = cur.snr_delta(base, objective)
         st.caption(f"Perdita ohmica del feed ({S.material}): {cur.ohmic_db:.3f} dB → +{materials.noise_from_loss(cur.ohmic_db):.1f} K di rumore")
+        if cur.tsys:
+            _ts = cur.tsys
+            st.caption(_T("**Tsys {s:.1f} K** = antenna {a0:.1f} K attenuata dalle perdite ({l:.2f} dB) → {a:.1f} K + rumore "
+                          "delle perdite (feed + linea) {ln:.1f} K + preamplificatore {r:.1f} K (NF {nf:.2f} dB). "
+                          "G/T = G − 10·log10(Tsys).", s=_ts["sys"], a0=_ts["t_ant"], l=_ts["loss_db"], a=_ts["ant"],
+                          ln=_ts["line"], r=_ts["rx"], nf=nf))
         m[0].metric("Δ S/N", f"{snr:+.2f} dB", help="TX: ΔG · RX: Δ(G/T) · EME: ΔG+Δ(G/T)")
         met(m[1], "Efficienza", 100 * cur.eta, 100 * base.eta, "{:.1f}", "%")
         met(m[2], "Guadagno", cur.gain_dbi, base.gain_dbi, "{:.2f}", "dBi")
@@ -1010,15 +1050,12 @@ with tabs[2], contextlib.suppress(_Skip):
                    "aspettarsi 12–15 punti di efficienza in meno, ma le DIFFERENZE tra varianti sono significative.")
         c1, c2 = st.columns(2)
         with c1:
-            fig = polar_fig(cur.pattern, "Lobo: variante (pieno) vs progetto (tratteggio)")
+            fig = polar_fig(cur.pattern, "Lobo: variante (pieno) vs progetto (tratteggio)", dish_fD=dish.fD)
             eb, hb = base.pattern.db()
             for v, col in ((eb, "#d62728"), (hb, "#1f77b4")):
                 th = np.concatenate([-base.pattern.theta_deg[::-1], base.pattern.theta_deg])
                 fig.add_trace(go.Scatterpolar(theta=th, r=np.clip(np.concatenate([v[::-1], v]), -40, 0) + 40,
                                               mode="lines", line=dict(color=col, dash="dash", width=1), showlegend=False))
-            psi = reflector.half_angle_from_fD(dish.fD)
-            fig.add_trace(go.Scatterpolar(theta=[psi, psi, None, -psi, -psi], r=[0, 40, None, 0, 40], mode="lines",
-                                          line=dict(color="green", dash="dot"), name="bordo parabola"))
             st.plotly_chart(fig, width="stretch")
         with c2:
             fds = np.arange(0.3, 1.4, 0.02)
@@ -1030,7 +1067,8 @@ with tabs[2], contextlib.suppress(_Skip):
                 fig.add_trace(go.Scatter(x=fds, y=[100 * e.spillover for e in ef], name=f"spillover {name}",
                                          line=dict(dash=dash, width=1)))
             fig.add_vline(x=dish.fD, line_dash="dot", annotation_text="tua parabola")
-            fig.update_layout(height=460, title="Efficienza vs f/D", xaxis_title="f/D", yaxis_title="%", yaxis_range=[30, 101])
+            fig.update_layout(height=460, title="Efficienza vs f/D", xaxis_title="f/D", yaxis_title="%", yaxis_range=[30, 101],
+                              xaxis=dict(dtick=0.1))
             st.plotly_chart(fig, width="stretch")
         st.subheader("💡 Consigli")
         for t in explore.advice(cur, base, sc, objective, kind, S.f_ghz):

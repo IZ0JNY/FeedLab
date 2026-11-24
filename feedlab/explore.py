@@ -82,6 +82,7 @@ class Result:
     ohmic_db: float = 0.0
     pattern: patterns.Pattern = field(repr=False, default=None)
     modes: dict = field(default_factory=dict, repr=False)
+    tsys: dict = field(default_factory=dict, repr=False)   # system-noise breakdown (K): ant, line, rx, sys, loss_db
 
     def snr_delta(self, base: "Result", objective: str) -> float:
         dG = self.gain_dbi - base.gain_dbi
@@ -151,7 +152,9 @@ def performance(kind: str, f_ghz: float, sc: Scenario, geo, pat: patterns.Patter
     gt = G - 10 * math.log10(t_sys)
     params = {k: float(geo.params[PARAM_FROM_GEOM[k]]) for k, _, _ in TUNABLE.get(kind, [])}
     return Result(params, eta_tot * line, e.spillover, e.illumination, e.phase, e.polarization, e.blockage,
-                  e.edge_taper_db, G, ta, gt, s11, pc * lam, ohm, pat, modes)
+                  e.edge_taper_db, G, ta, gt, s11, pc * lam, ohm, pat, modes,
+                  dict(ant=ta * line, line=(1 - line) * 290.0, rx=sc.t_rx_K, sys=t_sys,
+                       loss_db=sc.feedline_loss_db + ohm, t_ant=ta))
 
 
 STEP_HORNS = ("pickett_potter", "skobelev")

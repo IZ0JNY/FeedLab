@@ -7,4 +7,4 @@ Kildal, Milligan, Baars. See docs/KNOWLEDGE_BASE.md.
 """
 from . import waveguide, reflector, patterns, efficiency, horns, cassegrain, noise  # noqa: F401
 
-__version__ = "0.4.21"
+__version__ = "0.4.22"

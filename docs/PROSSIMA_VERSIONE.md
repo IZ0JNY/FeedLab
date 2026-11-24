@@ -1,10 +1,20 @@
-# Modifiche per la prossima versione (0.4.22)
+# Modifiche per la prossima versione (0.4.23)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (bozza inglese in revisione) | ⏳ in corso |
+
+---
+
+# Archivio: versione 0.4.22 (pubblicata, BETA TEST)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Grafici efficienza vs f/D con tacche ogni 0.1 (Laboratorio e Simulazione) | ✅ fatto |
+| 2 | Dettaglio Tsys (antenna, perdite, preamplificatore) sotto il G/T, con effetto di +1 dB di NF | ✅ fatto |
+| 3 | Angolo a −10 dB del lobo (piani E e H) segnato sul grafico polare e confrontato con l'apertura della parabola | ✅ fatto |
 
 ---
 
