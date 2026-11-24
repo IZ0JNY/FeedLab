@@ -9,6 +9,7 @@
 | 3 | Schema di montaggio rinominato "Piastrina avvitata alla base del feed con viti in lamatura (guida avvitata alla piastrina)" / "Plate screwed to the feed base with counterbored screws (waveguide screwed into the plate)", senza IZ0JNY | ✅ fatto |
 | 4 | Viste 3D senza l'effetto "a stella" (righe scure che partono dai fori): Plotly scartava i triangoli lunghi e sottili della tessellazione; ora vengono disegnati tutti | ✅ fatto |
 | 5 | Cursore del taper al bordo anche nel Laboratorio, collegato a quello della Procedura guidata (muovendo uno si muove l'altro); il feed si riprogetta e le simulazioni si aggiornano subito | ✅ fatto |
+| 6 | Materiali dei servizi CNC online JLCCNC, PCBWay e Weerg (alluminio 6061/6082/7075/5083/5052/2011/2024, ottone H59/H62/C360/OT58, rame T2/C101/C110, bronzo CuSn12, inox 316L, titanio) con conducibilità e rugosità della finitura di serie | ✅ fatto |
 
 ---
 

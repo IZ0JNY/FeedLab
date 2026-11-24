@@ -36,6 +36,25 @@ MATERIALS = {m.name: m for m in [
     Material("Acciaio inox AISI 304", 1.40e6, 0.4, 8.0, "solo strutture: perdite elevate", "#8c9196"),
     Material("Stampa 3D + vernice al rame", 1.0e6, 5.0, 1.3, "perdite alte, solo prototipi/bande basse", "#9c5b34"),
     Material("Stampa 3D + elettrodeposizione rame", 5.0e7, 3.0, 2.0, "rugosità della stampa domina sopra 24 GHz", "#b87333"),
+    # materials of the online CNC services JLCCNC, PCBWay and Weerg (typical conductivity of the alloy; roughness of
+    # their standard "as machined" finish, Rq ≈ 2 µm: ask for a polished inside to get the lower losses above)
+    Material('Alluminio 6061-T6 (JLCCNC, PCBWay)', 2.5e+07, 2.0, 2.7, "il più comune; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Alluminio 6082-T6 Anticorodal (Weerg)', 2.6e+07, 2.0, 2.7, "resistente alla corrosione; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Alluminio 7075-T6 Ergal (JLCCNC, PCBWay, Weerg)', 1.9e+07, 2.0, 2.81, "molto resistente, conduce meno del 6061; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Alluminio 5083 (Weerg)', 1.6e+07, 2.0, 2.66, "anticorrosione marina, conduce poco; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Alluminio 5052 (PCBWay)', 2e+07, 2.0, 2.68, "anticorrosione; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Alluminio 2011 (Weerg)', 2.3e+07, 2.0, 2.83, "da tornio, ottima lavorabilità; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Alluminio 2A12 / 2024 (PCBWay)', 1.74e+07, 2.0, 2.78, "aeronautico, conduce poco; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#a8a9ad'),
+    Material('Ottone H59 (JLCCNC)', 1.6e+07, 2.0, 8.4, "ottone da lavorazione; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#c9a227'),
+    Material('Ottone H62 (JLCCNC)', 1.57e+07, 2.0, 8.43, "ottone; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#c9a227'),
+    Material('Ottone C360 (PCBWay)', 1.5e+07, 2.0, 8.5, "ottone da tornio (come CuZn39Pb3); finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#c9a227'),
+    Material('Ottone OT58 CuZn40Pb2 (Weerg)', 1.5e+07, 2.0, 8.4, "ottone da tornio; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#c9a227'),
+    Material('Rame T2 (JLCCNC)', 5.7e+07, 2.0, 8.9, "rame puro 99.9 %; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#b87333'),
+    Material('Rame C101 OFE (Weerg)', 5.85e+07, 2.0, 8.94, "rame senza ossigeno; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#b87333'),
+    Material('Rame C110 ETP (PCBWay)', 5.8e+07, 2.0, 8.94, "rame elettrolitico; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse)", '#b87333'),
+    Material('Bronzo CuSn12 (Weerg)', 5.5e+06, 2.0, 8.7, "perdite alte (circa 3× l'ottone): non consigliato per l'interno", '#a07a3c'),
+    Material('Acciaio inox 316L (JLCCNC, PCBWay, Weerg)', 1.33e+06, 2.0, 8.0, 'solo strutture: perdite elevate', '#8c9196'),
+    Material('Titanio Ti-6Al-4V (PCBWay)', 5.8e+05, 2.0, 4.43, 'solo strutture: perdite molto elevate', '#878681'),
 ]}
 
 
