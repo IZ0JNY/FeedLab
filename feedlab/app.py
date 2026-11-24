@@ -636,10 +636,15 @@ with tabs[1], contextlib.suppress(_Skip):
     c1, c2 = st.columns([1, 2])
     with c1:
         st.subheader("Quote (modificabili)")
-        S.wall = st.number_input("Spessore parete (mm)", 0.2, 10.0, float(geo.params.get("wall", 1.0)), 0.05)
+        # like every other dimension, wall and base thickness change the feed only when "Applica modifiche" is pressed
+        if "wall_in" not in S:
+            S["wall_in"] = float(geo.params.get("wall", 1.0))
+        if "base_t_in" not in S:
+            S["base_t_in"] = S.get("base_t")
+        st.number_input("Spessore parete (mm)", 0.2, 10.0, step=0.05, key="wall_in")
         if not isinstance(geo, geometry.RectHornGeometry):
-            st.number_input("Spessore base del feed (mm)", min_value=1.0, max_value=30.0, value=None, step=0.5,
-                            key="base_t", placeholder=i18n.tr("automatico") + f" ({geo.params.get('flange_thickness', 0):.2f})",
+            st.number_input("Spessore base del feed (mm)", min_value=1.0, max_value=30.0, step=0.5,
+                            key="base_t_in", placeholder=i18n.tr("automatico") + f" ({geo.params.get('flange_thickness', 0):.2f})",
                             help="vuoto = automatico (quanto serve ai fori filettati della flangia); minimo 1 mm. "
                                  "Più sottile: i fori filettati diventano passanti e il filetto utile è lo spessore")
         editable = {k: v for k, v in geo.params.items() if isinstance(v, (int, float)) and k not in ("wall", "rings", "flange_diam", "flange_thickness", "outer_fillet_R")}
@@ -683,6 +688,8 @@ with tabs[1], contextlib.suppress(_Skip):
                 del S[_k]
         cc1, cc2 = st.columns(2)
         if cc1.button("Applica modifiche"):
+            S.wall = float(S["wall_in"])
+            S["base_t"] = S.get("base_t_in")
             ov = S.overrides.setdefault(S.feed_kind, {})
             # flare: angle and length are the same quantity seen two ways -> the one just edited wins
             if "alpha" in newv and "flare_length" in newv:
@@ -705,6 +712,9 @@ with tabs[1], contextlib.suppress(_Skip):
             st.rerun()
         if cc2.button("Ripristina progetto"):
             S.overrides[S.feed_kind] = {}
+            S.wall, S["base_t"] = None, None
+            for _k in ("wall_in", "base_t_in"):
+                S.pop(_k, None)
             _fresh_inputs()
             st.rerun()
     with c2:

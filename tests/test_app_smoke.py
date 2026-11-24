@@ -150,3 +150,16 @@ def test_square_flange_feed_counterbore_in_plate_tab(isolated):
     geometry.BASE.update({"shape": "round", "wg": None})
     geometry.MOUNT.clear()
     geometry.MOUNT.update({"wg": None})
+
+
+def test_wall_and_base_apply_only_with_button(isolated):
+    """Wall and base thickness behave like the other dimensions: nothing changes until "Applica modifiche"."""
+    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
+    at.run()
+    _start(at)
+    at.number_input(key="base_t_in").set_value(5.0).run()
+    at.number_input(key="wall_in").set_value(1.5).run()
+    assert ("base_t" not in at.session_state or at.session_state["base_t"] is None) and not at.session_state["wall"]
+    next(b for b in at.button if b.label == "Applica modifiche").click().run()
+    assert not at.exception, _errors(at)
+    assert at.session_state["base_t"] == 5.0 and at.session_state["wall"] == 1.5

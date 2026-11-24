@@ -4,6 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
+| 2 | Progetto feed: spessore parete e spessore base si applicano solo con "Applica modifiche", come tutte le altre quote ("Ripristina progetto" li riporta ad automatico) | ✅ fatto |
 | 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (fori, lamature, viti, tolleranze, materiali e loro caratteristiche) | ⏳ da fare |
 
 ---
