@@ -9,7 +9,7 @@ ENTRIES = [
     ('Pro', 'Pros'),
     ('ℹ️ Informazioni sui materiali', 'ℹ️ About materials'),
     ('tabella per scegliere il materiale: conducibilità, rugosità, peso, lavorabilità, prezzo, reperibilità, resistenza agli agenti atmosferici, pro e contro', 'table to choose the material: conductivity, roughness, weight, machinability, price, availability, weather resistance, pros and cons'),
-    ('Voti da ★☆☆☆☆ (scarso) a ★★★★★ (ottimo); **Prezzo**: ★★★★★ = il più economico. **Perdite**: perdite ohmiche di una parete liscia rispetto al rame (1.0×); la rugosità le aumenta ancora, soprattutto sopra 24 GHz.', 'Ratings from ★☆☆☆☆ (poor) to ★★★★★ (excellent); **Price**: ★★★★★ = the cheapest. **Losses**: ohmic losses of a smooth wall relative to copper (1.0×); roughness raises them further, above all over 24 GHz.'),
+    ('Voti da 1 pallino 🔴 (scarso) a 5 pallini 🟢 (ottimo); **Prezzo**: 5 pallini = il più economico. **Perdite**: perdite ohmiche di una parete liscia rispetto al rame (1.0×); la rugosità le aumenta ancora, soprattutto sopra 24 GHz.', 'Ratings from 1 dot 🔴 (poor) to 5 dots 🟢 (excellent); **Price**: 5 dots = the cheapest. **Losses**: ohmic losses of a smooth wall relative to copper (1.0×); roughness raises them further, above all over 24 GHz.'),
     ("💡 **Per iniziare:** alluminio 6061/6082 (economico, leggero) con l'interno lucidato; per le perdite più basse ottone argentato o rame argentato; all'aperto proteggi il feed (vernice, radome o coperchio).", '💡 **To start with:** 6061/6082 aluminium (cheap, light) with a polished inside; for the lowest losses silver-plated brass or silver-plated copper; outdoors protect the feed (paint, radome or cover).'),
     ('σ (10⁷ S/m)', 'σ (10⁷ S/m)'),
     ('Densità (g/cm³)', 'Density (g/cm³)'),

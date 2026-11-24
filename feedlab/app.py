@@ -357,8 +357,9 @@ def _materials_dialog():
     """Table that helps choosing the feed material: conductivity, roughness, density, losses and pros / cons."""
     import html as _h
     tr = i18n.tr
-    stars = lambda n: "★" * n + "☆" * (5 - n)
-    st.markdown("Voti da ★☆☆☆☆ (scarso) a ★★★★★ (ottimo); **Prezzo**: ★★★★★ = il più economico. "
+    _col = {1: "#d64545", 2: "#e8833a", 3: "#e0b416", 4: "#8bc34a", 5: "#2e9e4f"}   # red (poor) … green (excellent)
+    dots = lambda n: "".join(f'<i style="background:{_col[n]}"></i>' if i < n else "<i></i>" for i in range(5))
+    st.markdown("Voti da 1 pallino 🔴 (scarso) a 5 pallini 🟢 (ottimo); **Prezzo**: 5 pallini = il più economico. "
                 "**Perdite**: perdite ohmiche di una parete liscia rispetto al rame (1.0×); la rugosità le aumenta "
                 "ancora, soprattutto sopra 24 GHz.")
     st.markdown("💡 **Per iniziare:** alluminio 6061/6082 (economico, leggero) con l'interno lucidato; per le "
@@ -373,7 +374,7 @@ def _materials_dialog():
             continue
         sel = ' class="sel"' if m.name == S.get("material") else ""
         cells = [f"<b>{_h.escape(tr(m.name))}</b>", f"{m.sigma / 1e7:.2f}", f"{m.rq_um:g}", f"{m.density:.2f}",
-                 f"{materials.loss_vs_copper(m):.1f}×"] + [f'<span class="st">{stars(v)}</span>' for v in g[:5]] + \
+                 f"{materials.loss_vs_copper(m):.1f}×"] + [f'<span class="st">{dots(v)}</span>' for v in g[:5]] + \
                 [_h.escape(tr(g[5])), _h.escape(tr(g[6]))]
         rows.append(f"<tr{sel}>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
     _st.html("""<style>
@@ -384,7 +385,10 @@ def _materials_dialog():
       .mt td:first-child {min-width:170px}
       .mt tr:nth-child(even) td {background:#8881}
       .mt tr.sel td {background:#ffe9a8 !important; color:#000}
-      .mt .st {color:#d4a017; letter-spacing:-1px; white-space:nowrap}
+      .mt .st {white-space:nowrap}
+      .mt .st i {display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:3px;
+                 background:transparent; border:1px solid #9995; box-sizing:border-box}
+      .mt .st i[style] {border-color:#0002}
       .mt td:nth-child(11), .mt td:nth-child(12) {min-width:200px}
     </style><div class="mt"><table><tr>""" + "".join(f"<th>{_h.escape(tr(h))}</th>" for h in head) + "</tr>"
              + "".join(rows) + "</table></div>")
