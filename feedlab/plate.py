@@ -156,6 +156,8 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import FancyBboxPatch, Rectangle, Circle
+    import textwrap
+    from . import i18n
     from .drawing import HOLE_TOLERANCES, general_tolerance
     fig = plt.figure(figsize=(11.69, 8.27))
     ax = fig.add_axes([0.05, 0.12, 0.5, 0.8]); ax.set_aspect("equal"); ax.set_axis_off()
@@ -208,14 +210,15 @@ def drawing_pdf(p: MatchingPlate, path, material: str = "Ottone / Alluminio"):
            f"Spessore            {p.thickness:.3f} mm  (± {p.tolerance:.3f})\n"
            + (f"Spessore corpo      {p.body_t:.2f} mm: tasca lato feed Ø{p.circ_diam:.3f}\n"
               f"                    prof. {p.pocket_depth:.2f} mm (prolunga la guida circolare)\n"
-              if p.pocket_depth > 1e-6 else "") +
+              if p.pocket_depth > 0.005 else "") +
            (f"Ø esterno           {p.outer:.2f} mm (flangia rotonda)\n" if p.shape == "round" else
               f"Lato esterno        {p.outer:.1f} mm\n") +
            f"Z0 intermedia       {p.z0:.1f} Ω\n\n"
            f"Versione base: a {p.basic['a']:.3f}, b {p.basic['b']:.3f}, t {p.basic['thickness']:.3f} mm\n\n"
            f"Materiale: {material}\nTolleranza generale ±{general_tolerance(p.f_ghz):g} mm\n"
            f"Spessore λ/4: ±{p.tolerance:.3f} mm (critico)\n"
-           + (f"Fori: {HOLE_TOLERANCES}\n" if p.mount is not None else "")
+           + ("\n".join(textwrap.wrap(i18n.tr("Tolleranze fori") + ": " + i18n.tr(HOLE_TOLERANCES), 62)) + "\n"
+              if p.mount is not None else "")
            + (_holes_text(p) if p.mount is not None else
               "Fori di fissaggio: secondo la flangia standard del WR\n"
               "e del feed (allineare con spine di centraggio).\n\n") +
@@ -244,10 +247,14 @@ def _holes_text(p: MatchingPlate) -> str:
         lines += ["  " + x for x in textwrap.wrap(T("base del feed: fori filettati {th} passanti; viti della guida: flangia "
                                                     "guida + {t:.1f} mm di piastrina + {s:.1f} mm nella base",
                                                     th=m.thread, t=p.body_t, s=m.guide_in), 58)]
-    else:
+    elif m.guide_in:
         lines += ["  " + x for x in textwrap.wrap(T("base del feed: fori passanti, viti {sc} dal lato del feed: base {s:.1f} mm "
                                                     "sotto la testa + {t:.1f} mm di piastrina + filetto nella flangia della guida",
                                                     sc=m.screw, s=m.guide_in, t=p.body_t), 58)]
+    else:
+        lines += ["  " + x for x in textwrap.wrap(T("base del feed: fori passanti, viti {sc} dal lato del feed: base sotto la "
+                                                    "testa + {t:.1f} mm di piastrina + filetto nella flangia della guida",
+                                                    sc=m.screw, t=p.body_t), 58)]
     if m.plate_screw:
         drill = max((h.depth or 0.0 for h in m.feed_holes if h.kind == "tap" and h.depth), default=0.0)
         for x in (T("viti piastra→feed: 4 × {ps} × {ln} a testa cilindrica", ps=m.plate_screw, ln=m.screw_len_label),

@@ -341,9 +341,12 @@ def _flange_sheet(geo, mnt, title, material, sheet="2/2"):
     for i, h in enumerate(mnt.feed_holes, 1):
         lines.append(f"{i:>2d} {h.x:>8.2f} {h.y:>8.2f}  {i18n.tr(h.callout)}")
     lines.append("")
-    for n_ in (T("Coordinate in mm dal centro della guida."),
-               T("Fori filettati nella flangia; nel file STEP sono modellati al diametro di preforo."),
-               T("Allineare piastrina e guida con le spine prima di serrare.")):
+    notes_ = [T("Coordinate in mm dal centro della guida.")]
+    if any(h.kind == "tap" for h in mnt.feed_holes):
+        notes_.append(T("Fori filettati nella flangia; nel file STEP sono modellati al diametro di preforo."))
+    if any(h.kind == "dowel" for h in mnt.feed_holes):
+        notes_.append(T("Allineare piastrina e guida con le spine prima di serrare."))
+    for n_ in notes_:
         lines += textwrap.wrap(n_, 62)
     for w in mnt.warnings:
         lines += textwrap.wrap(T("ATTENZIONE:") + " " + i18n.tr(w), 70)

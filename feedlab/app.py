@@ -1185,7 +1185,7 @@ with tabs[6], contextlib.suppress(_Skip):
             if pl.mount is not None and getattr(_gf, "mount", None) is not None and \
                     _gf.mount.flange.wg == pl.mount.flange.wg:
                 pl.mount.screw_len, pl.mount.screw_len_label = _gf.mount.screw_len, _gf.mount.screw_len_label
-                pl.mount.screw_in = _gf.mount.screw_in
+                pl.mount.screw_in, pl.mount.guide_in = _gf.mount.screw_in, _gf.mount.guide_in
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Apertura a", f"{pl.a:.3f} mm"); m2.metric("Apertura b", f"{pl.b:.3f} mm")
             m3.metric("Spessore", f"{pl.thickness:.3f} mm", f"± {pl.tolerance:.3f}", delta_color="off")
@@ -1217,7 +1217,7 @@ with tabs[6], contextlib.suppress(_Skip):
                     _txt.append(i18n.tr("4 fori per i pin di allineamento della flangia."))
                 if any(h.kind == "pin" for h in mm_.plate_holes):
                     _txt.append(i18n.tr("2 spine di centraggio piastra–feed."))
-                if pl.pocket_depth > 1e-6:
+                if pl.pocket_depth > 0.005:
                     _txt.append(_T("Corpo piastrina {t} mm con tasca Ø{d} × {p} mm sul lato feed (prolunga la guida "
                                    "circolare; la parte λ/4 resta invariata).",
                                    t=f"{pl.body_t:.2f}", d=f"{pl.circ_diam:.3f}", p=f"{pl.pocket_depth:.2f}"))

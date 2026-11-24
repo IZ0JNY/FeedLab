@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('base del feed: fori passanti, viti {sc} dal lato del feed: base sotto la testa + {t:.1f} mm di piastrina + filetto nella flangia della guida', 'feed base: through holes, {sc} screws from the feed side: base under the head + {t:.1f} mm of plate + thread in the waveguide flange'),
     ('**Fori della flangia {wg}** (stessa posizione nella piastrina e nella base del feed)', '**{wg} flange holes** (same position in the plate and in the feed base)'),
     ('Come la flangia (Ø{d:g} passanti)', 'As the flange (Ø{d:g} through)'),
     ('Maggiorati (passanti, anche nella piastrina)', 'Enlarged (through, also in the plate)'),
