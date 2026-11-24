@@ -1,19 +1,25 @@
-## FeedLab 0.4.16 BETA TEST per Windows / for Windows
+## FeedLab 0.4.17 BETA TEST per Windows / for Windows
 
-**Installazione / Installation:** `FeedLab-Setup-0.4.16.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.16-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+**Installazione / Installation:** `FeedLab-Setup-0.4.17.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.17-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
 
 ### 🇮🇹 Novità
-- **Spessore della base del feed** ora nella scheda **Progetto feed**, sotto lo spessore della parete (non più nella barra laterale).
-- **Flange rotonde (da 47 GHz):** nuova opzione "viti dal lato del feed con lamatura nella base": testa della vite nella lamatura sul lato horn, vite avvitata nella flangia della guida. Nello STEP/STL del feed e nel foglio della flangia del PDF.
-- **Piastrina WR:** vista 3D della piastrina accanto alla vista frontale.
-- **Cartiglio dei PDF:** i testi lunghi (nome del feed, materiale) vanno a capo invece di uscire dal riquadro.
-- **Inglese:** Credits e catalogo parabole (note e fonti) completamente tradotti; il modulo di segnalazione problemi usa la lingua scelta.
+- **Lamature nella base del feed per tutte le flange** (anche quadrate WR-90/75/42): il feed si avvita direttamente sulla guida, con la testa delle viti nella lamatura sul lato horn.
+- **Diametro e profondità della lamatura** indicati e modificabili (valori standard proposti da FeedLab); la base si ispessisce da sola.
+- **Vista 3D ruotabile della base del feed forata** nella scheda Piastrina WR; il Modello 3D mostra i fori reali.
+- **Disegni PDF di piastrina e flangia:** diametro dei fori e filettature (M2, M3…).
+- **Avvio senza scelte predefinite:** Seleziona frequenza, parabola, tipo di feed e materiale.
+- **Procedura guidata:** obiettivo predefinito Massimo G/T e nuova opzione **Massime prestazioni RX (minimo rumore)**.
+- **Promemoria openEMS** (solo un consiglio) dopo modifiche importanti della geometria, nelle schede Progetto feed e Laboratorio.
+- In alto a sinistra: "Software progettato da Ivan IZ0JNY".
 
 ### 🇬🇧 What's new
-- **Feed base thickness** is now in the **Feed design** tab, below the wall thickness (no longer in the sidebar).
-- **Round flanges (from 47 GHz):** new option "screws from the feed side, counterbored in the base": screw head in a counterbore on the horn side, screw into the waveguide flange. In the feed STEP/STL and in the flange sheet of the PDF.
-- **WR plate:** 3D view of the plate next to the front view.
-- **PDF title block:** long texts (feed name, material) wrap instead of overflowing the box.
-- **English:** Credits and dish catalogue (notes and sources) fully translated; the problem-report form uses the chosen language.
+- **Counterbores in the feed base for every flange** (square WR-90/75/42 too): the feed screws directly onto the waveguide, with the screw heads in counterbores on the horn side.
+- **Counterbore diameter and depth** shown and adjustable (standard values proposed by FeedLab); the base thickens automatically.
+- **Rotatable 3D view of the drilled feed base** in the WR plate tab; the 3D model shows the real holes.
+- **Plate and flange PDF drawings:** hole diameters and threads (M2, M3…).
+- **Blank start-up:** select frequency, dish, feed type and material.
+- **Wizard:** default goal Max G/T and new option **Maximum RX performance (minimum noise)**.
+- **openEMS reminder** (advice only) after significant geometry changes, in the Feed design and Laboratory tabs.
+- Top left: "Software designed by Ivan IZ0JNY".
 
 Requisiti / Requirements: Windows 10/11 64-bit.
