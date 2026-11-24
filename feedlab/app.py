@@ -260,7 +260,7 @@ def model3d_fig(geo, cut: bool):
     if v is None:
         v, f = cad.profile_mesh(geo, n_phi=64, cut_deg=90 if cut else 0)
     fig = go.Figure(go.Mesh3d(x=v[:, 0], y=v[:, 1], z=v[:, 2], i=f[:, 0], j=f[:, 1], k=f[:, 2],
-                              color=materials.color(S.get("material", "")), flatshading=False, lighting=dict(ambient=0.45, diffuse=0.8, specular=0.6),
+                              color=materials.color(S.get("material", "")), flatshading=False, lighting=dict(ambient=0.45, diffuse=0.8, specular=0.6, facenormalsepsilon=0, vertexnormalsepsilon=0),
                               opacity=1.0))
     fig.update_layout(height=600, scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm"),
                       title=f"Modello 3D ({S.get('material', 'Ottone CuZn39Pb3')}) — z = 0 flangia d'ingresso")
@@ -1221,7 +1221,7 @@ with tabs[2], contextlib.suppress(_Skip):
 def _mesh_fig(v, f, title, height=430, eye=(1.4, -1.4, 0.9)):
     fig = go.Figure(go.Mesh3d(x=v[:, 0], y=v[:, 1], z=v[:, 2], i=f[:, 0], j=f[:, 1], k=f[:, 2],
                               color=materials.color(S.get("material", "")), flatshading=True,
-                              lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5)))
+                              lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5, facenormalsepsilon=0, vertexnormalsepsilon=0)))
     fig.update_layout(height=height, margin=dict(l=0, r=0, t=40, b=0), title=title,
                       scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
                                  camera=dict(eye=dict(x=eye[0], y=eye[1], z=eye[2]))))
@@ -1524,7 +1524,7 @@ with tabs[7], contextlib.suppress(_Skip):
                 pv, pf = plate.mesh(pl)
                 f3 = go.Figure(go.Mesh3d(x=pv[:, 0], y=pv[:, 1], z=pv[:, 2], i=pf[:, 0], j=pf[:, 1], k=pf[:, 2],
                                          color=materials.color(S.get("material", "")), flatshading=True,
-                                         lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5)))
+                                         lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5, facenormalsepsilon=0, vertexnormalsepsilon=0)))
                 f3.update_layout(height=420, title="Vista 3D della piastrina", margin=dict(l=0, r=0, t=40, b=0),
                                  scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
                                             camera=dict(eye=dict(x=1.2, y=-1.4, z=1.1))))
@@ -1553,7 +1553,7 @@ with tabs[7], contextlib.suppress(_Skip):
                     bv, bf = cad.mesh(_gb)                 # whole feed, base drilled like the plate
                     fb = go.Figure(go.Mesh3d(x=bv[:, 0], y=bv[:, 1], z=bv[:, 2], i=bf[:, 0], j=bf[:, 1], k=bf[:, 2],
                                              color=materials.color(S.get("material", "")), flatshading=True,
-                                             lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5)))
+                                             lighting=dict(ambient=0.45, diffuse=0.8, specular=0.5, facenormalsepsilon=0, vertexnormalsepsilon=0)))
                     fb.update_layout(height=620, margin=dict(l=0, r=0, t=40, b=0),
                                      title=i18n.tr("Feed: in basso la base (faccia verso la piastrina, z = 0) con fori e lamature, in alto l'apertura"),
                                      scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
