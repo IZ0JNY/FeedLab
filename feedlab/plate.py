@@ -65,7 +65,8 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
                  thread: str | None = None, cbore: bool = False, cb_depth: float | None = None,
                  cb_dia: float | None = None, pins: bool = True, plate_t: float | None = None,
                  plate_head: str = "allen", plate_tap: bool = False, outer_mm: float | None = None,
-                 outer_r: float = 0.0) -> MatchingPlate:
+                 outer_r: float = 0.0, plate_hole_dia: float | None = None, plate_cb_dia: float | None = None,
+                 plate_cb_depth: float | None = None) -> MatchingPlate:
     """holes: None (plain plate) or "metric" / "imperial": drill the standard flange pattern of `wg`
     (feedlab.flanges.mount: same 4 holes in plate and feed base, optional plate→feed screws, optional pins)."""
     w = RECT_WG[wg]
@@ -90,7 +91,8 @@ def design_plate(f_ghz: float, wg: str, circ_diam_mm: float, polarization: str =
     if holes:
         from .flanges import mount
         kw = dict(base_holes=base_holes, hole_dia=hole_dia, thread=thread, cbore=cbore, cb_depth=cb_depth,
-                  cb_dia=cb_dia, pins=pins, plate_head=plate_head, plate_tap=plate_tap)
+                  cb_dia=cb_dia, pins=pins, plate_head=plate_head, plate_tap=plate_tap, plate_hole_dia=plate_hole_dia,
+                  plate_cb_dia=plate_cb_dia, plate_cb_depth=plate_cb_depth)
         # the plate keeps the λ/4 thickness unless the user sets a thicker body (feed-side pocket)
         body_t = round(max(t, float(plate_t or 0.0)), 2)
         mnt = mount(wg, holes, polarization, circ_diam_mm, f_ghz, plate_screw, plate_t=body_t, **kw)

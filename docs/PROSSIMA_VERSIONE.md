@@ -1,11 +1,18 @@
-# Modifiche per la prossima versione (0.4.21)
+# Modifiche per la prossima versione (0.4.22)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | Manuale più dettagliato: ogni campo spiegato con screenshot, procedura passo per passo, opzioni (bozza inglese in revisione) | ⏳ in corso |
-| 2 | Semplificare la scelta dei fori di feed e piastrina (proposta: scelta per "tipo di montaggio") | 💬 da decidere |
+
+---
+
+# Archivio: versione 0.4.21 (pubblicata, BETA TEST)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | Nuova scheda Montaggio feed + piastrina: schemi di montaggio con disegno in sezione, fori impostati da FeedLab, menu avanzato con 3D di piastrina e feed in tempo reale | ✅ fatto |
 
 ---
 

@@ -136,17 +136,19 @@ def test_dimension_edit_with_apply_button(isolated):
 
 
 def test_square_flange_feed_counterbore_in_plate_tab(isolated):
-    """24 GHz, WR-42, square base, holes + counterbores in the feed base: no error (0.4.17 'max() … empty')."""
+    """24 GHz, WR-42, square base: every assembly scheme builds feed and plate without errors (0.4.17 'max() … empty')."""
     from feedlab import geometry
     at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
     at.run()
     _start(at)
     next(r for r in at.radio if r.label == "Base del feed").set_value("square").run()
-    next(c for c in at.checkbox if "Fori di fissaggio" in c.label).check().run()
-    at.checkbox(key="mount_cbore").check().run()
-    assert not at.exception, _errors(at)
-    assert not [e.value for e in at.error]
-    assert any("Feed con la base forata" in s.value for s in at.subheader)
+    sch = next(r for r in at.radio if r.key == "mount_scheme_square")
+    for scheme in ("feed_side", "guide_side", "plate_screwed"):
+        sch.set_value(scheme).run()
+        assert not at.exception, _errors(at)
+        assert not [e.value for e in at.error]
+        assert at.session_state["mount_cfg"]["wg"] == "WR-42"
+    assert at.session_state["mount_cfg"]["plate_tap"] and at.session_state["mount_cfg"]["plate_screw"] == "M2.5"
     geometry.BASE.update({"shape": "round", "wg": None})
     geometry.MOUNT.clear()
     geometry.MOUNT.update({"wg": None})

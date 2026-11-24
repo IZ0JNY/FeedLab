@@ -265,7 +265,9 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
           f_ghz: float | None = None, plate_screw: str | None = None, plate_t: float | None = None,
           base_holes: str = "flange", hole_dia: float | None = None, thread: str | None = None,
           cbore: bool = False, cb_depth: float | None = None, cb_dia: float | None = None,
-          pins: bool = True, plate_head: str = "allen", plate_tap: bool = False) -> Mount:
+          pins: bool = True, plate_head: str = "allen", plate_tap: bool = False,
+          plate_hole_dia: float | None = None, plate_cb_dia: float | None = None,
+          plate_cb_depth: float | None = None) -> Mount:
     """Holes of the plate and of the feed base for waveguide `wg`.
 
     The 4 holes of the standard flange are reproduced, at the same positions, in the plate and in the feed base:
@@ -279,7 +281,9 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
                    plate (WR side), blind tapped holes in the feed. None = no plate screws.
       pins: round MIL flanges — the 4 dowel holes of the flange, through the plate and into the base.
       plate_head: plate→feed screws "allen" (socket head in a counterbore) or "flat" (Phillips countersunk).
-      plate_tap: the flange holes are threaded in the plate (the waveguide screws into the plate)."""
+      plate_tap: the flange holes are threaded in the plate (the waveguide screws into the plate).
+      plate_hole_dia: diameter of the flange holes in the plate when they are through (default: as the base, or the
+                      flange hole); plate_cb_dia / plate_cb_depth: counterbore of the plate→feed screws."""
     if wg not in FLANGES:
         raise ValueError(f"nessuna flangia standard in tabella per {wg}")
     if base_holes not in BASE_HOLE_MODES:
@@ -319,6 +323,9 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
             cb_k = round(max(0.5, float(cb_depth)), 2)
         if cbore and cb_dia:
             cb_d = round(max(float(cb_dia), d_hole + 0.2), 2)
+    if plate_hole_dia:                 # user's plate holes (through): between the screw size and 1 mm from the edge
+        d_plate = round(min(max(float(plate_hole_dia), round(SCREWS[screw][0] + 0.1, 1)),
+                            max_hole_dia(wg, feed_input_diam)), 2)
     for x, y in screw_xy:
         x, y = _rot(x, y, polarization)
         if plate_tap:
@@ -343,7 +350,7 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
         metric = plate_screw if plate_screw in choices else (
             next((k for k, v in UNC_FOR_METRIC.items() if v == plate_screw), choices[0]))
         _plate_screws(m, system, feed_input_diam, wg, screw=plate_screw_name(metric, system), plate_t=plate_t,
-                      head=plate_head)
+                      head=plate_head, cb_dia=plate_cb_dia, cb_depth=plate_cb_depth)
     # interference with the feed's circular input guide
     if feed_input_diam:
         for h in m.feed_holes:
@@ -356,7 +363,8 @@ def mount(wg: str, system: str = "metric", polarization: str = "V", feed_input_d
 
 
 def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang: int = 36,
-                  screw: str | None = None, plate_t: float | None = None, head: str = "allen") -> None:
+                  screw: str | None = None, plate_t: float | None = None, head: str = "allen",
+                  cb_dia: float | None = None, cb_depth: float | None = None) -> None:
     """Four Phillips flat-head (countersunk) screws holding the plate on the feed (θ + k·90°), heads flush in
     countersinks on the WR side: the plate keeps its thickness. Smallest radius whose countersinks keep ≥ 0.6 mm
     from every other hole, from the circular guide and from the WR aperture, and ≥ 1 mm from the outline of the
@@ -371,6 +379,10 @@ def _plate_screws(m: Mount, system: str, feed_input_diam: float, wg: str, n_ang:
         grip_cut = 0.0                                        # flush: the whole plate is the grip
     else:                                                     # socket head cap screw in a counterbore
         cs_d, cs_k = CBORE[screw]
+        if cb_dia:
+            cs_d = round(max(float(cb_dia), clear + 0.2), 2)
+        if cb_depth:
+            cs_k = round(max(0.5, float(cb_depth)), 2)
         grip_cut = cs_k
     w = RECT_WG.get(wg)
     a, b = (w.a_mm, w.b_mm) if w else (0.0, 0.0)

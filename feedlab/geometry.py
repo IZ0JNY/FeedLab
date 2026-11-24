@@ -311,7 +311,8 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
                     MOUNT.get("plate_screw"), MOUNT.get("plate_t"), MOUNT.get("base_holes") or "flange",
                     MOUNT.get("hole_dia"), MOUNT.get("thread"), bool(MOUNT.get("cbore")),
                     MOUNT.get("cb_depth"), MOUNT.get("cb_dia"), MOUNT.get("pins", True),
-                    MOUNT.get("plate_head") or "allen", bool(MOUNT.get("plate_tap")))
+                    MOUNT.get("plate_head") or "allen", bool(MOUNT.get("plate_tap")), MOUNT.get("plate_hole_dia"),
+                    MOUNT.get("plate_cb_dia"), MOUNT.get("plate_cb_depth"))
         d_need, t_need = mnt.feed_flange_min()
     # base (flange) thickness: chosen by the user (≥ 1 mm) or automatic (enough for the threaded holes)
     t_user = BASE.get("thickness")
