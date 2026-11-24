@@ -122,11 +122,15 @@ The window has two parts:
 | **Band** | operating frequency | amateur bands 10.368, 24.048, 47.088, 76.032, 122.25, 134.928 GHz, or **Other frequency…** (10–140 GHz) |
 | **λ** | free-space wavelength | all "λ" values in FeedLab refer to it |
 | **Dish / Feed** | summary of the dish and feed you chose | appears once chosen |
+| **ℹ️ About materials** | button above the material choice | opens a comparison table: conductivity, roughness, density, losses relative to copper, and coloured-dot ratings (red = poor … green = excellent) for machinability, price, availability, weather resistance and treatments, with the pros and cons of each material. The chosen material is highlighted in yellow |
 | **Feed material** | metal (or coating) of the feed | sets conductivity σ and roughness → ohmic loss and the noise the feed adds; below: σ, **skin depth δ** at your frequency and a practical note (§14.1) |
 | **Rectangular waveguide** | the WR guide the feed is fixed to through the λ/4 plate | only the guides of the band: 10 GHz **WR-90** or **WR-75**, 24 GHz **WR-42**, 47 GHz **WR-22** or **WR-19**… It sizes plate, drilling and square base |
-| **Feed base** | **Circular** or **Square (waveguide flange)** | square only for square standard flanges (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); it grows by itself if holes or counterbores need it |
+| **Feed base** | **Circular** or **Square** | square (default at 10 and 24 GHz) only for square standard flanges (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); it grows by itself if holes or counterbores need it |
 | **Language** | Italiano / English | chosen in the installer; here mainly for the portable version |
 | **ℹ️ Credits · 🔄 Check for updates · 📖 Manual · 🐞 Report a problem** | author and sources · new versions · this manual · pre-filled GitHub issue | |
+
+
+![About materials]({IMG}/m34_materials.jpg)
 
 ---
 
@@ -228,7 +232,7 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 | **Feed type** | all feeds, alphabetical |
 | **Wall thickness (mm)** | metal wall of the horn |
 | **Feed base thickness (mm)** | empty = **automatic** (what holes and threads need); minimum 1 mm; thread and screw lengths follow it |
-| **Inner dimensions** | depend on the feed; **lengths blue, diameters green, flare angles red** |
+| **Inner dimensions** | depend on the feed; each field shows the name of the dimension in your language and the code used on the section (e.g. «cone length · flare_length»); **lengths blue, diameters green, flare angles red** |
 | **input_length** | lengthens the straight input guide (longer feed, same performance) |
 | **Flare angles** | changing an angle recomputes the cone length; diameters stay |
 | **Apply changes / Reset design** | **every** change — wall and base thickness included — is applied only with **Apply changes**; Reset goes back to the rule's dimensions |
@@ -448,24 +452,45 @@ The **front view** colours the holes by function: **black** = waveguide flange h
 | **④ Results** | S11, patterns, efficiency, gain, G/T, phase centre; upload a `results.json` from another PC; compare runs |
 | **⑤ Space mapping** | corrects the fast-solver design with the openEMS result |
 
+> **Validation reminder.** Every 5 changes to the design (dimensions, material, illumination, base, mounting…) a notice invites you to run an openEMS simulation: slower but more accurate than the fast simulator, it validates the data and shows whether the two results converge. With **⑤ Space mapping** the openEMS result then corrects the design.
+
 ---
 
 ## 14. Reference tables
 
 ### 14.1 Materials
 
-| Material | σ (10⁷ S/m) | skin depth δ (µm) at 10 / 24 / 47 / 76 GHz | Rq (µm) | Practical note |
-|---|---|---|---|---|
-| Copper OFHC (Cu-ETP) | 5.80 | 0.65 / 0.43 / 0.30 / 0.24 | 0.4 | best conductor; oxidises: protect it |
-| Copper, silver-plated (Ag ≥ 3 µm) | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | plating ≥ 3–5 δ; best for RX at mm-waves |
-| Copper, gold-plated (Au flash on Ni) | 4.10 | 0.77 / 0.51 / 0.36 / 0.29 | 0.3 | avoid nickel underneath: magnetic and lossy |
-| Brass CuZn39Pb3 | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 0.4 | very easy to turn; losses ≈ 2× copper |
-| Brass, silver-plated | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | machinability of brass, losses of silver |
-| Aluminium 6082/6061 T6 | 2.50 | 0.99 / 0.65 / 0.46 / 0.37 | 0.6 | light; anodise outside only |
-| Aluminium 1050 (pure) | 3.50 | 0.84 / 0.55 / 0.39 / 0.31 | 0.6 | more conductive but soft |
-| Stainless steel AISI 304 | 0.14 | 4.18 / 2.74 / 1.96 / 1.54 | 0.4 | structures only: high losses |
-| 3D print + copper paint | 0.10 | 4.94 / 3.25 / 2.32 / 1.83 | 5.0 | prototypes / low bands |
-| 3D print + electroplated copper | 5.00 | 0.70 / 0.46 / 0.33 / 0.26 | 3.0 | print roughness dominates above 24 GHz |
+| Material | σ (10⁷ S/m) | skin depth δ (µm) at 10 / 24 / 47 / 76 GHz | Rq (µm) | Losses × copper | Practical note |
+|---|---|---|---|---|---|
+| Copper silver-plated (Ag ≥ 3 µm) | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | 1.0× | silver plating ≥ 3-5 δ; best for RX at mm-waves |
+| Brass silver-plated | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | 1.0× | machinability of brass + losses of silver |
+| Copper C101 OFE (Weerg) | 5.85 | 0.65 / 0.42 / 0.30 / 0.24 | 2 | 1.0× | oxygen-free copper; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Copper OFHC (Cu-ETP) | 5.80 | 0.65 / 0.43 / 0.30 / 0.24 | 0.4 | 1.0× | excellent conductor; it oxidises: protect it |
+| Copper C110 ETP (PCBWay) | 5.80 | 0.65 / 0.43 / 0.30 / 0.24 | 2 | 1.0× | electrolytic copper; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Copper T2 (JLCCNC) | 5.70 | 0.65 / 0.43 / 0.31 / 0.24 | 2 | 1.0× | 99.9 % pure copper; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| 3D print + electroplated copper | 5.00 | 0.70 / 0.46 / 0.33 / 0.26 | 3 | 1.1× | print roughness dominates above 24 GHz |
+| Copper gold-plated (Au flash on Ni) | 4.10 | 0.77 / 0.51 / 0.36 / 0.29 | 0.3 | 1.2× | avoid nickel underneath: it is magnetic and lossy |
+| Aluminium 1050 (pure) | 3.50 | 0.84 / 0.55 / 0.39 / 0.31 | 0.6 | 1.3× | more conductive but soft |
+| Aluminium 6082-T6 Anticorodal (Weerg) | 2.60 | 0.97 / 0.64 / 0.45 / 0.36 | 2 | 1.5× | corrosion resistant; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Aluminium 6082/6061 T6 | 2.50 | 0.99 / 0.65 / 0.46 / 0.37 | 0.6 | 1.5× | light; anodise outside only |
+| Aluminium 6061-T6 (JLCCNC, PCBWay) | 2.50 | 0.99 / 0.65 / 0.46 / 0.37 | 2 | 1.5× | the most common; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Aluminium 2011 (Weerg) | 2.30 | 1.03 / 0.68 / 0.48 / 0.38 | 2 | 1.6× | free-machining, for the lathe; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Aluminium 5052 (PCBWay) | 2.00 | 1.11 / 0.73 / 0.52 / 0.41 | 2 | 1.7× | corrosion resistant; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Aluminium 7075-T6 Ergal (JLCCNC, PCBWay, Weerg) | 1.90 | 1.13 / 0.74 / 0.53 / 0.42 | 2 | 1.7× | very strong, less conductive than 6061; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Aluminium 2A12 / 2024 (PCBWay) | 1.74 | 1.18 / 0.78 / 0.56 / 0.44 | 2 | 1.8× | aerospace grade, low conductivity; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Aluminium 5083 (Weerg) | 1.60 | 1.24 / 0.81 / 0.58 / 0.46 | 2 | 1.9× | marine grade, low conductivity; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Brass H59 (JLCCNC) | 1.60 | 1.24 / 0.81 / 0.58 / 0.46 | 2 | 1.9× | machining brass; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Brass H62 (JLCCNC) | 1.57 | 1.25 / 0.82 / 0.59 / 0.46 | 2 | 1.9× | brass; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Brass CuZn39Pb3 | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 0.4 | 2.0× | very easy to turn; losses ~2× copper |
+| Brass C360 (PCBWay) | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 2 | 2.0× | free-cutting brass (like CuZn39Pb3); standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Brass OT58 CuZn40Pb2 (Weerg) | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 2 | 2.0× | free-cutting brass; standard finish Ra 1.6–3.2 µm: ask for Ra ≤ 0.8 inside (lower losses) |
+| Bronze CuSn12 (Weerg) | 0.55 | 2.11 / 1.38 / 0.99 / 0.78 | 2 | 3.2× | high losses (about 3× brass): not recommended for the inside |
+| Stainless steel AISI 304 | 0.14 | 4.18 / 2.74 / 1.96 / 1.54 | 0.4 | 6.4× | structures only: high losses |
+| Stainless steel 316L (JLCCNC, PCBWay, Weerg) | 0.13 | 4.29 / 2.81 / 2.01 / 1.58 | 2 | 6.6× | structures only: high losses |
+| 3D print + copper paint | 0.10 | 4.94 / 3.25 / 2.32 / 1.83 | 5 | 7.6× | high losses, prototypes/low bands only |
+| Titanium Ti-6Al-4V (PCBWay) | 0.06 | 6.49 / 4.26 / 3.05 / 2.40 | 2 | 10.0× | structures only: very high losses |
+
+Materials named after a service (JLCCNC, PCBWay, Weerg) are those these online CNC services machine; the roughness given (Rq ≈ 2 µm) is their standard finish: asking for a polished inside (Ra ≤ 0.8 µm) lowers the losses. The **ℹ️ About materials** button shows the same table with machinability, price, availability, weather resistance, treatments, pros and cons.
 
 RF current flows in a layer a few δ thick: platings ≥ 3–5 δ; roughness comparable to δ increases the loss. FeedLab turns the ohmic loss into added noise temperature (Laboratory).
 

@@ -425,7 +425,13 @@ def _materials_dialog():
                 [_h.escape(tr(g[5])), _h.escape(tr(g[6]))]
         rows.append(f"<tr{sel}>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
     _st.html("""<style>
-      .mt {max-height:65vh; overflow:auto; border:1px solid #ccc4; border-radius:6px}
+      .mt {max-height:60vh; overflow-y:scroll; overflow-x:auto; border:1px solid #ccc4; border-radius:6px;
+           scrollbar-width:auto; scrollbar-color:#2e5c8a #dde4ec}
+      .mt::-webkit-scrollbar {width:14px; height:14px}
+      .mt::-webkit-scrollbar-track {background:#dde4ec; border-radius:7px}
+      .mt::-webkit-scrollbar-thumb {background:#2e5c8a; border-radius:7px; border:2px solid #dde4ec}
+      .mt::-webkit-scrollbar-thumb:hover {background:#1d4166}
+      .hint {font-size:13px; margin:2px 0 6px; color:#2e5c8a; font-weight:600}
       .mt table {border-collapse:collapse; font-size:12px; min-width:1100px}
       .mt th {position:sticky; top:0; background:#2e5c8a; color:#fff; padding:5px 6px; text-align:left; z-index:1}
       .mt td {padding:4px 6px; border-top:1px solid #ccc5; vertical-align:top}
@@ -437,7 +443,7 @@ def _materials_dialog():
                  background:transparent; border:1px solid #9995; box-sizing:border-box}
       .mt .st i[style] {border-color:#0002}
       .mt td:nth-child(11), .mt td:nth-child(12) {min-width:200px}
-    </style><div class="mt"><table><tr>""" + "".join(f"<th>{_h.escape(tr(h))}</th>" for h in head) + "</tr>"
+    </style><div class="hint">""" + _h.escape(tr("↕ Scorri la tabella con la barra a destra per vedere tutti i {n} materiali").replace("{n}", str(len(rows)))) + """</div><div class="mt"><table><tr>""" + "".join(f"<th>{_h.escape(tr(h))}</th>" for h in head) + "</tr>"
              + "".join(rows) + "</table></div>")
     st.caption("Conducibilità: valori tipici della lega. Rugosità: finitura di serie dei servizi CNC (Ra 1.6–3.2 µm) "
                "o di un interno lucidato; ordinando chiedi Ra ≤ 0.8 µm all'interno del feed.")

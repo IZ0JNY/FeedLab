@@ -122,11 +122,15 @@ La finestra ha due parti:
 | **Banda** | frequenza di lavoro | bande radioamatoriali 10.368, 24.048, 47.088, 76.032, 122.25, 134.928 GHz, oppure **Altra frequenza…** (10–140 GHz) |
 | **λ** | lunghezza d'onda nello spazio libero | tutti i valori "λ" di FeedLab si riferiscono a questa |
 | **Parabola / Feed** | riepilogo della parabola e del feed scelti | compare dopo la scelta |
+| **ℹ️ Informazioni sui materiali** | pulsante sopra la scelta del materiale | apre una tabella di confronto: conducibilità, rugosità, densità, perdite rispetto al rame, e voti a pallini colorati (rosso = scarso … verde = ottimo) per lavorabilità, prezzo, reperibilità, resistenza agli agenti atmosferici e trattamenti, con pro e contro di ogni materiale. Il materiale scelto è evidenziato in giallo |
 | **Materiale del feed** | il metallo (o il rivestimento) del feed | fissa conducibilità σ e rugosità → perdite ohmiche e rumore aggiunto; sotto: σ, **profondità di penetrazione δ** alla tua frequenza e una nota pratica (§14.1) |
 | **Guida d'onda rettangolare** | la guida WR a cui si fissa il feed tramite la piastrina λ/4 | solo le guide della banda: 10 GHz **WR-90** o **WR-75**, 24 GHz **WR-42**, 47 GHz **WR-22** o **WR-19**… Dimensiona piastrina, foratura e base quadrata |
-| **Base del feed** | **Circolare** o **Quadrata (flangia guida)** | quadrata solo per le flange standard quadrate (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); si allarga da sola se fori o lamature lo richiedono |
+| **Base del feed** | **Circolare** o **Quadrata** | quadrata (default a 10 e 24 GHz) solo per le flange standard quadrate (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); si allarga da sola se fori o lamature lo richiedono |
 | **Lingua** | Italiano / English | si sceglie nell'installer; qui serve soprattutto per la versione portable |
 | **ℹ️ Credits · 🔄 Controlla aggiornamenti · 📖 Manuale · 🐞 Segnala un problema** | autore e fonti · nuove versioni · questo manuale · segnalazione GitHub precompilata | |
+
+
+![Informazioni sui materiali]({IMG}/m34_materials.jpg)
 
 ---
 
@@ -228,7 +232,7 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 | **Tipo di feed** | tutti i feed, in ordine alfabetico |
 | **Spessore parete (mm)** | parete metallica dell'horn |
 | **Spessore base del feed (mm)** | vuoto = **automatico** (quanto serve a fori e filetti); minimo 1 mm; filetti e lunghezze delle viti si adattano |
-| **Quote interne** | dipendono dal feed; **lunghezze in blu, diametri in verde, angoli dei flare in rosso** |
+| **Quote interne** | dipendono dal feed; ogni campo ha il nome della quota nella tua lingua e la sigla che compare sulla sezione (es. «lunghezza del cono · flare_length»); **lunghezze in blu, diametri in verde, angoli dei flare in rosso** |
 | **input_length** | allunga la guida d'ingresso diritta (feed più lungo, stesse prestazioni) |
 | **Angoli dei flare** | cambiando un angolo si ricalcola la lunghezza del cono; i diametri restano |
 | **Applica modifiche / Ripristina progetto** | **ogni** modifica — compresi spessore di parete e base — si applica solo con **Applica modifiche**; Ripristina torna alle quote della regola |
@@ -448,24 +452,45 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 | **④ Risultati** | S11, lobi, efficienza, guadagno, G/T, centro di fase; caricamento di un `results.json` da un altro PC; confronto tra simulazioni |
 | **⑤ Space mapping** | corregge il progetto del risolutore rapido con il risultato di openEMS |
 
+> **Invito alla validazione.** Ogni 5 modifiche al progetto (quote, materiale, illuminazione, base, montaggio…) compare un avviso che invita a lanciare una simulazione openEMS: è più lenta ma più precisa del simulatore veloce, valida i dati e mostra se i due risultati convergono. Con **⑤ Space mapping** il risultato di openEMS corregge poi il progetto.
+
 ---
 
 ## 14. Tabelle di riferimento
 
 ### 14.1 Materiali
 
-| Materiale | σ (10⁷ S/m) | profondità di penetrazione δ (µm) a 10 / 24 / 47 / 76 GHz | Rq (µm) | Nota pratica |
-|---|---|---|---|---|
-| Rame OFHC (Cu-ETP) | 5.80 | 0.65 / 0.43 / 0.30 / 0.24 | 0.4 | ottimo conduttore; si ossida: va protetto |
-| Rame argentato (Ag ≥ 3 µm) | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | argentatura ≥ 3–5 δ; il migliore per RX in onde millimetriche |
-| Rame dorato (Au flash su Ni) | 4.10 | 0.77 / 0.51 / 0.36 / 0.29 | 0.3 | evitare il nichel sotto: magnetico e con perdite |
-| Ottone CuZn39Pb3 | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 0.4 | facilissimo da tornire; perdite ≈ 2× il rame |
-| Ottone argentato | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | lavorabilità dell'ottone, perdite dell'argento |
-| Alluminio 6082/6061 T6 | 2.50 | 0.99 / 0.65 / 0.46 / 0.37 | 0.6 | leggero; anodizzare solo all'esterno |
-| Alluminio 1050 puro | 3.50 | 0.84 / 0.55 / 0.39 / 0.31 | 0.6 | più conduttivo ma tenero |
-| Acciaio inox AISI 304 | 0.14 | 4.18 / 2.74 / 1.96 / 1.54 | 0.4 | solo strutture: perdite alte |
-| Stampa 3D + vernice al rame | 0.10 | 4.94 / 3.25 / 2.32 / 1.83 | 5.0 | prototipi / bande basse |
-| Stampa 3D + elettrodeposizione rame | 5.00 | 0.70 / 0.46 / 0.33 / 0.26 | 3.0 | sopra 24 GHz domina la rugosità della stampa |
+| Materiale | σ (10⁷ S/m) | profondità di penetrazione δ (µm) a 10 / 24 / 47 / 76 GHz | Rq (µm) | Perdite × rame | Nota pratica |
+|---|---|---|---|---|---|
+| Rame argentato (Ag ≥ 3 µm) | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | 1.0× | argentatura ≥ 3-5 δ; migliore per RX a mm-wave |
+| Ottone argentato | 6.10 | 0.63 / 0.42 / 0.30 / 0.23 | 0.3 | 1.0× | lavorabilità dell'ottone + perdite dell'argento |
+| Rame C101 OFE (Weerg) | 5.85 | 0.65 / 0.42 / 0.30 / 0.24 | 2 | 1.0× | rame senza ossigeno; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Rame OFHC (Cu-ETP) | 5.80 | 0.65 / 0.43 / 0.30 / 0.24 | 0.4 | 1.0× | ottimo conduttore, si ossida: proteggere |
+| Rame C110 ETP (PCBWay) | 5.80 | 0.65 / 0.43 / 0.30 / 0.24 | 2 | 1.0× | rame elettrolitico; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Rame T2 (JLCCNC) | 5.70 | 0.65 / 0.43 / 0.31 / 0.24 | 2 | 1.0× | rame puro 99.9 %; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Stampa 3D + elettrodeposizione rame | 5.00 | 0.70 / 0.46 / 0.33 / 0.26 | 3 | 1.1× | rugosità della stampa domina sopra 24 GHz |
+| Rame dorato (Au flash su Ni) | 4.10 | 0.77 / 0.51 / 0.36 / 0.29 | 0.3 | 1.2× | evitare il nichel sotto: è magnetico e dissipa |
+| Alluminio 1050 puro | 3.50 | 0.84 / 0.55 / 0.39 / 0.31 | 0.6 | 1.3× | più conduttivo ma tenero |
+| Alluminio 6082-T6 Anticorodal (Weerg) | 2.60 | 0.97 / 0.64 / 0.45 / 0.36 | 2 | 1.5× | resistente alla corrosione; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Alluminio 6082/6061 T6 | 2.50 | 0.99 / 0.65 / 0.46 / 0.37 | 0.6 | 1.5× | leggero; anodizzazione solo esterna |
+| Alluminio 6061-T6 (JLCCNC, PCBWay) | 2.50 | 0.99 / 0.65 / 0.46 / 0.37 | 2 | 1.5× | il più comune; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Alluminio 2011 (Weerg) | 2.30 | 1.03 / 0.68 / 0.48 / 0.38 | 2 | 1.6× | da tornio, ottima lavorabilità; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Alluminio 5052 (PCBWay) | 2.00 | 1.11 / 0.73 / 0.52 / 0.41 | 2 | 1.7× | anticorrosione; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Alluminio 7075-T6 Ergal (JLCCNC, PCBWay, Weerg) | 1.90 | 1.13 / 0.74 / 0.53 / 0.42 | 2 | 1.7× | molto resistente, conduce meno del 6061; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Alluminio 2A12 / 2024 (PCBWay) | 1.74 | 1.18 / 0.78 / 0.56 / 0.44 | 2 | 1.8× | aeronautico, conduce poco; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Alluminio 5083 (Weerg) | 1.60 | 1.24 / 0.81 / 0.58 / 0.46 | 2 | 1.9× | anticorrosione marina, conduce poco; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Ottone H59 (JLCCNC) | 1.60 | 1.24 / 0.81 / 0.58 / 0.46 | 2 | 1.9× | ottone da lavorazione; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Ottone H62 (JLCCNC) | 1.57 | 1.25 / 0.82 / 0.59 / 0.46 | 2 | 1.9× | ottone; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Ottone CuZn39Pb3 | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 0.4 | 2.0× | ottima lavorabilità al tornio; perdite ~2× rame |
+| Ottone C360 (PCBWay) | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 2 | 2.0× | ottone da tornio (come CuZn39Pb3); finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Ottone OT58 CuZn40Pb2 (Weerg) | 1.50 | 1.28 / 0.84 / 0.60 / 0.47 | 2 | 2.0× | ottone da tornio; finitura di serie Ra 1.6–3.2 µm: per l'interno chiedi Ra ≤ 0.8 (perdite più basse) |
+| Bronzo CuSn12 (Weerg) | 0.55 | 2.11 / 1.38 / 0.99 / 0.78 | 2 | 3.2× | perdite alte (circa 3× l'ottone): non consigliato per l'interno |
+| Acciaio inox AISI 304 | 0.14 | 4.18 / 2.74 / 1.96 / 1.54 | 0.4 | 6.4× | solo strutture: perdite elevate |
+| Acciaio inox 316L (JLCCNC, PCBWay, Weerg) | 0.13 | 4.29 / 2.81 / 2.01 / 1.58 | 2 | 6.6× | solo strutture: perdite elevate |
+| Stampa 3D + vernice al rame | 0.10 | 4.94 / 3.25 / 2.32 / 1.83 | 5 | 7.6× | perdite alte, solo prototipi/bande basse |
+| Titanio Ti-6Al-4V (PCBWay) | 0.06 | 6.49 / 4.26 / 3.05 / 2.40 | 2 | 10.0× | solo strutture: perdite molto elevate |
+
+I materiali con il nome del servizio (JLCCNC, PCBWay, Weerg) sono quelli lavorabili da questi servizi CNC online; la rugosità indicata (Rq ≈ 2 µm) è la loro finitura di serie: chiedendo l'interno lucidato (Ra ≤ 0.8 µm) le perdite scendono. Il pulsante **ℹ️ Informazioni sui materiali** mostra la stessa tabella con lavorabilità, prezzo, reperibilità, resistenza agli agenti atmosferici, trattamenti, pro e contro.
 
 La corrente RF scorre in uno strato spesso pochi δ: i rivestimenti devono essere ≥ 3–5 δ, e una rugosità paragonabile a δ aumenta le perdite. FeedLab trasforma la perdita ohmica in temperatura di rumore aggiunta (Laboratorio).
 

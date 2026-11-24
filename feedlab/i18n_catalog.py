@@ -6,6 +6,7 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('↕ Scorri la tabella con la barra a destra per vedere tutti i {n} materiali', '↕ Scroll the table with the bar on the right to see all {n} materials'),
     ('Hai cambiato parecchie impostazioni: è il momento di una validazione con openEMS. Lancia una simulazione full-wave nella scheda 🖥️ Full-wave openEMS: è più lenta ma più precisa del simulatore veloce, valida i dati e verifica che i due risultati convergano.', 'You have changed quite a few settings: time for a validation with openEMS. Run a full-wave simulation in the 🖥️ Full-wave openEMS tab: it is slower but more accurate than the fast simulator, validates the data and checks that the two results converge.'),
     ('Quadrata', 'Square'),
     ('Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL)', 'Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL)'),
