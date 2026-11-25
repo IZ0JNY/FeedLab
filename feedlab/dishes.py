@@ -91,7 +91,7 @@ CATALOG: list[DishModel] = [
               {10.7: 37.8, 11.7: 38.5, 12.75: 39.2}, "40/23", "acciaio zincato", GIB_LN),
     DishModel("Gibertini", "OP 125 L", "offset", 1245, 1335, 1210, 1300, 0.66, None, "", 21.3, None, None,
               {}, "", "Alu", "Gibertini OP125L installation guide (kosmosat.gr) + listini",
-              "datasheet: F/D 0.66, beam 1.32° @11.7 GHz"),
+              "datasheet: F/D 0.66, fascio 1.32° a 11.7 GHz"),
     # --- Fracarro ---
     DishModel("Fracarro", "RO125AP", "offset", 1240, 1345, None, None, None, None, "", 23.0, None, 74,
               {10.7: 41.0, 11.7: 41.6, 12.7: 42.4}, "", "Alu", "Fracarro RO125AP datasheet",
@@ -109,7 +109,7 @@ CATALOG: list[DishModel] = [
               {11.7: 35.8}, "40", "Alu", "Triax TDA 64 datasheet (zajadacz.de)", "F/D non pubblicato"),
     # --- Kathrein (focale/f/D non pubblicati nei datasheet: misurare) ---
     DishModel("Kathrein", "CAS 60 (20010006)", "offset", 570, 570, None, None, None, None, "", None, None, None,
-              {11.2: 34.9, 12.1: 35.5, 12.625: 35.9}, "", "Alu pulverbeschichtet",
+              {11.2: 34.9, 12.1: 35.5, 12.625: 35.9}, "", "Alu verniciato a polvere",
               "Kathrein CAS 60 Produktinformation, Art.-Nr. 20010006 (PDF fornito dall'utente)",
               "diametro 57 cm; HPBW < 2.8° a centro banda; G/T 14.7/15.7 dB/K (UAS 571/572/584/585, feed centrale) "
               "a 11.3/12.5 GHz; elevazione 5–45°; ingombro 599 × 759 × 528 mm con supporto (altezza riflettore non "
@@ -120,7 +120,7 @@ CATALOG: list[DishModel] = [
               {11.2: 41.5, 12.1: 42.15, 12.6: 42.5}, "", "Alu", "Kathrein CAS 120/G datasheet (radiomuseum/zajadacz)",
               "HPBW < 1.43°; F/D/focale non pubblicati: misurare"),
     DishModel("Kathrein", "CAS 180 (216235)", "offset", 1800, 1800, None, None, None, None, "", None, None, None,
-              {11.2: 44.5, 12.1: 45.15, 12.625: 45.5}, "", "Alu pulverbeschichtet, riscaldabile",
+              {11.2: 44.5, 12.1: 45.15, 12.625: 45.5}, "", "Alu verniciato a polvere, riscaldabile",
               "Kathrein CAS 180 product information, order no. 216235 (PDF fornito dall'utente)",
               "diametro 1.8 m; HPBW 0.9°; cross-pol > 30 dB; elevazione 5–50°; ingombri 1980 mm larghezza, 1511 mm "
               "altezza, 1900 mm sporgenza; supporto feed ZAS 181C. Focale, f/D e angolo di offset non pubblicati: "
@@ -134,7 +134,7 @@ CATALOG: list[DishModel] = [
     DishModel("Fuba", "DAA 780", "offset", 740, 840, None, None, None, 397, "stimata dall'offset 25° (f = D/(4·tan θ))",
               25.0, None, None, {10.75: 36.8, 12.75: 38.5}, "40", "Alu 1.0 mm", "Fuba, scheda tecnica su fuba.de + 'DAA/DAL-Sortiment Folder' (fuba_daa_dal_sortiment_folderv2.pdf)",
               "cross-pol ≥ 27 dB; braccio LNB 61 cm; focale stimata: verifica misurando la profondità"),
-    DishModel("Fuba", "DAA 850", "offset", 850, 850, None, None, 0.63, 531.3, "datasheet Fuba (Brennpunkt 53.13 cm)",
+    DishModel("Fuba", "DAA 850", "offset", 850, 850, None, None, 0.63, 531.3, "datasheet Fuba (fuoco 53.13 cm)",
               21.5, None, None, {10.75: 38.12, 12.75: 39.53}, "40", "Alu 1.1 mm", "Fuba, scheda tecnica su fuba.de + 'DAA/DAL-Sortiment Folder' (fuba_daa_dal_sortiment_folderv2.pdf)",
               "f/D 0.63; HPBW < 2.2° a 12.75 GHz; cross-pol ≥ 27 dB; braccio LNB 65 cm"),
     DishModel("Fuba", "DAA 110", "offset", 991, 1099, None, None, None, None, "", None, None, None,

@@ -20,7 +20,7 @@ Version {VERSION} BETA TEST · Software designed by Ivan De Cesaris, IZ0JNY
 11. Step 6 — WR plate (λ/4 matching plate)
 12. Step 7 — Drawing & STEP (PDF, STEP, STL)
 13. Full-wave openEMS (optional)
-14. EMELab — EME measurements and planning (optional)
+14. Project outputs (PDF, tables, project file)
 15. Reference tables: materials, tolerances, flanges, screws, counterbores
 16. Worked example: a 24 GHz EME feed for a 2.4 m offset dish
 17. Troubleshooting and FAQ
@@ -103,7 +103,7 @@ The window has two parts:
 | 🌐 **3D pattern** | 3D radiation pattern of the feed |
 | 🧊 **3D model** | 3D model of the feed with its drilled base |
 | 🔩 **Feed + matching plate assembly** | how feed and plate are fixed to the external waveguide: scheme, section, holes, screws, live 3D |
-| 🔌 **WR plate** | λ/4 matching plate to the WR waveguide: aperture, thickness, views, PDF and STEP |
+| 🔲 **WR plate** | λ/4 matching plate to the WR waveguide: aperture, thickness, views, PDF and STEP |
 | 📄 **Drawing & STEP** | PDF drawing, STEP, STL, general tolerance |
 | 🖥️ **Full-wave openEMS** | optional full-wave check (install, run, results, space mapping) |
 | ℹ️ **Credits** | author, licence, contributors and all technical sources |
@@ -128,7 +128,6 @@ The window has two parts:
 | **Rectangular waveguide** | the WR guide the feed is fixed to through the λ/4 plate | only the guides of the band: 10 GHz **WR-90** or **WR-75**, 24 GHz **WR-42**, 47 GHz **WR-22** or **WR-19**… It sizes plate, drilling and square base |
 | **Feed base** | **Circular** or **Square** | square (default at 10 and 24 GHz) only for square standard flanges (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); it grows by itself if holes or counterbores need it |
 | **Language** | Italiano / English | chosen in the installer; here mainly for the portable version |
-| **📡 Enable EMELab** | switch | adds the EMELab tab (EME measurements and planning, §14); off by default, the choice is remembered |
 | **ℹ️ Credits · 🔄 Check for updates · 📖 Manual · 🐞 Report a problem** | author and sources · new versions · this manual · pre-filled GitHub issue | |
 
 
@@ -458,37 +457,28 @@ The **front view** colours the holes by function: **black** = waveguide flange h
 
 ---
 
-## 14. EMELab — EME measurements and planning (optional)
+## 14. Project outputs (PDF, tables, project file)
 
-EMELab is an **optional** tab: turn it on with the **📡 Enable EMELab** switch in the sidebar (the choice is remembered). It is for EME at 10, 24 and 47 GHz: **log the real measurements** of your station, compare them with what the setup should give and find where to improve. **All data stay on your PC** (a file in the settings folder): station, setups, measurements and the address of your weather station are never sent; the internet weather service only receives coordinates and time. All times are in **UTC**.
+![Project outputs]({IMG}/m35_output.jpg)
 
-![EMELab: station and setups]({IMG}/m35_emelab_station.jpg)
+In the **📦 Project outputs** tab choose which documents to generate, press **⚙️ Generate** and download the files one by one or all together with **⬇️ Download all (ZIP)**. Every document shows feed, band, dish and material at the top, and FeedLab version and UTC date at the bottom.
 
-### 14.1 Station and setups
-| Field | What it is |
+| Document | Contents |
 |---|---|
-| **Callsign, Locator, Latitude/Longitude, Height** | position of the station (the locator gives the coordinates) |
-| **Personal weather station** | address of your Meteotemplate / Cumulus / Weather Display site (or data file); saved only on the PC |
-| **Solar flux at 15.4 GHz** | value of the day from the RSTN observatories (NOAA SWPC): needed for the expected sun noise |
-| **Setups per band** | dish, gain, efficiency, taper, spillover (**📐 From FeedLab** button from the open design, or by hand), preamplifier/transverter NF, feed → LNA loss, TX power at the feed, RMS surface error, measured beamwidth |
+| **📄 Complete project report (PDF)** | cover with the main results, fast simulations, dish, feed drawing, plate, mounting, openEMS and the table of all data |
+| **📈 Fast simulations (PDF)** | gain, G/T, efficiencies, taper, S11, phase centre, Tsys and the scenario used; S11 over ±5 % of the band; E- and H-plane pattern with the dish rim |
+| **📐 Feed: drawing and simulations (PDF)** | the dimensioned drawing of the Drawing & STEP tab followed by the simulations |
+| **📡 Dish (PDF)** | dish data, opening angle, design f/D of the feed, illumination and efficiency breakdown |
+| **🔲 λ/4 plate (PDF)** | the plate drawing (included after opening the 🔲 WR plate tab once) |
+| **🔩 Feed + plate, mounting (PDF)** | mounting scheme, screws, thicknesses and section |
+| **📋 Table of all dimensions and data (PDF + CSV)** | every value entered or computed: design data, feed dimensions, plate, results, openEMS; the CSV opens in Excel / LibreOffice |
+| **🖥️ openEMS simulations (PDF)** | for every finished simulation of this feed and band: gain, G/T, efficiency, phase centre, beam, S11 and full-wave pattern |
+| **💾 Project file (.json)** | the whole project: data entered and computed results. Share it with other radio amateurs and open it again in FeedLab |
+| **🧊 3D models of the feed (STEP + STL)** | as in the Drawing & STEP tab |
 
-### 14.2 New measurement
-Choose setup, **UTC date and time** and type (sun or moon noise, cold sky, ground, echo, beacon, QSO, focusing). Enter Y or SNR, the angles read and the **offsets at the peak**. The weather comes from **🌡️ From my station** or **🌍 From Open-Meteo** and can be corrected by hand; it is saved with its UTC time and its source. Below, EMELab shows at once Sun and Moon position and distance, Sun–Moon angle, zenith and path attenuation (ITU-R P.676), sky temperature, Tsys, **expected sun and moon Y**, expected echo, Doppler and spreading.
+**📂 Open a project file**: upload a `.feedlab.json` and press **Open project** to get back band, dish, feed, edited dimensions, material, illumination, waveguide and mounting.
 
-![EMELab: new measurement]({IMG}/m36_emelab_new.jpg)
-
-### 14.3 Log and analysis
-The **log** lists the measurements with expected values, differences and the G/T derived from the sun (filters by band and type, CSV export and import). The **analysis** gives plain-language advice: measured vs expected G/T, effect of elevation and humidity, **pointing model** (AZ and EL zeros, axis tilt, sag), **focusing curve** and effective reflectivity of the Moon from the echoes.
-
-![EMELab: analysis]({IMG}/m37_emelab_analysis.jpg)
-
-### 14.4 Planner
-For every **Moon pass** above the minimum elevation: start, end, best moment, distance, expected echo in 1 Hz and in the spreading bandwidth, attenuation, minimum Sun–Moon angle. With the **locator of the other station** it shows only the common windows; with **Use the weather forecast** it accounts for the forecast humidity (16 days). At the bottom: **perigees and apogees** (up to 2.2 dB on echoes) and the **most favourable months** from last year's climate at your site.
-
-![EMELab: planner]({IMG}/m38_emelab_planner.jpg)
-
-### 14.5 Measurement guide
-The last sub-tab explains the fundamental measurements (sun, moon, sky/ground, hot load, sun transit, focusing, pointing, echoes, environment) with procedure and references.
+The simulation scenario (elevation, NF, losses, surface, attenuation) is the one set in the **Laboratory**; if you have not opened it, the Laboratory defaults apply.
 
 ---
 

@@ -36,3 +36,18 @@ def test_english_texts_have_no_italian_words():
     bad = [(sorted({m.group(1).lower() for m in rx.finditer(_strip(en))}), en) for _, en in ENTRIES]
     bad = [b for b in bad if b[0]]
     assert not bad, "\n".join(f"{w} | {t[:120]}" for w, t in bad)
+
+
+def test_dish_catalogue_texts():
+    """Materials and notes of the dish catalogue: Italian in Italian, translated in English (no German either)."""
+    from feedlab import dishes, i18n
+    it_rx, de_rx = _rx(IT_WORDS + " vetroresina riscaldabile pressofusione"), _rx("pulverbeschichtet brennpunkt und mit")
+    bad = []
+    for d in dishes.CATALOG:
+        for v in (d.material, d.notes):
+            if not v:
+                continue
+            en = i18n.tr(v, "en")
+            if de_rx.search(v) or it_rx.search(_strip(en)):
+                bad.append((v, en))
+    assert not bad, bad

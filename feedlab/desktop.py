@@ -7,6 +7,7 @@ the app instead and the server stays up until "Chiudi FeedLab" is pressed in the
     python -m feedlab.desktop --browser       # use the default browser
     python -m feedlab.desktop --server-only --port 8765    # just the server (tests, LAN use)
     python -m feedlab.desktop --selftest      # check that every component imports, then exit
+    python -m feedlab.desktop --app emelab    # EMELab, the companion program (EME measurements and planning)
 """
 from __future__ import annotations
 
@@ -41,11 +42,20 @@ def python_exe() -> str:
     return str(exe)
 
 
-APP_ID = "IZ0JNY.FeedLab"            # same AppUserModelID as the installer's shortcuts: taskbar shows their icon
+# the two programs: entry script, window title, AppUserModelID (same as the installer's shortcuts: the taskbar
+# shows their icon), icon file and name used in messages
+APPS = {
+    "feedlab": dict(main="feedlab_main.py", title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde",
+                    app_id="IZ0JNY.FeedLab", ico="feedlab.ico", name="FeedLab", emoji="📡"),
+    "emelab": dict(main="emelab_main.py", title="EMELab — misure e pianificazione EME",
+                   app_id="IZ0JNY.EMELab", ico="emelab.ico", name="EMELab", emoji="🌕"),
+}
+APP = APPS["feedlab"]
+APP_ID = APP["app_id"]
 
 
 def icon_path() -> Path | None:
-    for p in (ROOT.parent / "feedlab.ico", ROOT / "windows" / "feedlab.ico"):
+    for p in (ROOT.parent / APP["ico"], ROOT / "windows" / APP["ico"]):
         if p.exists():
             return p
     return None
@@ -57,7 +67,7 @@ def win_identity() -> None:
         return
     try:
         import ctypes
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP["app_id"])
     except Exception:
         pass
 
@@ -141,11 +151,11 @@ def start_server(port: int, address: str = "127.0.0.1", mode: str = "window") ->
     env["FEEDLAB_DESKTOP"] = mode
     env["MPLBACKEND"] = "Agg"
     env["PYTHONIOENCODING"] = "utf-8"
-    cmd = [python_exe(), "-m", "streamlit", "run", str(ROOT / "feedlab_main.py"),
+    cmd = [python_exe(), "-m", "streamlit", "run", str(ROOT / APP["main"]),
            "--server.port", str(port), "--server.address", address, "--server.headless", "true",
            "--browser.gatherUsageStats", "false", "--server.fileWatcherType", "none",
            "--global.developmentMode", "false", "--server.maxUploadSize", "200", "--theme.base", "light"]
-    log = open(config_dir() / "server.log", "w", encoding="utf-8")
+    log = open(config_dir() / ("server.log" if APP["name"] == "FeedLab" else "server_emelab.log"), "w", encoding="utf-8")
     return subprocess.Popen(cmd, cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT, creationflags=NO_WINDOW)
 
 
@@ -178,8 +188,8 @@ def stop(proc: subprocess.Popen) -> None:
 
 
 LOADING = """<html><body style="font-family:Segoe UI,Arial;background:#0e1117;color:#ddd;display:flex;align-items:center;
-justify-content:center;height:95vh;margin:0"><div style="text-align:center"><div style="font-size:42px">📡</div>
-<div style="font-size:22px;margin-top:8px">FeedLab</div><div style="opacity:.7;margin-top:6px">avvio in corso…</div>
+justify-content:center;height:95vh;margin:0"><div style="text-align:center"><div style="font-size:42px">@EMOJI@</div>
+<div style="font-size:22px;margin-top:8px">@NAME@</div><div style="opacity:.7;margin-top:6px">avvio in corso…</div>
 </div></body></html>"""
 
 
@@ -203,7 +213,7 @@ def message_box(text: str) -> None:
     if IS_WIN:
         try:
             import ctypes
-            ctypes.windll.user32.MessageBoxW(0, text, "FeedLab", 0x10)
+            ctypes.windll.user32.MessageBoxW(0, text, APP["name"], 0x10)
             return
         except Exception:
             pass
@@ -217,9 +227,12 @@ def main(argv=None) -> int:
     ap.add_argument("--port", type=int, default=0)
     ap.add_argument("--address", default="127.0.0.1")
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--app", choices=list(APPS), default="feedlab", help="feedlab (default) o emelab")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
+    global APP
+    APP = APPS[a.app]
     win_identity()
     port = a.port or free_port()
     use_window = not (a.browser or a.server_only)
@@ -232,7 +245,7 @@ def main(argv=None) -> int:
     url = f"http://127.0.0.1:{port}"
     if a.server_only:
         ok = wait_ready(port, proc)
-        print("FeedLab server", "pronto" if ok else "NON partito", url, flush=True)
+        print(APP["name"], "server", "pronto" if ok else "NON partito", url, flush=True)
         try:
             return proc.wait()
         except KeyboardInterrupt:
@@ -250,23 +263,24 @@ def main(argv=None) -> int:
             from . import i18n
             i18n.set_lang(i18n.default_lang())
             patch_downloads()
-            title = i18n.tr("FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde")
-            window = webview.create_window(title, html=i18n.tr(LOADING), width=1440, height=920, min_size=(900, 600))
+            title = i18n.tr(APP["title"])
+            loading = i18n.tr(LOADING).replace("@NAME@", APP["name"]).replace("@EMOJI@", APP["emoji"])
+            window = webview.create_window(title, html=loading, width=1440, height=920, min_size=(900, 600))
 
             def load():
                 win_set_icon(title)
                 if wait_ready(port, proc):
                     window.load_url(url)
                 else:
-                    window.load_html(LOADING.replace("avvio in corso…", "il server non è partito: vedi "
-                                                     + str(config_dir() / "server.log")))
+                    window.load_html(loading.replace(i18n.tr("avvio in corso…"), i18n.tr("il server non è partito: vedi ")
+                                                     + str(config_dir())))
             webview.start(load, private_mode=False, storage_path=str(config_dir() / "webview"))
             stop(proc)
             return 0
         except Exception as e:                       # no WebView2 / pywebview: fall back to the browser
             print("finestra nativa non disponibile:", e, file=sys.stderr)
     if not wait_ready(port, proc):
-        message_box("FeedLab non è riuscito ad avviarsi. Dettagli in " + str(config_dir() / "server.log"))
+        message_box(APP["name"] + " non è riuscito ad avviarsi. Dettagli in " + str(config_dir()))
         stop(proc)
         return 1
     webbrowser.open(url)
@@ -275,6 +289,17 @@ def main(argv=None) -> int:
     except KeyboardInterrupt:
         stop(proc)
         return 0
+
+
+def launch_other(app: str) -> None:
+    """Start the other program (FeedLab ↔ EMELab) as its own process and window."""
+    exe = Path(sys.executable)
+    pyw = exe.with_name("pythonw.exe")
+    cmd = [str(pyw if IS_WIN and pyw.exists() else exe), "-m", "feedlab.desktop", "--app", app]
+    if not IS_WIN:
+        cmd.append("--browser")
+    subprocess.Popen(cmd, cwd=str(ROOT), creationflags=NO_WINDOW if IS_WIN else 0,
+                     start_new_session=not IS_WIN)
 
 
 if __name__ == "__main__":

@@ -4,9 +4,13 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | **EMELab** (scheda opzionale, interruttore «📡 Abilita EMELab» nella barra laterale): stazione e setup per 10/24/47 GHz (anche «Da FeedLab»), diario delle misure in UTC (sole, luna, cielo freddo, terra, eco, beacon, QSO, messa a fuoco) con posizione e distanza di Sole e Luna (ERFA/SOFA), Doppler e spreading, meteo da stazione personale (Meteotemplate/Cumulus/Weather Display) o Open-Meteo, attenuazione ITU-R P.676 e temperatura di cielo; valori attesi (Y sole/luna, eco), G/T dal sole, modello di puntamento, curva di fuoco, consigli; pianificatore per passaggi della Luna con stazione corrispondente e previsioni meteo, perigei/apogei, mesi più favorevoli; guida alle misure. Dati solo sul PC | 🟡 in revisione |
-| 2 | Studio di sintesi di feed EME per la Channel Master 243 (10/24/47 GHz): tre ricerche globali (profilo libero, famiglia Dual-Flare, horn corrugato), limite teorico, bocca più larga, tolleranze: il Dual-Flare IZ0JNY è già all'ottimo (+0.014 dB al massimo); variante compatta 16 % più corta; relazione in docs/studi/feed_EME_ChannelMaster243.md, strumenti in feedlab/synth.py e tools/synth | ✅ fatto (da validare con openEMS) |
-| 3 | EMELab → Analisi: «Dove guadagnare dB» (NF, perdite, superficie, puntamento, elevazione, umidità) per ogni setup | ✅ fatto |
+| 1 | **Dual-Flare (IZ0JNY) compatto**: tabella riottimizzata per f/D 0.6–0.9 (EME, S11 < −25 dB su ±1 %, guida d'ingresso ≤ 0.76 λ), stesso nome, feed circa 16 % più corto con prestazioni uguali o migliori; validazione openEMS a 10368.2, 24048.2 e 47088.2 MHz | 🟡 in corso |
+| 2 | **File di progetto (.json)**: dati inseriti e risultati calcolati (guadagno, G/T, efficienze, taper, S11, lobi, Tsys, piastrina, openEMS); si scambia e si riapre in FeedLab | ✅ fatto |
+| 3 | **Scheda «📦 Output di progetto»**: PDF a scelta (report completo, simulazioni veloci, feed, parabola, piastrina, feed + piastrina, tabella di tutte le quote e i dati + CSV, openEMS), file di progetto, STEP/STL, ZIP di tutto | ✅ fatto |
+| 4 | Icona della piastrina: 🔲 al posto della spina elettrica | ✅ fatto |
+| 5 | Catalogo parabole: materiali e note solo in italiano (niente tedesco) e tradotti in inglese («vetroresina» → fibreglass…); test automatico | ✅ fatto |
+| 6 | EMELab: in pausa (codice nel repository, non incluso nel programma) | ⏸️ in pausa |
+| 7 | Studio di sintesi di feed EME per la Channel Master 243 (relazione in docs/studi) e strumenti di sintesi | ✅ fatto |
 
 ---
 

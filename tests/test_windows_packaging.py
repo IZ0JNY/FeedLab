@@ -16,10 +16,15 @@ def test_no_modified_interpreter():
 
 
 def test_shortcuts_share_the_app_id():
+    """Each shortcut carries the AppUserModelID of the program it starts (FeedLab or EMELab)."""
     from feedlab import desktop
     iss = (ROOT / "windows" / "feedlab.iss").read_text(encoding="utf-8-sig")
     shortcuts = [l for l in iss.splitlines() if l.startswith('Name: "{auto')]
-    assert shortcuts and all(f'AppUserModelID: "{desktop.APP_ID}"' in l for l in shortcuts)
+    assert shortcuts
+    for l in shortcuts:
+        app = desktop.APPS["emelab" if "--app emelab" in l else "feedlab"]
+        assert f'AppUserModelID: "{app["app_id"]}"' in l and app["ico"] in l
+
 
 
 def test_checksums_published():

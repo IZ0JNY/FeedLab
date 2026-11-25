@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Ivan De Cesaris, IZ0JNY
-"""Tab "📡 EMELab" of FeedLab (optional, enabled from the sidebar): EME station, measurement log with Sun/Moon
-positions and weather (UTC), expected vs measured, pointing model, Moon planner and measurement guide.
-All data stay in a local SQLite file (settings folder); the personal weather-station address is saved only
-in the local settings."""
+"""The tabs of EMELab (separate program, feedlab/emelab/app.py): station, setups (dish and feed taken from
+FeedLab on request), new measurement with Sun/Moon positions and weather (UTC), log, expected vs measured,
+pointing model, Moon planner and measurement guide. All data stay in a local SQLite file (settings folder);
+the personal weather-station address is saved only in the local settings."""
 from __future__ import annotations
 
 import math
@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 import streamlit as _st
 
 from feedlab import i18n, openems_local
-from feedlab.emelab import analysis, astro, atmos, db as edb, planner, weather
+from feedlab.emelab import analysis, astro, atmos, bridge, db as edb, planner, weather
 
 st = i18n.wrap(_st)
 BANDS = {"10.368 GHz": 10.368, "24.048 GHz": 24.048, "47.088 GHz": 47.088}
@@ -61,27 +61,10 @@ def _station(D):
                "tuo PC e non vengono mai inviati: il meteo da internet riceve solo coordinate e ora.")
 
 
-def _setup_from_feedlab(S, current_geometry, name, band, extra) -> dict | None:
-    """Gain, efficiency, spillover and edge taper of the FeedLab design at this band, on the chosen dish."""
-    from feedlab import explore
-    if not (S.get("dish") and S.get("feed_kind")):
-        return None
-    d = S.dish
-    sc = explore.Scenario(dish_kind=d.kind, D_mm=d.D_mm, fD=d.fD, elev_deg=30, t_rx_K=analysis.t_rx(extra["nf_db"]),
-                          surface_rms_mm=extra.get("rms_mm", 0.3), feedline_loss_db=0.0,
-                          material=S.get("material") or "Ottone CuZn39Pb3")
-    r = explore.evaluate(S.feed_kind, band, sc, dict((S.get("overrides") or {}).get(S.feed_kind, {})),
-                         fD_design=S.get("fd_design"))
-    return {"band_ghz": band, "D_m": d.D_mm / 1000, "eta_ap": r.eta, "gain_dbi": r.gain_dbi, "edge_taper_db": r.edge_taper_db,
-            "spill": r.spill, "ground_frac": 0.25 if d.kind == "offset" else 0.5, "feed": S.feed_kind,
-            "dish": f"{d.kind} D {d.D_mm:.0f} mm f/D {d.fD:.3f}", "material": S.get("material"),
-            "pc_mm": r.pc_mm, "source": "FeedLab", **extra}
-
-
-def _setups(D, S, current_geometry):
+def _setups(D):
     st.subheader("Configurazioni per banda")
     st.caption("Una configurazione per ogni banda: parabola, feed, perdite, preamplificatore/transverter e potenza. Il pulsante "
-               "«Da FeedLab» prende guadagno, efficienza, spillover e taper dal progetto aperto in FeedLab.")
+               "«Prendi da FeedLab» chiede a FeedLab il progetto aperto e ne calcola guadagno, efficienza, spillover e taper.")
     c = st.columns(4)
     band_l = c[0].selectbox("Banda", list(BANDS), key="em_setup_band")
     band = BANDS[band_l]
@@ -97,13 +80,20 @@ def _setups(D, S, current_geometry):
                            help="dal transito del sole: durata a −3 dB × 0.25°/min × cos(dec)")
     extra = {"nf_db": nf, "line_loss_db": line, "tx_w": txw, "rms_mm": rms, "hpbw_deg": hp or None}
     b = st.columns(3)
-    if b[0].button("📐 Da FeedLab", key="em_from_fl", help="usa parabola, feed e materiale del progetto aperto"):
-        stp = _setup_from_feedlab(S, current_geometry, name, band, extra)
-        if stp is None:
-            st.warning("Scegli prima parabola e feed in FeedLab (procedura guidata).")
+    des = bridge.load_design()
+    if b[0].button("📥 Prendi da FeedLab", key="em_from_fl", type="primary",
+                   help="chiede a FeedLab il progetto aperto (parabola, feed, quote, materiale) e ne calcola guadagno, "
+                        "efficienza, spillover e taper per la banda scelta"):
+        des = bridge.load_design()
+        if des is None:
+            st.warning("Nessun progetto da FeedLab: apri FeedLab e scegli banda, parabola, feed e materiale.")
         else:
+            with st.spinner("Calcolo con i modelli di FeedLab…"):
+                stp = bridge.setup_from_design(des, band, extra)
             D.save_setup(name, band, stp)
             st.success("Configurazione salvata da FeedLab.")
+    st.caption((i18n.tr("Progetto aperto in FeedLab") + ": " + bridge.describe(des) + f" ({des.get('saved_utc', '')} UTC)")
+               if des else i18n.tr("FeedLab non ha ancora un progetto completo (banda, parabola, feed e materiale)."))
     with b[1].popover("✍️ Inserisci a mano"):
         Dm = st.number_input("Diametro della parabola (m)", 0.3, 20.0, 2.4, 0.05, key="em_m_D")
         eta = st.number_input("Efficienza d'apertura (%)", 20.0, 90.0, 60.0, 1.0, key="em_m_eta")
@@ -432,29 +422,6 @@ def _planner(D):
 def _guide():
     from pathlib import Path
     lang = i18n.get_lang()
-    p = Path(__file__).resolve().parent / "emelab" / f"guida_misure_{'it' if lang == 'it' else 'en'}.md"
+    p = Path(__file__).resolve().parent / f"guida_misure_{'it' if lang == 'it' else 'en'}.md"
     if p.exists():
         _st.markdown(p.read_text(encoding="utf-8"))
-
-
-def render(S, current_geometry):
-    D = _db()
-    st.header("📡 EMELab — stazione EME, misure e pianificazione")
-    st.caption("Registra misure di sole, luna, cielo freddo, terra ed eco con posizione di sole e luna, distanza, "
-               "meteo e attenuazione atmosferica (tutto in UTC); EMELab le confronta con quanto la tua configurazione dovrebbe "
-               "dare e ti dice dove migliorare.")
-    t = st.tabs(["① Stazione e configurazioni", "② Nuova misura", "③ Diario", "④ Analisi", "⑤ Pianificatore", "⑥ Guida alle misure"])
-    with t[0]:
-        _station(D)
-        st.divider()
-        _setups(D, S, current_geometry)
-    with t[1]:
-        _new(D)
-    with t[2]:
-        _log(D)
-    with t[3]:
-        _analysis(D)
-    with t[4]:
-        _planner(D)
-    with t[5]:
-        _guide()

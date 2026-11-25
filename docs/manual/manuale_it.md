@@ -20,7 +20,7 @@ Versione {VERSION} BETA TEST · Software progettato da Ivan De Cesaris, IZ0JNY
 11. Passo 6 — Piastrina WR (piastrina λ/4)
 12. Passo 7 — Disegno & STEP (PDF, STEP, STL)
 13. Full-wave openEMS (facoltativo)
-14. EMELab — misure e pianificazione EME (facoltativo)
+14. Output di progetto (PDF, tabelle, file di progetto)
 15. Tabelle di riferimento: materiali, tolleranze, flange, viti, lamature
 16. Esempio completo: feed EME a 24 GHz per una offset da 2.4 m
 17. Problemi frequenti
@@ -103,7 +103,7 @@ La finestra ha due parti:
 | 🌐 **Lobo 3D** | lobo di irradiazione 3D del feed |
 | 🧊 **Modello 3D** | modello 3D del feed con la base forata |
 | 🔩 **Montaggio feed + piastrina** | come si fissano feed e piastrina alla guida esterna: schema, sezione, fori, viti, 3D in tempo reale |
-| 🔌 **Piastrina WR** | piastrina λ/4 verso la guida WR: apertura, spessore, viste, PDF e STEP |
+| 🔲 **Piastrina WR** | piastrina λ/4 verso la guida WR: apertura, spessore, viste, PDF e STEP |
 | 📄 **Disegno & STEP** | disegno PDF, STEP, STL, tolleranza generale |
 | 🖥️ **Full-wave openEMS** | verifica full-wave facoltativa (installazione, simulazione, risultati, space mapping) |
 | ℹ️ **Credits** | autore, licenza, collaboratori e tutte le fonti tecniche |
@@ -128,7 +128,6 @@ La finestra ha due parti:
 | **Guida d'onda rettangolare** | la guida WR a cui si fissa il feed tramite la piastrina λ/4 | solo le guide della banda: 10 GHz **WR-90** o **WR-75**, 24 GHz **WR-42**, 47 GHz **WR-22** o **WR-19**… Dimensiona piastrina, foratura e base quadrata |
 | **Base del feed** | **Circolare** o **Quadrata** | quadrata (default a 10 e 24 GHz) solo per le flange standard quadrate (WR-90 41.40 mm, WR-75 38.30 mm, WR-42 22.41 mm); si allarga da sola se fori o lamature lo richiedono |
 | **Lingua** | Italiano / English | si sceglie nell'installer; qui serve soprattutto per la versione portable |
-| **📡 Abilita EMELab** | interruttore | aggiunge la scheda EMELab (misure e pianificazione EME, §14); spento di default, la scelta viene ricordata |
 | **ℹ️ Credits · 🔄 Controlla aggiornamenti · 📖 Manuale · 🐞 Segnala un problema** | autore e fonti · nuove versioni · questo manuale · segnalazione GitHub precompilata | |
 
 
@@ -443,7 +442,7 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 ---
 
 ## 13. Full-wave openEMS (facoltativo)
-14. EMELab — misure e pianificazione EME (facoltativo)
+14. Output di progetto (PDF, tabelle, file di progetto)
 
 ![openEMS]({IMG}/m32_openems.jpg)
 
@@ -459,37 +458,28 @@ La **vista frontale** colora i fori per funzione: **nero** = fori della flangia 
 
 ---
 
-## 14. EMELab — misure e pianificazione EME (facoltativo)
+## 14. Output di progetto (PDF, tabelle, file di progetto)
 
-EMELab è una scheda **facoltativa**: si accende con l'interruttore **📡 Abilita EMELab** nella barra laterale (la scelta viene ricordata). Serve a chi fa EME a 10, 24 e 47 GHz per **registrare le misure vere** della stazione, confrontarle con quanto la configurazione dovrebbe dare e capire dove migliorare. **Tutti i dati restano sul tuo PC** (un file nella cartella delle impostazioni): stazione, configurazioni, misure e l'indirizzo della tua stazione meteo non vengono mai inviati; il servizio meteo da internet riceve solo coordinate e ora. Tutti gli orari sono in **UTC**.
+![Output di progetto]({IMG}/m35_output.jpg)
 
-![EMELab: stazione e configurazioni]({IMG}/m35_emelab_station.jpg)
+Nella scheda **📦 Output di progetto** scegli quali documenti generare, premi **⚙️ Genera** e scarica i file uno per uno oppure tutti insieme con **⬇️ Scarica tutto (ZIP)**. Ogni documento riporta in testa feed, banda, parabola e materiale, e in fondo versione di FeedLab e data UTC.
 
-### 14.1 Stazione e configurazioni
-| Campo | Cos'è |
+| Documento | Contenuto |
 |---|---|
-| **Nominativo, Locator, Latitudine/Longitudine, Quota** | posizione della stazione (dal locator si calcolano le coordinate) |
-| **Stazione meteo personale** | indirizzo del tuo sito Meteotemplate / Cumulus / Weather Display (o del file dati); salvato solo sul PC |
-| **Flusso solare a 15.4 GHz** | valore del giorno degli osservatori RSTN (NOAA SWPC): serve per il rumore solare atteso |
-| **Configurazioni per banda** | parabola, guadagno, efficienza, taper, spillover (pulsante **📐 Da FeedLab** dal progetto aperto, oppure a mano), NF del preamplificatore/transverter, perdite feed → LNA, potenza TX al feed, errore RMS della superficie, larghezza del fascio misurata |
+| **📄 Report completo di progetto (PDF)** | copertina con i risultati principali, simulazioni veloci, parabola, disegno del feed, piastrina, montaggio, openEMS e tabella di tutti i dati |
+| **📈 Simulazioni veloci (PDF)** | guadagno, G/T, efficienze, taper, S11, centro di fase, Tsys e lo scenario usato; S11 su ±5 % della banda; lobo nei piani E e H con il bordo della parabola |
+| **📐 Feed: disegno e simulazioni (PDF)** | il disegno quotato della scheda Disegno & STEP seguito dalle simulazioni |
+| **📡 Parabola (PDF)** | dati della parabola, angolo di apertura, f/D di progetto del feed, illuminazione e scomposizione dell'efficienza |
+| **🔲 Piastrina λ/4 (PDF)** | il disegno della piastrina (si include dopo aver aperto una volta la scheda 🔲 Piastrina WR) |
+| **🔩 Feed + piastrina, montaggio (PDF)** | schema di montaggio, viti, spessori e sezione |
+| **📋 Tabella di tutte le quote e i dati (PDF + CSV)** | ogni valore inserito o calcolato: dati di progetto, quote del feed, piastrina, risultati, openEMS; il CSV si apre con Excel / LibreOffice |
+| **🖥️ Simulazioni openEMS (PDF)** | per ogni simulazione completata di questo feed e banda: guadagno, G/T, efficienza, centro di fase, fascio, S11 e lobo full-wave |
+| **💾 File di progetto (.json)** | tutto il progetto: dati inseriti e risultati calcolati. Si scambia con altri radioamatori e si riapre in FeedLab |
+| **🧊 Modelli 3D del feed (STEP + STL)** | come nella scheda Disegno & STEP |
 
-### 14.2 Nuova misura
-Scegli configurazione, **data e ora UTC** e tipo (rumore solare o lunare, cielo freddo, terra, eco, beacon, QSO, messa a fuoco). Inserisci Y o SNR, gli angoli letti e le **correzioni al picco**. Il meteo si prende con **🌡️ Dalla mia stazione** o **🌍 Da Open-Meteo** e si corregge a mano; viene salvato con la sua ora UTC e la sua fonte. Sotto, EMELab mostra subito posizione e distanza di Sole e Luna, angolo Sole–Luna, attenuazione allo zenit e sul percorso (ITU-R P.676), temperatura di cielo, Tsys, **Y di sole e luna attesi**, eco attesa, Doppler e allargamento.
+**📂 Apri un file di progetto**: carica un `.feedlab.json` e premi **Apri progetto** per ritrovare banda, parabola, feed, quote modificate, materiale, illuminazione, guida e montaggio.
 
-![EMELab: nuova misura]({IMG}/m36_emelab_new.jpg)
-
-### 14.3 Diario e analisi
-Il **diario** elenca le misure con valori attesi, differenze e G/T ricavato dal sole (filtri per banda e tipo, esportazione e importazione CSV). L'**analisi** dà i consigli in parole semplici: G/T misurato contro atteso, effetto di elevazione e umidità, **modello di puntamento** (zero di AZ ed EL, inclinazione dell'asse, cedimento), **curva di messa a fuoco** e riflettività efficace della Luna dalle eco.
-
-![EMELab: analisi]({IMG}/m37_emelab_analysis.jpg)
-
-### 14.4 Pianificatore
-Per ogni **passaggio della Luna** sopra l'elevazione minima: inizio, fine, momento migliore, distanza, eco attesa in 1 Hz e nella banda di allargamento, attenuazione, angolo minimo Sole–Luna. Con il **locator della stazione corrispondente** mostra solo le finestre comuni; con **Usa le previsioni meteo** tiene conto dell'umidità prevista (16 giorni). In fondo: **perigei e apogei** (fino a 2.2 dB sulle eco) e **mesi più favorevoli** dal clima dell'ultimo anno nel tuo luogo.
-
-![EMELab: pianificatore]({IMG}/m38_emelab_planner.jpg)
-
-### 14.5 Guida alle misure
-L'ultima sottoscheda spiega le misure fondamentali (sole, luna, cielo/terra, carico caldo, transito del sole, messa a fuoco, puntamento, eco, ambiente) con procedura e riferimenti.
+Lo scenario delle simulazioni (elevazione, NF, perdite, superficie, attenuazione) è quello impostato nel **Laboratorio**; se non l'hai aperto, valgono i valori predefiniti del Laboratorio.
 
 ---
 

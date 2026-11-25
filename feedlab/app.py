@@ -533,12 +533,6 @@ with st.sidebar:
     st.caption(f"Versione {feedlab.__version__}{' BETA TEST' if _bst['beta'] else ''} · © Ivan De Cesaris IZ0JNY")
     st.selectbox("Lingua / Language", list(i18n.LANGS), key="lang", format_func=lambda k: i18n.LANGS[k],
                  on_change=_set_lang)       # chosen in the installer; here for the portable version
-    if "emelab_on" not in S:
-        S["emelab_on"] = bool(openems_local.load_settings().get("emelab", False))
-    st.toggle("📡 Abilita EMELab", key="emelab_on",
-              on_change=lambda: openems_local.save_settings(emelab=bool(S.get("emelab_on"))),
-              help="aggiunge la scheda EMELab: diario delle misure EME (sole, luna, eco, meteo), analisi e "
-                   "pianificazione a 10, 24 e 47 GHz. I dati restano su questo PC")
     if st.button("ℹ️ Credits", key="credits_btn", help="Autore, versione e tutte le fonti"):
         _credits_dialog()
     if st.button("🔄 Controlla aggiornamenti", key="upd_btn", help="chiede a GitHub se c'è una versione più nuova"):
@@ -577,8 +571,66 @@ if not _missing():
     S["tweak_sig"] = _sig
 
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
-                "🧊 Modello 3D", "🔩 Montaggio feed + piastrina", "🔌 Piastrina WR", "📄 Disegno & STEP",
-                "🖥️ Full-wave openEMS"] + (["📡 EMELab"] if S.get("emelab_on") else []) + ["ℹ️ Credits"])
+                "🧊 Modello 3D", "🔩 Montaggio feed + piastrina", "🔲 Piastrina WR", "📄 Disegno & STEP",
+                "🖥️ Full-wave openEMS", "📦 Output di progetto", "ℹ️ Credits"])
+
+
+def _project_snapshot():
+    """Plain copy of what the project file needs (the build runs in a background thread)."""
+    keys = ["f_ghz", "dish", "feed_kind", "material", "overrides", "wall", "base_t", "base_shape", "wr_wg", "mount_cfg",
+            "mount_ui", "plate_rf", "fd_design", "ill_mode", "ill_taper", "ill_goal", "outer_mode", "outer_fillet",
+            "lab_scenario"]
+    return {k: S.get(k) for k in keys}
+
+
+def _autosave_project():
+    """Keep the open design as a project file for EMELab (it reads it: 📥 Prendi da FeedLab), without slowing
+    the interface: rebuilt in the background only when the inputs change."""
+    if _missing():
+        return
+    snap = _project_snapshot()
+    key = repr({k: v for k, v in snap.items()})
+    if S.get("_proj_auto_key") == key:
+        return
+    S["_proj_auto_key"] = key
+    import threading
+    from feedlab import project as _project
+    try:
+        geo = current_geometry()
+        fdd = _fd_design()
+    except Exception:
+        return
+
+    def work():
+        try:
+            _project.save_auto(_project.build(snap, geo, fdd, with_sweep=False))
+        except Exception:
+            pass
+    threading.Thread(target=work, daemon=True).start()
+
+
+_autosave_project()
+
+
+def _apply_project(p: dict):
+    """Open a project file: restore dish, band, feed, dimensions, material, illumination and mounting."""
+    from feedlab import project as _project
+    from feedlab.waveguide import suggest_rect_wg as _sug
+    i = p["inputs"]
+    f = float(i["f_ghz"])
+    lab = next((k for k, v in BANDS.items() if abs(v - f) < 1e-6), None)
+    S["band_sel"] = lab or "Altra frequenza…"
+    if lab is None:
+        S["f_other"] = f
+    S["material_sel"] = i.get("material")
+    if i.get("wr_wg"):
+        S[f"wr_wg_{'_'.join(_sug(f))}"] = i["wr_wg"]
+    if i.get("base_shape"):
+        S["base_shape"] = i["base_shape"]
+        S["base_shape_band"] = f
+    _project.apply(S, p)
+    S["feed_kind"] = i["feed_kind"]
+    S["cands"] = None
 
 # ---------------------------------------------------------------- 1 wizard
 with tabs[0]:
@@ -1132,6 +1184,8 @@ with tabs[2], contextlib.suppress(_Skip):
             azen = c[5].number_input("Att. zenitale (dB)", 0.0, 10.0, 0.1 if S.f_ghz < 20 else 0.3 if S.f_ghz < 60 else 1.0, 0.05)
         sc = explore.Scenario(dish.kind, dish.D_mm, dish.fD, max(elev, 1), noise.receiver_temp(nf), azen, 290.0, rms, line,
                               material=S.material)
+        S["lab_scenario"] = {"elev_deg": float(max(elev, 1)), "nf_db": float(nf), "line_loss_db": float(line),
+                             "rms_mm": float(rms), "zenith_db": float(azen)}
         sc_t = tuple(sc.__dict__.values())
         _fdd = _fd_design()
         base_vals = explore.base_values(kind, S.f_ghz, _fdd, S.wall)
@@ -1711,10 +1765,87 @@ with tabs[7], contextlib.suppress(_Skip):
 
 
 # ---------------------------------------------------------------- credits
-if S.get("emelab_on"):
-    with tabs[10]:
-        from feedlab import app_emelab
-        app_emelab.render(S, current_geometry)
+# ---------------------------------------------------------------- project outputs
+with tabs[10]:
+    st.header("📦 Output di progetto")
+    st.caption("Scegli quali documenti generare: PDF delle simulazioni e dei disegni, tabella di tutte le quote e i dati, "
+               "risultati openEMS, report completo e il file di progetto (.json), che si può scambiare e riaprire in "
+               "FeedLab.")
+    if _missing():
+        st.info(_T("Per iniziare seleziona: {m}.", m=", ".join(i18n.tr(x) for x in _missing())))
+    else:
+        from feedlab import project as _project, report as _report
+        OUT = [("full", "📄 Report completo di progetto (PDF)", True), ("sims", "📈 Simulazioni veloci (PDF)", False),
+               ("feed", "📐 Feed: disegno e simulazioni (PDF)", False), ("dish", "📡 Parabola (PDF)", False),
+               ("plate", "🔲 Piastrina λ/4 (PDF)", False), ("assembly", "🔩 Feed + piastrina, montaggio (PDF)", False),
+               ("data", "📋 Tabella di tutte le quote e i dati (PDF + CSV)", False),
+               ("openems", "🖥️ Simulazioni openEMS (PDF)", False), ("json", "💾 File di progetto (.json)", True),
+               ("cad", "🧊 Modelli 3D del feed (STEP + STL)", False)]
+        cols = st.columns(2)
+        pick = {k: cols[n % 2].checkbox(lab, value=dflt, key=f"out_{k}") for n, (k, lab, dflt) in enumerate(OUT)}
+        if not S.get("wr_wg") or not S.get("plate_rf"):
+            st.caption(i18n.tr("La piastrina si progetta nella scheda 🔲 Piastrina WR: aprila una volta per includerla."))
+        base_name = f"FeedLab_{S.feed_kind}_{S.f_ghz:.3f}GHz"
+        if st.button("⚙️ Genera", type="primary", key="out_go"):
+            files = {}
+            with st.spinner("Calcolo del progetto e generazione dei documenti…"):
+                geo_o = current_geometry()
+                proj = _project.build(_project_snapshot(), geo_o, _fd_design())
+                _project.save_auto(proj)
+                wdir = WORK / "outputs"
+                wdir.mkdir(exist_ok=True)
+                jobs = {"full": lambda: _report.full_pdf(proj, S, geo_o, wdir), "sims": lambda: _report.sims_pdf(proj),
+                        "feed": lambda: _report.feed_pdf(proj, geo_o, wdir), "dish": lambda: _report.dish_pdf(proj),
+                        "plate": lambda: _report.plate_pdf(S, proj, wdir), "assembly": lambda: _report.assembly_pdf(proj, S),
+                        "data": lambda: _report.data_pdf(proj), "openems": lambda: _report.openems_pdf(proj)}
+                names = {"full": "report_completo", "sims": "simulazioni", "feed": "feed", "dish": "parabola",
+                         "plate": "piastrina", "assembly": "feed_piastrina", "data": "dati", "openems": "openems"}
+                for k, fn in jobs.items():
+                    if pick.get(k):
+                        try:
+                            b = fn()
+                            if b:
+                                files[f"{base_name}_{names[k]}.pdf"] = b
+                        except Exception as e:
+                            st.warning(f"{i18n.tr(dict((a, b) for a, b, _ in OUT)[k])}: {e}")
+                if pick.get("data"):
+                    files[f"{base_name}_dati.csv"] = _report.data_csv(proj)
+                if pick.get("json"):
+                    files[f"{base_name}.feedlab.json"] = _project.to_json(proj)
+                if pick.get("cad"):
+                    try:
+                        files[f"{base_name}.stp"] = cad.export_step(geo_o, wdir / "feed.step").read_bytes()
+                        files[f"{base_name}.stl"] = cad.export_stl(geo_o, wdir / "feed.stl").read_bytes()
+                    except Exception as e:
+                        st.warning(f"STEP/STL: {e}")
+            S["outputs"] = files
+        if S.get("outputs"):
+            files = S["outputs"]
+            st.success(_T("{n} file pronti.", n=len(files)))
+            st.download_button("⬇️ Scarica tutto (ZIP)", _report.zip_all(files), file_name=f"{base_name}.zip",
+                               mime="application/zip", type="primary")
+            for name, data in files.items():
+                mime = ("application/pdf" if name.endswith(".pdf") else "application/json" if name.endswith(".json")
+                        else "text/csv" if name.endswith(".csv") else "application/octet-stream")
+                st.download_button(f"⬇️ {name}", data, file_name=name, mime=mime, key=f"dl_{name}")
+    st.divider()
+    st.subheader("📂 Apri un file di progetto")
+    up = st.file_uploader("File di progetto FeedLab (.json)", type=["json"], key="proj_up")
+
+    def _open_cb():
+        """Runs before the widgets are drawn: only here their values (band, material…) may be set."""
+        try:
+            from feedlab import project as _project
+            _apply_project(_project.load(S["proj_up"].getvalue()))
+            S["proj_msg"] = ("ok", None)
+        except Exception as e:
+            S["proj_msg"] = ("err", str(e))
+    st.button("📂 Apri progetto", key="proj_open", disabled=up is None, on_click=_open_cb)
+    _pm = S.pop("proj_msg", None)
+    if _pm and _pm[0] == "ok":
+        st.success("Progetto aperto.")
+    elif _pm:
+        st.error(i18n.tr("File non valido") + f": {_pm[1]}")
 
 with tabs[-1]:
     from feedlab import credits as _credits

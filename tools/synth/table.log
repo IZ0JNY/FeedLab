@@ -1,0 +1,2 @@
+f/D 0.6: 86.348 → 86.364  (419s)  x=[np.float64(0.7584), np.float64(1.0922), np.float64(0.0769), np.float64(1.6074), np.float64(0.4733), np.float64(1.0722), np.float64(1.5275), np.float64(1.5843)]
+f/D 0.7: 86.483 → 86.506  (625s)  x=[np.float64(0.7599), np.float64(1.0694), np.float64(0.0875), np.float64(1.5579), np.float64(0.4763), np.float64(1.3769), np.float64(1.8103), np.float64(1.1274)]

@@ -223,17 +223,3 @@ def test_openems_invitation_after_some_changes(isolated):
         at.selectbox(key="material_sel").select(m).run()
         shown += [t.value for t in at.toast]
     assert any("openEMS" in t for t in shown)
-
-
-def test_emelab_tab_optional(isolated):
-    """EMELab is off by default; the sidebar toggle adds its tab, which renders without errors."""
-    at = AppTest.from_file(str(ROOT / "feedlab_main.py"), default_timeout=600)
-    at.run()
-    assert not any("EMELab" in t.label for t in at.tabs)
-    next(t for t in at.toggle if "EMELab" in t.label).set_value(True).run()
-    assert not at.exception, _errors(at)
-    assert any("EMELab" in t.label for t in at.tabs)
-    from feedlab import openems_local
-    assert openems_local.load_settings().get("emelab") is True
-    _start(at)
-    assert not at.exception, _errors(at)
