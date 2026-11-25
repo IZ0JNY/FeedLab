@@ -270,7 +270,9 @@ def model3d_fig(geo, cut: bool):
     fig = go.Figure(go.Mesh3d(x=v[:, 0], y=v[:, 1], z=v[:, 2], i=f[:, 0], j=f[:, 1], k=f[:, 2],
                               color=materials.color(S.get("material", "")), flatshading=False, lighting=dict(ambient=0.45, diffuse=0.8, specular=0.6, facenormalsepsilon=0, vertexnormalsepsilon=0),
                               opacity=1.0))
-    fig.update_layout(height=600, scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm"),
+    fig.update_layout(height=900, margin=dict(l=0, r=0, t=40, b=0),
+                      scene=dict(aspectmode="data", xaxis_title="x mm", yaxis_title="y mm", zaxis_title="z mm",
+                                 camera=dict(eye=dict(x=1.25, y=1.25, z=0.9))),
                       title=f"Modello 3D ({S.get('material', 'Ottone CuZn39Pb3')}) — z = 0 flangia d'ingresso")
     return fig
 

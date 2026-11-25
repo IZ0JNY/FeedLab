@@ -4,6 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
+| 1 | Scheda 🧊 Modello 3D: vista 3D più grande (altezza 900 px, margini ridotti, camera più vicina) per usare tutto lo spazio | ✅ fatto |
 
 ---
 
