@@ -168,3 +168,13 @@ def test_far_field_not_rounded_to_zero():
     v = ns["_l"](np.array([[1.234e-11, -5e-13], [0.0, 2e-12]]))
     assert v[0][0] == pytest.approx(1.234e-11) and v[1][1] == pytest.approx(2e-12)
     assert "--post" in src and "post_only" in src
+
+
+def test_input_guide_wall_resolved_at_low_frequency(tmp_path):
+    """Regression (0.4.25): the input guide that runs into the back PML had a fixed 0.5 mm wall; at 10 GHz the
+    cells are ≈1.3 mm, the wall fell between mesh lines and the guide was open (S11 ≈ −2.6 dB). The wall must be
+    at least two cells thick and have its own mesh lines."""
+    from feedlab import geometry, openems_sim
+    script = openems_sim.make_deep_script(geometry.build("iz0jny", 10.3682, fD=0.7), tmp_path).read_text(encoding="utf-8")
+    assert "w_in = max(1.0, 2.0 * res)" in script
+    assert "R_IN + w_in" in script and "R_IN + 0.5" not in script
