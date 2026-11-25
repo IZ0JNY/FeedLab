@@ -14,6 +14,7 @@
 | 1 | **Nomi dei feed con la virgola**: l'autore segue il nome dopo una virgola, senza parentesi («Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL», «W2IMU Dual-Mode Feedhorn, parametric calculation OE2IGL», «Large W2IMU flare 30°, W1GHZ/W1FKF», «Dual-mode 'optimum' Skobelev, W1GHZ», «Tromba rettangolare, G3RPE», «Dual-Flare, IZ0JNY») in interfaccia, report, manuali e documenti | ✅ fatto |
 | 2 | **Titoli corti**: nel titolo del disegno, nell'intestazione e nella copertina del report il nome del feed senza «Feedhorn» e la banda in GHz (24.048 → «24 GHz», 10.368 → «10 GHz»); nelle schede e nelle tabelle restano il nome completo e la frequenza esatta | ✅ fatto |
 | 3 | **Nome dei file salvati a scelta**: casella «Nome file» precompilata col nome predefinito in Disegno & STEP, Piastrina, Output di progetto e openEMS; se la si lascia così si usa il predefinito, l'estensione si aggiunge da sola | ✅ fatto |
+| 4 | Scheda 🧊 Modello 3D: vista 3D più grande (altezza 900 px, margini ridotti, camera più vicina) per usare tutto lo spazio | ✅ fatto |
 
 ---
 
