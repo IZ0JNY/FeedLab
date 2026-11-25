@@ -1,4 +1,4 @@
-name: FeedLab per Windows
+name: FeedLab per Windows e Linux
 
 on:
   push:
@@ -114,17 +114,96 @@ jobs:
           name: FeedLab-Windows-portable-${{ steps.ver.outputs.version }}
           path: dist/FeedLab-*-portable.zip
           retention-days: 30
-      - name: GitHub release (every build of main, and tags v*)
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+
+  linux:
+    name: Build Linux (.deb + tar.xz)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q libgirepository1.0-dev libcairo2-dev pkg-config xz-utils
+          python -m pip install uv
+      - name: Version
+        id: ver
+        run: |
+          v=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml | head -1)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then v=${GITHUB_REF_NAME#v}; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: linux/build.sh --version ${{ steps.ver.outputs.version }}
+      - name: Tests with the packaged Python
+        run: |
+          py=build/linux/root/opt/feedlab/python/bin/python3
+          uv pip install --python $py --target build/pytest pytest
+          PYTHONNOUSERSITE=1 PYTHONPATH=build/pytest $py -m pytest -q -ra -p no:cacheprovider
+      - name: Install the .deb + server smoke test
+        run: |
+          sudo apt-get install -y -q ./dist/feedlab_*_amd64.deb
+          test -x /usr/bin/feedlab && test -f /usr/share/applications/feedlab.desktop
+          feedlab --selftest
+          feedlab --server-only --port 8765 &
+          for i in $(seq 90); do
+            if [ "$(curl -s http://127.0.0.1:8765/_stcore/health)" = "ok" ]; then ok=1; break; fi
+            sleep 2
+          done
+          [ -n "${ok:-}" ] || { tail -50 ~/.config/FeedLab/server.log; exit 1; }
+          pkill -f "streamlit run" || true
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FeedLab-Linux-${{ steps.ver.outputs.version }}
+          path: |
+            dist/feedlab_*_amd64.deb
+            dist/FeedLab-*-linux-x86_64.tar.xz
+            dist/SHA256SUMS-linux.txt
+          retention-days: 30
+          compression-level: 0
+
+  release:
+    name: GitHub release (Windows + Linux)
+    needs: [build, linux]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: FeedLab-*
+          merge-multiple: true
+      - name: Publish (new version) or add what is missing (version already published)
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: pwsh
         run: |
-          $tag = "v${{ steps.ver.outputs.version }}"
-          $files = @((Get-ChildItem dist\FeedLab-Setup-*.exe).FullName, (Get-ChildItem dist\FeedLab-*-portable.zip).FullName, (Get-Item dist\SHA256SUMS.txt).FullName)
-          gh release view $tag *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "$tag already published: not overwritten (bump the version to publish changes)"
-          } else {
-            gh release create $tag @files --target $env:GITHUB_SHA --latest --title "FeedLab $tag per Windows" --notes-file windows/RELEASE_NOTES.md
-          }
+          v=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml | head -1)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then v=${GITHUB_REF_NAME#v}; fi
+          tag="v$v"
+          cd dist
+          ls -la
+          files=(FeedLab-Setup-*.exe FeedLab-*-portable.zip feedlab_*_amd64.deb FeedLab-*-linux-x86_64.tar.xz)
+          if gh release view "$tag" > /dev/null 2>&1; then
+            # never overwrite published files: only add the ones the release does not have yet
+            # (e.g. the Linux packages of a version first published for Windows only)
+            have=$(gh release view "$tag" --json assets --jq '.assets[].name')
+            add=()
+            for f in "${files[@]}" SHA256SUMS-linux.txt; do
+              grep -qxF "$f" <<< "$have" || add+=("$f")
+            done
+            if [ ${#add[@]} -eq 0 ]; then
+              echo "$tag already published with all its files: not overwritten (bump the version to publish changes)"
+            else
+              echo "adding to $tag: ${add[*]}"
+              gh release upload "$tag" "${add[@]}"
+            fi
+          else
+            cat SHA256SUMS.txt SHA256SUMS-linux.txt > SHA256SUMS-all.txt
+            mv SHA256SUMS-all.txt SHA256SUMS.txt
+            gh release create "$tag" "${files[@]}" SHA256SUMS.txt --target "$GITHUB_SHA" --latest \
+              --title "FeedLab $tag per Windows e Linux" --notes-file ../windows/RELEASE_NOTES.md
+          fi
