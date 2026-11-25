@@ -8,7 +8,7 @@ Comment[it]=Progetta e simula illuminatori per parabole da 10 a 134 GHz (EME)
 Exec=feedlab
 Icon=feedlab
 Terminal=false
-Categories=Science;Engineering;HamRadio;Education;
+Categories=Science;Engineering;HamRadio;
 Keywords=antenna;feed;horn;dish;EME;microwave;openEMS;
 Actions=browser;
 
