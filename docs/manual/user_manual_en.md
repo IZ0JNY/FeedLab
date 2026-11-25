@@ -208,19 +208,19 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 
 ### 5.5 Feed types
 
-| Feed | Best for | Notes |
+| Feed | Range of use | Notes |
 |---|---|---|
-| **Axial Corrugated** (base concept Luis CT1DMK, improved version Gerald OE2IGL) | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %, the most efficient; 8 axial steps (OE2IGL v1.4); openEMS for verification |
+| **Axial Corrugated Feedhorn CT1DMK** (parametric calculation OE2IGL) | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %; 8 axial steps (OE2IGL v1.4); openEMS for verification |
 | **Chaparral 3 rings** | prime focus f/D < 0.33 | 78 % at f/D 0.35; openEMS |
 | **Conical horn** | general purpose | simple, wide band |
-| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; colder antenna, better G/T, very low S11; checked with openEMS at 24 GHz |
+| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; low antenna temperature, very low S11; checked with openEMS at 24 GHz |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verify full-wave before building |
-| **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | best G/T on offset dishes |
+| **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | +1.6…2.3 dB of sun noise on offset dishes (W1GHZ 2024) |
 | **Open circular waveguide** | small deep dishes | minimal blockage, poor F/B |
 | **Pickett-Potter** | f/D 0.5–0.95, also above 76 GHz | ~80 % (OE2IGL) |
 | **Rectangular horn** | linear polarisation, < 40 GHz | sheet metal, directly from WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke ring; openEMS |
-| **W2IMU dual-mode / Optimised W2IMU** | offset / f/D 0.5–0.95 | classic W1GHZ / OE2IGL optimisation |
+| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | W1GHZ rules / OE2IGL parametric calculation from the opening angle |
 
 ---
 

@@ -16,13 +16,13 @@
 - Lavorare con l'ANGOLO DI APERTURA del dish (totale, centro-bordo×2), non con la f/D.
 - f/D (prime) = 1/(4 tan(θ/4)), θ angolo totale.
 - f/D offset equivalente (offset angle 21°): f/D = [cos(θ/2) + cos(atan(2/tan((90−21)°)))] / (4 sin(θ/2)).
-### W2IMU ottimizzato (OE2IGL 2024, da W1GHZ + openEMS); θ = angolo di apertura [°], λ
+### W2IMU Dual-Mode Feedhorn, calcolo parametrico (OE2IGL 2024, da W1GHZ + openEMS); θ = angolo di apertura [°], λ
 - f_c(guida ingresso) = 0.77·f → A (diametro ingresso) = c/(1.706·f_c); range ammesso 0.725…0.84 f (A = λ/(1.706·0.84) … λ/(1.706·0.725)).
 - B = (−1.77531e-8 θ⁴ + 5.66609e-6 θ³ − 6.67931e-4 θ² + 0.0340124 θ − 0.60017)·θ·λ ; range 1.22λ…1.7λ.
 - C = (−7.41104e-10 θ⁵ + 3.00061e-7 θ⁴ − 4.83865e-5 θ³ + 3.88389e-3 θ² − 0.155265 θ + 2.4863)·θ / (1/λg_TE11(B) − 1/λg_TM11(B)), λg = λ/sqrt(1−(λ/λc)²), λc_TE11=1.706B, λc_TM11=0.82B.
 - α (semiangolo flare) = 44.6°·λ/B. Banda utile: 1.15–1.57 f_c. η 77% (f/D .5) – 80% (f/D .8).
 - Esempio 24.048 GHz, θ=74°: A 9.49 mm, α 26.4°.
-### Pickett-Potter ottimizzato (OE2IGL 2025, da Milligan + openEMS)
+### Pickett-Potter, calcolo parametrico (OE2IGL 2025, da Milligan + openEMS)
 - R_ap[λ] = 60.907·θ^(−0.98422); L_flare[λ] = −0.53504R⁴ + 4.1757R³ − 11.589R² + 16.963R − 5.8895 (opz. correzione %).
 - Di (ingresso) = 1.02λ (0.51·2λ); Ds (dopo gradino) = 1.30λ; D_ap = 2R λ.
 - Es. 47.048 GHz, θ=69.2°: R 0.941λ (D_ap 11.99 mm), L 2.87λ (18.29 mm), Di 6.50, Ds 8.28 mm. η 78% (f/D .6) – 81% (f/D >1). Pickett-Potter ≈ leggermente meglio del W2IMU; per f/D .58–.8.

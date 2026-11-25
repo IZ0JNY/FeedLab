@@ -9,7 +9,7 @@ Le basi di conoscenza sono:
 - le design guide e le simulazioni openEMS/GRASP di Gerald OE2IGL;
 - la teoria classica: Kildal, Milligan, Baars, Silver, Balanis.
 
-> Stato: **v0.4.23 BETA TEST**, software libero con licenza **GPLv3**, senza scadenza. Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
+> Stato: **v0.4.26 BETA TEST**, software libero con licenza **GPLv3**, senza scadenza. Programma per Windows (installer, interfaccia e manuale PDF in italiano e inglese), interfaccia grafica, simulatore a mode matching, CAD/STEP, disegno PDF, catalogo parabole, materiali, piastrina WR e **deep analysis openEMS opzionale** con installazione guidata.
 
 ## Cosa fa oggi
 | Modulo | Funzioni |
@@ -18,7 +18,7 @@ Le basi di conoscenza sono:
 | `reflector` | Geometria prime-focus e offset (angoli ai bordi, f/D equivalente, puntamento del feed offset); fit di parabola offset da misure; Ruze, blocking (Baars), defocus (Milligan), beam factor/HPBW |
 | `patterns` | Pattern BOR1 (E/H complessi). Modelli analitici: gaussiano, cos^q. **Integrazione d'apertura** con miscela di modi (TE11 + TM11 = dual-mode, HE11 = corrugato) e fase quadratica del flare; apertura rettangolare (horn piramidale). Lettura e scrittura dei file `.dat` W1GHZ FEEDPATT/PHASEPAT |
 | `efficiency` | Efficienza d'apertura (Kildal/W1GHZ) con decomposizione in spillover, illuminazione, fase, cross-pol e blocking; curva η vs f/D; **centro di fase** (metodo PHASEPAT e formula di W1GHZ); curva di defocus; riproduzione esatta dell'algoritmo FEEDPATT per confronti |
-| `horns` | Calcolatori: W2IMU (Turrin/W1GHZ e OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter (OE2IGL), **IZ0JNY Dual-Flare** (nuovo, per EME; studio in `docs/IZ0JNY_DualFlare.md`), Axial Corrugated (base concept Luis CT1DMK, improved version Gerald OE2IGL, foglio v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
+| `horns` | Calcolatori: W2IMU dual-mode e W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL), Large W2IMU a 30° (47/78/122/241 GHz), Skobelev optimum dual-mode (tabella HFSS di W1GHZ), Pickett-Potter, **IZ0JNY Dual-Flare** (nuovo, per EME; studio in `docs/IZ0JNY_DualFlare.md`), Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL, foglio v1.4), VE4MA, Super-VE4MA, Chaparral, horn rettangolare G3RPE, centro di fase del piramidale (Fresnel), horn conico ottimo, horn diagonale |
 | `cassegrain` | Progetto del subriflettore iperbolico (procedura W1GHZ verificata sul suo foglio di calcolo), sub ottimo di Kildal, profilo e G-code per tornio |
 | `noise` | T_sky (con correzione di Planck), T_rx, T_spillover, T_antenna integrata sul pattern, G/T, sun noise atteso |
 

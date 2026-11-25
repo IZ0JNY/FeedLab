@@ -1,3 +1,19 @@
+## FeedLab 0.4.26 BETA TEST per Windows e Linux / for Windows and Linux
+
+**Installazione / Installation:** Windows: `FeedLab-Setup-0.4.26.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.26-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.26_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.26_amd64.deb`) oppure / or `FeedLab-0.4.26-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **FeedLab per Linux:** pacchetto .deb per Debian/Ubuntu e AppImage per qualsiasi distribuzione (un solo file, senza installazione), nella stessa release di Windows.
+- **Nomi neutri dei feed:** «Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL)», «W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL)», «Pickett-Potter» e «W2IMU dual-mode». Tolti i giudizi (migliore, il più efficiente…) dai nomi e dalle descrizioni dei feed, nell'interfaccia e nei manuali. Gli autori restano nei crediti; i file di progetto già salvati si riaprono senza problemi.
+
+### 🇬🇧 What's new
+- **FeedLab for Linux:** .deb package for Debian/Ubuntu and AppImage for any distribution (a single file, no installation), in the same release as Windows.
+- **Neutral feed names:** "Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL)", "W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL)", "Pickett-Potter" and "W2IMU dual-mode". Value judgements (best, most efficient…) removed from feed names and descriptions, in the interface and the manuals. The authors stay in the credits; saved project files open as before.
+
+Requisiti / Requirements: Windows 10/11 64-bit; Linux x86_64 (glibc 2.31+: Debian 11+, Ubuntu 20.04+).
+
+---
+
 ## FeedLab 0.4.25 BETA TEST per Windows / for Windows
 
 **Installazione / Installation:** `FeedLab-Setup-0.4.25.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.25-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
