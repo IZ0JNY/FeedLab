@@ -4,6 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
+| 1 | **Nome dei file salvati a scelta**: casella «Nome file» precompilata col nome predefinito in Disegno & STEP, Piastrina, Output di progetto e openEMS; se la si lascia così si usa il predefinito, l'estensione si aggiunge da sola | ✅ fatto |
 
 ---
 

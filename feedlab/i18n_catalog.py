@@ -1645,4 +1645,6 @@ ENTRIES = [
     ('Feed pubblicati da OM (riferimento)', 'Feeds published by hams (reference)'),
     ('FeedLab progetta da 10 GHz in su.', 'FeedLab designs from 10 GHz up.'),
     ("manuale d'uso in PDF nella lingua scelta", 'PDF user manual in the chosen language'),
+    ('Nome file', 'File name'),
+    ("Lascia il nome proposto o scrivine uno tuo; l'estensione si aggiunge da sola.", 'Keep the proposed name or type your own; the extension is added automatically.'),
 ]
