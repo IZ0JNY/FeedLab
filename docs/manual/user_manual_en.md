@@ -210,17 +210,17 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 
 | Feed | Range of use | Notes |
 |---|---|---|
-| **Axial Corrugated Feedhorn CT1DMK** (parametric calculation OE2IGL) | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %; 8 axial steps (OE2IGL v1.4); openEMS for verification |
+| **Axial Corrugated Feedhorn CT1DMK**, parametric calculation OE2IGL | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %; 8 axial steps (OE2IGL v1.4); openEMS for verification |
 | **Chaparral 3 rings** | prime focus f/D < 0.33 | 78 % at f/D 0.35; openEMS |
 | **Conical horn** | general purpose | simple, wide band |
-| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; low antenna temperature, very low S11; checked with openEMS at 24 GHz |
+| **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; low antenna temperature, very low S11; checked with openEMS at 24 GHz |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verify full-wave before building |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | +1.6…2.3 dB of sun noise on offset dishes (W1GHZ 2024) |
 | **Open circular waveguide** | small deep dishes | minimal blockage, poor F/B |
 | **Pickett-Potter** | f/D 0.5–0.95, also above 76 GHz | ~80 % (OE2IGL) |
 | **Rectangular horn** | linear polarisation, < 40 GHz | sheet metal, directly from WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke ring; openEMS |
-| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | W1GHZ rules / OE2IGL parametric calculation from the opening angle |
+| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn**, parametric calculation OE2IGL | offset / f/D 0.5–0.95 | W1GHZ rules / OE2IGL parametric calculation from the opening angle |
 
 ---
 
@@ -561,7 +561,7 @@ Socket heads ISO 4762 / ASME B18.3; flat heads ISO 7046 (90°) / UNC 82°. Blind
 ## 16. Worked example: 24 GHz EME feed for a 2.4 m offset dish
 
 1. **Sidebar:** Band **24.048 GHz**, material **Brass CuZn39Pb3** (or silver-plated brass), waveguide **WR-42**, base **Circular**.
-2. **Guided procedure:** catalogue → **Channel Master Type 243 2.4 m**; goal **Maximum G/T**; illumination **Automatic** or e.g. 12 dB; **Find the best feed** → **Dual-Flare (IZ0JNY)** → **Use this feed**.
+2. **Guided procedure:** catalogue → **Channel Master Type 243 2.4 m**; goal **Maximum G/T**; illumination **Automatic** or e.g. 12 dB; **Find the best feed** → **Dual-Flare, IZ0JNY** → **Use this feed**.
 3. **Feed design:** check "Designed for f/D …"; base thickness automatic; **Apply changes** after any edit.
 4. **Laboratory:** goal **EME**, LNA NF and line loss; read **Tsys** and Δ S/N; **Analyse tolerances** at ±0.1 mm.
 5. **Simulation & S11:** S11 < −20 dB over the band; compare the **−10 dB angle** with the dish opening; η and phase centre.
