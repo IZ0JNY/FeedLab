@@ -242,7 +242,10 @@ def build(sim_path):
 
     pad = C["pad_lambda"] * lam0 + 10 * res
     z_back = -max(lam0, 3 * R_IN)                       # input guide runs into the back PML (matched)
-    xy = sorted(set([-R_MAX - pad, R_MAX + pad, 0.0, -R_IN, R_IN]
+    # wall of the input guide that runs into the back PML: at least two cells thick, with its own mesh lines
+    # (a fixed 0.5 mm wall fell between the lines at 10 GHz, 1.3 mm cells, and the guide was open)
+    w_in = max(1.0, 2.0 * res)
+    xy = sorted(set([-R_MAX - pad, R_MAX + pad, 0.0, -R_IN, R_IN, -(R_IN + w_in), R_IN + w_in]
                     + [s * float(r) for p in POLYS for r in p[0] for s in (1, -1)]))
     mesh.SetLines("x", xy)
     mesh.SmoothMeshLines("x", res, ratio=1.4)
@@ -253,7 +256,7 @@ def build(sim_path):
     x_lines, y_lines, z_lines = mesh.GetLines("x"), mesh.GetLines("y"), mesh.GetLines("z")
 
     metal = CSX.AddMetal("feed")
-    metal.AddRotPoly(points=np.array([[R_IN + 0.5, R_IN + 0.5, R_IN, R_IN], [z_back, 0.0, 0.0, z_back]]),
+    metal.AddRotPoly(points=np.array([[R_IN + w_in, R_IN + w_in, R_IN, R_IN], [z_back, 0.0, 0.0, z_back]]),
                      norm_dir="x", elevation=0, rot_axis="z", angle=[0, 2 * np.pi], priority=10)
     for p in POLYS:
         metal.AddRotPoly(points=np.array(p), norm_dir="x", elevation=0, rot_axis="z",

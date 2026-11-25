@@ -288,16 +288,5 @@ def main(argv=None) -> int:
         return 0
 
 
-def launch_other(app: str) -> None:
-    """Start the other program (FeedLab ↔ EMELab) as its own process and window."""
-    exe = Path(sys.executable)
-    pyw = exe.with_name("pythonw.exe")
-    cmd = [str(pyw if IS_WIN and pyw.exists() else exe), "-m", "feedlab.desktop", "--app", app]
-    if not IS_WIN:
-        cmd.append("--browser")
-    subprocess.Popen(cmd, cwd=str(ROOT), creationflags=NO_WINDOW if IS_WIN else 0,
-                     start_new_session=not IS_WIN)
-
-
 if __name__ == "__main__":
     sys.exit(main())
