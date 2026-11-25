@@ -155,9 +155,9 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
         if D_l > 40:
             for c in cands:
                 c.warnings.append("parabola > 40λ: valutare Cassegrain con feed dual-mode (vedi modulo Cassegrain)")
-    # Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL), v1.4: 10-76 GHz, prime f/D 0.33-0.9, offset-equivalent 0.33-0.8
+    # Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL, v1.4: 10-76 GHz, prime f/D 0.33-0.9, offset-equivalent 0.33-0.8
     if 10 <= f_ghz <= 76 and 0.33 <= fD_feed <= (0.9 if dish.kind == "prime" else 0.8):
-        add("axial_corrugated", ["Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL), 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D",
+        add("axial_corrugated", ["Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL, 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D",
                                  "facile al tornio fino a 47 GHz; da 76 GHz si usano Pickett-Potter o cavity feed"],
             ["simulazione rapida non disponibile (scalini assiali): verifica con openEMS"]
             + (["sopra 47 GHz gli scalini diventano molto stretti"] if f_ghz > 47 else []))

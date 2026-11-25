@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.patches import Polygon, Rectangle
 
-from .geometry import FEED_TYPES, FeedGeometry, RectHornGeometry, wall_features
+from .geometry import FEED_TYPES, FeedGeometry, short_title, RectHornGeometry, wall_features
 
 
 def tolerance_mm(f_ghz: float) -> float:
@@ -238,7 +238,7 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
     """tolerances: rows from tolerance.analyse(...).critical — printed as a table of the tolerance each
     critical dimension needs (the general tolerance applies to all the others)."""
     path = Path(path)
-    title = title or f"{FEED_TYPES.get(geo.kind, geo.kind)}"
+    title = title or short_title(FEED_TYPES.get(geo.kind, geo.kind), geo.f_ghz)
     from . import i18n
     # Axial Corrugated: sheet 1 = half-section at double scale, sheet 2 = whole section
     views = [True, False] if geo.kind == "axial_corrugated" else [False]

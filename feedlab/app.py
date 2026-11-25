@@ -1093,7 +1093,7 @@ with tabs[8], contextlib.suppress(_Skip):
     st.header("Disegno meccanico (PDF) e file per la produzione")
     geo = current_geometry()
     mat = st.text_input("Materiale", f"{S.material}, interno lucidato Ra ≤ {materials.MATERIALS[S.material].rq_um} µm")
-    name = st.text_input("Titolo", f"{geometry.FEED_TYPES[geo.kind]} {S.f_ghz:g} GHz")
+    name = st.text_input("Titolo", geometry.short_title(geometry.FEED_TYPES[geo.kind], S.f_ghz))
     _tol_rec = drawing.tolerance_mm(S.f_ghz)
     _tol = st.number_input(_T("Tolleranza generale di lavorazione ± (mm, consigliata {t:g} per {f:g} GHz)", t=_tol_rec, f=S.f_ghz),
                            min_value=0.005, max_value=1.0, value=float(_tol_rec), step=0.005, format="%.3f",
