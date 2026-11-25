@@ -11,7 +11,7 @@ license = {text = "GPL-3.0-or-later"}
 authors = [{name = "Ivan De Cesaris IZ0JNY", email = "ivan@iz0jny.it"}]
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.24", "scipy>=1.10", "matplotlib>=3.7", "plotly>=5.18", "streamlit>=1.35", "cadquery>=2.4", "pyerfa>=2.0"]
+dependencies = ["numpy>=1.24", "scipy>=1.10", "matplotlib>=3.7", "plotly>=5.18", "streamlit>=1.35", "cadquery>=2.4", "pypdf>=4.0"]
 
 [project.optional-dependencies]
 test = ["pytest"]
