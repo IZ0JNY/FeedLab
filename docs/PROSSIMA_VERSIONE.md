@@ -4,7 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | **FeedLab per Linux**: pacchetto .deb (Debian/Ubuntu) e tar.xz portatile, compilati da GitHub Actions (`linux/build.sh`) e pubblicati nella stessa release di Windows; finestra propria GTK/WebKit o browser | ✅ fatto |
+| 1 | **FeedLab per Linux**: pacchetto .deb (Debian/Ubuntu) e AppImage (un solo file, senza installazione), compilati da GitHub Actions (`linux/build.sh`) e pubblicati nella stessa release di Windows; finestra propria GTK/WebKit o browser | ✅ fatto |
 
 ---
 

@@ -41,11 +41,11 @@ Compilazione: GitHub Actions (`.github/workflows/windows.yml`) esegue i test su 
 Nella stessa pagina [Releases](https://github.com/IZ0JNY/FeedLab/releases) ci sono i file per Linux (x86_64):
 
 - **`feedlab_<versione>_amd64.deb`** per Debian e Ubuntu: `sudo apt install ./feedlab_<versione>_amd64.deb`, poi FeedLab nel menu delle applicazioni oppure il comando `feedlab`. Si installa in `/opt/feedlab` con il suo Python e tutte le librerie.
-- **`FeedLab-<versione>-linux-x86_64.tar.xz`**, versione portatile: estrai e avvia `./bin/feedlab`.
+- **`FeedLab-<versione>-x86_64.AppImage`**, per qualsiasi distribuzione e senza installazione: un solo file; rendilo eseguibile (`chmod +x FeedLab-*.AppImage`, oppure Proprietà → «Consenti l'esecuzione») e avvialo con un doppio clic. Se il sistema non ha FUSE (`libfuse2`), avvialo con `--appimage-extract-and-run`.
 
 L'app si apre in una finestra propria (GTK/WebKit, pacchetti `gir1.2-webkit2-4.1` e `gir1.2-gtk-3.0`, che apt installa insieme al .deb); se mancano, si apre nel browser (`feedlab --browser` per sceglierlo). openEMS su Linux si installa dal gestore di pacchetti o si compila, poi si indica la cartella nella scheda **🖥️ Full-wave openEMS → ① Installazione**.
 
-Compilazione: lo stesso workflow GitHub Actions compila anche per Linux (`linux/build.sh`: Python autonomo + pacchetti + app, poi .deb e tar.xz) e mette i file nella stessa release di Windows.
+Compilazione: lo stesso workflow GitHub Actions compila anche per Linux (`linux/build.sh`: Python autonomo + pacchetti + app, poi .deb e AppImage) e mette i file nella stessa release di Windows.
 
 ## Interfaccia grafica
 
