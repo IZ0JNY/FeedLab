@@ -1226,6 +1226,8 @@ ENTRIES = [
     ('ingresso Ø≈1.02λ: propagano anche TM01/TE21, non eccitati dal TE11 in struttura simmetrica — raccordare con taper dolce dalla guida monomodo', 'input Ø≈1.02λ: TM01/TE21 also propagate, not excited by TE11 in a symmetrical structure — use a gentle taper from the single-mode guide'),
     ("dual-mode, PC sull'apertura, facile al tornio", 'dual-mode, phase centre at the aperture, easy on a lathe'),
     ('flare 30° con punta da centri: ideale 47-241 GHz', '30° flare with a centre drill: ideal for 47-241 GHz'),
+    ('migliore G/T su offset (+1.6…2.3 dB sun noise)', 'better G/T on offset dishes (+1.6…2.3 dB of sun noise)'),
+    ('classico W1GHZ (B ≈ 2.35 f/D)', 'classic W1GHZ (B ≈ 2.35 f/D)'),
     ('semplice da lamiera, diretto da guida WR', 'simple from sheet metal, fed directly from WR guide'),
     ('simulazione rapida non disponibile (anello coassiale): usare openEMS', 'fast simulation not available (coaxial ring): use openEMS'),
     ('simulazione rapida non disponibile: usare openEMS', 'fast simulation not available: use openEMS'),

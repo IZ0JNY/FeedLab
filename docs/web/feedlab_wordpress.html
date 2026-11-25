@@ -1,0 +1,67 @@
+<!-- FeedLab presentation: paste into a WordPress «Custom HTML» block. Images are served from the public FeedLab repository on GitHub. -->
+<div class="feedlab-page" style="max-width:1100px;">
+<p><strong>FeedLab</strong> is a free, open-source program to design feeds for microwave EME dishes, from 10 GHz up to 134 GHz.</p>
+<p>FeedLab does not pretend to compete with anybody or with the excellent tools many hams already use. Its aim is simpler: thanks to a fast mode-matching engine, it lets you play with the parameters of the best-known feeds in the literature and see at once what happens to illumination, spillover, efficiency, G/T and S11 on your own dish — for our EME hobby the feed is a fundamental component. When you want to go deeper, openEMS is built in, so the same design can be checked with a full-wave simulation without leaving the program.</p>
+<p>The other half of the idea is construction. FeedLab produces the 3D files (STEP and STL), dimensioned PDF drawings with tolerances, the λ/4 matching plate from the rectangular waveguide with the flange holes, the feed + plate assembly and a full project report. In this way anybody can have a feed made, even without any CAD knowledge, for example through the online CNC services (JLCCNC, PCBWay, Weerg: their materials and surface finishes are in the program).</p>
+<h3>What is inside</h3>
+<ul>
+<li><strong>Feeds:</strong> open circular guide, W2IMU dual-mode (W1GHZ) and its OE2IGL optimised version, Large W2IMU flare (W1GHZ/W1FKF), Skobelev dual-mode, Pickett-Potter (OE2IGL), conical horn, VE4MA/Super-VE4MA choke, Chaparral, Axial Corrugated (CT1DMK, improved by OE2IGL), rectangular horn (G3RPE) and the Dual-Flare (IZ0JNY).</li>
+<li><strong>Dishes:</strong> catalogue of prime-focus and offset dishes with real data, or your own custom dish; edge taper of your choice; guided procedure that suggests the best feed.</li>
+<li><strong>Simulation:</strong> fast mode-matching simulator for patterns, efficiencies, phase centre, S11 and G/T; tolerance analysis; openEMS full-wave check of the same geometry.</li>
+<li><strong>Outputs:</strong> STEP/STL, PDF drawings, matching plate, assembly, project file (.json) and project reports in PDF and CSV.</li>
+<li><strong>Windows 10/11</strong> installer (no administrator rights) or portable zip; English and Italian, with a detailed user manual.</li>
+</ul>
+<h3>Screenshots</h3>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-01-guided-procedure.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-01-guided-procedure.jpg" alt="FeedLab – Guided procedure" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Guided procedure: choose your dish (commercial catalogue or custom), band, polarisation and goal; FeedLab finds the best feed for it.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-02-best-feed.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-02-best-feed.jpg" alt="FeedLab – Dish illumination with your edge taper" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Dish illumination with your edge taper: spillover, illumination efficiency and the illuminated dish in 3D.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-03-feed-design.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-03-feed-design.jpg" alt="FeedLab – Feed design" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Feed design: every dimension editable, with the axial section, the critical dimensions and the CNC options.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-04-laboratory.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-04-laboratory.jpg" alt="FeedLab – Laboratory" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Laboratory: move the dimensions and see at once what happens to gain, efficiency, G/T, antenna temperature and S11.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-05-fast-simulation.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-05-fast-simulation.jpg" alt="FeedLab – Fast mode-matching simulation" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Fast mode-matching simulation: S11 over the band, mode content at the aperture, E/H-plane patterns.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-06-3d-model.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-06-3d-model.jpg" alt="FeedLab – 3D model of the feed, exported as STEP and STL for CNC machining." style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">3D model of the feed, exported as STEP and STL for CNC machining.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-07-assembly.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-07-assembly.jpg" alt="FeedLab – Feed + λ/4 matching plate assembly with the waveguide flange holes, in 3D and updated at every change." style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Feed + λ/4 matching plate assembly with the waveguide flange holes, in 3D and updated at every change.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-08-matching-plate.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-08-matching-plate.jpg" alt="FeedLab – λ/4 matching plate from the rectangular waveguide (WR-90, WR-75, WR-42, WR-22…) to the feed's circular guide." style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">λ/4 matching plate from the rectangular waveguide (WR-90, WR-75, WR-42, WR-22…) to the feed's circular guide.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-09-drawings.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-09-drawings.jpg" alt="FeedLab – Dimensioned PDF drawings with tolerances, STEP and STL" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Dimensioned PDF drawings with tolerances, STEP and STL: ready for the online CNC services.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-10-openems.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-10-openems.jpg" alt="FeedLab – Optional full-wave check with openEMS, built in" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Optional full-wave check with openEMS, built in: guided installation and simulation of the same geometry.</figcaption>
+</figure>
+<figure style="margin:0 0 28px 0;">
+  <a href="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-11-project-outputs.jpg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/IZ0JNY/FeedLab/main/docs/web/feedlab-11-project-outputs.jpg" alt="FeedLab – Project outputs" style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px;" loading="lazy"></a>
+  <figcaption style="font-size:0.9em;color:#555;margin-top:6px;">Project outputs: choose the PDFs to generate (full report, simulations, feed, dish, plate, data table), the project file and the 3D models.</figcaption>
+</figure>
+<h3>Download and manual</h3>
+<p>Please read the user manual first: it shows, tab by tab, what FeedLab does and how to use it.</p>
+<ul>
+<li><a href="https://github.com/IZ0JNY/FeedLab/blob/main/docs/manual/FeedLab_User_Manual_EN.pdf" target="_blank" rel="noopener">User manual (PDF, English)</a> · <a href="https://github.com/IZ0JNY/FeedLab/blob/main/docs/manual/FeedLab_Manuale_IT.pdf" target="_blank" rel="noopener">Manuale d'uso (PDF, italiano)</a></li>
+<li><a href="https://github.com/IZ0JNY/FeedLab/releases/latest" target="_blank" rel="noopener">Download the latest version</a> (Windows installer or portable zip, with SHA256SUMS.txt)</li>
+<li><a href="https://github.com/IZ0JNY/FeedLab" target="_blank" rel="noopener">Source code on GitHub</a> (GPL v3)</li>
+</ul>
+<p>FeedLab is a BETA version and beta testers are very welcome: tell me what does not work, what is not clear and what you would like to see, privately by e-mail or by <a href="https://github.com/IZ0JNY/FeedLab/issues" target="_blank" rel="noopener">opening an issue on GitHub</a>.</p>
+</div>

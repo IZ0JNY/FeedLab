@@ -1,3 +1,19 @@
+## FeedLab 0.4.25 BETA TEST per Windows / for Windows
+
+**Installazione / Installation:** `FeedLab-Setup-0.4.25.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.25-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **openEMS a 10 GHz corretto:** nella simulazione full-wave la guida d'ingresso del feed aveva una parete fissa di 0.5 mm, più sottile della griglia a 10 GHz (celle di 1.3 mm). La guida risultava aperta e i risultati erano sbagliati (S11 circa −2.6 dB, efficienza 35 %). Ora la parete è spessa almeno due celle e ha le sue linee di griglia. Dual-Flare (IZ0JNY) a 10368.2 MHz sulla Channel Master 243: 47.1 dBi, efficienza 76 %, S11 sotto −18 dB, in accordo con il simulatore veloce. La correzione vale per tutti i feed e tutte le bande.
+- **Inglese:** tradotte due note rimaste in italiano nella scelta del feed; «—» al posto di «None» nella tabella dei feed.
+
+### 🇬🇧 What's new
+- **openEMS at 10 GHz fixed:** in the full-wave simulation the feed's input guide had a fixed 0.5 mm wall, thinner than the 10 GHz mesh (1.3 mm cells). The guide was open and the results were wrong (S11 about −2.6 dB, 35 % efficiency). Now the wall is at least two cells thick and has its own mesh lines. Dual-Flare (IZ0JNY) at 10368.2 MHz on the Channel Master 243: 47.1 dBi, 76 % efficiency, S11 below −18 dB, in agreement with the fast simulator. The fix applies to every feed and band.
+- **English:** two notes left in Italian in the feed choice are now translated; «—» instead of «None» in the feed table.
+
+Requisiti / Requirements: Windows 10/11 64-bit.
+
+---
+
 ## FeedLab 0.4.24 BETA TEST per Windows / for Windows
 
 **Installazione / Installation:** `FeedLab-Setup-0.4.24.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.24-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.

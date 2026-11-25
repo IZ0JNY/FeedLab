@@ -816,8 +816,8 @@ with tabs[0]:
     if S.cands:
         rows = []
         for i, c in enumerate(S.cands):
-            rows.append({"#": i + 1, "Feed": c.label, "η stimata %": round(100 * c.eta_est, 1) if c.eta_est else None,
-                         "f/D ottimo del feed": round(c.best_fD, 2) if c.best_fD else None,
+            rows.append({"#": i + 1, "Feed": c.label, "η stimata %": round(100 * c.eta_est, 1) if c.eta_est else "—",
+                         "f/D ottimo del feed": round(c.best_fD, 2) if c.best_fD else "—",
                          "Ingombro Ø mm": round(c.blockage_diam_mm, 1) if c.blockage_diam_mm else "— (offset)",
                          "Perché": "; ".join(c.reasons), "Attenzione": "; ".join(c.warnings)})
         st.dataframe(rows, width="stretch", hide_index=True)

@@ -1,10 +1,18 @@
-# Modifiche per la prossima versione (0.4.25)
+# Modifiche per la prossima versione (0.4.26)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | openEMS a 10 GHz: capire perché la simulazione del Dual-Flare dà S11 −2.6 dB (porta o dominio) e ripeterla | ⬜ da fare |
+
+---
+
+# Versione 0.4.25 (pubblicata, BETA TEST)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | openEMS a 10 GHz: la parete della guida d'ingresso (0.5 mm fissi) cadeva tra le linee della griglia (celle di 1.3 mm) e la guida restava aperta; ora è spessa almeno due celle con le sue linee. Dual-Flare a 10368.2 MHz: 47.1 dBi, η 76 %, S11 < −18 dB; test di regressione | ✅ fatto |
+| 2 | Inglese: note «migliore G/T su offset» e «classico W1GHZ» tradotte; «—» al posto di «None» nella tabella dei feed | ✅ fatto |
 
 ---
 
