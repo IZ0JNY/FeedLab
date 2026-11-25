@@ -12,6 +12,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .geometry import short_title
+
 A4 = (8.27, 11.69)
 
 
@@ -30,7 +32,7 @@ def _fig():
 def _header(fig, proj, title):
     i = proj["inputs"]
     fig.text(0.06, 0.965, "FeedLab — " + _tr(title), fontsize=13, weight="bold")
-    fig.text(0.06, 0.945, f"{i.get('feed_name', '')} · {i.get('f_ghz', 0):.3f} GHz · "
+    fig.text(0.06, 0.945, f"{short_title(i.get('feed_name', ''), i.get('f_ghz'))} · "
              f"{_tr('parabola')} {i['dish']['kind']} D {i['dish']['D_mm']:.0f} mm f/D {i['dish']['fD']:.3f} · "
              f"{_tr(i.get('material') or '')}", fontsize=8, color="0.3")
     fig.text(0.06, 0.02, f"FeedLab {proj.get('app_version', '')} · {proj.get('created_utc', '')} UTC · © Ivan De Cesaris IZ0JNY",
@@ -275,7 +277,7 @@ def _cover(pdf, proj):
     fig = _fig()
     fig.text(0.5, 0.80, "FeedLab", ha="center", fontsize=30, weight="bold", color="#12324f")
     fig.text(0.5, 0.75, _tr("Report di progetto"), ha="center", fontsize=18)
-    fig.text(0.5, 0.68, i.get("feed_name", ""), ha="center", fontsize=14)
+    fig.text(0.5, 0.68, short_title(i.get("feed_name", ""), i.get("f_ghz")), ha="center", fontsize=14)
     fig.text(0.5, 0.645, f"{i.get('f_ghz', 0):.3f} GHz · {_tr(i.get('material') or '')}", ha="center", fontsize=11)
     d = i["dish"]
     fig.text(0.5, 0.61, f"{_tr('parabola')} {d['kind']} D {d['D_mm']:.0f} mm f/D {d['fD']:.3f}", ha="center", fontsize=11)

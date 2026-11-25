@@ -90,7 +90,7 @@ def w2imu_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
     C = (-7.41104e-10 * th ** 5 + 3.00061e-7 * th ** 4 - 4.83865e-5 * th ** 3 + 3.88389e-3 * th ** 2
          - 0.155265 * th + 2.4863) * th / (1 / lg1 - 1 / lg2)
     alpha = 44.6 * lam / B
-    return Design("W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL)", f_ghz,
+    return Design("W2IMU Dual-Mode Feedhorn, parametric calculation OE2IGL", f_ghz,
                   {"input_diam_A": A, "aperture_diam_B": B, "length_C": C, "flare_half_deg": alpha,
                    "f_min_ghz": 1.15 * fc, "f_max_ghz": 1.57 * fc},
                   "OE2IGL DualModeHorn-design-guide 2024",
@@ -198,7 +198,7 @@ def axial_corrugated_oe2igl(f_ghz: float, opening_angle_deg: float) -> Design:
              "valido 10–76 GHz, prime focus f/D 0.33–0.90, offset 0.33–0.80"]
     if not 10 <= f_ghz <= 76:
         notes.append("ATTENZIONE: fuori dall'intervallo di frequenza validato (10–76 GHz)")
-    return Design("Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL)", f_ghz, {**d, **eff}, "OE2IGL high-performance-axial-corrugated-feed v1.4", notes)
+    return Design("Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL", f_ghz, {**d, **eff}, "OE2IGL high-performance-axial-corrugated-feed v1.4", notes)
 
 
 # ---------------- choke-ring feeds ----------------
@@ -242,7 +242,7 @@ def rect_feedhorn_g3rpe(f_ghz: float, fD: float, wg_a_mm: float, wg_b_mm: float)
         notes.append(f"apertura H più piccola della guida: f/D minimo con questa guida ≈ {(wg_a_mm / lam + 0.575) / 2.864:.2f}")
     L_apex = AH * AH / lam
     L = L_apex * (AH - wg_a_mm) / AH
-    return Design("Rectangular feedhorn (G3RPE)", f_ghz,
+    return Design("Rectangular feedhorn, G3RPE", f_ghz,
                   {"aperture_H": AH, "aperture_E": AE, "axial_length": L, "wg_a": wg_a_mm, "wg_b": wg_b_mm},
                   "G3RPE curves / W1GHZ HDL_ANT", notes + ["centro di fase ≈ 0.1-0.2λ dentro l'apertura"])
 
@@ -293,5 +293,5 @@ def conical_optimum(f_ghz: float, gain_dbi: float, guide_diam_mm: float) -> Desi
 def diagonal_horn_side(f_ghz: float, bw10_full_deg: float) -> Design:
     lam = wavelength_mm(f_ghz)
     d = 101.0 * lam / bw10_full_deg
-    return Design("Diagonal horn (Love)", f_ghz, {"side": d, "bw3_full_deg": 58.5 * lam / d},
+    return Design("Diagonal horn, Love", f_ghz, {"side": d, "bw3_full_deg": 58.5 * lam / d},
                   "A.W. Love / W1GHZ 6.5.3", ["flare < 30° full", "45° plane sidelobes (cross-pol)"])
