@@ -1,3 +1,23 @@
+## FeedLab 0.4.27 BETA TEST per Windows e Linux / for Windows and Linux
+
+**Installazione / Installation:** Windows: `FeedLab-Setup-0.4.27.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.27-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.27_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.27_amd64.deb`) oppure / or `FeedLab-0.4.27-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **Nomi dei feed con la virgola:** l'autore segue il nome dopo una virgola, senza parentesi: «Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL», «W2IMU Dual-Mode Feedhorn, parametric calculation OE2IGL», «Large W2IMU flare 30°, W1GHZ/W1FKF», «Dual-mode 'optimum' Skobelev, W1GHZ», «Tromba rettangolare, G3RPE», «Dual-Flare, IZ0JNY».
+- **Titoli corti:** nel disegno e nel report il titolo è il nome del feed senza «Feedhorn» e la banda in GHz, per esempio «W2IMU Dual-Mode, parametric calculation OE2IGL 24 GHz». Nelle schede e nelle tabelle restano il nome completo e la frequenza esatta.
+- **Nome dei file salvati a scelta:** casella «Nome file» precompilata col nome predefinito in Disegno & STEP, Piastrina, Output di progetto e openEMS; l'estensione si aggiunge da sola.
+- **Modello 3D più grande:** la vista della scheda 🧊 Modello 3D è più alta e più vicina al feed.
+
+### 🇬🇧 What's new
+- **Feed names with a comma:** the author follows the name after a comma, without brackets: "Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL", "W2IMU Dual-Mode Feedhorn, parametric calculation OE2IGL", "Large W2IMU flare 30°, W1GHZ/W1FKF", "Dual-mode 'optimum' Skobelev, W1GHZ", "Rectangular horn, G3RPE", "Dual-Flare, IZ0JNY".
+- **Short titles:** in the drawing and the report the title is the feed name without "Feedhorn" and the band in GHz, e.g. "W2IMU Dual-Mode, parametric calculation OE2IGL 24 GHz". Tabs and tables keep the full name and the exact frequency.
+- **Choose the name of saved files:** a «File name» box filled in with the default name in Drawing & STEP, Plate, Project outputs and openEMS; the extension is added automatically.
+- **Larger 3D model:** the view in the 🧊 3D model tab is taller and closer to the feed.
+
+Requisiti / Requirements: Windows 10/11 64-bit; Linux x86_64 (glibc 2.31+: Debian 11+, Ubuntu 20.04+).
+
+---
+
 ## FeedLab 0.4.26 BETA TEST per Windows e Linux / for Windows and Linux
 
 **Installazione / Installation:** Windows: `FeedLab-Setup-0.4.26.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.26-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.26_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.26_amd64.deb`) oppure / or `FeedLab-0.4.26-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
