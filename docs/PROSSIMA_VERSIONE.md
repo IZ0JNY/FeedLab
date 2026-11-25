@@ -5,6 +5,7 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | **FeedLab per Linux**: pacchetto .deb (Debian/Ubuntu) e tar.xz portatile, compilati da GitHub Actions (`linux/build.sh`) e pubblicati nella stessa release di Windows; finestra propria GTK/WebKit o browser | ✅ fatto |
+| 2 | **Nomi neutri dei feed**: «Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL)» e «W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL)» al posto di «versione migliorata»/«ottimizzato»; tolti i giudizi (migliore, il più efficiente…) da nomi e descrizioni dei feed in interfaccia, manuali IT/EN e documenti | ✅ fatto |
 
 ---
 

@@ -140,7 +140,7 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                            "fredda (EME), compatto", "solo coni e cilindri: facile al tornio",
                            "verificato con openEMS a 24 e 47 GHz sulla Channel Master 243"])
         if 0.65 <= fD_feed <= 0.85:
-            add("large_w2imu", ["flare 30° con punta da centri: ideale 47-241 GHz", "migliore G/T su offset (+1.6…2.3 dB sun noise)"])
+            add("large_w2imu", ["flare 30° con punta da centri: ideale 47-241 GHz", "su offset: +1.6…2.3 dB di sun noise (W1GHZ 2024)"])
         if fD_feed > 0.95:
             add("skobelev", ["unico dual-mode adatto a f/D > 0.9 (apertura 2-6 λ)"])
         if polarization == "linear" and f_ghz < 40 and fD_feed >= 0.48:
@@ -149,16 +149,16 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
         add("ve4ma", ["Super-VE4MA: 79% calc., 65% misurato (record prime-focus)"],
             ["simulazione rapida non disponibile (anello coassiale): usare openEMS"] +
             (["ostruzione alta su parabola piccola"] if D_l < 12 else []), variant="super")
-        add("chaparral", ["3 anelli bassi 0.2×0.2λ: 78% @ f/D 0.35; migliore per f/D < 0.33"],
+        add("chaparral", ["3 anelli bassi 0.2×0.2λ: 78% @ f/D 0.35; adatto a f/D < 0.33"],
             ["simulazione rapida non disponibile: usare openEMS"], variant="best" if fD >= 0.3 else "deep_dish")
         add("open_circular", ["semplicissimo, ostruzione minima per parabole < 10 λ"], ["F/B scarso, ~10 punti sotto i choke"])
         if D_l > 40:
             for c in cands:
                 c.warnings.append("parabola > 40λ: valutare Cassegrain con feed dual-mode (vedi modulo Cassegrain)")
-    # Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL v1.4): 10-76 GHz, prime f/D 0.33-0.9, offset-equivalent 0.33-0.8
+    # Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL), v1.4: 10-76 GHz, prime f/D 0.33-0.9, offset-equivalent 0.33-0.8
     if 10 <= f_ghz <= 76 and 0.33 <= fD_feed <= (0.9 if dish.kind == "prime" else 0.8):
-        add("axial_corrugated", ["Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL), 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D",
-                                 "facile al tornio fino a 47 GHz; da 76 GHz meglio Pickett-Potter o cavity feed"],
+        add("axial_corrugated", ["Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL), 8 scalini: 81-86% (foglio di calcolo v1.4, openEMS), ampio campo di f/D",
+                                 "facile al tornio fino a 47 GHz; da 76 GHz si usano Pickett-Potter o cavity feed"],
             ["simulazione rapida non disponibile (scalini assiali): verifica con openEMS"]
             + (["sopra 47 GHz gli scalini diventano molto stretti"] if f_ghz > 47 else []))
     # ---------- adjustments ----------

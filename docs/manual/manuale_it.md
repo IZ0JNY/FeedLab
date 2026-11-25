@@ -208,19 +208,19 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 
 ### 5.5 Tipi di feed
 
-| Feed | Ideale per | Note |
+| Feed | Campo d'uso | Note |
 |---|---|---|
-| **Axial Corrugated** (base concept Luis CT1DMK, improved version Gerald OE2IGL) | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %, il più efficiente; 8 scalini assiali (OE2IGL v1.4); verifica con openEMS |
+| **Axial Corrugated Feedhorn CT1DMK** (parametric calculation OE2IGL) | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %; 8 scalini assiali (OE2IGL v1.4); verifica con openEMS |
 | **Chaparral 3 anelli** | prime focus f/D < 0.33 | 78 % a f/D 0.35; openEMS |
 | **Horn conico** | uso generale | semplice, a larga banda |
-| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME | scalino + cono + cilindro di fasatura + secondo cono; antenna più fredda, G/T migliore, S11 molto basso; verificato con openEMS a 24 GHz |
+| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME | scalino + cono + cilindro di fasatura + secondo cono; temperatura d'antenna bassa, S11 molto basso; verificato con openEMS a 24 GHz |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verificare full-wave prima di costruire |
-| **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | miglior G/T sulle offset |
+| **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | su offset +1.6…2.3 dB di sun noise (W1GHZ 2024) |
 | **Guida circolare aperta** | parabole piccole e profonde | blocking minimo, F/B scarso |
 | **Pickett-Potter** | f/D 0.5–0.95, anche oltre 76 GHz | ~80 % (OE2IGL) |
 | **Tromba rettangolare** | polarizzazione lineare, < 40 GHz | lamiera, direttamente dalla WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke; openEMS |
-| **W2IMU dual-mode / W2IMU ottimizzato** | offset / f/D 0.5–0.95 | classico W1GHZ / ottimizzazione OE2IGL |
+| **W2IMU dual-mode (Turrin/W1GHZ) / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | regole W1GHZ / calcolo parametrico OE2IGL dall'angolo di apertura |
 
 ---
 

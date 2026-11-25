@@ -47,7 +47,7 @@ TECH_SOURCES = [
     ("Ivan IZ0JNY", "Dual-Flare (IZ0JNY) (FeedLab, 2026)",
      "feed a scalino + doppio cono con sezione di fasatura, ottimizzato per EME con il solutore di FeedLab", ""),
     ("Gerald OE2IGL", "*High performance axial corrugated feed* v1.4 (foglio di calcolo e presentazione, Dorsten 2026)",
-     "Axial Corrugated (progetto base Luis CT1DMK, versione migliorata Gerald OE2IGL): quote in funzione dell'angolo di apertura, efficienza 81-86%",
+     "Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL): quote in funzione dell'angolo di apertura, efficienza 81-86%",
      "https://wettersat.bplaced.net/feed-simulation.html"),
     ("Flann Microwave", "*Waveguide and Flange Data*; MIL-DTL-3922/67C", "foratura delle flange standard delle guide WR",
      "https://flann.com/wp-content/uploads/2025/02/Waveguide-and-Flange-Data.pdf"),
