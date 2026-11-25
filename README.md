@@ -36,6 +36,17 @@ Scarica **`FeedLab-Setup-<versione>.exe`** dalla pagina [Releases](https://githu
 
 Compilazione: GitHub Actions (`.github/workflows/windows.yml`) esegue i test su Windows e crea installer e zip; in locale `windows\build.ps1` (Python embedded + pacchetti + Inno Setup).
 
+## FeedLab per Linux
+
+Nella stessa pagina [Releases](https://github.com/IZ0JNY/FeedLab/releases) ci sono i file per Linux (x86_64):
+
+- **`feedlab_<versione>_amd64.deb`** per Debian e Ubuntu: `sudo apt install ./feedlab_<versione>_amd64.deb`, poi FeedLab nel menu delle applicazioni oppure il comando `feedlab`. Si installa in `/opt/feedlab` con il suo Python e tutte le librerie.
+- **`FeedLab-<versione>-linux-x86_64.tar.xz`**, versione portatile: estrai e avvia `./bin/feedlab`.
+
+L'app si apre in una finestra propria (GTK/WebKit, pacchetti `gir1.2-webkit2-4.1` e `gir1.2-gtk-3.0`, che apt installa insieme al .deb); se mancano, si apre nel browser (`feedlab --browser` per sceglierlo). openEMS su Linux si installa dal gestore di pacchetti o si compila, poi si indica la cartella nella scheda **🖥️ Full-wave openEMS → ① Installazione**.
+
+Compilazione: lo stesso workflow GitHub Actions compila anche per Linux (`linux/build.sh`: Python autonomo + pacchetti + app, poi .deb e tar.xz) e mette i file nella stessa release di Windows.
+
 ## Interfaccia grafica
 
 ```bash

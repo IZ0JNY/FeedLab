@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Name=FeedLab
+GenericName=Microwave feed designer
+GenericName[it]=Progettazione di feed a microonde
+Comment=Design and simulate dish feeds for 10-134 GHz (EME)
+Comment[it]=Progetta e simula illuminatori per parabole da 10 a 134 GHz (EME)
+Exec=feedlab
+Icon=feedlab
+Terminal=false
+Categories=Science;Engineering;HamRadio;Education;
+Keywords=antenna;feed;horn;dish;EME;microwave;openEMS;
+Actions=browser;
+
+[Desktop Action browser]
+Name=FeedLab (browser)
+Exec=feedlab --browser

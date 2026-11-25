@@ -1,0 +1,9 @@
+FeedLab @VERSION@ per Linux (x86_64), versione portatile - Laboratorio di Progettazione di feed/illuminatori a microonde
+
+Avvio:   ./bin/feedlab             (finestra propria GTK/WebKit; se manca, si apre nel browser)
+         ./bin/feedlab --browser   (nel browser predefinito)
+Per la finestra propria servono i pacchetti di sistema gir1.2-webkit2-4.1 e gir1.2-gtk-3.0
+(Debian/Ubuntu: sudo apt install gir1.2-webkit2-4.1 gir1.2-gtk-3.0). Python e librerie sono inclusi.
+openEMS (opzionale): installalo dal gestore di pacchetti o compilalo, poi indica la cartella nella scheda
+"Full-wave openEMS" > Installazione.
+Progetto: https://github.com/IZ0JNY/FeedLab  -  Licenza GPLv3 (file LICENSE)

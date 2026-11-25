@@ -1,0 +1,19 @@
+Package: feedlab
+Version: @VERSION@
+Section: hamradio
+Priority: optional
+Architecture: amd64
+Installed-Size: @SIZE@
+Maintainer: Ivan De Cesaris IZ0JNY <ivan@iz0jny.it>
+Depends: libc6 (>= 2.31), xdg-utils
+Recommends: gir1.2-webkit2-4.1, gir1.2-gtk-3.0, libgirepository-1.0-1, libcairo2, libcairo-gobject2
+Homepage: https://github.com/IZ0JNY/FeedLab
+Description: design and simulate microwave dish feeds (10-134 GHz, EME)
+ FeedLab designs and simulates feeds/illuminators for microwave dishes from
+ 10 to 134 GHz (W1GHZ, OE2IGL and classic theory): W2IMU, dual-mode,
+ corrugated, VE4MA, Cassegrain sub-reflectors, mode-matching S11, aperture
+ efficiency, G/T, mechanical PDF drawings and STEP/STL models, optional
+ openEMS full-wave analysis.
+ .
+ Self-contained: ships its own Python and libraries in /opt/feedlab.
+ The app opens in its own window (GTK/WebKit) or in the default browser.
