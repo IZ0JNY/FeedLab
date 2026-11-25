@@ -22,11 +22,11 @@ DEG = math.pi / 180.0
 
 FEED_TYPES = {
     "open_circular": "Guida circolare aperta (coffee-can)",
-    "w2imu": "W2IMU dual-mode (Turrin/W1GHZ)",
+    "w2imu": "W2IMU dual-mode",
     "w2imu_oe2igl": "W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL)",
     "large_w2imu": "Large W2IMU flare 30° (W1GHZ/W1FKF)",
     "skobelev": "Dual-mode 'optimum' Skobelev (W1GHZ)",
-    "pickett_potter": "Pickett-Potter (OE2IGL)",
+    "pickett_potter": "Pickett-Potter",
     "conical": "Horn conico",
     "ve4ma": "VE4MA / Super-VE4MA (choke)",
     "chaparral": "Chaparral 3 anelli",

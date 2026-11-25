@@ -220,7 +220,7 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 | **Pickett-Potter** | f/D 0.5–0.95, also above 76 GHz | ~80 % (OE2IGL) |
 | **Rectangular horn** | linear polarisation, < 40 GHz | sheet metal, directly from WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke ring; openEMS |
-| **W2IMU dual-mode (Turrin/W1GHZ) / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | W1GHZ rules / OE2IGL parametric calculation from the opening angle |
+| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | W1GHZ rules / OE2IGL parametric calculation from the opening angle |
 
 ---
 

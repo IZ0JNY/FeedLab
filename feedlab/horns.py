@@ -150,7 +150,7 @@ def pickett_potter_oe2igl(f_ghz: float, opening_angle_deg: float, length_corr: f
     lam = wavelength_mm(f_ghz)
     R = 60.907 * opening_angle_deg ** -0.98422
     L = (-0.53504 * R ** 4 + 4.1757 * R ** 3 - 11.589 * R ** 2 + 16.963 * R - 5.8895) * (1 + length_corr)
-    return Design("Pickett-Potter (OE2IGL)", f_ghz,
+    return Design("Pickett-Potter", f_ghz,
                   {"input_diam_Di": 1.02 * lam, "step_diam_Ds": 1.30 * lam, "aperture_diam": 2 * R * lam,
                    "flare_length": L * lam},
                   "OE2IGL DualModeHorn-design-guide 2025 (Milligan + openEMS)",

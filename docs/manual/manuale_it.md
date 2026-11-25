@@ -220,7 +220,7 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 | **Pickett-Potter** | f/D 0.5–0.95, anche oltre 76 GHz | ~80 % (OE2IGL) |
 | **Tromba rettangolare** | polarizzazione lineare, < 40 GHz | lamiera, direttamente dalla WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke; openEMS |
-| **W2IMU dual-mode (Turrin/W1GHZ) / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | regole W1GHZ / calcolo parametrico OE2IGL dall'angolo di apertura |
+| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | regole W1GHZ / calcolo parametrico OE2IGL dall'angolo di apertura |
 
 ---
 
