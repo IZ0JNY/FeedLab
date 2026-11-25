@@ -1,15 +1,23 @@
-# Modifiche per la prossima versione (0.4.24)
+# Modifiche per la prossima versione (0.4.25)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
-| 1 | **Dual-Flare (IZ0JNY) compatto**: tabella riottimizzata per f/D 0.6–0.9 (EME, S11 < −25 dB su ±1 %, guida d'ingresso ≤ 0.76 λ), stesso nome, feed circa 16 % più corto con prestazioni uguali o migliori; validazione openEMS a 10368.2, 24048.2 e 47088.2 MHz | 🟡 in corso |
+| 1 | openEMS a 10 GHz: capire perché la simulazione del Dual-Flare dà S11 −2.6 dB (porta o dominio) e ripeterla | ⬜ da fare |
+
+---
+
+# Versione 0.4.24 (pubblicata, BETA TEST)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | **Dual-Flare (IZ0JNY) compatto**: tabella riottimizzata per f/D 0.6–0.9 (stesso G/T entro 0.01 dB, +0.02 dB di guadagno, 2–18 % più corto, S11 ≤ −25 dB su ±1 %); openEMS a 24048.2 MHz (30 celle/λ: S11 −24.9 dB, η 66.5 %) e 47088.2 MHz (S11 −21.6 dB) sulla CM243. A 10368.2 MHz la simulazione openEMS dà S11 −2.6 dB ed η 35 % per entrambi i feed (vecchio e nuovo): problema di impostazione della simulazione a 10 GHz (porta/dominio), da indagare | ✅ fatto |
 | 2 | **File di progetto (.json)**: dati inseriti e risultati calcolati (guadagno, G/T, efficienze, taper, S11, lobi, Tsys, piastrina, openEMS); si scambia e si riapre in FeedLab | ✅ fatto |
 | 3 | **Scheda «📦 Output di progetto»**: PDF a scelta (report completo, simulazioni veloci, feed, parabola, piastrina, feed + piastrina, tabella di tutte le quote e i dati + CSV, openEMS), file di progetto, STEP/STL, ZIP di tutto | ✅ fatto |
 | 4 | Icona della piastrina: 🔲 al posto della spina elettrica | ✅ fatto |
 | 5 | Catalogo parabole: materiali e note solo in italiano (niente tedesco) e tradotti in inglese («vetroresina» → fibreglass…); test automatico | ✅ fatto |
-| 6 | EMELab: in pausa (codice nel repository, non incluso nel programma) | ⏸️ in pausa |
+| 6 | EMELab: programma separato nel repository IZ0JNY/EMELab; tolto da FeedLab | ✅ fatto |
 | 7 | Studio di sintesi di feed EME per la Channel Master 243 (relazione in docs/studi) e strumenti di sintesi | ✅ fatto |
 
 ---

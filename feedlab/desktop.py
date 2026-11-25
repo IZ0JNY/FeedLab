@@ -7,7 +7,6 @@ the app instead and the server stays up until "Chiudi FeedLab" is pressed in the
     python -m feedlab.desktop --browser       # use the default browser
     python -m feedlab.desktop --server-only --port 8765    # just the server (tests, LAN use)
     python -m feedlab.desktop --selftest      # check that every component imports, then exit
-    python -m feedlab.desktop --app emelab    # EMELab, the companion program (EME measurements and planning)
 """
 from __future__ import annotations
 
@@ -42,13 +41,11 @@ def python_exe() -> str:
     return str(exe)
 
 
-# the two programs: entry script, window title, AppUserModelID (same as the installer's shortcuts: the taskbar
+# the program: entry script, window title, AppUserModelID (same as the installer's shortcuts: the taskbar
 # shows their icon), icon file and name used in messages
 APPS = {
     "feedlab": dict(main="feedlab_main.py", title="FeedLab — Laboratorio di Progettazione di feed/illuminatori a microonde",
                     app_id="IZ0JNY.FeedLab", ico="feedlab.ico", name="FeedLab", emoji="📡"),
-    "emelab": dict(main="emelab_main.py", title="EMELab — misure e pianificazione EME",
-                   app_id="IZ0JNY.EMELab", ico="emelab.ico", name="EMELab", emoji="🌕"),
 }
 APP = APPS["feedlab"]
 APP_ID = APP["app_id"]
@@ -155,7 +152,7 @@ def start_server(port: int, address: str = "127.0.0.1", mode: str = "window") ->
            "--server.port", str(port), "--server.address", address, "--server.headless", "true",
            "--browser.gatherUsageStats", "false", "--server.fileWatcherType", "none",
            "--global.developmentMode", "false", "--server.maxUploadSize", "200", "--theme.base", "light"]
-    log = open(config_dir() / ("server.log" if APP["name"] == "FeedLab" else "server_emelab.log"), "w", encoding="utf-8")
+    log = open(config_dir() / "server.log", "w", encoding="utf-8")
     return subprocess.Popen(cmd, cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT, creationflags=NO_WINDOW)
 
 
@@ -227,7 +224,7 @@ def main(argv=None) -> int:
     ap.add_argument("--port", type=int, default=0)
     ap.add_argument("--address", default="127.0.0.1")
     ap.add_argument("--selftest", action="store_true")
-    ap.add_argument("--app", choices=list(APPS), default="feedlab", help="feedlab (default) o emelab")
+    ap.add_argument("--app", choices=list(APPS), default="feedlab", help="feedlab (default)")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()

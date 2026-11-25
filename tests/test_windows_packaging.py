@@ -22,7 +22,7 @@ def test_shortcuts_share_the_app_id():
     shortcuts = [l for l in iss.splitlines() if l.startswith('Name: "{auto')]
     assert shortcuts
     for l in shortcuts:
-        app = desktop.APPS["emelab" if "--app emelab" in l else "feedlab"]
+        app = desktop.APPS["feedlab"]
         assert f'AppUserModelID: "{app["app_id"]}"' in l and app["ico"] in l
 
 

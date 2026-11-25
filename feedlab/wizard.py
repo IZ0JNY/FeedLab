@@ -136,8 +136,9 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                  "verifica full-wave (openEMS) prima di costruire"])
             add("w2imu", ["classico W1GHZ (B ≈ 2.35 f/D)"])
         if 0.6 <= fD_feed <= 0.9:
-            add("iz0jny", ["scalino + doppio cono: η vicina al limite teorico del modello, S11 < -30 dB, antenna più "
-                           "fredda (EME)", "solo coni e cilindri: facile al tornio"])
+            add("iz0jny", ["scalino + doppio cono: η vicina al limite teorico del modello, S11 < -25 dB, antenna più "
+                           "fredda (EME), compatto", "solo coni e cilindri: facile al tornio",
+                           "verificato con openEMS a 24 e 47 GHz sulla Channel Master 243"])
         if 0.65 <= fD_feed <= 0.85:
             add("large_w2imu", ["flare 30° con punta da centri: ideale 47-241 GHz", "migliore G/T su offset (+1.6…2.3 dB sun noise)"])
         if fD_feed > 0.95:

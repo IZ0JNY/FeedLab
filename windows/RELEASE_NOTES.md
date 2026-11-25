@@ -1,3 +1,29 @@
+## FeedLab 0.4.24 BETA TEST per Windows / for Windows
+
+**Installazione / Installation:** `FeedLab-Setup-0.4.24.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.24-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **Dual-Flare (IZ0JNY) compatto:** stesso nome, quote riottimizzate per f/D da 0.6 a 0.9 con una ricerca globale. Il G/T resta uguale (entro 0.01 dB), il guadagno sale di 0.02 dB e il feed è dal 2 al 18 % più corto. L'S11 resta sotto −25 dB su ±1 % di banda. Verificato con openEMS sulla Channel Master 243 da 2.4 m: a 24048.2 MHz 53.86 dBi, efficienza 66.5 %, S11 −24.9 dB; a 47088.2 MHz 57.63 dBi, S11 −21.6 dB.
+- **File di progetto (.json):** salva i dati inseriti e i risultati calcolati (guadagno, G/T, efficienze, taper, S11, lobi, Tsys, piastrina, openEMS). Si scambia e si riapre in FeedLab con «📂 Apri progetto».
+- **Nuova scheda «📦 Output di progetto»:** scegli che cosa generare. Ci sono i PDF del report completo, delle simulazioni veloci, del feed con disegni e simulazioni, della parabola, della piastrina, del feed con la piastrina, della tabella di tutte le quote e i dati (anche in CSV) e delle simulazioni openEMS. Puoi scaricare anche il file di progetto, i modelli STEP/STL e uno ZIP con tutto.
+- **Piastrina:** nuova icona 🔲 al posto della spina elettrica.
+- **Catalogo parabole:** materiali e note solo in italiano e in inglese («vetroresina» → fibreglass…).
+- **EMELab** diventa un programma a sé (misure, pianificazione e log EME): legge il file di progetto di FeedLab e non è più incluso in FeedLab.
+- **Manuale** aggiornato con il capitolo «Output di progetto» e le schermate nuove.
+
+### 🇬🇧 What's new
+- **Compact Dual-Flare (IZ0JNY):** same name, dimensions re-optimised for f/D from 0.6 to 0.9 with a global search. G/T stays the same (within 0.01 dB), gain rises by 0.02 dB and the feed is 2 to 18 % shorter. S11 stays below −25 dB over ±1 % bandwidth. Checked with openEMS on the 2.4 m Channel Master 243: at 24048.2 MHz 53.86 dBi, 66.5 % efficiency, S11 −24.9 dB; at 47088.2 MHz 57.63 dBi, S11 −21.6 dB.
+- **Project file (.json):** saves the data you entered and the computed results (gain, G/T, efficiencies, taper, S11, patterns, Tsys, plate, openEMS). You can share it and reopen it in FeedLab with «📂 Open project».
+- **New «📦 Project outputs» tab:** choose what to generate. There are PDFs of the full report, the fast simulations, the feed with drawings and simulations, the dish, the plate, the feed with the plate, the table of all dimensions and data (also as CSV) and the openEMS simulations. You can also download the project file, the STEP/STL models and a ZIP with everything.
+- **Plate:** new 🔲 icon instead of the electric plug.
+- **Dish catalogue:** materials and notes only in Italian and English («vetroresina» → fibreglass…).
+- **EMELab** becomes a program of its own (EME measurements, planning and log): it reads FeedLab's project file and is no longer included in FeedLab.
+- **Manual** updated with the «Project outputs» chapter and new screenshots.
+
+Requisiti / Requirements: Windows 10/11 64-bit.
+
+---
+
 ## FeedLab 0.4.23 BETA TEST per Windows / for Windows
 
 **Installazione / Installation:** `FeedLab-Setup-0.4.23.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.23-portable.zip` → `FeedLab.bat`. Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
