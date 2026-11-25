@@ -11,7 +11,7 @@
 # provides. Native window: pywebview with the system's GTK/WebKit2GTK (PyGObject built here); without them
 # FeedLab opens in the browser.
 #
-# Requirements: uv, dpkg-deb, curl (appimagetool, or set APPIMAGETOOL), a C compiler, pkg-config, libgirepository1.0-dev, libcairo2-dev (to build
+# Requirements: uv, dpkg-deb, desktop-file-validate, curl (appimagetool, or set APPIMAGETOOL), a C compiler, pkg-config, libgirepository1.0-dev, libcairo2-dev (to build
 # PyGObject), internet access.
 # Usage:  linux/build.sh [--version 0.4.26] [--python /path/to/python-build-standalone/bin/python3.13] [--no-appimage]
 set -euo pipefail

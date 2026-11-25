@@ -127,7 +127,7 @@ jobs:
       - name: Build tools
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q libgirepository1.0-dev libcairo2-dev pkg-config xz-utils
+          sudo apt-get install -y -q libgirepository1.0-dev libcairo2-dev pkg-config xz-utils desktop-file-utils
           python -m pip install uv
       - name: Version
         id: ver
