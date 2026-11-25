@@ -23,17 +23,38 @@ DEG = math.pi / 180.0
 FEED_TYPES = {
     "open_circular": "Guida circolare aperta (coffee-can)",
     "w2imu": "W2IMU dual-mode",
-    "w2imu_oe2igl": "W2IMU Dual-Mode Feedhorn (parametric calculation OE2IGL)",
-    "large_w2imu": "Large W2IMU flare 30° (W1GHZ/W1FKF)",
-    "skobelev": "Dual-mode 'optimum' Skobelev (W1GHZ)",
+    "w2imu_oe2igl": "W2IMU Dual-Mode Feedhorn, parametric calculation OE2IGL",
+    "large_w2imu": "Large W2IMU flare 30°, W1GHZ/W1FKF",
+    "skobelev": "Dual-mode 'optimum' Skobelev, W1GHZ",
     "pickett_potter": "Pickett-Potter",
     "conical": "Horn conico",
     "ve4ma": "VE4MA / Super-VE4MA (choke)",
     "chaparral": "Chaparral 3 anelli",
-    "axial_corrugated": "Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL)",
-    "rect_horn": "Tromba rettangolare (G3RPE)",
-    "iz0jny": "Dual-Flare (IZ0JNY)",
+    "axial_corrugated": "Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL",
+    "rect_horn": "Tromba rettangolare, G3RPE",
+    "iz0jny": "Dual-Flare, IZ0JNY",
 }
+
+# amateur band names used in short titles: (low GHz, high GHz, label)
+_BANDS = [(1.24, 1.30, "1.2"), (2.30, 2.45, "2.3"), (3.30, 3.50, "3.4"), (5.65, 5.925, "5.7"), (10.0, 10.5, "10"),
+          (24.0, 24.25, "24"), (47.0, 47.2, "47"), (75.5, 81.0, "76"), (119.98, 123.0, "122"), (134.0, 141.0, "134"),
+          (241.0, 250.0, "241")]
+
+
+def band_label(f_ghz: float) -> str:
+    """Short frequency for titles: the amateur band name (24.048 -> "24"), else rounded."""
+    for lo, hi, lab in _BANDS:
+        if lo <= f_ghz <= hi:
+            return lab
+    return f"{f_ghz:.0f}" if f_ghz >= 10 else f"{f_ghz:.1f}"
+
+
+def short_title(feed_name: str, f_ghz: float | None = None) -> str:
+    """Short title of a design: feed name without "Feedhorn", band in GHz ("W2IMU Dual-Mode, parametric
+    calculation OE2IGL 24 GHz"). Tabs and tables keep the full name and the exact frequency."""
+    name = feed_name.replace(" Feedhorn", "")
+    return f"{name} {band_label(f_ghz)} GHz" if f_ghz else name
+
 
 # feeds whose interior is a single circular guide with steps/cones -> mode-matching simulation possible
 MODEMATCH_OK = {"open_circular", "w2imu", "w2imu_oe2igl", "large_w2imu", "skobelev", "pickett_potter", "conical", "iz0jny"}

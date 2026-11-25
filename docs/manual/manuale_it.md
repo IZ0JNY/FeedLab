@@ -210,17 +210,17 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 
 | Feed | Campo d'uso | Note |
 |---|---|---|
-| **Axial Corrugated Feedhorn CT1DMK** (parametric calculation OE2IGL) | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %; 8 scalini assiali (OE2IGL v1.4); verifica con openEMS |
+| **Axial Corrugated Feedhorn CT1DMK**, parametric calculation OE2IGL | 10–76 GHz, f/D 0.33–0.9 (offset ≤ 0.8) | 81–86 %; 8 scalini assiali (OE2IGL v1.4); verifica con openEMS |
 | **Chaparral 3 anelli** | prime focus f/D < 0.33 | 78 % a f/D 0.35; openEMS |
 | **Horn conico** | uso generale | semplice, a larga banda |
-| **Dual-Flare (IZ0JNY)** | f/D 0.6–0.9, EME | scalino + cono + cilindro di fasatura + secondo cono; temperatura d'antenna bassa, S11 molto basso; verificato con openEMS a 24 GHz |
+| **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | scalino + cono + cilindro di fasatura + secondo cono; temperatura d'antenna bassa, S11 molto basso; verificato con openEMS a 24 GHz |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verificare full-wave prima di costruire |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | su offset +1.6…2.3 dB di sun noise (W1GHZ 2024) |
 | **Guida circolare aperta** | parabole piccole e profonde | blocking minimo, F/B scarso |
 | **Pickett-Potter** | f/D 0.5–0.95, anche oltre 76 GHz | ~80 % (OE2IGL) |
 | **Tromba rettangolare** | polarizzazione lineare, < 40 GHz | lamiera, direttamente dalla WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke; openEMS |
-| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn** (parametric calculation OE2IGL) | offset / f/D 0.5–0.95 | regole W1GHZ / calcolo parametrico OE2IGL dall'angolo di apertura |
+| **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn**, parametric calculation OE2IGL | offset / f/D 0.5–0.95 | regole W1GHZ / calcolo parametrico OE2IGL dall'angolo di apertura |
 
 ---
 
@@ -562,7 +562,7 @@ Teste cilindriche ISO 4762 / ASME B18.3; teste piane ISO 7046 (90°) / UNC 82°.
 ## 16. Esempio completo: feed EME a 24 GHz per una offset da 2.4 m
 
 1. **Barra laterale:** Banda **24.048 GHz**, materiale **Ottone CuZn39Pb3** (o ottone argentato), guida **WR-42**, base **Circolare**.
-2. **Procedura guidata:** catalogo → **Channel Master Type 243 2.4 m**; obiettivo **Massimo G/T**; illuminazione **Automatica** o per esempio 12 dB; **Trova il feed migliore** → **Dual-Flare (IZ0JNY)** → **Usa questo feed**.
+2. **Procedura guidata:** catalogo → **Channel Master Type 243 2.4 m**; obiettivo **Massimo G/T**; illuminazione **Automatica** o per esempio 12 dB; **Trova il feed migliore** → **Dual-Flare, IZ0JNY** → **Usa questo feed**.
 3. **Progetto feed:** controlla "Progettato per f/D …"; spessore della base automatico; **Applica modifiche** dopo ogni modifica.
 4. **Laboratorio:** obiettivo **EME**, NF dell'LNA e perdita di linea; leggi **Tsys** e Δ S/N; **Analizza tolleranze** a ±0.1 mm.
 5. **Simulazione & S11:** S11 < −20 dB sulla banda; confronta l'**angolo a −10 dB** con l'apertura della parabola; η e centro di fase.

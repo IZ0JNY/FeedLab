@@ -1,4 +1,4 @@
-"""Axial Corrugated Feedhorn CT1DMK (parametric calculation OE2IGL), v1.4 spreadsheet, as a FeedLab feed type."""
+"""Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL, v1.4 spreadsheet, as a FeedLab feed type."""
 import pytest
 
 from feedlab import geometry, wizard
@@ -43,3 +43,11 @@ def test_axial_corrugated_circular_guide_section_and_base():
     finally:
         geometry.BASE.update({"shape": "round", "wg": None})
         geometry.MOUNT.update({"wg": None})
+
+
+def test_short_title_band_and_no_feedhorn():
+    from feedlab import geometry
+    t = geometry.short_title(geometry.FEED_TYPES["w2imu_oe2igl"], 24.048)
+    assert t == "W2IMU Dual-Mode, parametric calculation OE2IGL 24 GHz"
+    assert geometry.band_label(10.368) == "10" and geometry.band_label(75.976) == "76"
+    assert geometry.band_label(134.928) == "134" and geometry.band_label(5.76) == "5.7"
