@@ -16,6 +16,7 @@ import streamlit as _st
 
 import feedlab
 from feedlab import credits as _credits_mod
+from feedlab import filenames as _filenames
 
 from feedlab import i18n
 
@@ -1113,6 +1114,7 @@ with tabs[8], contextlib.suppress(_Skip):
     elif not isinstance(geo, geometry.RectHornGeometry):
         st.info(i18n.tr("Base del feed senza fori: scegli lo schema di montaggio nella scheda 🔩 Montaggio feed + "
                         "piastrina, poi rigenera STEP/STL."))
+    fname = _filenames.pick(st, base.name, "feed")
     c1, c2, c3, c4 = st.columns(4)
     if c1.button("📄 Genera PDF"):
         tt = S.get("tol_table")
@@ -1120,19 +1122,19 @@ with tabs[8], contextlib.suppress(_Skip):
                                   tolerances=tt[1] if tt and tt[0] == geo.kind else None)
         S["pdf"] = pth.read_bytes()
     if S.get("pdf"):
-        c1.download_button("Scarica disegno PDF", S["pdf"], file_name=base.name + ".pdf", mime="application/pdf")
+        c1.download_button("Scarica disegno PDF", S["pdf"], file_name=fname + ".pdf", mime="application/pdf")
     if c2.button("🧊 Genera STEP"):
         with st.spinner("OpenCascade…"):
             S["step"] = cad.export_step(geo, base.with_suffix(".step")).read_bytes()
     if S.get("step"):
-        c2.download_button("Scarica .stp", S["step"], file_name=base.name + ".stp", mime="model/step")
+        c2.download_button("Scarica .stp", S["step"], file_name=fname + ".stp", mime="model/step")
     if c3.button("🖨️ Genera STL"):
         S["stl"] = cad.export_stl(geo, base.with_suffix(".stl")).read_bytes()
     if S.get("stl"):
-        c3.download_button("Scarica .stl", S["stl"], file_name=base.name + ".stl", mime="model/stl")
+        c3.download_button("Scarica .stl", S["stl"], file_name=fname + ".stl", mime="model/stl")
     rep = {"feed": geo.kind, "f_ghz": S.f_ghz, "params_mm": geo.params,
            "dish": None if S.dish is None else S.dish.__dict__}
-    c4.download_button("🧾 Parametri JSON", json.dumps(rep, indent=2, default=float), file_name=base.name + ".json", mime="application/json")
+    c4.download_button("🧾 Parametri JSON", json.dumps(rep, indent=2, default=float), file_name=fname + ".json", mime="application/json")
     if S.get("pdf"):
         import base64
         b64 = base64.b64encode(S["pdf"]).decode()
@@ -1677,15 +1679,16 @@ with tabs[7], contextlib.suppress(_Skip):
                 for w_ in mm_.warnings:
                     st.warning(w_)
             base = WORK / f"plate_{wg}_{S.f_ghz:g}GHz_{pl.polarization}".replace(".", "p")
+            pname = _filenames.pick(st, base.name, "plate")
             b1, b2 = st.columns(2)
             if b1.button("📄 Disegno PDF piastrina"):
                 S["plate_pdf"] = Path(plate.drawing_pdf(pl, base.with_suffix(".pdf"), S.material)).read_bytes()
             if S.get("plate_pdf"):
-                b1.download_button("Scarica PDF", S["plate_pdf"], file_name=base.name + ".pdf", mime="application/pdf")
+                b1.download_button("Scarica PDF", S["plate_pdf"], file_name=pname + ".pdf", mime="application/pdf")
             if b2.button("🧊 STEP piastrina"):
                 S["plate_step"] = Path(plate.export_step(pl, base.with_suffix(".step"))).read_bytes()
             if S.get("plate_step"):
-                b2.download_button("Scarica .stp", S["plate_step"], file_name=base.name + ".stp", mime="model/step")
+                b2.download_button("Scarica .stp", S["plate_step"], file_name=pname + ".stp", mime="model/step")
             # front view preview
             fig = go.Figure()
             h = pl.outer / 2
@@ -1786,6 +1789,7 @@ with tabs[10]:
         if not S.get("wr_wg") or not S.get("plate_rf"):
             st.caption(i18n.tr("La piastrina si progetta nella scheda 🔲 Piastrina WR: aprila una volta per includerla."))
         base_name = f"FeedLab_{S.feed_kind}_{S.f_ghz:.3f}GHz"
+        out_name = _filenames.pick(st, base_name, "outputs")
         if st.button("⚙️ Genera", type="primary", key="out_go"):
             files = {}
             with st.spinner("Calcolo del progetto e generazione dei documenti…"):
@@ -1819,10 +1823,12 @@ with tabs[10]:
                     except Exception as e:
                         st.warning(f"STEP/STL: {e}")
             S["outputs"] = files
+            S["outputs_base"] = base_name
         if S.get("outputs"):
-            files = S["outputs"]
+            _ob = S.get("outputs_base", base_name)
+            files = {(out_name + n[len(_ob):] if n.startswith(_ob) else n): d for n, d in S["outputs"].items()}
             st.success(_T("{n} file pronti.", n=len(files)))
-            st.download_button("⬇️ Scarica tutto (ZIP)", _report.zip_all(files), file_name=f"{base_name}.zip",
+            st.download_button("⬇️ Scarica tutto (ZIP)", _report.zip_all(files), file_name=f"{out_name}.zip",
                                mime="application/zip", type="primary")
             for name, data in files.items():
                 mime = ("application/pdf" if name.endswith(".pdf") else "application/json" if name.endswith(".json")
