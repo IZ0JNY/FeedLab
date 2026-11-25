@@ -116,7 +116,7 @@ jobs:
           retention-days: 30
 
   linux:
-    name: Build Linux (.deb + tar.xz)
+    name: Build Linux (.deb + AppImage)
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -127,7 +127,7 @@ jobs:
       - name: Build tools
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q libgirepository1.0-dev libcairo2-dev pkg-config xz-utils
+          sudo apt-get install -y -q libgirepository1.0-dev libcairo2-dev pkg-config xz-utils desktop-file-utils
           python -m pip install uv
       - name: Version
         id: ver
@@ -154,13 +154,27 @@ jobs:
           done
           [ -n "${ok:-}" ] || { tail -50 ~/.config/FeedLab/server.log; exit 1; }
           pkill -f "streamlit run" || true
+      - name: AppImage smoke test
+        run: |
+          app=$(ls dist/FeedLab-*-x86_64.AppImage)
+          chmod +x "$app"
+          export APPIMAGE_EXTRACT_AND_RUN=1          # the runner has no FUSE
+          "$app" --selftest
+          "$app" --server-only --port 8766 &
+          ok=
+          for i in $(seq 90); do
+            if [ "$(curl -s http://127.0.0.1:8766/_stcore/health)" = "ok" ]; then ok=1; break; fi
+            sleep 2
+          done
+          [ -n "$ok" ] || { tail -50 ~/.config/FeedLab/server.log; exit 1; }
+          pkill -f "streamlit run" || true
           ls -la dist
       - uses: actions/upload-artifact@v4
         with:
           name: FeedLab-Linux-${{ steps.ver.outputs.version }}
           path: |
             dist/feedlab_*_amd64.deb
-            dist/FeedLab-*-linux-x86_64.tar.xz
+            dist/FeedLab-*-x86_64.AppImage
             dist/SHA256SUMS-linux.txt
           retention-days: 30
           compression-level: 0
@@ -186,7 +200,7 @@ jobs:
           tag="v$v"
           cd dist
           ls -la
-          files=(FeedLab-Setup-*.exe FeedLab-*-portable.zip feedlab_*_amd64.deb FeedLab-*-linux-x86_64.tar.xz)
+          files=(FeedLab-Setup-*.exe FeedLab-*-portable.zip feedlab_*_amd64.deb FeedLab-*-x86_64.AppImage)
           if gh release view "$tag" > /dev/null 2>&1; then
             # never overwrite published files: only add the ones the release does not have yet
             # (e.g. the Linux packages of a version first published for Windows only)
