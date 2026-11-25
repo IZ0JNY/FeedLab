@@ -15,6 +15,7 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as _st
 
+from feedlab import filenames as _filenames
 from feedlab import i18n
 from feedlab import deep_analysis, explore, geometry, materials, openems_local, openems_sim, spacemap, wizard
 from feedlab.waveguide import wavelength_mm
@@ -288,7 +289,9 @@ def _new_section(S, geo, dish):
                                       "Poi carica results.json in FeedLab, scheda Full-wave openEMS > Risultati.\n")
         S["oems_zip"] = buf.getvalue()
     if S.get("oems_zip"):
-        c[1].download_button("Scarica gli script (.zip)", S["oems_zip"], file_name=f"openems_{geo.kind}_{f0:g}GHz.zip")
+        with c[1]:
+            _zn = _filenames.pick(st, f"openems_{geo.kind}_{f0:g}GHz", "oems_zip")
+        c[1].download_button("Scarica gli script (.zip)", S["oems_zip"], file_name=f"{_zn}.zip")
     if can_run and c[2].button("🧊 Anteprima geometria (AppCSXCAD)", key="oems_prev"):
         d = openems_local.work_dir() / "_preview"
         p = openems_sim.make_deep_script(geo, d, plan[0][2])
@@ -472,18 +475,20 @@ def _results_section(S, geo, dish, polar_fig):
                                                 if sph else "") + f" · mesh {(r.mesh.get('cells') or 0) / 1e6:.2f} M celle, "
                f"{_fmt_time(r.timing.get('total_s'))}")
 
+    _dd = f"FeedLab_deep_{r.meta.get('kind')}"
+    _dn = _filenames.pick(st, _dd, "oems_deep")
     c = st.columns(4)
     jd = Path(r.path).parent
     if c[0].button("📄 Report HTML", key="oems_rep"):
         S["oems_report"] = deep_analysis.html_report(r, a, spec, jd / "report.html").read_bytes()
     if S.get("oems_report"):
-        c[0].download_button("Scarica il report", S["oems_report"], file_name=f"FeedLab_deep_{r.meta.get('kind')}.html",
+        c[0].download_button("Scarica il report", S["oems_report"], file_name=f"{_dn}.html",
                              mime="text/html")
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
         for p in deep_analysis.export_csv(r, jd / "export") + deep_analysis.export_dat(r, jd / "export"):
             z.write(p, p.name)
-    c[1].download_button("CSV + .dat W1GHZ", buf.getvalue(), file_name=f"openems_{r.meta.get('kind')}_dati.zip")
+    c[1].download_button("CSV + .dat W1GHZ", buf.getvalue(), file_name=(f"{_dn}_dati.zip" if _dn != _dd else f"openems_{r.meta.get('kind')}_dati.zip"))
     if c[2].button("↪️ Usa questo lobo nelle altre schede", key="oems_use"):
         S.fullwave = openems_sim.load_results(r.path)
         st.success("Lobo full-wave caricato: la scheda *Simulazione & S11* può usarlo al posto del modello rapido.")
