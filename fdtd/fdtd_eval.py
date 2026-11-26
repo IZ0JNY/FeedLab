@@ -35,8 +35,11 @@ PY = os.environ.get("OPENEMS_PYTHON", "/opt/openEMS/venv/bin/python")
 class EvalConfig:
     fD: float = 0.6                    # prime-focus or offset-equivalent f/D of the dish
     band: float = 0.02                 # far field at f0*(1-band), f0, f0*(1+band)
+    exc_band: float = 0.10             # excitation f0*(1 +/- exc_band): a short pulse, ~4x fewer timesteps
+    min_cell_frac: float = 0.3         # merge mesh lines closer than 0.3 cell (small cells shrink the time step)
     cells_per_lambda: int = 16         # 16 for search (-1.5 % bias vs 26), 24+ to confirm
     end_db: float = 30.0
+    nr_ts: int = 40000                 # typical runs stop at 10-16k steps; resonant designs would run to 100k
     s11_max_db: float = -20.0          # penalty above this, anywhere in f0*(1 +/- band)
     max_len_lambda: float = 12.0       # penalty above this feed length
     pad_lambda: float = 0.4
@@ -47,7 +50,8 @@ class EvalConfig:
 def _key(geo, cfg: EvalConfig) -> str:
     g = openems_sim.geometry_payload(geo)
     s = json.dumps({"polys": g["polys"], "r_in": g["r_input"], "f0": g["f0_ghz"],
-                    "sim": [cfg.band, cfg.cells_per_lambda, cfg.end_db, cfg.pad_lambda]}, sort_keys=True)
+                    "sim": [cfg.band, cfg.cells_per_lambda, cfg.end_db, cfg.pad_lambda]
+                    + ([cfg.exc_band, cfg.min_cell_frac] if (cfg.exc_band, cfg.min_cell_frac) != (0.0, 0.0) else [])}, sort_keys=True)
     return hashlib.sha1(s.encode()).hexdigest()[:16]
 
 
@@ -58,8 +62,13 @@ def run_openems(geo, cfg: EvalConfig, label: str = "") -> Path:
     if res.exists():
         return d
     f0 = geo.f_ghz
-    dc = openems_sim.DeepConfig(f_lo=f0 * (1 - cfg.band), f_hi=f0 * (1 + cfg.band), cells_per_lambda=cfg.cells_per_lambda,
-                                end_db=cfg.end_db, n_freq=41, theta_step=1.0, sphere=False, pad_lambda=cfg.pad_lambda,
+    eb = max(cfg.exc_band, cfg.band)
+    # the mesh rule of the script is "cells per wavelength at f_hi": keep the cell = λ0 / cells_per_lambda
+    cpl = int(round(cfg.cells_per_lambda * (1 + eb)))
+    dc = openems_sim.DeepConfig(f_lo=f0 * (1 - eb), f_hi=f0 * (1 + eb), cells_per_lambda=cpl,
+                                ff_freqs=[f0 * (1 - cfg.band), f0, f0 * (1 + cfg.band)],
+                                min_cell_frac=cfg.min_cell_frac,
+                                end_db=cfg.end_db, nr_ts=cfg.nr_ts, n_freq=int(round(20 * eb / 0.01)) + 1, theta_step=1.0, sphere=False, pad_lambda=cfg.pad_lambda,
                                 threads=cfg.threads, label=label or geo.kind)
     script = openems_sim.make_deep_script(geo, d, dc, name="sim.py")
     with open(d / "sim.log", "w") as fh:
@@ -71,6 +80,16 @@ def run_openems(geo, cfg: EvalConfig, label: str = "") -> Path:
     import shutil
     shutil.rmtree(d / "sim_data", ignore_errors=True)
     return d
+
+
+def energy_decay_db(folder: Path) -> float:
+    """Last energy level openEMS printed (dB below the peak); nan if unknown."""
+    import re
+    try:
+        m = re.findall(r"\(-\s*([0-9.]+)dB\)", (folder / "sim.log").read_text(errors="replace"))
+        return -float(m[-1]) if m else float("nan")
+    except OSError:
+        return float("nan")
 
 
 def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = None) -> dict:
@@ -90,15 +109,22 @@ def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = Non
         per.append({"f_ghz": ff.f_ghz, "eta_ill": e.total, "spill": e.spillover, "taper": e.illumination,
                     "phase": e.phase, "pol": e.polarization, "edge_taper_db": e.edge_taper_db,
                     "s11_db": 20 * math.log10(g + 1e-12), "eta": e.total * (1 - g * g)})
-    s11_db_max = float(20 * np.log10(np.abs(s11).max() + 1e-12))
+    inb = (freq >= f0 * (1 - cfg.band) - 1e-9) & (freq <= f0 * (1 + cfg.band) + 1e-9)
+    s11_db_max = float(20 * np.log10(np.abs(s11[inb] if inb.any() else s11).max() + 1e-12))
     fom = float(np.mean([x["eta"] for x in per]))
     pen = 0.0
     if s11_db_max > cfg.s11_max_db:
         pen += 0.01 * (s11_db_max - cfg.s11_max_db)
     if length_mm is not None and length_mm / lam0 > cfg.max_len_lambda:
         pen += 0.01 * (length_mm / lam0 - cfg.max_len_lambda)
+    # a run stopped by the timestep limit with the energy still high (trapped/closed cavity, instability) gives
+    # meaningless far fields: rejected
+    edb = energy_decay_db(folder)
+    converged = not (np.isfinite(edb) and edb > -(cfg.end_db - 8))
+    if not converged:
+        pen += 1.0
     i0 = int(np.argmin([abs(x["f_ghz"] - f0) for x in per]))
-    return {"fom": fom - pen, "eta_mean": fom, "penalty": pen, "eta_f0": per[i0]["eta"], "per_freq": per,
+    return {"fom": fom - pen, "energy_db": edb, "converged": converged, "eta_mean": fom, "penalty": pen, "eta_f0": per[i0]["eta"], "per_freq": per,
             "pc_mm": pc["d_mm"], "pc_lambda": pc["d_mm"] / lam0, "s11_max_db": s11_db_max,
             "cells": r.mesh.get("cells"), "fdtd_s": r.timing.get("fdtd_s")}
 
