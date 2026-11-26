@@ -197,7 +197,8 @@ def main(argv=None):
         x = [best["x"][k] for k in fam.keys]
         cfg.cells_per_lambda = a.confirm_cpl
         out = {}
-        for name, xx in (("seed", fam.seed(a.fD)), ("best", x)):
+        cases = [(f"seed{i}", sx) for i, sx in enumerate(fam.seeds(a.fD))] + [("best", x)]
+        for name, xx in cases:
             r = fe.evaluate(fam.build(xx, a.f0, a.fD), cfg, label=f"{fam.name} {name} confirm")
             r["x"] = dict(zip(fam.keys, map(float, xx)))
             out[name] = r
