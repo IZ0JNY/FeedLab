@@ -20,7 +20,7 @@ DATA = Path(__file__).resolve().parent / "data" / "openems_w2imu_fD060_14cpl.jso
 def test_families_build(name):
     fam = optimize.FAMILIES[name]
     assert len(fam.keys) == len(fam.bounds)
-    for fD in (0.55, 0.7, 0.8):
+    for fD in (0.55, 0.7, 0.8):  # W2IMU range (B 1.22-1.9 λ)
         x0 = fam.seed(fD)
         assert len(x0) == len(fam.keys)
         for x in (x0, [b[0] for b in fam.bounds], [b[1] for b in fam.bounds]):

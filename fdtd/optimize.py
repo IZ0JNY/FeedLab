@@ -41,6 +41,10 @@ class Family:
     def seed(self, fD: float) -> list[float]:
         raise NotImplementedError
 
+    def seeds(self, fD: float) -> list[list[float]]:
+        """Published designs of the family; the search starts from the best of them (openEMS)."""
+        return [self.seed(fD)]
+
     def build(self, x, f0: float, fD: float):
         raise NotImplementedError
 
@@ -56,6 +60,16 @@ class W2IMU(Family):
         lam = wavelength_mm(10.0)
         return [d.dims_mm["input_diam"] / lam, d.dims_mm["aperture_diam_B"] / lam, d.dims_mm["flare_half_deg"],
                 d.dims_mm["phasing_length_C"] / lam]
+
+    def seeds(self, fD):
+        out = [self.seed(fD)]
+        lam = wavelength_mm(10.0)
+        try:
+            d = horns.w2imu_oe2igl(10.0, 4 * math.degrees(math.atan(1 / (4 * fD)))).dims_mm
+            out.append([d["input_diam_A"] / lam, d["aperture_diam_B"] / lam, d["flare_half_deg"], d["length_C"] / lam])
+        except Exception:
+            pass
+        return out
 
     def build(self, x, f0, fD):
         lam = wavelength_mm(f0)
@@ -93,7 +107,29 @@ class ProfileFamily(Family):
         return synth.geometry_for(synth.vec_to_profile(x), f0)
 
 
-FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily())}
+class AxialCorrugated(Family):
+    """8 axial slots on a stepped face (CT1DMK concept, OE2IGL design guide v1.4). Slot width as a fraction
+    of the pitch (the wall between slots stays positive); d2…d8 share one depth."""
+    name = "axial_corrugated"
+    keys = ["pitch", "w_frac", "axi", "delta", "Di", "Ds", "d1", "dk"]
+    bounds = [(0.18, 0.48), (0.40, 0.90), (-0.05, 0.40), (0.0, 0.25), (0.62, 0.90), (0.62, 1.30), (0.15, 0.60),
+              (0.18, 0.32)]
+
+    def seed(self, fD):
+        lam = wavelength_mm(10.0)
+        d = horns.axial_corrugated_oe2igl(10.0, 4 * math.degrees(math.atan(1 / (4 * fD)))).dims_mm
+        return [d["pitch"] / lam, d["w"] / d["pitch"], d["axi"] / lam, d["delta"] / lam, d["Di"] / lam,
+                d["Ds"] / lam, d["d1"] / lam, d["d2_to_d8"] / lam]
+
+    def build(self, x, f0, fD):
+        lam = wavelength_mm(f0)
+        pitch, wf, axi, delta, Di, Ds, d1, dk = x
+        kw = {"pitch": pitch * lam, "w": wf * pitch * lam, "axi": axi * lam, "delta": delta * lam, "Di": Di * lam,
+              "Ds": Ds * lam, "d1": d1 * lam, **{f"d{k}": dk * lam for k in range(2, 9)}}
+        return geometry.build("axial_corrugated", f0, fD=fD, **kw)
+
+
+FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily(), AxialCorrugated())}
 
 
 # --------------------------------------------------------------------------------------------- objective
@@ -102,7 +138,8 @@ class Objective:
         self.fam, self.cfg, self.f0, self.log = fam, cfg, f0, log
         self.lo = np.array([b[0] for b in fam.bounds])
         self.hi = np.array([b[1] for b in fam.bounds])
-        self.best = None
+        bf = log.with_name(log.stem + "_best.json")
+        self.best = json.loads(bf.read_text()) if bf.exists() else None     # keep the best of earlier runs
         self.n = 0
 
     def to_x(self, u):
@@ -169,9 +206,16 @@ def main(argv=None):
         return out
 
     obj = Objective(fam, cfg, a.f0, log)
-    x0 = json.loads(a.x0) if a.x0 else fam.seed(a.fD)
-    if a.seed_mm and fam.name == "profile":
+    if a.x0:
+        x0 = json.loads(a.x0)
+    elif a.seed_mm and fam.name == "profile":
         x0 = mm_seed(a.fD, a.f0)
+    else:                                   # best published design of the family (each one is one run)
+        cands = fam.seeds(a.fD)
+        if len(cands) > 1:
+            x0 = min(cands, key=lambda x: obj(np.clip(obj.to_u(x), 0, 1)))
+        else:
+            x0 = cands[0]
     u0 = np.clip(obj.to_u(x0), 0, 1)
     from scipy import optimize
     if a.method == "nm":
