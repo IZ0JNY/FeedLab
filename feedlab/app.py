@@ -1156,6 +1156,19 @@ def lab_eval(kind, f, sc_tuple, over_tuple, wall, fd_design=None):
     return explore.evaluate(kind, f, sc, dict(over_tuple), wall, fd_design)
 
 
+def _apply_lab_overrides(kind, over, base_vals):
+    """on_click of «Applica l'ottimo / il progetto robusto»: runs before the widgets are drawn, the only moment
+    Streamlit lets us move the lab sliders (assigning their keys afterwards raises and the optimum was lost)."""
+    over = {k: float(v) for k, v in over.items() if k in base_vals}
+    S.overrides[kind] = dict(over)
+    for k, _, _ in explore.TUNABLE.get(kind, []):
+        S[f"lab_{kind}_{k}"] = float(over.get(k, base_vals[k]))
+    for k in [k for k in list(S.keys()) if str(k).startswith(f"in_{kind}_")]:   # Progetto feed shows the new values
+        del S[k]
+    for k in ("pdf", "step", "stl"):
+        S.pop(k, None)
+
+
 with tabs[2], contextlib.suppress(_Skip):
     _need()
     st.header("Laboratorio: varia le quote e guarda cosa cambia")
@@ -1323,11 +1336,7 @@ with tabs[2], contextlib.suppress(_Skip):
             st.success(f"Ottimo trovato: Δ S/N {res.snr_delta(base, objective):+.2f} dB · η {100 * res.eta:.1f}% · "
                        f"G {res.gain_dbi:.2f} dBi · G/T {res.g_over_t:.2f} dB/K · S11 {res.s11_db if res.s11_db is None else round(res.s11_db, 1)} dB")
             st.write({k: f"{v:.3f} ({100 * (v / base_vals[k] - 1):+.1f}%)" for k, v in over.items()})
-            if st.button("Applica l'ottimo al progetto"):
-                S.overrides[kind] = {**over}
-                for k, v in over.items():
-                    S[f"lab_{kind}_{k}"] = float(v)
-                st.rerun()
+            st.button("Applica l'ottimo al progetto", on_click=_apply_lab_overrides, args=(kind, over, base_vals))
 
         # ------------------------------------------------ fabrication tolerances
         st.divider()
@@ -1411,11 +1420,8 @@ with tabs[2], contextlib.suppress(_Skip):
                 st.success(f"Progetto robusto: {ylab_r} nominale {info['objective']:.2f} · medio {info['mean']:.2f} ± {info['sd']:.3f} dB · "
                            f"garantito (media − k·σ) {info['score']:.2f} · η {100 * info['eta']:.1f}% · S11 {info['s11_db']:.1f} dB")
                 st.write({k: f"{v:.3f} ({100 * (v / base_vals[k] - 1):+.1f}%)" for k, v in over_r.items() if k in base_vals})
-                if st.button("Applica il progetto robusto", key="rob_apply"):
-                    S.overrides[kind] = {k: v for k, v in over_r.items() if k in base_vals}
-                    for k, v in S.overrides[kind].items():
-                        S[f"lab_{kind}_{k}"] = float(v)
-                    st.rerun()
+                st.button("Applica il progetto robusto", key="rob_apply", on_click=_apply_lab_overrides,
+                          args=(kind, over_r, base_vals))
 
 
 # ---------------------------------------------------------------- assembly: feed + matching plate → waveguide
