@@ -110,6 +110,13 @@ p = patterns.circular_aperture_pattern(1.7, {"TE11": 1, "TM11": 0.2})
 print(efficiency.best_fD(p))
 ```
 
+## Ottimizzazione full-wave iterativa (`fdtd/`)
+
+Strumento di ricerca separato dal programma: installa openEMS in modo riproducibile (script per container
+cloud, Dockerfile) e ottimizza le geometrie dei feed con centinaia di simulazioni FDTD, con figura di merito
+l'efficienza d'illuminazione sulla f/D della parabola (spillover, taper, fase, cross-pol, S11). Feed pubblicati
+simulati con le stesse regole come riferimento. Istruzioni in [`fdtd/README.md`](fdtd/README.md).
+
 ## Roadmap
 1. **Import dei pattern full-wave.** openEMS (script Python con nf2ff), CST/HFSS (CSV), GRASP (.cut), NEC2. Tagli a 45° e polarizzazione circolare.
 2. **Generatore di geometrie** per openEMS e STL/STEP: W2IMU, Skobelev/Pickett-Potter, corrugato, choke, septum. Fabbricazione: dime, G-code, punte da centri.
