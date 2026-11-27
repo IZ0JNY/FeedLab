@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import optimize as op  # noqa: E402
 
 from feedlab import geometry, project, wizard  # noqa: E402
-from feedlab.waveguide import wavelength_mm  # noqa: E402
+from feedlab.waveguide import RECT_WG, suggest_rect_wg, wavelength_mm  # noqa: E402
 
 OUT = op.RESULTS / "feedlab"
 
@@ -57,6 +57,8 @@ def main(argv=None):
     ap.add_argument("--dishes", default="3000,3700", help="prime-focus dish Ø, mm, comma separated")
     ap.add_argument("--material", default="Alluminio 6082/6061 T6")
     ap.add_argument("--name", default="", help="file name prefix (default: family_fD)")
+    ap.add_argument("--wr", default="", help="WR guide for the λ/4 plate (default: first of the band; none = no plate)")
+    ap.add_argument("--pol", default="V", choices=["V", "H"])
     a = ap.parse_args(argv)
 
     fam = op.FAMILIES[a.family]
@@ -71,6 +73,13 @@ def main(argv=None):
         for D in map(float, a.dishes.split(",")):
             S = {"f_ghz": f, "dish": wizard.dish_from_prime(D, a.fD), "feed_kind": kind, "material": a.material,
                  "overrides": {kind: kw}, "wall": None, "fd_design": a.fD}
+            # λ/4 plate circular feed guide → WR (tab «Piastrina WR»), already filled in: first standard WR of the
+            # band, polarisation V, mill radius as FeedLab's default, optimised version
+            wgs = suggest_rect_wg(f)
+            if wgs and a.wr != "none":
+                wg = a.wr or wgs[0]
+                S["wr_wg"] = wg
+                S["plate_rf"] = (a.pol, float(round(2 * geo.r_input, 3)), float(round(min(2.0, 0.08 * RECT_WG[wg].a_mm), 2)), True)
             p = project.build(S, geo, a.fD)
             p["openems_optimum"] = {"source": f"fdtd/results/{tag}_best.json", "family": fam.name, "x_lambda": best["x"],
                                     "eta_mean": best["eta_mean"], "s11_max_db": best["s11_max_db"],
