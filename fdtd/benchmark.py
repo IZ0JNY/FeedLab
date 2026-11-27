@@ -30,10 +30,12 @@ def main(argv=None):
     ap.add_argument("--cpl", type=int, default=16)
     ap.add_argument("--band", type=float, default=0.02)
     ap.add_argument("--feeds", default=",".join(DEFAULT))
+    ap.add_argument("--dish-lambda", type=float, default=0.0, help="prime focus: dish Ø in λ (adds blocking)")
+    ap.add_argument("--tag", default="")
     a = ap.parse_args(argv)
-    cfg = fe.EvalConfig(fD=a.fD, band=a.band, cells_per_lambda=a.cpl)
+    cfg = fe.EvalConfig(fD=a.fD, band=a.band, cells_per_lambda=a.cpl, dish_diam_lambda=a.dish_lambda)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    out = RESULTS / f"benchmark_fD{a.fD:.2f}_{a.cpl}cpl.json"
+    out = RESULTS / (f"benchmark_fD{a.fD:.2f}_{a.cpl}cpl" + (f"_{a.tag}" if a.tag else "") + ".json")
     rows = json.loads(out.read_text()) if out.exists() else {}
     for kind in a.feeds.split(","):
         try:

@@ -129,7 +129,39 @@ class AxialCorrugated(Family):
         return geometry.build("axial_corrugated", f0, fD=fD, **kw)
 
 
-FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily(), AxialCorrugated())}
+class ChokeFamily(Family):
+    """Smooth circular horn with coaxial choke ring(s): VE4MA/Kumar (1 ring) or Chaparral (equal rings), for deep
+    prime-focus dishes (f/D 0.3-0.45). Horn Ø, ring width, ring depth, ring setback behind the rim (negative =
+    the ring opening is ahead of the rim). Ring walls as the horn wall (FeedLab default, CNC-friendly)."""
+    keys = ["horn_diam", "ring_width", "ring_depth", "ring_setback"]
+
+    def __init__(self, name, kind, variants, bounds):
+        self.name, self.kind, self.variants, self.bounds = name, kind, variants, bounds
+
+    def _x(self, variant):
+        lam = wavelength_mm(10.0)
+        d = (horns.ve4ma if self.kind == "ve4ma" else horns.chaparral)(10.0, variant).dims_mm
+        return [d[k] / lam for k in self.keys]
+
+    def seed(self, fD):
+        return self._x(self.variants[0])
+
+    def seeds(self, fD):
+        return [self._x(v) for v in self.variants]
+
+    def build(self, x, f0, fD):
+        lam = wavelength_mm(f0)
+        kw = {k: v * lam for k, v in zip(self.keys, x)}
+        kw["ring_wall"] = geometry.wall_default(f0)
+        return geometry.build(self.kind, f0, fD=fD, **kw)
+
+
+VE4MA = ChokeFamily("ve4ma", "ve4ma", ["super", "original", "small"],
+                    [(0.62, 1.00), (0.10, 0.90), (0.10, 0.70), (-0.30, 0.70)])
+CHAPARRAL = ChokeFamily("chaparral", "chaparral", ["best", "deep_dish"],
+                        [(0.62, 1.00), (0.10, 0.45), (0.10, 0.60), (-0.30, 0.70)])
+
+FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily(), AxialCorrugated(), VE4MA, CHAPARRAL)}
 
 
 # --------------------------------------------------------------------------------------------- objective
@@ -184,12 +216,16 @@ def main(argv=None):
     ap.add_argument("--confirm-cpl", type=int, default=24)
     ap.add_argument("--s11-max", type=float, default=-20.0)
     ap.add_argument("--max-len", type=float, default=12.0, help="length limit, λ")
+    ap.add_argument("--dish-lambda", type=float, default=0.0,
+                    help="prime focus: dish Ø in λ at f0, adds the central blocking of the feed Ø (0 = none)")
+    ap.add_argument("--tag", default="", help="suffix of the result files (e.g. a dish size)")
     a = ap.parse_args(argv)
 
     fam = FAMILIES[a.family]
-    cfg = fe.EvalConfig(fD=a.fD, band=a.band, cells_per_lambda=a.cpl, s11_max_db=a.s11_max, max_len_lambda=a.max_len)
+    cfg = fe.EvalConfig(fD=a.fD, band=a.band, cells_per_lambda=a.cpl, s11_max_db=a.s11_max, max_len_lambda=a.max_len,
+                        dish_diam_lambda=a.dish_lambda)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    tag = f"{fam.name}_fD{a.fD:.2f}"
+    tag = f"{fam.name}_fD{a.fD:.2f}" + (f"_{a.tag}" if a.tag else "")
     log = RESULTS / f"{tag}.jsonl"
 
     if a.confirm:

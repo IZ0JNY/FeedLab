@@ -42,6 +42,7 @@ class EvalConfig:
     nr_ts: int = 40000                 # typical runs stop at 10-16k steps; resonant designs would run to 100k
     s11_max_db: float = -20.0          # penalty above this, anywhere in f0*(1 +/- band)
     max_len_lambda: float = 12.0       # penalty above this feed length
+    dish_diam_lambda: float = 0.0      # prime focus: dish Ø in λ0 -> central blocking by the feed Ø (0 = no blocking)
     pad_lambda: float = 0.4
     threads: int = 0
     timeout_s: float = 3 * 3600
@@ -92,7 +93,7 @@ def energy_decay_db(folder: Path) -> float:
         return float("nan")
 
 
-def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = None) -> dict:
+def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = None, block_mm: float = 0.0) -> dict:
     r = deep_analysis.load(folder / "results.json")
     f0 = r.f0
     lam0 = wavelength_mm(f0)
@@ -101,13 +102,15 @@ def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = Non
     freq = np.asarray(r.freq_ghz)
     s11 = np.asarray(r.s11)
     per = []
+    # prime focus: the feed's outer Ø shadows the centre of the dish (struts not included)
+    blk = block_mm / (cfg.dish_diam_lambda * lam0) if cfg.dish_diam_lambda > 0 and block_mm > 0 else 0.0
     for ff in r.ff:
         lam = wavelength_mm(ff.f_ghz)
         # same physical phase-centre position at every frequency
-        e = efficiency.dish_efficiency(ff.pattern().shifted(pc["d_mm"] / lam), cfg.fD)
+        e = efficiency.dish_efficiency(ff.pattern().shifted(pc["d_mm"] / lam), cfg.fD, blk)
         g = abs(np.interp(ff.f_ghz, freq, s11.real) + 1j * np.interp(ff.f_ghz, freq, s11.imag))
         per.append({"f_ghz": ff.f_ghz, "eta_ill": e.total, "spill": e.spillover, "taper": e.illumination,
-                    "phase": e.phase, "pol": e.polarization, "edge_taper_db": e.edge_taper_db,
+                    "phase": e.phase, "pol": e.polarization, "block": e.blockage, "edge_taper_db": e.edge_taper_db,
                     "s11_db": 20 * math.log10(g + 1e-12), "eta": e.total * (1 - g * g)})
     inb = (freq >= f0 * (1 - cfg.band) - 1e-9) & (freq <= f0 * (1 + cfg.band) + 1e-9)
     s11_db_max = float(20 * np.log10(np.abs(s11[inb] if inb.any() else s11).max() + 1e-12))
@@ -132,9 +135,10 @@ def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = Non
 def evaluate(geo, cfg: EvalConfig, label: str = "", log: Path | None = None) -> dict:
     t0 = time.time()
     d = run_openems(geo, cfg, label)
-    out = figure_of_merit(d, cfg, geo.length)
+    out = figure_of_merit(d, cfg, geo.length, geo.blockage_diameter())
     out.update({"run": d.name, "label": label, "kind": geo.kind, "f0_ghz": geo.f_ghz, "fD": cfg.fD,
                 "length_lambda": geo.length / wavelength_mm(geo.f_ghz),
+                "block_diam_lambda": geo.blockage_diameter() / wavelength_mm(geo.f_ghz), "dish_diam_lambda": cfg.dish_diam_lambda,
                 "params_mm": {k: v for k, v in geo.params.items() if isinstance(v, (int, float))},
                 "wall_s": time.time() - t0})
     if log:
