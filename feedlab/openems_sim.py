@@ -64,6 +64,8 @@ class DeepConfig:
     pad_lambda: float = 0.5               # air between feed and PML (wavelengths at f0)
     dump_fields: bool = False             # E-field in the xz plane at f0 (VTK, ParaView)
     threads: int = 0                      # 0 = openEMS default (all cores)
+    min_cell_frac: float = 0.0            # >0: merge mesh lines closer than this x cell size (faster, coarser
+                                          # geometry: used by the fdtd/ optimiser, 0 = exact lines)
     openems_root: str = ""                # filled in by openems_local when known
     label: str = ""
 
@@ -247,10 +249,27 @@ def build(sim_path):
     w_in = max(1.0, 2.0 * res)
     xy = sorted(set([-R_MAX - pad, R_MAX + pad, 0.0, -R_IN, R_IN, -(R_IN + w_in), R_IN + w_in]
                     + [s * float(r) for p in POLYS for r in p[0] for s in (1, -1)]))
+    dmin = float(C.get("min_cell_frac") or 0.0) * res
+
+    def merge(lines, keep=()):
+        """drop lines closer than dmin to the previous one (tiny cells shrink the time step)"""
+        if dmin <= 0:
+            return lines
+        out = []
+        for v in lines:
+            if out and v - out[-1] < dmin:
+                if v in keep:
+                    out[-1] = v
+                continue
+            out.append(v)
+        return out
+
+    xy = merge(xy, keep=(0.0, -R_IN, R_IN))
     mesh.SetLines("x", xy)
     mesh.SmoothMeshLines("x", res, ratio=1.4)
     mesh.SetLines("y", mesh.GetLines("x"))
     zl = sorted(set([z_back, Z_AP + pad] + [float(z) for p in POLYS for z in p[1]]))
+    zl = merge(zl, keep=(z_back,))
     mesh.SetLines("z", zl)
     mesh.SmoothMeshLines("z", res, ratio=1.4)
     x_lines, y_lines, z_lines = mesh.GetLines("x"), mesh.GetLines("y"), mesh.GetLines("z")

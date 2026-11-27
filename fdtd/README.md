@@ -37,6 +37,16 @@ Con Docker: `docker run --rm -v "$PWD/fdtd/results:/work/fdtd/results" -v "$PWD/
   Un'ottimizzazione interrotta riparte da dove era: i punti già simulati costano zero.
 - **Risultati**: `fdtd/results/<famiglia>_fD<f/D>.jsonl` (tutte le valutazioni), `*_best.json`, `*_confirm.json`.
 
+## Impostazioni di simulazione (`fdtd_eval.EvalConfig`)
+
+- eccitazione f0 ± 10 % (impulso corto), campo lontano a f0·(1−b), f0, f0·(1+b), S11 valutato solo in f0 ± b;
+- cella = λ0/16 durante la ricerca; le linee di griglia più vicine di 0.3 celle si fondono (le celle
+  minuscole riducono il passo temporale: i corrugati passavano da 3 a 18 minuti);
+- massimo 40 000 passi; una simulazione che non scende sotto −22 dB di energia (cavità chiusa, instabilità)
+  è scartata con penalità 1.0.
+
+Con queste regole: W2IMU 29 s, Axial Corrugated 95 s (4 core).
+
 ## Figura di merito
 
 Per ciascuna frequenza f0·(1−b), f0, f0·(1+b) (b = 2 % di default), dal campo lontano openEMS (NF2FF):
