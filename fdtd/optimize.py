@@ -183,11 +183,13 @@ def main(argv=None):
     ap.add_argument("--confirm", action="store_true", help="only re-simulate the best design at --confirm-cpl")
     ap.add_argument("--confirm-cpl", type=int, default=24)
     ap.add_argument("--s11-max", type=float, default=-20.0)
+    ap.add_argument("--s11-weight", type=float, default=0.01, help="FOM penalty per dB of S11 above --s11-max")
     ap.add_argument("--max-len", type=float, default=12.0, help="length limit, λ")
     a = ap.parse_args(argv)
 
     fam = FAMILIES[a.family]
-    cfg = fe.EvalConfig(fD=a.fD, band=a.band, cells_per_lambda=a.cpl, s11_max_db=a.s11_max, max_len_lambda=a.max_len)
+    cfg = fe.EvalConfig(fD=a.fD, band=a.band, cells_per_lambda=a.cpl, s11_max_db=a.s11_max, s11_weight=a.s11_weight,
+                         max_len_lambda=a.max_len)
     RESULTS.mkdir(parents=True, exist_ok=True)
     tag = f"{fam.name}_fD{a.fD:.2f}"
     log = RESULTS / f"{tag}.jsonl"

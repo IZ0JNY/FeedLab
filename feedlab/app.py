@@ -291,7 +291,7 @@ def section_fig(geo):
     fig.add_hline(y=0, line_dash="dashdot", line_color="gray")
     t = float(geo.params.get("wall", 0) or 0)
     feats = geometry.wall_features(geo.profile)
-    if geo.kind == "axial_corrugated":      # slots: no smooth-horn step/flare labels
+    if geo.kind in geometry.CORRUGATED_KINDS:      # slots: no smooth-horn step/flare labels
         feats = {**feats, "steps": [], "flares": []}
     ann = dict(showarrow=True, arrowhead=0, arrowwidth=1, ax=0, ay=-28, font=dict(size=11), bgcolor="rgba(255,255,255,0.8)")
     for z, ra, rb in feats["steps"]:
@@ -301,7 +301,7 @@ def section_fig(geo):
         fig.add_annotation(x=(z0 + z1) / 2, y=-(r0 + r1) / 2, text=f"flare α = {abs(a):.2f}°",
                            **{**ann, "ay": 28, "font": dict(size=11, color="red"), "arrowcolor": "red"})
     # names of the design dimensions (as in the PDF drawing): axial lengths above, diameters on the part
-    if geo.kind != "axial_corrugated":
+    if geo.kind not in geometry.CORRUGATED_KINDS:
         prof = geo.profile
         Rmax = max(geo.outer_radius, max(r for _, r in prof))
         zs = sorted({round(z, 4) for z, _ in prof})
@@ -842,7 +842,7 @@ with tabs[1], contextlib.suppress(_Skip):
         S.feed_kind = _kind
         st.rerun()
     _need()
-    if S.feed_kind in ("rect_horn", "axial_corrugated"):
+    if S.feed_kind in ("rect_horn", *geometry.CORRUGATED_KINDS):
         st.caption("Opzioni di lavorazione CNC dell'esterno (profilo semplificato, raccordi) non disponibili per questo feed.")
     else:
         with st.expander("🛠️ Lavorazione CNC dell'esterno (facoltativa, l'interno non cambia)", expanded=False):
@@ -886,7 +886,7 @@ with tabs[1], contextlib.suppress(_Skip):
                     "aperture_H": "aperture_H", "aperture_E": "aperture_E", "axial_length": "axial_length",
                     "Ls": "Ls", "Dm": "Dm", "L1": "L1", "Lp": "Lp", "L2": "L2",
                     "cone1_half_deg": "a1", "cone2_half_deg": "a2"}
-        if S.feed_kind == "axial_corrugated":           # OE2IGL design-guide dimensions, edited one by one
+        if S.feed_kind in geometry.CORRUGATED_KINDS:           # OE2IGL design-guide dimensions, edited one by one
             map_keys = {k: k for k in ("pitch", "w", "axi", "delta", "Di", "Ds", "L_guide", *[f"d{i}" for i in range(1, 9)])}
         for k, v in editable.items():
             if k not in map_keys:

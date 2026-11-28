@@ -33,7 +33,11 @@ FEED_TYPES = {
     "axial_corrugated": "Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL",
     "rect_horn": "Tromba rettangolare, G3RPE",
     "iz0jny": "Dual-Flare, IZ0JNY",
+    "fd04": "Feed 0.4 f/D",
 }
+
+# feeds built as axial-corrugated heads (8 axial slots on a stepped face): same drawing, editing and CAD rules
+CORRUGATED_KINDS = {"axial_corrugated", "fd04"}
 
 # amateur band names used in short titles: (low GHz, high GHz, label)
 _BANDS = [(1.24, 1.30, "1.2"), (2.30, 2.45, "2.3"), (3.30, 3.50, "3.4"), (5.65, 5.925, "5.7"), (10.0, 10.5, "10"),
@@ -454,7 +458,7 @@ def _finish(kind, f, params, profile, t, extra_polys=None, notes=None, design=No
     wall_poly = _wall_polygon(profile, t, fl_r, fl_t)
     # optional CNC outer profile and outer fillets (every feed of revolution; the Axial Corrugated input tube is
     # joined to the corrugated head, where a fillet would leave a groove)
-    cnc_ok = kind != "axial_corrugated"
+    cnc_ok = kind not in CORRUGATED_KINDS
     mode = OUTER_PROFILE.get("mode", "wall") if cnc_ok else "wall"
     if mode != "wall":
         simpler = cnc_outer(wall_poly, len(profile), fl_t, mode)
@@ -609,6 +613,9 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
     if kind == "iz0jny":
         return _iz0jny(f_ghz, fD, t, kw)
 
+    if kind == "fd04":
+        return _fd04(f_ghz, t, kw)
+
     raise ValueError(f"unknown feed type {kind}")
 
 
@@ -650,6 +657,38 @@ def _iz0jny(f_ghz, fD, t, kw):
     return _finish("iz0jny", f_ghz, {"Di_input": Di, "Ds_step": Ds, "Ls": Ls, "Dm": Dm, "L1": L1, "Lp": Lp, "D_aperture": Dap, "L2": L2,
                                      "input_length": Lin, "cone1_half_deg": a1, "cone2_half_deg": a2, "wall": t},
                    prof, t, notes=notes)
+
+
+# Feed 0.4 f/D: axial-corrugated head found with openEMS (fdtd/optimize.py, family axial_corrugated, ~200 FDTD
+# runs) for a dish of f/D 0.4 (prime focus, or offset-equivalent): illuminator efficiency x (1 - |S11|^2), mean over
+# f0 +/- 2 %, with S11 <= -20 dB; confirmed at lambda/24 and at 10.368 and 24.048 GHz (fdtd/RISULTATI_fD040.md).
+# In wavelengths: pitch, slot width / pitch, axial advance per slot, delta, Di, Ds, depth of slot 1, depth of 2...8.
+FD04_LAMBDA = {"pitch": 0.403, "w_frac": 0.634, "axi": 0.020, "delta": 0.209, "Di": 0.718, "Ds": 0.620,
+               "d1": 0.320, "dk": 0.279}
+FD04_ETA = 0.795          # openEMS, f/D 0.4, mean over f0 +/- 2 %, S11 included
+FD04_FD = 0.4
+
+
+def _fd04(f_ghz, t, kw):
+    lam = wavelength_mm(f_ghz)
+    x = FD04_LAMBDA
+    dims = {"pitch": x["pitch"] * lam, "w": x["w_frac"] * x["pitch"] * lam, "axi": x["axi"] * lam,
+            "delta": x["delta"] * lam, "Di": x["Di"] * lam, "Ds": x["Ds"] * lam, "d1": x["d1"] * lam,
+            **{f"d{k}": x["dk"] * lam for k in range(2, 9)}}
+    dims.update(kw)                      # the user's edits win
+    opening = 4 * math.degrees(math.atan(1 / (4 * FD04_FD)))
+    g = _axial_corrugated(f_ghz, opening, t, dims)
+    g.kind = "fd04"
+    g.params["eta_guide_pct"] = 100 * FD04_ETA
+    g.params["opening_deg"] = opening
+    g.notes = [f"ottimizzato con openEMS per f/D {FD04_FD} (≈ {100 * FD04_ETA:.1f} % con S11, f0 ± 2 %); "
+               "verificato a 10.368 e 24.048 GHz",
+               "8 scanalature assiali sul fronte a gradini (stessa struttura dell'Axial Corrugated)",
+               "simulazione rapida non disponibile (scalini assiali): per altre frequenze verifica con openEMS"] + \
+              [n for n in g.notes if not n.startswith(("efficienza secondo", "usa l'angolo", "simulazione rapida",
+                                                       "valido 10", "tolleranza"))]
+    g.design = None
+    return g
 
 
 def _axial_corrugated(f_ghz, opening_deg, t, kw):

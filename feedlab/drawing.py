@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.patches import Polygon, Rectangle
 
-from .geometry import FEED_TYPES, FeedGeometry, short_title, RectHornGeometry, wall_features
+from .geometry import CORRUGATED_KINDS, FEED_TYPES, FeedGeometry, short_title, RectHornGeometry, wall_features
 
 
 def tolerance_mm(f_ghz: float) -> float:
@@ -49,7 +49,7 @@ def _param_for(geo, value: float, diameter: bool) -> str:
     for k, v in geo.params.items():
         if not isinstance(v, (int, float)) or isinstance(v, bool) or k in _NOT_DIMS or k.endswith(("_deg", "_pct")):
             continue
-        if geo.kind == "axial_corrugated" and k[:1] == "d" and k[1:].isdigit():
+        if geo.kind in CORRUGATED_KINDS and k[:1] == "d" and k[1:].isdigit():
             continue                                    # slot depths: dimensioned inside each step
         if abs(v - value) < 0.006:
             return k
@@ -142,7 +142,7 @@ def _section_axes(fig, geo: FeedGeometry, half: bool = False):
     Rmax = geo.outer_radius
     n_d = len({round(r, 3) for _, r in geo.profile})
     sp = 0.07 * Rmax                                  # half view: diameter callouts side by side, right of the part
-    side = geo.kind == "axial_corrugated"             # many close diameters: callouts side by side, right of the part
+    side = geo.kind in CORRUGATED_KINDS             # many close diameters: callouts side by side, right of the part
     ax.set_xlim(-0.08 * L - 4, (L + (n_d + 1) * sp if side else L * 1.08) + 4)
     ax.set_ylim(-Rmax * (0.25 if half else 1.5) - 5, Rmax * (1.5 if side else 1.35) + 3)
     ax.set_aspect("equal"); ax.set_axis_off()
@@ -155,7 +155,7 @@ def _section_axes(fig, geo: FeedGeometry, half: bool = False):
     named = set()
     for i, (z0, z1) in enumerate(zip(zs[:-1], zs[1:])):
         k = _param_for(geo, z1 - z0, False)
-        if geo.kind == "axial_corrugated" and (not k or k in named):              # corrugated: one callout per named length (las, axi)
+        if geo.kind in CORRUGATED_KINDS and (not k or k in named):              # corrugated: one callout per named length (las, axi)
             continue
         lab = f"{z1 - z0:.2f}" + (f" = {k}" if k and k not in named else "")
         named.add(k)
@@ -178,7 +178,7 @@ def _section_axes(fig, geo: FeedGeometry, half: bool = False):
         _dim_v(ax, x, 0 if half else -r, r, f"Ø{2 * r:.3f}" + (f" = {k}" if k else ""))
     ax.text(L, -Rmax * (0.12 if half else 1.3), f"Ø esterno max {2 * geo.outer_radius:.2f}", fontsize=6.5, ha="right")
     _wall_dims(ax, geo)
-    if geo.kind == "axial_corrugated":
+    if geo.kind in CORRUGATED_KINDS:
         _corrugated_dims(ax, geo, half)
     if geo.kind in ("ve4ma", "chaparral"):
         _ring_dims(ax, geo)
@@ -210,7 +210,7 @@ def _wall_dims(ax, geo):
     L = geo.z_aperture
     Rmax = geo.outer_radius
     y_dim = -Rmax * 1.12 - 1.0                           # dimension line below the part
-    if geo.kind == "axial_corrugated":   # slots: no smooth-horn step/flare callouts
+    if geo.kind in CORRUGATED_KINDS:   # slots: no smooth-horn step/flare callouts
         feats = {**feats, "steps": [], "flares": []}
         t = 0
     if t > 0:                                            # wall at the aperture rim
@@ -241,7 +241,7 @@ def drawing_pdf(geo, path: str | Path, material: str = "Ottone CuZn39Pb3 / Al 60
     title = title or short_title(FEED_TYPES.get(geo.kind, geo.kind), geo.f_ghz)
     from . import i18n
     # Axial Corrugated: sheet 1 = half-section at double scale, sheet 2 = whole section
-    views = [True, False] if geo.kind == "axial_corrugated" else [False]
+    views = [True, False] if geo.kind in CORRUGATED_KINDS else [False]
     mnt = getattr(geo, "mount", None)
     n_sheets = len(views) + (mnt is not None)
     with PdfPages(path) as pdf:

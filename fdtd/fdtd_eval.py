@@ -41,6 +41,7 @@ class EvalConfig:
     end_db: float = 30.0
     nr_ts: int = 40000                 # typical runs stop at 10-16k steps; resonant designs would run to 100k
     s11_max_db: float = -20.0          # penalty above this, anywhere in f0*(1 +/- band)
+    s11_weight: float = 0.01           # penalty per dB above s11_max_db
     max_len_lambda: float = 12.0       # penalty above this feed length
     pad_lambda: float = 0.4
     threads: int = 0
@@ -114,7 +115,7 @@ def figure_of_merit(folder: Path, cfg: EvalConfig, length_mm: float | None = Non
     fom = float(np.mean([x["eta"] for x in per]))
     pen = 0.0
     if s11_db_max > cfg.s11_max_db:
-        pen += 0.01 * (s11_db_max - cfg.s11_max_db)
+        pen += cfg.s11_weight * (s11_db_max - cfg.s11_max_db)
     if length_mm is not None and length_mm / lam0 > cfg.max_len_lambda:
         pen += 0.01 * (length_mm / lam0 - cfg.max_len_lambda)
     # a run stopped by the timestep limit with the energy still high (trapped/closed cavity, instability) gives
