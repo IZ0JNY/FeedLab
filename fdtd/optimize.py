@@ -159,7 +159,7 @@ class ChokeFamily(Family):
 VE4MA = ChokeFamily("ve4ma", "ve4ma", ["super", "original", "small"],
                     [(0.62, 1.00), (0.10, 0.90), (0.10, 0.70), (-0.30, 0.70)])
 CHAPARRAL = ChokeFamily("chaparral", "chaparral", ["best", "deep_dish"],
-                        [(0.62, 1.00), (0.10, 0.45), (0.10, 0.60), (-0.30, 0.70)])
+                        [(0.62, 1.00), (0.10, 0.60), (0.10, 0.60), (-0.30, 0.70)])
 
 class LargeW2IMU(Family):
     """Large-flare W2IMU (W1GHZ & W1FKF, MUD 2023): input guide A, wide cone alpha (30° published, 60° centre
@@ -167,7 +167,7 @@ class LargeW2IMU(Family):
     wide flares for deep dishes (f/D 0.35-0.5)."""
     name = "large_w2imu"
     keys = ["A", "B", "alpha_deg", "C"]
-    bounds = [(0.70, 0.82), (0.85, 2.10), (12.0, 60.0), (0.0, 4.5)]
+    bounds = [(0.70, 0.82), (0.72, 2.10), (12.0, 60.0), (0.0, 4.5)]   # B < A is rejected (failed build)
 
     def _x(self, B):
         d = horns.large_w2imu_30deg(10.0, B).dims_mm
@@ -183,6 +183,8 @@ class LargeW2IMU(Family):
     def build(self, x, f0, fD):
         lam = wavelength_mm(f0)
         A, B, a, C = x
+        if B < A + 0.02:
+            raise ValueError("aperture smaller than the input guide")
         return geometry.build("large_w2imu", f0, fD=fD, A=A * lam, B=B * lam, alpha=a, C=C * lam)
 
 
