@@ -1,9 +1,19 @@
-# Modifiche per la prossima versione (0.4.29)
+# Modifiche per la prossima versione (0.4.30)
 
 **Regola:** ogni 5 modifiche si fa una nuova build e la si pubblica su GitHub.
 
 | # | Richiesta | Stato |
 |---|---|---|
+
+---
+
+# Versione 0.4.29 (pubblicata, BETA TEST)
+
+| # | Richiesta | Stato |
+|---|---|---|
+| 1 | **Parabola Gibertini OP 150 L** nel catalogo: offset 155 × 166 cm, F/D 0.66, 43.3 dBi a 10.95 GHz (η ≈ 68 %) | ✅ fatto |
+| 2 | **Parabole offset custom fino a 12 m**: diametro, asse corto e focale (fino a 24 m) ammessi per offset fino a 12 m (prima 5–10 m), anche in «Ho misurato la mia parabola» | ✅ fatto |
+| 3 | **Niente feed divisi per f/D nella lista**: tolto «Feed 0.4 f/D» (0.4.28); i feed ottimizzati con openEMS per f/D 0.4 (corrugato 83.5 %, Chaparral 80.1 %, VE4MA 80.3 %, W2IMU 73.5 %) sono file progetto in `fdtd/results/feedlab/` (10 e 24 GHz, parabole 3 e 3.7 m) da aprire con «📂 Apri progetto»; i progetti 0.4.28 con «Feed 0.4 f/D» si aprono come Axial Corrugated con le stesse quote; manuali IT/EN | ✅ fatto |
 
 ---
 

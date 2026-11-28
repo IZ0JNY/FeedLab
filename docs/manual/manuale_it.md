@@ -214,7 +214,6 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 | **Chaparral 3 anelli** | prime focus f/D < 0.33 | 78 % a f/D 0.35; openEMS |
 | **Horn conico** | uso generale | semplice, a larga banda |
 | **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | scalino + cono + cilindro di fasatura + secondo cono; temperatura d'antenna bassa, S11 molto basso; verificato con openEMS a 24 GHz |
-| **Feed 0.4 f/D** | f/D 0.35–0.47, 10 e 24 GHz | testa corrugata con 8 scanalature assiali ottimizzata con openEMS: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %) |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verificare full-wave prima di costruire |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | su offset +1.6…2.3 dB di sun noise (W1GHZ 2024) |
 | **Guida circolare aperta** | parabole piccole e profonde | blocking minimo, F/B scarso |
@@ -222,6 +221,8 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 | **Tromba rettangolare** | polarizzazione lineare, < 40 GHz | lamiera, direttamente dalla WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke; openEMS |
 | **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn**, parametric calculation OE2IGL | offset / f/D 0.5–0.95 | regole W1GHZ / calcolo parametrico OE2IGL dall'angolo di apertura |
+
+I feed ottimizzati con openEMS per una f/D precisa non sono nella lista: sono **file progetto** in `fdtd/results/feedlab/` (per f/D 0.4 a 10 e 24 GHz, parabole da 3 e 3.7 m: corrugato 83.5 %, Chaparral 80.1 %, VE4MA 80.3 %, W2IMU 73.5 %). Si aprono con **📂 Apri progetto** e danno feed, parabola e quote già impostati. Un progetto della 0.4.28 con «Feed 0.4 f/D» si apre come Axial Corrugated con le sue quote.
 
 ---
 

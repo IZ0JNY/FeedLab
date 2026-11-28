@@ -214,7 +214,6 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 | **Chaparral 3 rings** | prime focus f/D < 0.33 | 78 % at f/D 0.35; openEMS |
 | **Conical horn** | general purpose | simple, wide band |
 | **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; low antenna temperature, very low S11; checked with openEMS at 24 GHz |
-| **Feed 0.4 f/D** | f/D 0.35–0.47, 10 and 24 GHz | corrugated head with 8 axial slots optimised with openEMS: 83.5 % with S11 ≤ −21 dB (f0 ± 2 %) |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verify full-wave before building |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | +1.6…2.3 dB of sun noise on offset dishes (W1GHZ 2024) |
 | **Open circular waveguide** | small deep dishes | minimal blockage, poor F/B |
@@ -222,6 +221,8 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 | **Rectangular horn** | linear polarisation, < 40 GHz | sheet metal, directly from WR |
 | **VE4MA / Super-VE4MA** | prime focus f/D 0.35–0.45 | choke ring; openEMS |
 | **W2IMU dual-mode / W2IMU Dual-Mode Feedhorn**, parametric calculation OE2IGL | offset / f/D 0.5–0.95 | W1GHZ rules / OE2IGL parametric calculation from the opening angle |
+
+Feeds optimised with openEMS for one specific f/D are not in the list: they are **project files** in `fdtd/results/feedlab/` (for f/D 0.4 at 10 and 24 GHz, 3 and 3.7 m dishes: corrugated 83.5 %, Chaparral 80.1 %, VE4MA 80.3 %, W2IMU 73.5 %). Open them with **📂 Open project**: feed, dish and dimensions are already set. A 0.4.28 project saved with "Feed 0.4 f/D" opens as an Axial Corrugated with its dimensions.
 
 ---
 

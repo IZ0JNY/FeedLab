@@ -161,11 +161,6 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                                  "facile al tornio fino a 47 GHz; da 76 GHz si usano Pickett-Potter o cavity feed"],
             ["simulazione rapida non disponibile (scalini assiali): verifica con openEMS"]
             + (["sopra 47 GHz gli scalini diventano molto stretti"] if f_ghz > 47 else []))
-    # Feed 0.4 f/D: corrugated head optimised with openEMS for f/D 0.4, verified at 10 and 24 GHz
-    if 10 <= f_ghz <= 24.25 and 0.35 <= fD_feed <= 0.47:
-        add("fd04", ["ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %)",
-                     "8 scanalature assiali, testa corta: si lavora al tornio"],
-            ["simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz"])
     # ---------- adjustments ----------
     for c in cands:
         if polarization == "circular":
@@ -176,7 +171,7 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                 c.reasons.append("CP: aggiungere polarizzatore (septum in guida 0.71λ o dielettrico)")
                 if f_ghz > 60:
                     c.warnings.append("septum oltre 60 GHz: simmetria guida entro ~1% (pochi µm)")
-        if hi_freq and c.kind in ("ve4ma", "chaparral"):
+        if hi_freq and c.kind in geometry.CHOKE_KINDS:
             c.score -= 0.05
             c.warnings.append("anelli sottili difficili oltre 70 GHz (OE2IGL: cavity feed o Pickett-Potter)")
         if tools == "sheet" and c.kind not in ("rect_horn", "open_circular", "w2imu"):
@@ -185,7 +180,7 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
         if priority == "gt" and c.kind in ("large_w2imu", "skobelev", "pickett_potter"):
             c.score += 0.01
         if priority == "rx":
-            if c.kind in ("iz0jny", "large_w2imu", "axial_corrugated", "fd04", "skobelev", "pickett_potter"):
+            if c.kind in ("iz0jny", "large_w2imu", "axial_corrugated", "skobelev", "pickett_potter"):
                 c.score += 0.02
                 c.reasons.append("lobi laterali e posteriori bassi: poco rumore dal terreno (RX)")
             elif c.kind in ("open_circular", "rect_horn"):

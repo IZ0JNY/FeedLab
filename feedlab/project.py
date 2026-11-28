@@ -202,4 +202,10 @@ def apply(S, p: dict) -> None:
     for k in INPUT_KEYS:
         if i.get(k) is not None:
             S[k] = i[k]
-    S["overrides"] = {i["feed_kind"]: dict(i.get("overrides") or {})}
+    from .geometry import LEGACY_KINDS
+    kind, over = i["feed_kind"], dict(i.get("overrides") or {})
+    if kind in LEGACY_KINDS:            # feed type no longer in the list: its base type with its dimensions
+        base, dims = LEGACY_KINDS[kind]
+        kind, over = base, {**dims(float(i["f_ghz"])), **over}
+        S["feed_kind"] = kind
+    S["overrides"] = {kind: over}

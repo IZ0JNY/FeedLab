@@ -1,3 +1,21 @@
+## FeedLab 0.4.29 BETA TEST per Windows e Linux / for Windows and Linux
+
+**Installazione / Installation:** Windows: `FeedLab-Setup-0.4.29.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.29-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.29_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.29_amd64.deb`) oppure / or `FeedLab-0.4.29-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **Gibertini OP 150 L** nel catalogo parabole: offset 155 × 166 cm, F/D 0.66, 43.3 dBi a 10.95 GHz (efficienza ≈ 68 %).
+- **Parabole offset custom fino a 12 m:** nei campi «la tua parabola» diametro e asse corto arrivano a 12 m (asse lungo 13 m, focale 24 m).
+- **Feed per f/D 0.4 come file progetto:** «Feed 0.4 f/D» non è più nella lista dei feed (niente feed divisi per focale). I feed ottimizzati con openEMS per f/D 0.4 (corrugato 83.5 %, Chaparral 80.1 %, VE4MA 80.3 %, W2IMU 73.5 %) sono file progetto `.feedlab.json` su GitHub in [`fdtd/results/feedlab/`](https://github.com/IZ0JNY/FeedLab/tree/main/fdtd/results/feedlab) (10 e 24 GHz, parabole 3 e 3.7 m): si aprono con 📂 Apri progetto. I progetti della 0.4.28 con «Feed 0.4 f/D» si aprono come Axial Corrugated con le stesse quote.
+
+### 🇬🇧 What's new
+- **Gibertini OP 150 L** in the dish catalogue: offset 155 × 166 cm, F/D 0.66, 43.3 dBi at 10.95 GHz (efficiency ≈ 68 %).
+- **Custom offset dishes up to 12 m:** in the "your dish" fields, diameter and short axis go up to 12 m (long axis 13 m, focal length 24 m).
+- **f/D 0.4 feeds as project files:** "Feed 0.4 f/D" is no longer in the feed list (no feeds split by focal length). The feeds optimised with openEMS for f/D 0.4 (corrugated 83.5 %, Chaparral 80.1 %, VE4MA 80.3 %, W2IMU 73.5 %) are `.feedlab.json` project files on GitHub in [`fdtd/results/feedlab/`](https://github.com/IZ0JNY/FeedLab/tree/main/fdtd/results/feedlab) (10 and 24 GHz, 3 and 3.7 m dishes): open them with 📂 Open project. 0.4.28 projects saved with "Feed 0.4 f/D" open as an Axial Corrugated with the same dimensions.
+
+Requisiti / Requirements: Windows 10/11 64-bit; Linux x86_64 (glibc 2.31+: Debian 11+, Ubuntu 20.04+).
+
+---
+
 ## FeedLab 0.4.28 BETA TEST per Windows e Linux / for Windows and Linux
 
 **Installazione / Installation:** Windows: `FeedLab-Setup-0.4.28.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.28-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.28_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.28_amd64.deb`) oppure / or `FeedLab-0.4.28-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.

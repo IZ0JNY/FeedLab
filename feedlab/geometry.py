@@ -33,11 +33,14 @@ FEED_TYPES = {
     "axial_corrugated": "Axial Corrugated Feedhorn CT1DMK, parametric calculation OE2IGL",
     "rect_horn": "Tromba rettangolare, G3RPE",
     "iz0jny": "Dual-Flare, IZ0JNY",
-    "fd04": "Feed 0.4 f/D",
 }
 
 # feeds built as axial-corrugated heads (8 axial slots on a stepped face): same drawing, editing and CAD rules
-CORRUGATED_KINDS = {"axial_corrugated", "fd04"}
+CORRUGATED_KINDS = {"axial_corrugated"}
+# choke-ring feeds (horn + coaxial rings): same drawing and editing rules
+CHOKE_KINDS = {"ve4ma", "chaparral"}
+# smooth W2IMU-type horns (input guide A, cone, aperture B, phasing cylinder C)
+W2IMU_KINDS = {"w2imu", "w2imu_oe2igl", "large_w2imu"}
 
 # amateur band names used in short titles: (low GHz, high GHz, label)
 _BANDS = [(1.24, 1.30, "1.2"), (2.30, 2.45, "2.3"), (3.30, 3.50, "3.4"), (5.65, 5.925, "5.7"), (10.0, 10.5, "10"),
@@ -613,9 +616,6 @@ def build(kind: str, f_ghz: float, *, fD: float | None = None, opening_deg: floa
     if kind == "iz0jny":
         return _iz0jny(f_ghz, fD, t, kw)
 
-    if kind == "fd04":
-        return _fd04(f_ghz, t, kw)
-
     raise ValueError(f"unknown feed type {kind}")
 
 
@@ -659,35 +659,23 @@ def _iz0jny(f_ghz, fD, t, kw):
                    prof, t, notes=notes)
 
 
-# Feed 0.4 f/D: axial-corrugated head found with openEMS (fdtd/optimize.py, family axial_corrugated, 200 FDTD
-# runs) for a dish of f/D 0.4 (prime focus, or offset-equivalent): illuminator efficiency x (1 - |S11|^2), mean over
-# f0 +/- 2 %, with S11 <= -20 dB; confirmed at lambda/24 and at 10.368 and 24.048 GHz (fdtd/RISULTATI_fD040.md).
-# In wavelengths: pitch, slot width / pitch, axial advance per slot, delta, Di, Ds, depth of slot 1, depth of 2...8.
+# Feed types removed from the list (FeedLab 0.4.28 «Feed 0.4 f/D»): a project saved with one of them opens as the
+# feed type it was built on, with its dimensions as overrides. Corrugated head optimised with openEMS for f/D 0.4,
+# in wavelengths (fdtd/RISULTATI_fD040.md).
 FD04_LAMBDA = {"pitch": 0.4441, "w_frac": 0.5862, "axi": 0.0599, "delta": 0.2214, "Di": 0.7233, "Ds": 0.7233,
                "d1": 0.4775, "dk": 0.2689}
-FD04_ETA = 0.835          # openEMS, f/D 0.4, mean over f0 +/- 2 %, S11 included
-FD04_FD = 0.4
 
 
-def _fd04(f_ghz, t, kw):
+def fd04_overrides(f_ghz: float) -> dict:
+    """Axial Corrugated dimensions (mm) of the former «Feed 0.4 f/D» at f_ghz."""
     lam = wavelength_mm(f_ghz)
     x = FD04_LAMBDA
-    dims = {"pitch": x["pitch"] * lam, "w": x["w_frac"] * x["pitch"] * lam, "axi": x["axi"] * lam,
+    return {"pitch": x["pitch"] * lam, "w": x["w_frac"] * x["pitch"] * lam, "axi": x["axi"] * lam,
             "delta": x["delta"] * lam, "Di": x["Di"] * lam, "Ds": x["Ds"] * lam, "d1": x["d1"] * lam,
             **{f"d{k}": x["dk"] * lam for k in range(2, 9)}}
-    dims.update(kw)                      # the user's edits win
-    opening = 4 * math.degrees(math.atan(1 / (4 * FD04_FD)))
-    g = _axial_corrugated(f_ghz, opening, t, dims)
-    g.kind = "fd04"
-    g.params["eta_guide_pct"] = 100 * FD04_ETA
-    g.params["opening_deg"] = opening
-    g.notes = ["ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %), verificato a 10.368 e 24.048 GHz",
-               "8 scanalature assiali sul fronte a gradini (stessa struttura dell'Axial Corrugated)",
-               "simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz"] + \
-              [n for n in g.notes if not n.startswith(("efficienza secondo", "usa l'angolo", "simulazione rapida",
-                                                       "valido 10", "tolleranza", "ATTENZIONE"))]
-    g.design = None
-    return g
+
+
+LEGACY_KINDS = {"fd04": ("axial_corrugated", fd04_overrides)}
 
 
 def _axial_corrugated(f_ghz, opening_deg, t, kw):

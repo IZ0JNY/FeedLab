@@ -640,8 +640,7 @@ def _apply_project(p: dict):
     if i.get("base_shape"):
         S["base_shape"] = i["base_shape"]
         S["base_shape_band"] = f
-    _project.apply(S, p)
-    S["feed_kind"] = i["feed_kind"]
+    _project.apply(S, p)             # also maps a feed type no longer in the list to its base type
     S["cands"] = None
 
 # ---------------------------------------------------------------- 1 wizard
@@ -673,9 +672,9 @@ with tabs[0]:
                 st.table({"Dato": list(info), "Valore": [str(v) for v in info.values()]})
                 if dm.opening_deg() is None or st.checkbox("Ho misurato la mia parabola (più preciso del datasheet)"):
                     st.info("Misura: assi del bordo e profondità massima (righello teso sul bordo lungo l'asse lungo).")
-                    la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, float(dm.height_mm))
-                    sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, float(dm.width_mm))
-                    dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, float(round(sa * sa / (16 * (f_cat or 0.6 * sa)) * sa / la, 1)))
+                    la = st.number_input("Asse lungo (mm)", 100.0, 13000.0, float(dm.height_mm))
+                    sa = st.number_input("Asse corto (mm)", 100.0, 12000.0, float(dm.width_mm))
+                    dp = st.number_input("Profondità massima (mm)", 1.0, 3000.0, float(round(sa * sa / (16 * (f_cat or 0.6 * sa)) * sa / la, 1)))
                     dish = wizard.dish_from_offset_tv(la, sa, dp) if dm.kind == "offset" else wizard.dish_from_prime(sa, depth=dp)
                 else:
                     dish = wizard.dish_from_catalog(dm)
@@ -685,24 +684,24 @@ with tabs[0]:
                 mode = st.radio("Dati disponibili", ["Diametro + f/D (come nei datasheet)", "Misure del riflettore (assi + profondità)",
                                                      "Diametro + focale", "Diametro + angolo di illuminazione"])
                 if mode.startswith("Diametro + f/D"):
-                    D = st.number_input("Diametro / larghezza (mm)", 100.0, 10000.0, 800.0)
+                    D = st.number_input("Diametro / larghezza (mm)", 100.0, 12000.0, 800.0)
                     fdo = st.number_input("f/D offset (f / larghezza)", 0.3, 2.0, 0.66, 0.01,
                                           help="convenzione dei costruttori di parabole TV (es. Gibertini 0.66, Triax 0.6)")
                     dish = wizard.dish_from_offset_fD(D, fdo * D, 0.0)
                 elif mode.endswith("illuminazione"):
-                    D = st.number_input("Diametro proiettato (mm)", 100.0, 10000.0, 800.0)
+                    D = st.number_input("Diametro proiettato (mm)", 100.0, 12000.0, 800.0)
                     ang = st.number_input("Angolo di illuminazione richiesto (° totali)", 20.0, 170.0, 70.0, 0.5)
                     dish = wizard.Dish("offset", D, reflector.fD_from_half_angle(ang / 2), None,
                                        note="parabola custom definita dall'angolo di illuminazione")
                 elif mode.startswith("Misure"):
-                    la = st.number_input("Asse lungo (mm)", 100.0, 5000.0, 676.0)
-                    sa = st.number_input("Asse corto (mm)", 100.0, 5000.0, 630.0)
-                    dp = st.number_input("Profondità massima (mm)", 1.0, 1000.0, 52.0)
+                    la = st.number_input("Asse lungo (mm)", 100.0, 13000.0, 676.0)
+                    sa = st.number_input("Asse corto (mm)", 100.0, 12000.0, 630.0)
+                    dp = st.number_input("Profondità massima (mm)", 1.0, 3000.0, 52.0)
                     dish = wizard.dish_from_offset_tv(la, sa, dp)
                 else:
-                    D = st.number_input("Diametro proiettato (mm)", 100.0, 5000.0, 600.0)
-                    f = st.number_input("Focale del paraboloide madre (mm)", 50.0, 5000.0, 390.0)
-                    h = st.number_input("Distanza asse → bordo inferiore (mm)", 0.0, 2000.0, 0.0)
+                    D = st.number_input("Diametro proiettato (mm)", 100.0, 12000.0, 600.0)
+                    f = st.number_input("Focale del paraboloide madre (mm)", 50.0, 24000.0, 390.0)
+                    h = st.number_input("Distanza asse → bordo inferiore (mm)", 0.0, 6000.0, 0.0)
                     dish = wizard.dish_from_offset_fD(D, f, h)
             else:
                 D = st.number_input("Diametro (mm)", 100.0, 20000.0, 1200.0)
@@ -900,7 +899,7 @@ with tabs[1], contextlib.suppress(_Skip):
         for k, v in editable.items():
             if k not in map_keys:
                 continue
-            if S.feed_kind in ("w2imu", "w2imu_oe2igl", "large_w2imu") and k == "flare_length":
+            if S.feed_kind in geometry.W2IMU_KINDS and k == "flare_length":
                 st.text(f"{i18n.tr('lunghezza del cono')} · flare_length ({i18n.tr('calcolata')}) {v:.3f}")
                 continue
             if S.feed_kind == "conical" and k == "flare_length":
@@ -913,7 +912,7 @@ with tabs[1], contextlib.suppress(_Skip):
                 lab = f":green[{_nm} (mm)]"
             else:
                 lab = f":blue[{_nm} (mm)]"
-            _guide = k in ("input_length", "L_guide") or (k == "length" and S.feed_kind in ("open_circular", "ve4ma", "chaparral"))
+            _guide = k in ("input_length", "L_guide") or (k == "length" and S.feed_kind in ("open_circular", *geometry.CHOKE_KINDS))
             nv = st.number_input(lab, value=float(round(v, 4)), format="%.4f", key=f"in_{S.feed_kind}_{k}",
                                  help="angolo del cono: cambiandolo FeedLab ricalcola la lunghezza del cono "
                                       "(i diametri restano)" if k.endswith("_deg") else
