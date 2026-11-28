@@ -5,7 +5,7 @@ import pytest
 from feedlab import geometry
 from feedlab.geometry import _seg_dist
 
-KINDS = [k for k in geometry.FEED_TYPES if k not in ("rect_horn", "axial_corrugated")]
+KINDS = [k for k in geometry.FEED_TYPES if k != "rect_horn" and k not in geometry.CORRUGATED_KINDS]
 
 
 def _build(kind, mode="wall", fillet=0.0):
