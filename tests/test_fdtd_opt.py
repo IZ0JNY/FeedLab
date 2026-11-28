@@ -55,3 +55,24 @@ def test_cache_key_depends_on_geometry_and_mesh():
     assert fe._key(g1, c) == fe._key(fam.build(fam.seed(0.6), 10.368, 0.6), c)
     assert fe._key(g1, c) != fe._key(g2, c)
     assert fe._key(g1, c) != fe._key(g1, fe.EvalConfig(cells_per_lambda=24))
+
+
+def test_prime_focus_blocking_lowers_fom(tmp_path):
+    shutil.copy(DATA, tmp_path / "results.json")
+    free = fe.figure_of_merit(tmp_path, fe.EvalConfig(fD=0.6), length_mm=113.9)
+    blk = fe.figure_of_merit(tmp_path, fe.EvalConfig(fD=0.6, dish_diam_lambda=10.0), length_mm=113.9, block_mm=30.0)
+    assert blk["eta_mean"] < free["eta_mean"]
+    assert 0.9 < blk["per_freq"][1]["block"] < 1.0
+
+
+@pytest.mark.parametrize("name", ["ve4ma", "chaparral", "axial_corrugated"])
+def test_export_overrides_rebuild_same_feed(name):
+    """The FeedLab project overrides rebuild exactly the geometry simulated by the optimiser."""
+    import export_feedlab
+    from feedlab import geometry
+    fam = optimize.FAMILIES[name]
+    x = fam.seeds(0.4)[0]
+    for f in (10.368, 24.048):
+        kind, kw = export_feedlab.overrides(fam, x, f)
+        a, b = fam.build(x, f, 0.4), geometry.build(kind, f, fD=0.4, **kw)
+        assert a.profile == b.profile and a.blockage_diameter() == pytest.approx(b.blockage_diameter())

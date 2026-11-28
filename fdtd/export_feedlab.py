@@ -47,6 +47,35 @@ def overrides(fam, x: list[float], f_ghz: float) -> tuple[str, dict]:
     raise ValueError(f"export not available for {fam.name}")
 
 
+def openems_results(family: str, fD: float, f_ghz: float, S: dict, geo) -> dict | None:
+    """Dish results (same formulas and fields as FeedLab's project file) from the confirmed openEMS far field in
+    fdtd/results/openems_fD<fD>/<family>/ (simulated at 10.368 GHz; quotes in λ, so the pattern holds at f_ghz)."""
+    import numpy as np
+    from feedlab import deep_analysis, explore
+    path = op.RESULTS / f"openems_fD{fD:.2f}" / family / "results.json"
+    if not path.exists():
+        return None
+    r = deep_analysis.load(path)
+    lam0 = wavelength_mm(r.f0)
+    pat = r.ff_at(r.f0).pattern()
+    pc = deep_analysis.phase_center(pat, fD, lam0)["d_mm"] / lam0          # λ, from the aperture
+    d = S["dish"]
+    sc_d = project.default_scenario(f_ghz)
+    sc = explore.Scenario(d.kind, d.D_mm, d.fD, sc_d["elev_deg"], __import__("feedlab").noise.receiver_temp(sc_d["nf_db"]),
+                          sc_d["zenith_db"], 290.0, sc_d["rms_mm"], sc_d["line_loss_db"], material=S["material"])
+    res = explore.performance(geo.kind, f_ghz, sc, geo, pat.shifted(pc), None)
+    g = np.interp(r.f0, np.asarray(r.freq_ghz), np.abs(np.asarray(r.s11)))
+    lam = wavelength_mm(f_ghz)
+    return {"source": f"openEMS {path.parent.relative_to(op.RESULTS.parent.parent)} (24 celle/λ, {r.f0:g} GHz)",
+            "gain_dbi": res.gain_dbi, "g_over_t": res.g_over_t, "eta": res.eta, "spill": res.spill, "illum": res.illum,
+            "phase": res.phase, "pol": res.pol, "block": res.block, "edge_taper_db": res.edge_taper_db,
+            "t_ant_K": res.t_ant, "s11_db": 20 * np.log10(g + 1e-12), "phase_center_mm": pc * lam + res.pc_mm,
+            "ohmic_db": res.ohmic_db, "tsys": res.tsys,
+            "pattern": {"theta_deg": res.pattern.theta_deg[::2],
+                        "E_db": 20 * np.log10(np.abs(res.pattern.E[::2]) / np.max(np.abs(res.pattern.E)) + 1e-12),
+                        "H_db": 20 * np.log10(np.abs(res.pattern.H[::2]) / np.max(np.abs(res.pattern.H)) + 1e-12)}}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--family", required=True, choices=sorted(op.FAMILIES))
@@ -84,7 +113,16 @@ def main(argv=None):
             p["openems_optimum"] = {"source": f"fdtd/results/{tag}_best.json", "family": fam.name, "x_lambda": best["x"],
                                     "eta_mean": best["eta_mean"], "s11_max_db": best["s11_max_db"],
                                     "f0_ghz_simulated": best["f0_ghz"], "cells_per_lambda": 16}
+            cf = op.RESULTS / f"{tag}_confirm.json"
+            if cf.exists():
+                c = json.loads(cf.read_text())["best"]
+                p["openems_optimum"]["confirm_24cpl"] = {"eta_mean": c["eta_mean"], "eta_f0": c["eta_f0"],
+                                                         "s11_max_db": c["s11_max_db"], "per_freq": c["per_freq"]}
             name = f"{a.name or tag}_{f:g}GHz_{D / 1000:g}m.feedlab.json"
+            ow = openems_results(fam.name, a.fD, f, S, geo)
+            if ow:                  # FeedLab's fast solver ignores chokes/slots: dish results from the openEMS pattern
+                p["results_fast_solver"] = p.get("results")
+                p["results"] = ow
             (OUT / name).write_text(project.to_json(project._clean(p)), encoding="utf-8")
             r = p.get("results", {})
             print(f"{name}: G {r.get('gain_dbi', float('nan')):.2f} dBi, η {r.get('eta', float('nan')):.3f}, "

@@ -1,0 +1,54 @@
+FEEDLAB:STAGE setup {}
+FEEDLAB:STAGE fdtd {"nx": 112, "ny": 112, "nz": 124, "cells": 1555456, "res_mm": 1.0110198472438054}
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.37.0
+ | (C) 2010-2026 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.7.0
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 112x112x124 --> 1.55546e+06 FDTD cells 
+FDTD timestep is: 1.21728e-12 s; Nyquist rate: 36 timesteps @1.14098e+10 Hz
+Excitation signal length is: 2270 timesteps (2.76323e-09s)
+Max. number of timesteps: 40000 ( --> 17.6211 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          180 || Speed:   68.1 MC/s (2.284e-02 s/TS) || Energy: ~2.63e-18 (- 0.00dB)
+[@        8s] Timestep:          423 || Speed:   93.1 MC/s (1.671e-02 s/TS) || Energy: ~1.13e-15 (- 0.00dB)
+[@       12s] Timestep:          738 || Speed:  120.9 MC/s (1.287e-02 s/TS) || Energy: ~2.03e-13 (- 0.00dB)
+[@       16s] Timestep:         1089 || Speed:  134.9 MC/s (1.153e-02 s/TS) || Energy: ~3.40e-12 (- 0.00dB)
+[@       20s] Timestep:         1440 || Speed:  135.1 MC/s (1.151e-02 s/TS) || Energy: ~5.78e-12 (- 0.00dB)
+[@       24s] Timestep:         1818 || Speed:  144.1 MC/s (1.079e-02 s/TS) || Energy: ~1.37e-12 (- 6.25dB)
+[@       28s] Timestep:         2160 || Speed:  131.4 MC/s (1.183e-02 s/TS) || Energy: ~3.03e-13 (-12.80dB)
+[@       32s] Timestep:         2502 || Speed:  131.0 MC/s (1.187e-02 s/TS) || Energy: ~2.07e-13 (-14.46dB)
+[@       36s] Timestep:         2826 || Speed:  125.1 MC/s (1.243e-02 s/TS) || Energy: ~1.72e-13 (-15.27dB)
+[@       40s] Timestep:         3168 || Speed:  129.6 MC/s (1.200e-02 s/TS) || Energy: ~1.31e-13 (-16.47dB)
+[@       44s] Timestep:         3528 || Speed:  139.1 MC/s (1.119e-02 s/TS) || Energy: ~1.10e-13 (-17.21dB)
+[@       48s] Timestep:         3897 || Speed:  142.5 MC/s (1.091e-02 s/TS) || Energy: ~8.62e-14 (-18.26dB)
+[@       52s] Timestep:         4266 || Speed:  140.1 MC/s (1.110e-02 s/TS) || Energy: ~6.52e-14 (-19.48dB)
+[@       56s] Timestep:         4608 || Speed:  132.8 MC/s (1.172e-02 s/TS) || Energy: ~5.30e-14 (-20.38dB)
+[@     1m00s] Timestep:         4968 || Speed:  139.4 MC/s (1.115e-02 s/TS) || Energy: ~3.86e-14 (-21.76dB)
+[@     1m04s] Timestep:         5310 || Speed:  130.8 MC/s (1.189e-02 s/TS) || Energy: ~3.19e-14 (-22.58dB)
+[@     1m08s] Timestep:         5661 || Speed:  133.2 MC/s (1.168e-02 s/TS) || Energy: ~2.50e-14 (-23.65dB)
+[@     1m13s] Timestep:         5985 || Speed:  124.6 MC/s (1.248e-02 s/TS) || Energy: ~2.07e-14 (-24.45dB)
+[@     1m17s] Timestep:         6327 || Speed:  131.9 MC/s (1.179e-02 s/TS) || Energy: ~1.60e-14 (-25.57dB)
+[@     1m21s] Timestep:         6669 || Speed:  132.4 MC/s (1.174e-02 s/TS) || Energy: ~1.19e-14 (-26.85dB)
+[@     1m25s] Timestep:         7020 || Speed:  135.4 MC/s (1.149e-02 s/TS) || Energy: ~1.00e-14 (-27.62dB)
+[@     1m29s] Timestep:         7380 || Speed:  137.5 MC/s (1.131e-02 s/TS) || Energy: ~7.26e-15 (-29.01dB)
+[@     1m33s] Timestep:         7767 || Speed:  149.5 MC/s (1.040e-02 s/TS) || Energy: ~5.91e-15 (-29.91dB)
+[@     1m37s] Timestep:         8100 || Speed:  126.9 MC/s (1.225e-02 s/TS) || Energy: ~4.72e-15 (-30.89dB)
+RunFDTD: end-criteria of -30.00dB reached after 8100 timesteps (-30.89dB)
+Time for 8100 iterations with 1555456.00 cells : 97.28 sec
+Speed: 129.51 MCells/s 
+FEEDLAB:STAGE port {}
+FEEDLAB:STAGE nf2ff {"part": "cuts", "n": 3}
+FEEDLAB:STAGE done {"s11_f0_db": -19.642702090143537, "Dmax_dbi": 7.321121206034416, "total_s": 101.97539567947388}
+S11 @ f0 = -19.6 dB, Dmax = 7.32 dBi, 102 s

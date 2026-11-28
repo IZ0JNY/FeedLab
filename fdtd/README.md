@@ -24,18 +24,28 @@ $PY fdtd/optimize.py --family w2imu --fD 0.6 --budget 60
 $PY fdtd/optimize.py --family dualflare --fD 0.6 --method de --budget 150
 $PY fdtd/optimize.py --family profile --fD 0.6 --seed-mm  # profilo libero, partenza dal mode matching
 $PY fdtd/optimize.py --family w2imu --fD 0.6 --confirm    # migliore e partenza di nuovo a 24 celle/λ
+# primo fuoco: blocking del feed su una parabola da 3 m a 10.368 GHz (103.75 λ), file *_fD0.40_3m*
+$PY fdtd/optimize.py --family axial_corrugated --fD 0.4 --dish-lambda 103.75 --tag 3m --method de --budget 130
+$PY fdtd/rescore_dishes.py --fD 0.4 --tag 3m --dishes 3000,3700 --bands 10.368,24.048   # altre parabole, senza nuovi run
+$PY fdtd/export_feedlab.py --family axial_corrugated --fD 0.4 --tag 3m                  # file di progetto FeedLab
 ```
 
 Con Docker: `docker run --rm -v "$PWD/fdtd/results:/work/fdtd/results" -v "$PWD/fdtd/runs:/work/fdtd/runs" feedlab-fdtd python fdtd/optimize.py ...`
 
 - **Famiglie**: `w2imu` (A, B, semiangolo, C), `dualflare` (scalino + cono 1 + cilindro + cono 2),
-  `profile` (profilo liscio monotono PCHIP con scalino d'ingresso). Quote in λ: il risultato vale per ogni
+  `profile` (profilo liscio monotono PCHIP con scalino d'ingresso), `axial_corrugated` (8 slot assiali, OE2IGL),
+  `ve4ma` e `chaparral` (guida liscia con anello/i choke: Ø guida, larghezza, profondità, arretramento; per f/D
+  0.3–0.45). Quote in λ: il risultato vale per ogni
   banda alla stessa f/D. La simulazione gira a `--f0` (10.368 GHz).
 - **Metodi**: `nm` Nelder-Mead dal progetto di letteratura (locale, poche decine di run), `de` evoluzione
   differenziale (globale, centinaia di run).
 - **Cache**: ogni run openEMS sta in `fdtd/runs/<hash>/` (solo json e log; i campi grezzi si cancellano).
   Un'ottimizzazione interrotta riparte da dove era: i punti già simulati costano zero.
-- **Risultati**: `fdtd/results/<famiglia>_fD<f/D>.jsonl` (tutte le valutazioni), `*_best.json`, `*_confirm.json`.
+- **Risultati**: `fdtd/results/<famiglia>_fD<f/D>[_tag].jsonl` (tutte le valutazioni), `*_best.json`, `*_confirm.json`.
+- **Primo fuoco**: `--dish-lambda` = Ø della parabola in λ; la FOM include il blocking del Ø esterno del feed.
+- **Verso FeedLab**: `export_feedlab.py` scrive `fdtd/results/feedlab/*.feedlab.json` (📂 Apri progetto), con la
+  piastrina WR già impostata e i risultati dal campo lontano openEMS confermato.
+- **Risultati pubblicati**: `RISULTATI_fD060.md` (offset/f/D 0.6), `RISULTATI_fD040.md` (primo fuoco f/D 0.4, 3–3.7 m).
 
 ## Impostazioni di simulazione (`fdtd_eval.EvalConfig`)
 
