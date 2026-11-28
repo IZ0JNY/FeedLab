@@ -39,6 +39,7 @@ TOL_KEYS["iz0jny"] = [("Ds", "Ds_step", "Ø dopo lo scalino", "len"), ("Dm", "Dm
                       ("L1", "L1", "Lunghezza cono 1", "len"), ("L2", "L2", "Lunghezza cono 2", "len")]
 TOL_KEYS["w2imu_oe2igl"] = TOL_KEYS["w2imu"]
 TOL_KEYS["large_w2imu"] = TOL_KEYS["w2imu"]
+TOL_KEYS["fd04_w2imu"] = TOL_KEYS["w2imu"]
 TOL_KEYS["skobelev"] = TOL_KEYS["pickett_potter"]
 
 TOL_CLASSES_MM = [0.002, 0.005, 0.01, 0.02, 0.03, 0.05, 0.1, 0.2, 0.5]

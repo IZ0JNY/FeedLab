@@ -215,6 +215,9 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 | **Conical horn** | general purpose | simple, wide band |
 | **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; low antenna temperature, very low S11; checked with openEMS at 24 GHz |
 | **Feed 0.4 f/D** | f/D 0.35–0.47, 10 and 24 GHz | corrugated head with 8 axial slots optimised with openEMS: 83.5 % with S11 ≤ −21 dB (f0 ± 2 %) |
+| **Feed 0.4 f/D Chaparral** | prime focus f/D 0.35–0.47, 10 and 24 GHz | 3 choke rings optimised with openEMS: 80.1 % with S11 −21 dB, outer Ø ≈ 3.8 λ |
+| **Feed 0.4 f/D VE4MA** | prime focus f/D 0.35–0.47, 10 and 24 GHz | one choke ring optimised with openEMS: 80.3 %, outer Ø ≈ 2.1 λ; S11 −17.6 dB, refine it for TX |
+| **Feed 0.4 f/D W2IMU** | prime focus f/D 0.35–0.47, 10 and 24 GHz | short smooth horn with 30° cone optimised with openEMS: 73.5 % with S11 −23 dB |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verify full-wave before building |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | +1.6…2.3 dB of sun noise on offset dishes (W1GHZ 2024) |
 | **Open circular waveguide** | small deep dishes | minimal blockage, poor F/B |

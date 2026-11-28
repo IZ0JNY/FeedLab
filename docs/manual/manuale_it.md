@@ -215,6 +215,9 @@ Scegli il feed in **Feed da progettare** e premi **➡️ Usa questo feed**. Puo
 | **Horn conico** | uso generale | semplice, a larga banda |
 | **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | scalino + cono + cilindro di fasatura + secondo cono; temperatura d'antenna bassa, S11 molto basso; verificato con openEMS a 24 GHz |
 | **Feed 0.4 f/D** | f/D 0.35–0.47, 10 e 24 GHz | testa corrugata con 8 scanalature assiali ottimizzata con openEMS: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %) |
+| **Feed 0.4 f/D Chaparral** | primo fuoco f/D 0.35–0.47, 10 e 24 GHz | 3 anelli a choke ottimizzati con openEMS: 80.1 % con S11 −21 dB, Ø esterno ≈ 3.8 λ |
+| **Feed 0.4 f/D VE4MA** | primo fuoco f/D 0.35–0.47, 10 e 24 GHz | un anello a choke ottimizzato con openEMS: 80.3 %, Ø esterno ≈ 2.1 λ; S11 −17.6 dB, da rifinire per TX |
+| **Feed 0.4 f/D W2IMU** | primo fuoco f/D 0.35–0.47, 10 e 24 GHz | horn liscio corto con cono 30° ottimizzato con openEMS: 73.5 % con S11 −23 dB |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verificare full-wave prima di costruire |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | su offset +1.6…2.3 dB di sun noise (W1GHZ 2024) |
 | **Guida circolare aperta** | parabole piccole e profonde | blocking minimo, F/B scarso |

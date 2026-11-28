@@ -1,3 +1,21 @@
+## FeedLab 0.4.29 BETA TEST per Windows e Linux / for Windows and Linux
+
+**Installazione / Installation:** Windows: `FeedLab-Setup-0.4.29.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.29-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.29_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.29_amd64.deb`) oppure / or `FeedLab-0.4.29-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **Gibertini OP 150 L** nel catalogo parabole: offset 155 × 166 cm, F/D 0.66, 43.3 dBi a 10.95 GHz (efficienza ≈ 68 %).
+- **Parabole offset custom fino a 12 m:** nei campi «la tua parabola» diametro e asse corto arrivano a 12 m (asse lungo 13 m, focale 24 m).
+- **Altri feed per f/D 0.4** (primo fuoco, 10 e 24 GHz), ottimizzati con openEMS: «Feed 0.4 f/D Chaparral» (3 anelli, 80.1 %, Ø ≈ 3.8 λ), «Feed 0.4 f/D VE4MA» (1 anello, 80.3 %, Ø ≈ 2.1 λ; S11 −17.6 dB, da rifinire per TX), «Feed 0.4 f/D W2IMU» (horn liscio con cono 30°, 73.5 %). La procedura guidata li propone per f/D 0.35–0.47.
+
+### 🇬🇧 What's new
+- **Gibertini OP 150 L** in the dish catalogue: offset 155 × 166 cm, F/D 0.66, 43.3 dBi at 10.95 GHz (efficiency ≈ 68 %).
+- **Custom offset dishes up to 12 m:** in the "your dish" fields, diameter and short axis go up to 12 m (long axis 13 m, focal length 24 m).
+- **More feeds for f/D 0.4** (prime focus, 10 and 24 GHz), optimised with openEMS: "Feed 0.4 f/D Chaparral" (3 rings, 80.1 %, Ø ≈ 3.8 λ), "Feed 0.4 f/D VE4MA" (1 ring, 80.3 %, Ø ≈ 2.1 λ; S11 −17.6 dB, refine it for TX), "Feed 0.4 f/D W2IMU" (smooth horn with 30° cone, 73.5 %). The guided procedure suggests them for f/D 0.35–0.47.
+
+Requisiti / Requirements: Windows 10/11 64-bit; Linux x86_64 (glibc 2.31+: Debian 11+, Ubuntu 20.04+).
+
+---
+
 ## FeedLab 0.4.28 BETA TEST per Windows e Linux / for Windows and Linux
 
 **Installazione / Installation:** Windows: `FeedLab-Setup-0.4.28.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.28-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.28_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.28_amd64.deb`) oppure / or `FeedLab-0.4.28-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.

@@ -166,6 +166,14 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
         add("fd04", ["ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %)",
                      "8 scanalature assiali, testa corta: si lavora al tornio"],
             ["simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz"])
+    # other feeds optimised with openEMS for a prime-focus f/D 0.4 (fdtd/RISULTATI_fD040.md)
+    if dish.kind == "prime" and 10 <= f_ghz <= 24.25 and 0.35 <= fD <= 0.47:
+        add("fd04_chaparral", ["ottimizzato con openEMS per f/D 0.4: 80.1 % con S11 −21 dB, compatto (Ø ≈ 3.8 λ)"],
+            ["simulazione rapida non disponibile (anelli coassiali): verificato con openEMS"])
+        add("fd04_ve4ma", ["ottimizzato con openEMS per f/D 0.4: 80.3 %, il più compatto (Ø ≈ 2.1 λ): poca ostruzione"],
+            ["S11 −17.6 dB: da rifinire prima di usarlo in TX"])
+        add("fd04_w2imu", ["ottimizzato con openEMS per f/D 0.4: 73.5 %, S11 −23 dB, horn liscio semplicissimo"],
+            ["7–9 punti sotto i feed a choke a f/D 0.4"])
     # ---------- adjustments ----------
     for c in cands:
         if polarization == "circular":
@@ -176,7 +184,7 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
                 c.reasons.append("CP: aggiungere polarizzatore (septum in guida 0.71λ o dielettrico)")
                 if f_ghz > 60:
                     c.warnings.append("septum oltre 60 GHz: simmetria guida entro ~1% (pochi µm)")
-        if hi_freq and c.kind in ("ve4ma", "chaparral"):
+        if hi_freq and c.kind in geometry.CHOKE_KINDS:
             c.score -= 0.05
             c.warnings.append("anelli sottili difficili oltre 70 GHz (OE2IGL: cavity feed o Pickett-Potter)")
         if tools == "sheet" and c.kind not in ("rect_horn", "open_circular", "w2imu"):

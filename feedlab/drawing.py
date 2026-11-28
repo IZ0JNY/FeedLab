@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.patches import Polygon, Rectangle
 
-from .geometry import CORRUGATED_KINDS, FEED_TYPES, FeedGeometry, short_title, RectHornGeometry, wall_features
+from .geometry import CHOKE_KINDS, CORRUGATED_KINDS, FEED_TYPES, FeedGeometry, short_title, RectHornGeometry, wall_features
 
 
 def tolerance_mm(f_ghz: float) -> float:
@@ -180,7 +180,7 @@ def _section_axes(fig, geo: FeedGeometry, half: bool = False):
     _wall_dims(ax, geo)
     if geo.kind in CORRUGATED_KINDS:
         _corrugated_dims(ax, geo, half)
-    if geo.kind in ("ve4ma", "chaparral"):
+    if geo.kind in CHOKE_KINDS:
         _ring_dims(ax, geo)
     if geo.kind == "iz0jny":
         _step_dims(ax, geo)
