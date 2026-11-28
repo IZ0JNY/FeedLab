@@ -85,14 +85,16 @@ def main(argv=None):
     ap.add_argument("--offset", action="store_true", help="add an offset (no blocking) panel")
     ap.add_argument("--offset-only", action="store_true",
                     help="offset dishes only: no blockage, so one chart for every Ø and band (f/D up to 1.2)")
+    ap.add_argument("--x", choices=["fd", "psi"], default="fd",
+                    help="x axis: f/D, or illumination half-angle with f/D on top (files *_angle*.png)")
     ap.add_argument("--lang", choices=["it", "en"], default="it", help="chart language (en: files *_EN.png)")
     ap.add_argument("--replot", action="store_true", help="only redraw from the saved json (no openEMS, no phase centres)")
     ap.add_argument("--set", choices=["all", "opt", "pub"], default="all",
                     help="optimised feeds, published designs or both")
     a = ap.parse_args(argv)
-    global LANG
-    LANG = a.lang
-    sfx = "_EN" if a.lang == "en" else ""
+    global LANG, XMODE
+    LANG, XMODE = a.lang, a.x
+    sfx = ("_angle" if a.x == "psi" else "") + ("_EN" if a.lang == "en" else "")
     if a.replot:
         out = ("eta_vs_fD_offset" if a.offset_only else f"eta_vs_fD_{a.f:g}GHz") + {"pub": "_pubblicati", "opt": "_ottimizzati"}.get(a.set, "")
         d = json.loads((op.RESULTS / f"{out}.json").read_text())
@@ -152,7 +154,7 @@ SHORT = {"axial_corrugated": "Corrugato", "chaparral": "Chaparral", "ve4ma": "VE
          "w2imu_oe2igl": "W2IMU OE2IGL", "skobelev": "Skobelev", "pickett_potter": "Pickett-Potter"}
 
 
-def _labels(ax, items, ymin, ymax):
+def _labels(ax, items, ymin, ymax, xs=0.12, xw=0.2):
     """Feed names written on their lines. Greedy: highest curves first; each label goes on its own curve at the
     point (near its peak) farthest from the labels already placed, so names do not pile up."""
     placed = []
@@ -161,12 +163,12 @@ def _labels(ax, items, ymin, ymax):
         if not len(ok):
             continue
         k0 = int(np.argmax(y))
-        cand = [k for k in ok if abs(fd[k] - fd[k0]) <= 0.2]
+        cand = [k for k in ok if abs(fd[k] - fd[k0]) <= xw]
         def score(k):
             if not placed:
-                return -abs(fd[k] - fd[k0])
-            d = min(np.hypot((fd[k] - px) / 0.12, (y[k] - py) / 2.2) for px, py in placed)
-            return min(d, 1.5) - 0.3 * abs(fd[k] - fd[k0])
+                return -abs(fd[k] - fd[k0]) / xs
+            d = min(np.hypot((fd[k] - px) / xs, (y[k] - py) / 2.2) for px, py in placed)
+            return min(d, 1.5) - 0.036 * abs(fd[k] - fd[k0]) / xs
         k = max(cand, key=score)
         placed.append((fd[k], y[k]))
         ax.text(fd[k], y[k], text, fontsize=7, color=col, ha="center", va="center", fontweight="bold",
@@ -183,23 +185,37 @@ def _panel(ax, rows, c, meta):
     else:
         title = f"Parabola primo fuoco Ø {float(c) * 100:.0f} cm a {f:g} GHz ({dl:.0f} λ)"
     env, labels = None, []
+    X = (lambda v: psi_deg(v)) if XMODE == "psi" else (lambda v: np.asarray(v, float))
     for label, r in rows.items():
-        fd, y = np.array(r["fD"]), 100 * np.array(r["eta"][c])
+        fd0, y = np.array(r["fD"]), 100 * np.array(r["eta"][c])
+        fd = X(fd0)
         env = y if env is None else np.maximum(env, y)
         col = COLORS.get(r["family"], "k")
         opt = r.get("optimised", True)
         ax.plot(fd, y, "-" if opt else ":", color=col, lw=2.2 if opt else 1.5, zorder=3 if opt else 2)
-        i = int(np.argmin(abs(fd - r["design_fD"])))
+        i = int(np.argmin(abs(fd0 - r["design_fD"])))
         ax.plot(fd[i], y[i], "o" if opt else "s", color=col, ms=5, mec="k", mew=0.5, zorder=4)
         name = f"{T(SHORT.get(r['family'], label))} {T('ott.')}" if opt else T(PUB_SHORT.get(label, label))
         labels.append((fd, y, f"{name} ({r['design_fD']:g})", col))
-    ax.fill_between(np.array(rows[next(iter(rows))]["fD"]), env, 40, color="0.85", alpha=0.3, lw=0)
-    _labels(ax, labels, 55, 88)
+    ax.fill_between(X(rows[next(iter(rows))]["fD"]), env, 40, color="0.85", alpha=0.3, lw=0)
+    if XMODE == "psi":
+        _labels(ax, labels, 55, 88, xs=8.0, xw=14.0)
+    else:
+        _labels(ax, labels, 55, 88)
     ax.set_title(title, fontsize=11)
     ax.grid(alpha=0.35)
-    ax.set_xlim(0.3, max(r["fD"][-1] for r in rows.values()))
+    fmax = max(r["fD"][-1] for r in rows.values())
     ax.set_ylim(55, 88)
-    ax.set_xlabel(T("f/D della parabola (offset: f/D equivalente)" if c == "offset" else "f/D della parabola"))
+    if XMODE == "psi":
+        ax.set_xlim(float(psi_deg(fmax)), float(psi_deg(0.3)))
+        ax.set_xlabel(T("Semiangolo di illuminazione ψ0 visto dal feed (°)"))
+        top = ax.secondary_xaxis("top", functions=(fd_of_psi, psi_deg))
+        top.set_xticks([t for t in (0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2) if t <= fmax + 1e-9])
+        top.set_xlabel(T("f/D della parabola (offset: f/D equivalente)" if c == "offset" else "f/D della parabola"),
+                       fontsize=9)
+    else:
+        ax.set_xlim(0.3, fmax)
+        ax.set_xlabel(T("f/D della parabola (offset: f/D equivalente)" if c == "offset" else "f/D della parabola"))
     ax.set_ylabel(T("η illuminazione × (1 − |S11|²)  [%]"))
 
 
@@ -214,8 +230,11 @@ EN = {
         "Generic offset dish 100, 120, 180, 240 cm (no blockage: same curves for every Ø and band)",
     "f/D della parabola (offset: f/D equivalente)": "Equivalent f/D of the offset dish",
     "f/D della parabola": "Dish f/D",
+    "Semiangolo di illuminazione ψ0 visto dal feed (°)": "Illumination half-angle ψ0 seen by the feed (°)",
     "η illuminazione × (1 − |S11|²)  [%]": "η illumination × (1 − |S11|²)  [%]",
     "Efficienza dei feed (openEMS) al variare della f/D": "Feed efficiency (openEMS) versus f/D",
+    "Efficienza dei feed (openEMS) al variare dell'angolo di illuminazione":
+        "Feed efficiency (openEMS) versus illumination angle",
     "Efficienza dei feed (openEMS) al variare di f/D e diametro della parabola":
         "Feed efficiency (openEMS) versus f/D and dish diameter",
     "ott.": "opt.", "Corrugato": "Corrugated", "Liscio": "Smooth profile", "Guida aperta": "Open waveguide",
@@ -226,6 +245,17 @@ SUB_EN = ("name on the line = feed (design f/D) · solid line ● = optimised wi
 FOOT_EN = ("Each curve comes from one openEMS far field (24 cells/λ, dimensions in λ: valid on every band); feed at its best "
            "phase centre for each f/D; blockage = feed outer Ø. Ruze, ohmic losses and struts not included.")
 LANG = "it"
+XMODE = "fd"                      # "fd": x = f/D; "psi": x = illumination half-angle, f/D on the top axis
+
+
+def psi_deg(fd):
+    """Half-angle of the dish rim seen from the focus (offset: of the equivalent dish)."""
+    with np.errstate(divide="ignore"):
+        return np.degrees(2 * np.arctan(1 / (4 * np.asarray(fd, float))))
+
+
+def fd_of_psi(psi):
+    return 1 / (4 * np.tan(np.radians(np.clip(np.asarray(psi, float), 1e-3, 179.9)) / 2))
 
 
 def T(text: str) -> str:
@@ -247,7 +277,8 @@ def plot(rows, meta, path):
     for c in cases:
         fig, ax = plt.subplots(figsize=(13, 8.5))
         _panel(ax, rows, c, meta)
-        fig.suptitle(T("Efficienza dei feed (openEMS) al variare della f/D") + "\n" + (SUB_EN if LANG == "en" else SUB),
+        fig.suptitle(T("Efficienza dei feed (openEMS) al variare dell'angolo di illuminazione" if XMODE == "psi"
+                       else "Efficienza dei feed (openEMS) al variare della f/D") + "\n" + (SUB_EN if LANG == "en" else SUB),
                      fontsize=11)
         fig.text(0.5, 0.005, FOOT_EN if LANG == "en" else FOOT, ha="center", fontsize=8)
         fig.tight_layout(rect=(0, 0.02, 1, 0.94))
