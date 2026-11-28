@@ -5,6 +5,7 @@
 | # | Richiesta | Stato |
 |---|---|---|
 | 1 | **Feed 0.4 f/D** nel catalogo dei feed: testa corrugata (8 scanalature assiali) ottimizzata con openEMS per f/D 0.4 (`fdtd/`, 200 simulazioni), 83.5 % con S11 ≤ −21 dB in f0 ± 2 %, verificata a 10.368 e 24.048 GHz; proposta dalla procedura guidata a 10 e 24 GHz per f/D 0.35–0.47; disegno, modello 3D e quote modificabili come l'Axial Corrugated | ✅ fatto |
+| 2 | **Tab su più righe**: la barra dei tab in alto va a capo, così tutti i tab sono visibili senza scorrere in orizzontale | ✅ fatto |
 
 ---
 
