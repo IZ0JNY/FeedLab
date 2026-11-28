@@ -38,9 +38,9 @@ def overrides(fam, x: list[float], f_ghz: float) -> tuple[str, dict]:
         return "axial_corrugated", {"pitch": pitch * lam, "w": wf * pitch * lam, "axi": axi * lam,
                                     "delta": delta * lam, "Di": Di * lam, "Ds": Ds * lam, "d1": d1 * lam,
                                     **{f"d{k}": dk * lam for k in range(2, 9)}}
-    if fam.name in ("w2imu", "large_w2imu"):
+    if fam.name in ("w2imu", "large_w2imu", "large_w2imu_30"):
         A, B, a, C = x
-        return fam.name, {"A": A * lam, "B": B * lam, "alpha": a, "C": C * lam}
+        return ("w2imu" if fam.name == "w2imu" else "large_w2imu"), {"A": A * lam, "B": B * lam, "alpha": a, "C": C * lam}
     if isinstance(fam, op.DualFlare):
         from feedlab import synth
         return "iz0jny", synth.df_params(x, lam)
