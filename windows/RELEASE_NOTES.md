@@ -1,3 +1,19 @@
+## FeedLab 0.4.28 BETA TEST per Windows e Linux / for Windows and Linux
+
+**Installazione / Installation:** Windows: `FeedLab-Setup-0.4.28.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.28-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.28_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.28_amd64.deb`) oppure / or `FeedLab-0.4.28-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.
+
+### 🇮🇹 Novità
+- **Feed 0.4 f/D:** nuovo feed nel catalogo, con testa corrugata a 8 scanalature assiali ottimizzata con openEMS per parabole con f/D 0.4 (83.5 % di efficienza, S11 ≤ −21 dB in f0 ± 2 %, verificato a 10.368 e 24.048 GHz). La procedura guidata lo propone a 10 e 24 GHz per f/D 0.35–0.47; disegno, modello 3D e quote modificabili.
+- **Tab su più righe:** la barra dei tab in alto va a capo, così tutti i tab sono visibili senza scorrere in orizzontale.
+
+### 🇬🇧 What's new
+- **Feed 0.4 f/D:** new feed in the catalogue, a corrugated head with 8 axial grooves optimised with openEMS for f/D 0.4 dishes (83.5 % efficiency, S11 ≤ −21 dB over f0 ± 2 %, checked at 10.368 and 24.048 GHz). The guided procedure suggests it at 10 and 24 GHz for f/D 0.35–0.47; drawing, 3D model and editable dimensions.
+- **Tabs on several rows:** the tab bar at the top wraps, so all tabs are visible without horizontal scrolling.
+
+Requisiti / Requirements: Windows 10/11 64-bit; Linux x86_64 (glibc 2.31+: Debian 11+, Ubuntu 20.04+).
+
+---
+
 ## FeedLab 0.4.27 BETA TEST per Windows e Linux / for Windows and Linux
 
 **Installazione / Installation:** Windows: `FeedLab-Setup-0.4.27.exe` (senza diritti di amministratore / no admin rights) oppure / or `FeedLab-0.4.27-portable.zip` → `FeedLab.bat`. Linux: `feedlab_0.4.27_amd64.deb` (Debian/Ubuntu: `sudo apt install ./feedlab_0.4.27_amd64.deb`) oppure / or `FeedLab-0.4.27-x86_64.AppImage` (`chmod +x`, poi doppio clic / then double-click). Controllo del file scaricato / check the download: `SHA256SUMS.txt`.

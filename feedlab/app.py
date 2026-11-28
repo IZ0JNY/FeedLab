@@ -573,6 +573,14 @@ if not _missing():
             _st.toast(i18n.tr("Hai cambiato parecchie impostazioni: è il momento di una validazione con openEMS. Lancia una simulazione full-wave nella scheda 🖥️ Full-wave openEMS: è più lenta ma più precisa del simulatore veloce, valida i dati e verifica che i due risultati convergano."), icon="🖥️", duration=12)
     S["tweak_sig"] = _sig
 
+# Barra dei tab su più righe: tutti i tab visibili senza scroll orizzontale.
+_st.markdown("""<style>
+[data-testid="stTabs"] [role="tablist"] {flex-wrap:wrap !important; overflow:visible !important; row-gap:2px}
+[data-testid="stTabs"] [role="tablist"] ~ button {display:none}
+div[data-baseweb="tab-highlight"] {display:none}
+button[data-baseweb="tab"][aria-selected="true"] {box-shadow:inset 0 -3px 0 currentColor}
+</style>""", unsafe_allow_html=True)
+
 tabs = st.tabs(["🧭 Procedura guidata", "📐 Progetto feed", "🎛️ Laboratorio", "📈 Simulazione & S11", "🌐 Lobo 3D",
                 "🧊 Modello 3D", "🔩 Montaggio feed + piastrina", "🔲 Piastrina WR", "📄 Disegno & STEP",
                 "🖥️ Full-wave openEMS", "📦 Output di progetto", "ℹ️ Credits"])
