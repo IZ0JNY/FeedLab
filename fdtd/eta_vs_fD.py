@@ -83,6 +83,8 @@ def main(argv=None):
     ap.add_argument("--f0", type=float, default=10.368)
     ap.add_argument("--cpl", type=int, default=24)
     ap.add_argument("--offset", action="store_true", help="add an offset (no blocking) panel")
+    ap.add_argument("--offset-only", action="store_true",
+                    help="offset dishes only: no blockage, so one chart for every Ø and band (f/D up to 1.2)")
     ap.add_argument("--lang", choices=["it", "en"], default="it", help="chart language (en: files *_EN.png)")
     ap.add_argument("--replot", action="store_true", help="only redraw from the saved json (no openEMS, no phase centres)")
     ap.add_argument("--set", choices=["all", "opt", "pub"], default="all",
@@ -92,12 +94,17 @@ def main(argv=None):
     LANG = a.lang
     sfx = "_EN" if a.lang == "en" else ""
     if a.replot:
-        out = f"eta_vs_fD_{a.f:g}GHz" + {"pub": "_pubblicati", "opt": "_ottimizzati"}.get(a.set, "")
+        out = ("eta_vs_fD_offset" if a.offset_only else f"eta_vs_fD_{a.f:g}GHz") + {"pub": "_pubblicati", "opt": "_ottimizzati"}.get(a.set, "")
         d = json.loads((op.RESULTS / f"{out}.json").read_text())
         plot(d["feeds"], d["meta"], op.RESULTS / f"{out}{sfx}.png")
         return d["feeds"]
     lam = wavelength_mm(a.f)
-    cases = ([("offset", 0.0)] if a.offset else []) + [(f"{float(D):g}", float(D) * 1000 / lam) for D in a.dishes.split(",")]
+    global FDS
+    if a.offset_only:
+        FDS = np.round(np.arange(0.30, 1.2001, 0.025), 3)
+        cases = [("offset", 0.0)]
+    else:
+        cases = ([("offset", 0.0)] if a.offset else []) + [(f"{float(D):g}", float(D) * 1000 / lam) for D in a.dishes.split(",")]
     rows = {}
     from feedlab import geometry
     todo = []
@@ -129,7 +136,7 @@ def main(argv=None):
                     "blocking del Ø esterno del feed, sostegni esclusi", "dish_band_ghz": a.f, "f0_ghz": a.f0,
             "dish_lambda": {c: dl for c, dl in cases}}
     meta["set"] = a.set
-    out = f"eta_vs_fD_{a.f:g}GHz" + ({"pub": "_pubblicati", "opt": "_ottimizzati"}.get(a.set, ""))
+    out = ("eta_vs_fD_offset" if a.offset_only else f"eta_vs_fD_{a.f:g}GHz") + ({"pub": "_pubblicati", "opt": "_ottimizzati"}.get(a.set, ""))
     (op.RESULTS / f"{out}.json").write_text(json.dumps({"meta": meta, "feeds": rows}, indent=1))
     plot(rows, meta, op.RESULTS / f"{out}{sfx}.png")
     return rows
@@ -170,7 +177,7 @@ def _panel(ax, rows, c, meta):
     f = meta["dish_band_ghz"]
     dl = meta["dish_lambda"][c]
     if c == "offset":
-        title = T("Offset (nessun blocking del feed)")
+        title = T("Parabola offset generica 100, 120, 180, 240 cm (nessun blocking: stesse curve per ogni Ø e banda)")
     elif LANG == "en":
         title = f"Prime-focus dish Ø {float(c) * 100:.0f} cm at {f:g} GHz ({dl:.0f} λ)"
     else:
@@ -190,9 +197,9 @@ def _panel(ax, rows, c, meta):
     _labels(ax, labels, 55, 88)
     ax.set_title(title, fontsize=11)
     ax.grid(alpha=0.35)
-    ax.set_xlim(0.3, 0.9)
+    ax.set_xlim(0.3, max(r["fD"][-1] for r in rows.values()))
     ax.set_ylim(55, 88)
-    ax.set_xlabel(T("f/D della parabola"))
+    ax.set_xlabel(T("f/D della parabola (offset: f/D equivalente)" if c == "offset" else "f/D della parabola"))
     ax.set_ylabel(T("η illuminazione × (1 − |S11|²)  [%]"))
 
 
@@ -203,7 +210,9 @@ PUB_SHORT = {"Super-VE4MA (W1GHZ/WD5AGO)": "Super-VE4MA", "Chaparral 3 anelli (W
              "Skobelev (W1GHZ)": "Skobelev", "Pickett-Potter (OE2IGL)": "Pickett-Potter",
              "Dual-Flare IZ0JNY (tabella)": "Dual-Flare IZ0JNY"}
 EN = {
-    "Offset (nessun blocking del feed)": "Offset (no feed blockage)",
+    "Parabola offset generica 100, 120, 180, 240 cm (nessun blocking: stesse curve per ogni Ø e banda)":
+        "Generic offset dish 100, 120, 180, 240 cm (no blockage: same curves for every Ø and band)",
+    "f/D della parabola (offset: f/D equivalente)": "Equivalent f/D of the offset dish",
     "f/D della parabola": "Dish f/D",
     "η illuminazione × (1 − |S11|²)  [%]": "η illumination × (1 − |S11|²)  [%]",
     "Efficienza dei feed (openEMS) al variare della f/D": "Feed efficiency (openEMS) versus f/D",
@@ -244,8 +253,10 @@ def plot(rows, meta, path):
         fig.tight_layout(rect=(0, 0.02, 1, 0.94))
         tag = "offset" if c == "offset" else f"{float(c) * 100:.0f}cm"
         stem, en = (path.stem[:-3], "_EN") if path.stem.endswith("_EN") else (path.stem, "")
-        fig.savefig(path.with_name(f"{stem}_{tag}{en}.png"), dpi=110)
+        fig.savefig(path if len(cases) == 1 else path.with_name(f"{stem}_{tag}{en}.png"), dpi=110)
         plt.close(fig)
+    if len(cases) == 1:
+        return
     nc = 2
     nr = (len(cases) + nc - 1) // nc
     fig, axs = plt.subplots(nr, nc, figsize=(11 * nc, 7.5 * nr), squeeze=False)
