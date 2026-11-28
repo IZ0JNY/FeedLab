@@ -4,6 +4,7 @@
 
 | # | Richiesta | Stato |
 |---|---|---|
+| 1 | **Parabola Gibertini OP 150 L** nel catalogo: offset 155 × 166 cm, F/D 0.66, 43.3 dBi a 10.95 GHz (η ≈ 68 %) | ✅ fatto |
 
 ---
 
