@@ -1652,4 +1652,12 @@ ENTRIES = [
     ("manuale d'uso in PDF nella lingua scelta", 'PDF user manual in the chosen language'),
     ('Nome file', 'File name'),
     ("Lascia il nome proposto o scrivine uno tuo; l'estensione si aggiunge da sola.", 'Keep the proposed name or type your own; the extension is added automatically.'),
+    ('🧪 Script per simulatori full-wave (openEMS, CST)', '🧪 Scripts for full-wave simulators (openEMS, CST)'),
+    ('Gli script per i simulatori coprono i feed a simmetria di rotazione (non la tromba rettangolare).', 'The simulator scripts cover feeds with rotational symmetry (not the rectangular horn).'),
+    ("Per chi ha openEMS o CST Studio Suite: il feed progettato, con porta guida d'onda TE11, contorni aperti e monitor del campo lontano, pronto da simulare. Ogni ZIP contiene le istruzioni (LEGGIMI).", 'For openEMS or CST Studio Suite users: the designed feed, with a TE11 waveguide port, open boundaries and far-field monitors, ready to simulate. Each ZIP holds the instructions (README).'),
+    ('⬇️ Script openEMS (.zip)', '⬇️ openEMS script (.zip)'),
+    ('⬇️ Macro CST (.zip)', '⬇️ CST macro (.zip)'),
+    ('script Python autonomo (non serve FeedLab): python -u sim_<feed>.py, poi carica results.json nella scheda 🖥️ Full-wave openEMS', 'stand-alone Python script (FeedLab not needed): python -u sim_<feed>.py, then load results.json in the 🖥️ Full-wave openEMS tab'),
+    ('macro VBA: in un progetto vuoto CST, Home > Macros > Run Macro. Costruisce il modello nella History List; il solutore lo avvii tu', 'VBA macro: in an empty CST project, Home > Macros > Run Macro. It builds the model in the History List; you start the solver'),
+    ('🧪 Script per simulatori: openEMS + macro CST', '🧪 Simulator scripts: openEMS + CST macro'),
 ]
