@@ -732,7 +732,8 @@ def _fd04_other(kind, f_ghz, fD, t, kw):
     g = build(base, f_ghz, fD=fD or FD04_FD, wall=t, **dims)
     g.kind = kind
     g.params["eta_guide_pct"] = 100 * eta
-    g.notes = list(notes)
+    n_design = len(g.design.notes) if g.design else 0
+    g.notes = list(notes) + g.notes[n_design:]         # keep the mount / flange / CNC notes added by _finish
     g.design = None
     return g
 
