@@ -659,13 +659,13 @@ def _iz0jny(f_ghz, fD, t, kw):
                    prof, t, notes=notes)
 
 
-# Feed 0.4 f/D: axial-corrugated head found with openEMS (fdtd/optimize.py, family axial_corrugated, ~200 FDTD
+# Feed 0.4 f/D: axial-corrugated head found with openEMS (fdtd/optimize.py, family axial_corrugated, 200 FDTD
 # runs) for a dish of f/D 0.4 (prime focus, or offset-equivalent): illuminator efficiency x (1 - |S11|^2), mean over
 # f0 +/- 2 %, with S11 <= -20 dB; confirmed at lambda/24 and at 10.368 and 24.048 GHz (fdtd/RISULTATI_fD040.md).
 # In wavelengths: pitch, slot width / pitch, axial advance per slot, delta, Di, Ds, depth of slot 1, depth of 2...8.
-FD04_LAMBDA = {"pitch": 0.403, "w_frac": 0.634, "axi": 0.020, "delta": 0.209, "Di": 0.718, "Ds": 0.620,
-               "d1": 0.320, "dk": 0.279}
-FD04_ETA = 0.795          # openEMS, f/D 0.4, mean over f0 +/- 2 %, S11 included
+FD04_LAMBDA = {"pitch": 0.4441, "w_frac": 0.5862, "axi": 0.0599, "delta": 0.2214, "Di": 0.7233, "Ds": 0.7233,
+               "d1": 0.4775, "dk": 0.2689}
+FD04_ETA = 0.835          # openEMS, f/D 0.4, mean over f0 +/- 2 %, S11 included
 FD04_FD = 0.4
 
 
@@ -681,12 +681,11 @@ def _fd04(f_ghz, t, kw):
     g.kind = "fd04"
     g.params["eta_guide_pct"] = 100 * FD04_ETA
     g.params["opening_deg"] = opening
-    g.notes = [f"ottimizzato con openEMS per f/D {FD04_FD} (≈ {100 * FD04_ETA:.1f} % con S11, f0 ± 2 %); "
-               "verificato a 10.368 e 24.048 GHz",
+    g.notes = ["ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %), verificato a 10.368 e 24.048 GHz",
                "8 scanalature assiali sul fronte a gradini (stessa struttura dell'Axial Corrugated)",
-               "simulazione rapida non disponibile (scalini assiali): per altre frequenze verifica con openEMS"] + \
+               "simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz"] + \
               [n for n in g.notes if not n.startswith(("efficienza secondo", "usa l'angolo", "simulazione rapida",
-                                                       "valido 10", "tolleranza"))]
+                                                       "valido 10", "tolleranza", "ATTENZIONE"))]
     g.design = None
     return g
 

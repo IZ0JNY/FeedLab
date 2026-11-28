@@ -214,6 +214,7 @@ Choose the feed in **Feed to design** and press **➡️ Use this feed**. You ca
 | **Chaparral 3 rings** | prime focus f/D < 0.33 | 78 % at f/D 0.35; openEMS |
 | **Conical horn** | general purpose | simple, wide band |
 | **Dual-Flare, IZ0JNY** | f/D 0.6–0.9, EME | step + cone + phasing cylinder + second cone; low antenna temperature, very low S11; checked with openEMS at 24 GHz |
+| **Feed 0.4 f/D** | f/D 0.35–0.47, 10 and 24 GHz | corrugated head with 8 axial slots optimised with openEMS: 83.5 % with S11 ≤ −21 dB (f0 ± 2 %) |
 | **Dual-mode "optimum" Skobelev** | f/D > 0.9 | verify full-wave before building |
 | **Large W2IMU flare 30°** | offset f/D 0.65–0.85, 47–241 GHz | +1.6…2.3 dB of sun noise on offset dishes (W1GHZ 2024) |
 | **Open circular waveguide** | small deep dishes | minimal blockage, poor F/B |

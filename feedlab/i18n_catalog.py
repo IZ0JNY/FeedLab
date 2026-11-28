@@ -6,6 +6,11 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
+    ('ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %)', 'optimised with openEMS for f/D 0.4: 83.5 % with S11 ≤ −21 dB (f0 ± 2 %)'),
+    ('8 scanalature assiali, testa corta: si lavora al tornio', '8 axial slots, short head: made on the lathe'),
+    ('simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz', 'fast simulation not available: checked with openEMS at 10 and 24 GHz'),
+    ('ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %), verificato a 10.368 e 24.048 GHz', 'optimised with openEMS for f/D 0.4: 83.5 % with S11 ≤ −21 dB (f0 ± 2 %), checked at 10.368 and 24.048 GHz'),
+    ("8 scanalature assiali sul fronte a gradini (stessa struttura dell'Axial Corrugated)", '8 axial slots on the stepped face (same structure as the Axial Corrugated)'),
     ('vetroresina', 'fibreglass'),
     ('verniciato a polvere', 'powder-coated'),
     ('riscaldabile', 'heatable'),

@@ -163,9 +163,9 @@ def recommend(dish: Dish, f_ghz: float, polarization: str = "linear", priority: 
             + (["sopra 47 GHz gli scalini diventano molto stretti"] if f_ghz > 47 else []))
     # Feed 0.4 f/D: corrugated head optimised with openEMS for f/D 0.4, verified at 10 and 24 GHz
     if 10 <= f_ghz <= 24.25 and 0.35 <= fD_feed <= 0.47:
-        add("fd04", [f"ottimizzato con openEMS per f/D 0.4: ≈ {100 * geometry.FD04_ETA:.0f} % con S11 ≤ −20 dB (f0 ± 2 %)",
+        add("fd04", ["ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %)",
                      "8 scanalature assiali, testa corta: si lavora al tornio"],
-            ["simulazione rapida non disponibile (scalini assiali): verificato con openEMS a 10 e 24 GHz"])
+            ["simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz"])
     # ---------- adjustments ----------
     for c in cands:
         if polarization == "circular":
