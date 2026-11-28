@@ -640,8 +640,7 @@ def _apply_project(p: dict):
     if i.get("base_shape"):
         S["base_shape"] = i["base_shape"]
         S["base_shape_band"] = f
-    _project.apply(S, p)
-    S["feed_kind"] = i["feed_kind"]
+    _project.apply(S, p)             # also maps a feed type no longer in the list to its base type
     S["cands"] = None
 
 # ---------------------------------------------------------------- 1 wizard

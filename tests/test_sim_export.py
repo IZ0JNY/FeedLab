@@ -12,11 +12,11 @@ import pytest
 from feedlab import geometry, sim_export
 
 FAKE = Path(__file__).resolve().parent / "fake_openems"
-KINDS = ["w2imu", "pickett_potter", "ve4ma", "chaparral", "conical", "axial_corrugated", "fd04", "iz0jny"]
+KINDS = ["w2imu", "pickett_potter", "ve4ma", "chaparral", "conical", "axial_corrugated", "iz0jny"]
 
 
 def _geo(kind, f=10.368):
-    return geometry.build(kind, f, fD=0.4 if kind == "fd04" else 0.6)
+    return geometry.build(kind, f, fD=0.6)
 
 
 def test_openems_zip_runs_without_feedlab(tmp_path):
@@ -81,7 +81,7 @@ def test_cst_macro_structure(kind):
 
 
 def test_cst_zip_contents():
-    z = zipfile.ZipFile(io.BytesIO(sim_export.cst_zip(_geo("fd04"), name="mio_feed")))
+    z = zipfile.ZipFile(io.BytesIO(sim_export.cst_zip(_geo("axial_corrugated"), name="mio_feed")))
     assert set(z.namelist()) == {"mio_feed.bas", "LEGGIMI_README.txt", "feed.json"}
 
 

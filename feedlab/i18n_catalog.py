@@ -6,21 +6,6 @@ contain numbers). Longer phrases win over shorter ones, so a sentence and its wo
 """
 
 ENTRIES = [
-    ('ottimizzato con openEMS per f/D 0.4: 80.1 % con S11 −21.2 dB (f0 ± 2 %, blocking su 3 m a 10 GHz incluso)', 'optimised with openEMS for f/D 0.4: 80.1 % with S11 −21.2 dB (f0 ± 2 %, blocking on 3 m at 10 GHz included)'),
-    ('3 anelli a choke, Ø esterno ≈ 3.8 λ: compatto, adatto anche a parabole piccole', '3 choke rings, outer Ø ≈ 3.8 λ: compact, suitable for small dishes too'),
-    ('simulazione rapida non disponibile (anelli coassiali): verificato con openEMS', 'fast simulation not available (coaxial rings): checked with openEMS'),
-    ('ottimizzato con openEMS per f/D 0.4: 80.3 % (f0 ± 2 %, blocking su 3 m a 10 GHz incluso)', 'optimised with openEMS for f/D 0.4: 80.3 % (f0 ± 2 %, blocking on 3 m at 10 GHz included)'),
-    ('un anello a choke, leggermente avanti rispetto alla bocca; Ø esterno ≈ 2.1 λ: il più compatto', 'one choke ring, slightly ahead of the mouth; outer Ø ≈ 2.1 λ: the most compact'),
-    ('ATTENZIONE: S11 −17.6 dB nella conferma a λ/24 (−20.6 dB a λ/16): da rifinire prima di costruirlo per TX', 'WARNING: S11 −17.6 dB in the λ/24 confirmation (−20.6 dB at λ/16): refine it before building it for TX'),
-    ('simulazione rapida non disponibile (anello coassiale): verificato con openEMS', 'fast simulation not available (coaxial ring): checked with openEMS'),
-    ('ottimizzato con openEMS per f/D 0.4: 73.5 % con S11 −23.2 dB (f0 ± 2 %)', 'optimised with openEMS for f/D 0.4: 73.5 % with S11 −23.2 dB (f0 ± 2 %)'),
-    ('horn liscio corto, cono 30° (punta da centri a 60°), Ø esterno = flangia: semplicissimo', 'short smooth horn, 30° cone (60° centre drill), outer Ø = flange: very simple'),
-    ('rende 7–9 punti meno dei feed a choke e del corrugato a f/D 0.4', '7–9 points below the choke feeds and the corrugated one at f/D 0.4'),
-    ('ottimizzato con openEMS per f/D 0.4: 80.1 % con S11 −21 dB, compatto (Ø ≈ 3.8 λ)', 'optimised with openEMS for f/D 0.4: 80.1 % with S11 −21 dB, compact (Ø ≈ 3.8 λ)'),
-    ('ottimizzato con openEMS per f/D 0.4: 80.3 %, il più compatto (Ø ≈ 2.1 λ): poca ostruzione', 'optimised with openEMS for f/D 0.4: 80.3 %, the most compact (Ø ≈ 2.1 λ): little blocking'),
-    ('S11 −17.6 dB: da rifinire prima di usarlo in TX', 'S11 −17.6 dB: refine it before using it for TX'),
-    ('ottimizzato con openEMS per f/D 0.4: 73.5 %, S11 −23 dB, horn liscio semplicissimo', 'optimised with openEMS for f/D 0.4: 73.5 %, S11 −23 dB, very simple smooth horn'),
-    ('7–9 punti sotto i feed a choke a f/D 0.4', '7–9 points below the choke feeds at f/D 0.4'),
     ('ottimizzato con openEMS per f/D 0.4: 83.5 % con S11 ≤ −21 dB (f0 ± 2 %)', 'optimised with openEMS for f/D 0.4: 83.5 % with S11 ≤ −21 dB (f0 ± 2 %)'),
     ('8 scanalature assiali, testa corta: si lavora al tornio', '8 axial slots, short head: made on the lathe'),
     ('simulazione rapida non disponibile: verificato con openEMS a 10 e 24 GHz', 'fast simulation not available: checked with openEMS at 10 and 24 GHz'),
