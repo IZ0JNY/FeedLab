@@ -65,7 +65,7 @@ def test_prime_focus_blocking_lowers_fom(tmp_path):
     assert 0.9 < blk["per_freq"][1]["block"] < 1.0
 
 
-@pytest.mark.parametrize("name", ["ve4ma", "chaparral", "axial_corrugated"])
+@pytest.mark.parametrize("name", ["ve4ma", "chaparral", "axial_corrugated", "large_w2imu", "dualflare_wide"])
 def test_export_overrides_rebuild_same_feed(name):
     """The FeedLab project overrides rebuild exactly the geometry simulated by the optimiser."""
     import export_feedlab

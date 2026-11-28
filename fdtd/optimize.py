@@ -161,7 +161,43 @@ VE4MA = ChokeFamily("ve4ma", "ve4ma", ["super", "original", "small"],
 CHAPARRAL = ChokeFamily("chaparral", "chaparral", ["best", "deep_dish"],
                         [(0.62, 1.00), (0.10, 0.45), (0.10, 0.60), (-0.30, 0.70)])
 
-FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily(), AxialCorrugated(), VE4MA, CHAPARRAL)}
+class LargeW2IMU(Family):
+    """Large-flare W2IMU (W1GHZ & W1FKF, MUD 2023): input guide A, wide cone alpha (30° published, 60° centre
+    drill), aperture B, phasing length C. Smooth wall, one turned part. Bounds open towards small apertures and
+    wide flares for deep dishes (f/D 0.35-0.5)."""
+    name = "large_w2imu"
+    keys = ["A", "B", "alpha_deg", "C"]
+    bounds = [(0.70, 0.82), (0.85, 2.10), (12.0, 60.0), (0.0, 4.5)]
+
+    def _x(self, B):
+        d = horns.large_w2imu_30deg(10.0, B).dims_mm
+        lam = wavelength_mm(10.0)
+        return [d["input_diam"] / lam, d["aperture_diam_B"] / lam, 30.0, d["length_C"] / lam]
+
+    def seed(self, fD):
+        return self._x(1.65)
+
+    def seeds(self, fD):
+        return [self._x(1.65), self._x(1.78), [0.76, 1.20, 30.0, 1.0]]
+
+    def build(self, x, f0, fD):
+        lam = wavelength_mm(f0)
+        A, B, a, C = x
+        return geometry.build("large_w2imu", f0, fD=fD, A=A * lam, B=B * lam, alpha=a, C=C * lam)
+
+
+class DualFlareWide(DualFlare):
+    """Dual-Flare with bounds open to small apertures (deep prime-focus dishes, f/D 0.35-0.5): the IZ0JNY table
+    starts at f/D 0.6, so the search also starts from a compact guess."""
+    name = "dualflare_wide"
+    bounds = [(0.70, 0.80), (0.75, 1.25), (0.0, 0.6), (0.80, 1.80), (0.05, 1.5), (0.0, 2.0), (0.80, 2.20), (0.02, 2.0)]
+
+    def seeds(self, fD):
+        return [self.seed(fD), [0.76, 0.95, 0.10, 1.05, 0.30, 0.50, 1.15, 0.30], [0.76, 1.00, 0.10, 1.25, 0.40, 0.80, 1.40, 0.50]]
+
+
+FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily(), AxialCorrugated(), VE4MA, CHAPARRAL,
+                                LargeW2IMU(), DualFlareWide())}
 
 
 # --------------------------------------------------------------------------------------------- objective
