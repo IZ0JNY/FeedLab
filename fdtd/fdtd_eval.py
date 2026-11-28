@@ -48,7 +48,23 @@ class EvalConfig:
     timeout_s: float = 3 * 3600
 
 
+def _is_rect(geo) -> bool:
+    return not hasattr(geo, "polygons")
+
+
+def _rect_payload(geo) -> dict:
+    """geometry of a RectHornGeometry for fdtd/rect_horn_sim.py"""
+    return {"kind": geo.kind, "f0_ghz": float(geo.f_ghz),
+            "params": {k: (float(v) if isinstance(v, (int, float, np.floating)) else v) for k, v in geo.params.items()}}
+
+
 def _key(geo, cfg: EvalConfig) -> str:
+    if _is_rect(geo):
+        g = _rect_payload(geo)
+        s = json.dumps({"rect": {k: (round(v, 6) if isinstance(v, float) else v) for k, v in g["params"].items()},
+                        "f0": g["f0_ghz"], "sim": [cfg.band, cfg.cells_per_lambda, cfg.end_db, cfg.pad_lambda,
+                                                   cfg.exc_band, cfg.min_cell_frac]}, sort_keys=True)
+        return "r" + hashlib.sha1(s.encode()).hexdigest()[:15]
     g = openems_sim.geometry_payload(geo)
     s = json.dumps({"polys": g["polys"], "r_in": g["r_input"], "f0": g["f0_ghz"],
                     "sim": [cfg.band, cfg.cells_per_lambda, cfg.end_db, cfg.pad_lambda]
@@ -71,10 +87,16 @@ def run_openems(geo, cfg: EvalConfig, label: str = "") -> Path:
                                 min_cell_frac=cfg.min_cell_frac,
                                 end_db=cfg.end_db, nr_ts=cfg.nr_ts, n_freq=int(round(20 * eb / 0.01)) + 1, theta_step=1.0, sphere=False, pad_lambda=cfg.pad_lambda,
                                 threads=cfg.threads, label=label or geo.kind)
-    script = openems_sim.make_deep_script(geo, d, dc, name="sim.py")
+    if _is_rect(geo):
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "feed.json").write_text(json.dumps({"format": "feedlab-openems-config", "version": 2,
+                                                 "geometry": _rect_payload(geo), "config": asdict(dc.resolved(f0))}, indent=1))
+        cmd = [PY, "-u", str(Path(__file__).resolve().parent / "rect_horn_sim.py"), str(d)]
+    else:
+        script = openems_sim.make_deep_script(geo, d, dc, name="sim.py")
+        cmd = [PY, "-u", str(script)]
     with open(d / "sim.log", "w") as fh:
-        p = subprocess.run([PY, "-u", str(script)], cwd=str(d), stdout=fh, stderr=subprocess.STDOUT,
-                           timeout=cfg.timeout_s)
+        p = subprocess.run(cmd, cwd=str(d), stdout=fh, stderr=subprocess.STDOUT, timeout=cfg.timeout_s)
     if p.returncode != 0 or not res.exists():
         raise RuntimeError(f"openEMS failed, see {d / 'sim.log'}")
     # the raw field data is large and not needed after the far field: keep only json + log

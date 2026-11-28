@@ -205,8 +205,54 @@ class LargeW2IMU30(LargeW2IMU):
     bounds = [(0.70, 0.82), (0.72, 2.10), (29.99, 30.01), (0.0, 4.5)]
 
 
+def rect_wg(f0: float) -> str:
+    """WR guide of the pyramidal horn: the first standard guide of the band (WR-90 at 10 GHz, WR-42 at 24 GHz)"""
+    from feedlab.waveguide import suggest_rect_wg
+    return suggest_rect_wg(f0)[0]
+
+
+class RectHorn(Family):
+    """Pyramidal horn straight from the WR guide (TE10): aperture H (along the broad wall a), aperture E, flare
+    length, in λ. The guide is a standard WR of the band, so its size in λ differs from band to band: optimise each
+    band (--f0) on its own. 3D openEMS run (fdtd/rect_horn_sim.py)."""
+    name = "rect_horn"
+    keys = ["aperture_H", "aperture_E", "axial_length"]
+    bounds = [(0.90, 2.40), (0.40, 2.40), (0.10, 4.00)]
+
+    def seed(self, fD):
+        lam = wavelength_mm(10.0)
+        d = horns.rect_feedhorn_g3rpe(10.0, fD, 0.8 * lam, 0.35 * lam).dims_mm
+        return [d["aperture_H"] / lam, d["aperture_E"] / lam, d["axial_length"] / lam]
+
+    def seeds(self, fD):
+        s = self.seed(fD)
+        return [s, [s[0], s[0], s[2]]]                  # G3RPE and the square aperture of the same H width
+
+    def build(self, x, f0, fD):
+        lam = wavelength_mm(f0)
+        AH, AE, L = x
+        return geometry.build_rect(f0, fD, rect_wg(f0), aperture_H=AH * lam, aperture_E=AE * lam, axial_length=L * lam)
+
+
+class SquareHorn(RectHorn):
+    """Square aperture (H = E), only the side and the flare length are searched."""
+    name = "square_horn"
+    keys = ["aperture", "axial_length"]
+    bounds = [(0.90, 2.40), (0.10, 4.00)]
+
+    def seed(self, fD):
+        s = RectHorn.seed(self, fD)
+        return [s[0], s[2]]
+
+    def seeds(self, fD):
+        return [self.seed(fD)]
+
+    def build(self, x, f0, fD):
+        return RectHorn.build(self, [x[0], x[0], x[1]], f0, fD)
+
+
 FAMILIES = {f.name: f for f in (W2IMU(), DualFlare(), ProfileFamily(), AxialCorrugated(), VE4MA, CHAPARRAL,
-                                LargeW2IMU(), DualFlareWide(), LargeW2IMU30())}
+                                LargeW2IMU(), DualFlareWide(), LargeW2IMU30(), RectHorn(), SquareHorn())}
 
 
 # --------------------------------------------------------------------------------------------- objective

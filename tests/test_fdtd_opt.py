@@ -25,6 +25,9 @@ def test_families_build(name):
         assert len(x0) == len(fam.keys)
         for x in (x0, [b[0] for b in fam.bounds], [b[1] for b in fam.bounds]):
             geo = fam.build(x, 10.368, fD)
+            if not hasattr(geo, "polygons"):           # WR horn (3D run): aperture not smaller than the guide
+                assert geo.length > 0 and geo.params["aperture_H"] >= geo.params["a"] * 0.99
+                continue
             assert geo.length > 0 and geo.r_aperture > geo.r_input * 0.99
             assert hasattr(geo, "polygons") and len(geo.polygons) >= 1
 
@@ -76,3 +79,21 @@ def test_export_overrides_rebuild_same_feed(name):
         kind, kw = export_feedlab.overrides(fam, x, f)
         a, b = fam.build(x, f, 0.4), geometry.build(kind, f, fD=0.4, **kw)
         assert a.profile == b.profile and a.blockage_diameter() == pytest.approx(b.blockage_diameter())
+
+
+@pytest.mark.parametrize("name", ["rect_horn", "square_horn"])
+def test_rect_horn_family_and_export(name):
+    """WR horn families: standard guide of the band, the FeedLab overrides rebuild the same horn, own cache key."""
+    import export_feedlab
+    from feedlab import geometry
+    fam = optimize.FAMILIES[name]
+    x = fam.seeds(0.65)[0]
+    for f, wg in ((10.368, "WR-90"), (24.048, "WR-42")):
+        a = fam.build(x, f, 0.65)
+        assert a.params["wg"] == wg
+        kind, kw = export_feedlab.overrides(fam, x, f)
+        b = geometry.build_rect(f, 0.65, wg, **kw)
+        assert kind == "rect_horn" and a.params == b.params
+        assert fe._key(a, fe.EvalConfig()).startswith("r")
+    if name == "square_horn":
+        assert a.params["aperture_H"] == a.params["aperture_E"]

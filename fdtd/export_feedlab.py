@@ -41,18 +41,22 @@ def overrides(fam, x: list[float], f_ghz: float) -> tuple[str, dict]:
     if fam.name in ("w2imu", "large_w2imu", "large_w2imu_30"):
         A, B, a, C = x
         return ("w2imu" if fam.name == "w2imu" else "large_w2imu"), {"A": A * lam, "B": B * lam, "alpha": a, "C": C * lam}
+    if fam.name in ("rect_horn", "square_horn"):
+        AH, AE, L = (x[0], x[0], x[1]) if fam.name == "square_horn" else x
+        return "rect_horn", {"aperture_H": AH * lam, "aperture_E": AE * lam, "axial_length": L * lam}
     if isinstance(fam, op.DualFlare):
         from feedlab import synth
         return "iz0jny", synth.df_params(x, lam)
     raise ValueError(f"export not available for {fam.name}")
 
 
-def openems_results(family: str, fD: float, f_ghz: float, S: dict, geo) -> dict | None:
+def openems_results(family: str, fD: float, f_ghz: float, S: dict, geo, sub: str = "") -> dict | None:
     """Dish results (same formulas and fields as FeedLab's project file) from the confirmed openEMS far field in
-    fdtd/results/openems_fD<fD>/<family>/ (simulated at 10.368 GHz; quotes in λ, so the pattern holds at f_ghz)."""
+    fdtd/results/openems_fD<fD>/<family or sub>/ (simulated at 10.368 GHz; quotes in λ, so the pattern holds at f_ghz;
+    the WR horns are simulated at their own band)."""
     import numpy as np
     from feedlab import deep_analysis, explore
-    path = op.RESULTS / f"openems_fD{fD:.2f}" / family / "results.json"
+    path = op.RESULTS / f"openems_fD{fD:.2f}" / (sub or family) / "results.json"
     if not path.exists():
         return None
     r = deep_analysis.load(path)
@@ -88,6 +92,7 @@ def main(argv=None):
     ap.add_argument("--name", default="", help="file name prefix (default: family_fD)")
     ap.add_argument("--wr", default="", help="WR guide for the λ/4 plate (default: first of the band; none = no plate)")
     ap.add_argument("--pol", default="V", choices=["V", "H"])
+    ap.add_argument("--offset", action="store_true", help="offset dishes of equivalent f/D --fD (Ø = projected aperture)")
     a = ap.parse_args(argv)
 
     fam = op.FAMILIES[a.family]
@@ -98,28 +103,35 @@ def main(argv=None):
     written = []
     for f in map(float, a.bands.split(",")):
         kind, kw = overrides(fam, x, f)
-        geo = geometry.build(kind, f, fD=a.fD, **kw)
+        rect = kind == "rect_horn"
+        geo = geometry.build_rect(f, a.fD, op.rect_wg(f), **kw) if rect else geometry.build(kind, f, fD=a.fD, **kw)
         for D in map(float, a.dishes.split(",")):
-            S = {"f_ghz": f, "dish": wizard.dish_from_prime(D, a.fD), "feed_kind": kind, "material": a.material,
+            dish = wizard.Dish("offset", D, a.fD, a.fD * D, note=f"offset generica, f/D equivalente {a.fD:g}") \
+                if a.offset else wizard.dish_from_prime(D, a.fD)
+            S = {"f_ghz": f, "dish": dish, "feed_kind": kind, "material": a.material,
                  "overrides": {kind: kw}, "wall": None, "fd_design": a.fD}
             # λ/4 plate circular feed guide → WR (tab «Piastrina WR»), already filled in: first standard WR of the
             # band, polarisation V, mill radius as FeedLab's default, optimised version
             wgs = suggest_rect_wg(f)
-            if wgs and a.wr != "none":
+            if rect:                    # the pyramidal horn starts from the WR flange itself: no plate
+                S["wr_wg"] = op.rect_wg(f)
+            elif wgs and a.wr != "none":
                 wg = a.wr or wgs[0]
                 S["wr_wg"] = wg
                 S["plate_rf"] = (a.pol, float(round(2 * geo.r_input, 3)), float(round(min(2.0, 0.08 * RECT_WG[wg].a_mm), 2)), True)
             p = project.build(S, geo, a.fD)
             p["openems_optimum"] = {"source": f"fdtd/results/{tag}_best.json", "family": fam.name, "x_lambda": best["x"],
                                     "eta_mean": best["eta_mean"], "s11_max_db": best["s11_max_db"],
-                                    "f0_ghz_simulated": best["f0_ghz"], "cells_per_lambda": 16}
+                                    "f0_ghz_simulated": best["f0_ghz"], "cells_per_lambda": 16,
+                                    **({"dish": "offset, f/D equivalente", "solver": "openEMS 3D (fdtd/rect_horn_sim.py)"}
+                                       if rect else {})}
             cf = op.RESULTS / f"{tag}_confirm.json"
             if cf.exists():
                 c = json.loads(cf.read_text())["best"]
                 p["openems_optimum"]["confirm_24cpl"] = {"eta_mean": c["eta_mean"], "eta_f0": c["eta_f0"],
                                                          "s11_max_db": c["s11_max_db"], "per_freq": c["per_freq"]}
             name = f"{a.name or tag}_{f:g}GHz_{D / 1000:g}m.feedlab.json"
-            ow = openems_results(fam.name, a.fD, f, S, geo)
+            ow = openems_results(fam.name, a.fD, f, S, geo, sub=f"{fam.name}_{a.tag}" if rect else "")
             if ow:                  # FeedLab's fast solver ignores chokes/slots: dish results from the openEMS pattern
                 p["results_fast_solver"] = p.get("results")
                 p["results"] = ow

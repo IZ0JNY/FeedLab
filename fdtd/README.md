@@ -47,7 +47,7 @@ Con Docker: `docker run --rm -v "$PWD/fdtd/results:/work/fdtd/results" -v "$PWD/
 - **Primo fuoco**: `--dish-lambda` = Ø della parabola in λ; la FOM include il blocking del Ø esterno del feed.
 - **Verso FeedLab**: `export_feedlab.py` scrive `fdtd/results/feedlab/*.feedlab.json` (📂 Apri progetto), con la
   piastrina WR già impostata e i risultati dal campo lontano openEMS confermato.
-- **Risultati pubblicati**: `RISULTATI_fD060.md` (offset/f/D 0.6), `RISULTATI_fD040.md` (primo fuoco f/D 0.4, 3–3.7 m).
+- **Risultati pubblicati**: `RISULTATI_fD060.md` (offset/f/D 0.6), `RISULTATI_fD040.md` (primo fuoco f/D 0.4, 3–3.7 m). `RISULTATI_offset_fD065.md` (tromba piramidale/quadrata WR per offset f/D 0.65, simulazione 3D `rect_horn_sim.py`).
 
 ## Impostazioni di simulazione (`fdtd_eval.EvalConfig`)
 

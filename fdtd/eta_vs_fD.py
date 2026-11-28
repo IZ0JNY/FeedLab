@@ -38,6 +38,10 @@ FEEDS = [
     ("Dual-Flare ott. f/D 0.6", "dualflare", "fD0.60", 0.6),
     ("Profilo liscio ott. f/D 0.6", "profile", "fD0.60", 0.6),
     ("Dual-Flare ott. f/D 0.4", "dualflare_wide", "fD0.40_3m", 0.4),
+    # pyramidal horns from the WR guide (3D openEMS): the guide in λ differs per band, so the 24 GHz design (tag
+    # *_24g) is used for the 24 GHz and higher charts when it exists
+    ("Tromba piramidale ott. f/D 0.65", "rect_horn", "fD0.65_10g", 0.65),
+    ("Tromba quadrata ott. f/D 0.65", "square_horn", "fD0.65_10g", 0.65),
 ]
 # published designs, as FeedLab builds them for their design f/D: (label, FeedLab kind, design f/D)
 PUBLISHED = [
@@ -52,6 +56,7 @@ PUBLISHED = [
     ("Skobelev (W1GHZ)", "skobelev", 0.6),
     ("Pickett-Potter (OE2IGL)", "pickett_potter", 0.6),
     ("Dual-Flare IZ0JNY (tabella)", "iz0jny", 0.6),
+    ("Tromba piramidale G3RPE f/D 0.65", "rect_horn", 0.65),
 ]
 FDS = np.round(np.arange(0.30, 0.9001, 0.025), 3)
 
@@ -112,15 +117,24 @@ def main(argv=None):
     todo = []
     if a.set in ("all", "opt"):
         for label, name, tag, fd in FEEDS:
+            f_build = a.f0
+            if tag.endswith("_10g") and a.f > 20 and (op.RESULTS / f"{name}_{tag[:-4]}_24g_best.json").exists():
+                tag, f_build = tag[:-4] + "_24g", 24.048
+            elif tag.endswith("_24g"):
+                f_build = 24.048
             bf = op.RESULTS / f"{name}_{tag}_best.json"
             if not bf.exists():
                 print(f"{label}: no result, skipped", flush=True)
                 continue
             fam = op.FAMILIES[name]
             best = json.loads(bf.read_text())
-            todo.append((label, name, fd, True, lambda fam=fam, best=best: fam.build([best["x"][k] for k in fam.keys], a.f0, 0.6)))
+            todo.append((label, name, fd, True, lambda fam=fam, best=best: fam.build([best["x"][k] for k in fam.keys], f_build, 0.6)))
     if a.set in ("all", "pub"):
         for label, kind, fd in PUBLISHED:
+            if kind == "rect_horn":         # G3RPE straight-line design from the WR of the band
+                fb = 24.048 if a.f > 20 else a.f0
+                todo.append((label, kind, fd, False, lambda fd=fd, fb=fb: geometry.build_rect(fb, fd, op.rect_wg(fb))))
+                continue
             todo.append((label, kind, fd, False, lambda kind=kind, fd=fd: geometry.build(kind, a.f0, fD=fd)))
     for label, name, fd, optimised, mk in todo:
         try:
@@ -147,11 +161,12 @@ def main(argv=None):
 COLORS = {"axial_corrugated": "#1f77b4", "chaparral": "#2ca02c", "ve4ma": "#9467bd", "large_w2imu": "#d62728",
           "large_w2imu_30": "#ff7f0e", "w2imu": "#8c564b", "dualflare": "#e377c2", "profile": "#17becf",
           "dualflare_wide": "#bcbd22", "iz0jny": "#e377c2", "open_circular": "#555555", "w2imu_oe2igl": "#8c564b",
-          "skobelev": "#17becf", "pickett_potter": "#bcbd22"}
+          "skobelev": "#17becf", "pickett_potter": "#bcbd22", "rect_horn": "#393b79", "square_horn": "#637939"}
 SHORT = {"axial_corrugated": "Corrugato", "chaparral": "Chaparral", "ve4ma": "VE4MA", "large_w2imu": "W2IMU LF",
          "large_w2imu_30": "W2IMU LF 30°", "w2imu": "W2IMU", "dualflare": "Dual-Flare", "profile": "Liscio",
          "dualflare_wide": "Dual-Flare", "iz0jny": "Dual-Flare IZ0JNY", "open_circular": "Guida aperta",
-         "w2imu_oe2igl": "W2IMU OE2IGL", "skobelev": "Skobelev", "pickett_potter": "Pickett-Potter"}
+         "w2imu_oe2igl": "W2IMU OE2IGL", "skobelev": "Skobelev", "pickett_potter": "Pickett-Potter",
+         "rect_horn": "Tromba piramidale", "square_horn": "Tromba quadrata"}
 
 
 def _labels(ax, items, ymin, ymax, xs=0.12, xw=0.2):
@@ -224,6 +239,7 @@ PUB_SHORT = {"Super-VE4MA (W1GHZ/WD5AGO)": "Super-VE4MA", "Chaparral 3 anelli (W
              "Guida circolare aperta": "Guida aperta", "W2IMU OE2IGL f/D 0.6": "W2IMU OE2IGL",
              "Large W2IMU 30° (W1GHZ/W1FKF)": "Large W2IMU W1GHZ", "W2IMU (W1GHZ, B = 2.35 f/D) f/D 0.6": "W2IMU W1GHZ",
              "Skobelev (W1GHZ)": "Skobelev", "Pickett-Potter (OE2IGL)": "Pickett-Potter",
+             "Tromba piramidale G3RPE f/D 0.65": "Tromba G3RPE",
              "Dual-Flare IZ0JNY (tabella)": "Dual-Flare IZ0JNY"}
 EN = {
     "Parabola offset generica 100, 120, 180, 240 cm (nessun blocking: stesse curve per ogni Ø e banda)":
@@ -238,7 +254,8 @@ EN = {
     "Efficienza dei feed (openEMS) al variare di f/D e diametro della parabola":
         "Feed efficiency (openEMS) versus f/D and dish diameter",
     "ott.": "opt.", "Corrugato": "Corrugated", "Liscio": "Smooth profile", "Guida aperta": "Open waveguide",
-    "Corrugato OE2IGL": "Corrugated OE2IGL",
+    "Corrugato OE2IGL": "Corrugated OE2IGL", "Tromba piramidale": "Pyramidal horn", "Tromba quadrata": "Square horn",
+    "Tromba G3RPE": "G3RPE horn",
 }
 SUB_EN = ("name on the line = feed (design f/D) · solid line ● = optimised with openEMS · dotted ■ = published design · "
           "grey: best feed at each f/D")

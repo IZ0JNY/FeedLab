@@ -1,0 +1,46 @@
+{
+ "format": "feedlab-openems-config",
+ "version": 2,
+ "geometry": {
+  "kind": "rect_horn",
+  "f0_ghz": 24.048,
+  "params": {
+   "wg": "WR-42",
+   "a": 10.668,
+   "b": 4.318,
+   "aperture_H": 17.178515518406147,
+   "aperture_E": 12.116707009632991,
+   "axial_length": 10.1549538682378,
+   "input_length": 12.466419577511644,
+   "wall": 1.0
+  }
+ },
+ "config": {
+  "f_lo": 21.6432,
+  "f_hi": 26.4528,
+  "cells_per_lambda": 26,
+  "nr_ts": 40000,
+  "end_db": 30.0,
+  "port_mode": "TE11",
+  "n_freq": 201,
+  "ff_freqs": [
+   23.56704,
+   24.048,
+   24.528959999999998
+  ],
+  "theta_step": 1.0,
+  "phi_cuts": [
+   0.0,
+   45.0,
+   90.0
+  ],
+  "sphere": false,
+  "sphere_step": 3.0,
+  "pad_lambda": 0.4,
+  "dump_fields": false,
+  "threads": 0,
+  "min_cell_frac": 0.3,
+  "openems_root": "",
+  "label": "rect_horn best confirm"
+ }
+}

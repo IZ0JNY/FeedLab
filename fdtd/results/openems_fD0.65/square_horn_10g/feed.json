@@ -1,0 +1,46 @@
+{
+ "format": "feedlab-openems-config",
+ "version": 2,
+ "geometry": {
+  "kind": "rect_horn",
+  "f0_ghz": 10.368,
+  "params": {
+   "wg": "WR-90",
+   "a": 22.86,
+   "b": 10.16,
+   "aperture_H": 32.499147684235446,
+   "aperture_E": 32.499147684235446,
+   "axial_length": 22.72801768999417,
+   "input_length": 28.91516763117284,
+   "wall": 1.73
+  }
+ },
+ "config": {
+  "f_lo": 9.3312,
+  "f_hi": 11.404800000000002,
+  "cells_per_lambda": 26,
+  "nr_ts": 40000,
+  "end_db": 30.0,
+  "port_mode": "TE11",
+  "n_freq": 201,
+  "ff_freqs": [
+   10.16064,
+   10.368,
+   10.57536
+  ],
+  "theta_step": 1.0,
+  "phi_cuts": [
+   0.0,
+   45.0,
+   90.0
+  ],
+  "sphere": false,
+  "sphere_step": 3.0,
+  "pad_lambda": 0.4,
+  "dump_fields": false,
+  "threads": 0,
+  "min_cell_frac": 0.3,
+  "openems_root": "",
+  "label": "square_horn best confirm"
+ }
+}
