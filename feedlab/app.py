@@ -17,6 +17,7 @@ import streamlit as _st
 import feedlab
 from feedlab import credits as _credits_mod
 from feedlab import filenames as _filenames
+from feedlab import sim_export as _sim_export
 
 from feedlab import i18n
 
@@ -1099,6 +1100,30 @@ with tabs[5], contextlib.suppress(_Skip):
     st.plotly_chart(model3d_fig(geo, cut), width="stretch")
 
 # ---------------------------------------------------------------- 6 export
+def _sim_export_section(geo, fname):
+    """Scripts for other full-wave programs: openEMS (Python) and CST Studio Suite (VBA macro)."""
+    st.subheader("🧪 Script per simulatori full-wave (openEMS, CST)")
+    if not _sim_export.supported(geo):
+        st.info("Gli script per i simulatori coprono i feed a simmetria di rotazione (non la tromba rettangolare).")
+        return
+    st.caption("Per chi ha openEMS o CST Studio Suite: il feed progettato, con porta guida d'onda TE11, contorni "
+               "aperti e monitor del campo lontano, pronto da simulare. Ogni ZIP contiene le istruzioni (LEGGIMI).")
+    c = st.columns(3)
+    bw = c[0].slider("Banda ± %", 2, 25, 10, key="simx_bw")
+    cells = c[1].select_slider("Celle per λ", [12, 15, 20, 25, 30, 40, 50, 60], 20, key="simx_cells",
+                               help="15 bozza · 20 rapida · 30–40 buona · 60 qualità OE2IGL (molta RAM)")
+    nff = c[2].select_slider("Frequenze del lobo", [1, 3, 5, 7], 3, key="simx_nff")
+    c = st.columns(2)
+    c[0].download_button("⬇️ Script openEMS (.zip)", _sim_export.openems_zip(geo, bw, cells, nff),
+                         file_name=f"{fname}_openems.zip", mime="application/zip", key="simx_oems",
+                         help="script Python autonomo (non serve FeedLab): python -u sim_<feed>.py, poi carica "
+                              "results.json nella scheda 🖥️ Full-wave openEMS")
+    c[1].download_button("⬇️ Macro CST (.zip)", _sim_export.cst_zip(geo, bw, cells, nff, name=fname),
+                         file_name=f"{fname}_cst.zip", mime="application/zip", key="simx_cst",
+                         help="macro VBA: in un progetto vuoto CST, Home > Macros > Run Macro. Costruisce il modello "
+                              "nella History List; il solutore lo avvii tu")
+
+
 with tabs[8], contextlib.suppress(_Skip):
     _need()
     st.header("Disegno meccanico (PDF) e file per la produzione")
@@ -1145,6 +1170,7 @@ with tabs[8], contextlib.suppress(_Skip):
     rep = {"feed": geo.kind, "f_ghz": S.f_ghz, "params_mm": geo.params,
            "dish": None if S.dish is None else S.dish.__dict__}
     c4.download_button("🧾 Parametri JSON", json.dumps(rep, indent=2, default=float), file_name=fname + ".json", mime="application/json")
+    _sim_export_section(geo, fname)
     if S.get("pdf"):
         import base64
         b64 = base64.b64encode(S["pdf"]).decode()
@@ -1799,7 +1825,8 @@ with tabs[10]:
                ("plate", "🔲 Piastrina λ/4 (PDF)", False), ("assembly", "🔩 Feed + piastrina, montaggio (PDF)", False),
                ("data", "📋 Tabella di tutte le quote e i dati (PDF + CSV)", False),
                ("openems", "🖥️ Simulazioni openEMS (PDF)", False), ("json", "💾 File di progetto (.json)", True),
-               ("cad", "🧊 Modelli 3D del feed (STEP + STL)", False)]
+               ("cad", "🧊 Modelli 3D del feed (STEP + STL)", False),
+               ("simx", "🧪 Script per simulatori: openEMS + macro CST", False)]
         cols = st.columns(2)
         pick = {k: cols[n % 2].checkbox(lab, value=dflt, key=f"out_{k}") for n, (k, lab, dflt) in enumerate(OUT)}
         if not S.get("wr_wg") or not S.get("plate_rf"):
@@ -1838,6 +1865,9 @@ with tabs[10]:
                         files[f"{base_name}.stl"] = cad.export_stl(geo_o, wdir / "feed.stl").read_bytes()
                     except Exception as e:
                         st.warning(f"STEP/STL: {e}")
+                if pick.get("simx") and _sim_export.supported(geo_o):
+                    files[f"{base_name}_openems.zip"] = _sim_export.openems_zip(geo_o)
+                    files[f"{base_name}_cst.zip"] = _sim_export.cst_zip(geo_o, name=base_name)
             S["outputs"] = files
             S["outputs_base"] = base_name
         if S.get("outputs"):
@@ -1848,7 +1878,8 @@ with tabs[10]:
                                mime="application/zip", type="primary")
             for name, data in files.items():
                 mime = ("application/pdf" if name.endswith(".pdf") else "application/json" if name.endswith(".json")
-                        else "text/csv" if name.endswith(".csv") else "application/octet-stream")
+                        else "text/csv" if name.endswith(".csv") else "application/zip" if name.endswith(".zip")
+                        else "application/octet-stream")
                 st.download_button(f"⬇️ {name}", data, file_name=name, mime=mime, key=f"dl_{name}")
     st.divider()
     st.subheader("📂 Apri un file di progetto")
