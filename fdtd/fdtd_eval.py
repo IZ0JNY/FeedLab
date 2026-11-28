@@ -68,7 +68,9 @@ def run_openems(geo, cfg: EvalConfig, label: str = "") -> Path:
     f0 = geo.f_ghz
     eb = max(cfg.exc_band, cfg.band)
     # the mesh rule of the script is "cells per wavelength at f_hi": keep the cell = λ0 / cells_per_lambda
-    cpl = int(round(cfg.cells_per_lambda * (1 + eb)))
+    # (up to 0.4.28, <= 30 c/λ: cpl * (1 + eb), i.e. λ0 / 1.21 cpl; kept so the cached runs stay valid)
+    cpl = int(round(cfg.cells_per_lambda * (1 + eb))) if cfg.cells_per_lambda <= 30 else \
+        int(round(cfg.cells_per_lambda / (1 + eb)))
     dc = openems_sim.DeepConfig(f_lo=f0 * (1 - eb), f_hi=f0 * (1 + eb), cells_per_lambda=cpl,
                                 ff_freqs=[f0 * (1 - cfg.band), f0, f0 * (1 + cfg.band)],
                                 min_cell_frac=cfg.min_cell_frac, symmetry=cfg.symmetry if cfg.cells_per_lambda > 30 else 1,
