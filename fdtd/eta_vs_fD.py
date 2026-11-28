@@ -47,7 +47,7 @@ PUBLISHED = [
     ("Axial Corrugated OE2IGL f/D 0.6", "axial_corrugated", 0.6),
     ("Guida circolare aperta", "open_circular", 0.4),
     ("W2IMU OE2IGL f/D 0.6", "w2imu_oe2igl", 0.6),
-    ("Large W2IMU 30° (W1GHZ/W1FKF)", "large_w2imu", 0.6),
+    ("Large W2IMU 30° (W1GHZ/W1FKF)", "large_w2imu", 0.8),    # B 1.78 λ: BW-10 ±35°, a feed for f/D ≈ 0.8
     ("W2IMU (W1GHZ, B = 2.35 f/D) f/D 0.6", "w2imu", 0.6),
     ("Skobelev (W1GHZ)", "skobelev", 0.6),
     ("Pickett-Potter (OE2IGL)", "pickett_potter", 0.6),

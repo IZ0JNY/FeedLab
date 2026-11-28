@@ -1,0 +1,37 @@
+FEEDLAB:STAGE setup {}
+FEEDLAB:STAGE fdtd {"nx": 97, "ny": 97, "nz": 137, "cells": 1289033, "res_mm": 1.0110198472438054}
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.37.0
+ | (C) 2010-2026 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.7.0
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 97x97x137 --> 1.28903e+06 FDTD cells 
+FDTD timestep is: 9.83848e-13 s; Nyquist rate: 44 timesteps @1.15502e+10 Hz
+Excitation signal length is: 2809 timesteps (2.76363e-09s)
+Max. number of timesteps: 40000 ( --> 14.2399 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          264 || Speed:   83.3 MC/s (1.547e-02 s/TS) || Energy: ~6.17e-18 (- 0.00dB)
+[@        8s] Timestep:          627 || Speed:  114.6 MC/s (1.124e-02 s/TS) || Energy: ~7.77e-15 (- 0.00dB)
+[@       12s] Timestep:         1067 || Speed:  139.4 MC/s (9.246e-03 s/TS) || Energy: ~1.16e-12 (- 0.00dB)
+[@       16s] Timestep:         1551 || Speed:  153.7 MC/s (8.384e-03 s/TS) || Energy: ~7.68e-12 (- 0.00dB)
+[@       20s] Timestep:         2013 || Speed:  148.7 MC/s (8.666e-03 s/TS) || Energy: ~5.32e-12 (- 1.60dB)
+[@       24s] Timestep:         2464 || Speed:  144.3 MC/s (8.931e-03 s/TS) || Energy: ~3.76e-13 (-13.10dB)
+[@       28s] Timestep:         2937 || Speed:  150.9 MC/s (8.544e-03 s/TS) || Energy: ~4.03e-15 (-32.80dB)
+RunFDTD: end-criteria of -30.00dB reached after 2937 timesteps (-32.80dB)
+Time for 2937 iterations with 1289033.00 cells : 28.37 sec
+Speed: 133.47 MCells/s 
+FEEDLAB:STAGE port {}
+FEEDLAB:STAGE nf2ff {"part": "cuts", "n": 3}
+FEEDLAB:STAGE done {"s11_f0_db": -24.298675139401208, "Dmax_dbi": 8.755410976622631, "total_s": 31.373939514160156}
+S11 @ f0 = -24.3 dB, Dmax = 8.76 dBi, 31 s

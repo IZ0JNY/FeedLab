@@ -1,0 +1,86 @@
+{
+ "format": "feedlab-openems-config",
+ "version": 2,
+ "geometry": {
+  "kind": "large_w2imu",
+  "f0_ghz": 10.368,
+  "params": {
+   "A_input": 20.496537807445993,
+   "B_aperture": 26.1562373124315,
+   "flare_half_deg": 29.997209534746748,
+   "flare_length": 4.901994882109973,
+   "C_phasing": 20.887159494464,
+   "input_length": 51.42192250882888,
+   "wall": 1.73,
+   "flange_diam": 47.08867191238427,
+   "flange_thickness": 3.4698201157407405
+  },
+  "polys": [
+   [
+    [
+     10.248268903722996,
+     10.248268903722996,
+     13.07811865621575,
+     13.07811865621575,
+     14.80811865621575,
+     14.80811865621575,
+     11.978268903722997,
+     11.978268903722997,
+     23.544335956192135,
+     23.544335956192135,
+     10.248268903722996
+    ],
+    [
+     0.0,
+     51.42192250882888,
+     56.32391739093885,
+     77.21107688540286,
+     77.21107688540286,
+     55.860410440314986,
+     50.958415558205004,
+     3.4698201157407405,
+     3.4698201157407405,
+     0.0,
+     0.0
+    ]
+   ]
+  ],
+  "r_input": 10.248268903722996,
+  "z_aperture": 77.21107688540286,
+  "outer_radius": 23.544335956192135,
+  "r_aperture": 13.07811865621575
+ },
+ "config": {
+  "f_lo": 9.3312,
+  "f_hi": 11.404800000000002,
+  "cells_per_lambda": 26,
+  "nr_ts": 40000,
+  "end_db": 30.0,
+  "port_mode": "TE11",
+  "n_freq": 201,
+  "ff_freqs": [
+   10.16064,
+   10.368,
+   10.57536
+  ],
+  "theta_step": 1.0,
+  "phi_cuts": [
+   0.0,
+   45.0,
+   90.0
+  ],
+  "sphere": false,
+  "sphere_step": 3.0,
+  "pad_lambda": 0.4,
+  "dump_fields": false,
+  "threads": 0,
+  "min_cell_frac": 0.3,
+  "openems_root": "",
+  "label": "large_w2imu_30 best confirm"
+ },
+ "notes": [
+  "C interpolata dalla tabella pubblicata",
+  "assottigliare il bordo (smusso a 45\u00b0)",
+  "centro di fase \u2248 apertura"
+ ]
+}

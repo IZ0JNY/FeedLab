@@ -28,6 +28,7 @@ $PY fdtd/optimize.py --family w2imu --fD 0.6 --confirm    # migliore e partenza 
 $PY fdtd/optimize.py --family axial_corrugated --fD 0.4 --dish-lambda 103.75 --tag 3m --method de --budget 130
 $PY fdtd/rescore_dishes.py --fD 0.4 --tag 3m --dishes 3000,3700 --bands 10.368,24.048   # altre parabole, senza nuovi run
 $PY fdtd/export_feedlab.py --family axial_corrugated --fD 0.4 --tag 3m                  # file di progetto FeedLab
+$PY fdtd/eta_vs_fD.py --f 10.368          # grafici efficienza/f/D/Ø parabola di tutti i feed (ottimizzati e pubblicati)
 ```
 
 Con Docker: `docker run --rm -v "$PWD/fdtd/results:/work/fdtd/results" -v "$PWD/fdtd/runs:/work/fdtd/runs" feedlab-fdtd python fdtd/optimize.py ...`
@@ -35,7 +36,8 @@ Con Docker: `docker run --rm -v "$PWD/fdtd/results:/work/fdtd/results" -v "$PWD/
 - **Famiglie**: `w2imu` (A, B, semiangolo, C), `dualflare` (scalino + cono 1 + cilindro + cono 2),
   `profile` (profilo liscio monotono PCHIP con scalino d'ingresso), `axial_corrugated` (8 slot assiali, OE2IGL),
   `ve4ma` e `chaparral` (guida liscia con anello/i choke: Ø guida, larghezza, profondità, arretramento; per f/D
-  0.3–0.45). Quote in λ: il risultato vale per ogni
+  0.3–0.45), `large_w2imu` / `large_w2imu_30` (W2IMU large flare, cono libero o 30° fisso), `dualflare_wide`
+  (Dual-Flare con limiti aperti verso bocche piccole). Quote in λ: il risultato vale per ogni
   banda alla stessa f/D. La simulazione gira a `--f0` (10.368 GHz).
 - **Metodi**: `nm` Nelder-Mead dal progetto di letteratura (locale, poche decine di run), `de` evoluzione
   differenziale (globale, centinaia di run).

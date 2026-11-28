@@ -17,7 +17,11 @@ evoluzione differenziale), **conferma a λ/24**.
 | Axial Corrugated CT1DMK, parametric calculation OE2IGL | 75.3 % | 74.3 % | −11.4 dB | | | | | 7.58 λ | |
 | Chaparral 3 anelli "best" (W1GHZ/WD5AGO) | 72.8 % | 72.5 % | −16.6 dB | | | | | 2.39 λ | |
 
-Solo ricerca (λ/16): guida circolare aperta 70.9 %.
+| W2IMU large flare, ottimizzato (cono 30° fisso) | 73.5 % | 73.6 % | −23.2 dB | 0.899 | 0.824 | 0.999 | 13.2 dB | 1.63 λ | 2.67 λ |
+| W2IMU large flare, ottimizzato (cono libero, 33.9°) | 73.5 % | 73.6 % | −20.6 dB | 0.885 | 0.839 | 0.999 | 12.4 dB | 1.63 λ | 2.68 λ |
+| Large W2IMU 30° W1GHZ/W1FKF, B 1.65 λ | 48.2 % | 47.9 % | −22.9 dB | | | | | | 5.24 λ |
+
+Solo ricerca (λ/16): Dual-Flare con limiti aperti 73.1 % (lasciato da parte), guida circolare aperta 70.9 %.
 
 ## Su 3 e 3.7 m, 10 e 24 GHz (stessi run, cambia solo il blocking)
 
@@ -44,6 +48,42 @@ FeedLab dà per l'Axial Corrugated 49.3 dBi su 3 m e 51.2 dBi su 3.7 m a 10.368 
   limite della ricerca (0.437 su 0.45 λ): forse si può guadagnare ancora qualcosa.
 - Il centro di fase dell'Axial Corrugated è 0.85 λ **dentro** la bocca (−24.7 mm a 10 GHz): la bocca del feed
   sta 25 mm oltre il fuoco, verso la parabola.
+
+## W2IMU large flare a f/D 0.4
+
+Il large W2IMU pubblicato (W1GHZ/W1FKF, bocca 1.65–1.78 λ, cono 30°) è un feed per f/D ≈ 0.8: a f/D 0.4 dà il
+48 % (1.65 λ) o il 34 % (1.78 λ), perché illumina solo il centro della parabola. Dal grafico qui sotto il suo massimo
+è il 79.5 % a f/D 0.82–0.85. Lasciando libero l'ottimizzatore (330 run libero, 170 a 30° fisso) il W2IMU per
+f/D 0.4 diventa un horn corto a bocca piccola: guida 0.71 λ, cono 30–34°, bocca 0.87–0.91 λ, cilindro di fase 0.72–0.77 λ.
+Si ferma al **73.5 %** confermato, appena sopra la guida aperta: per illuminare 128° con bordo a −12 dB senza corrugazioni
+non c'è abbastanza controllo del modo ibrido. **A f/D 0.4 il large flare perde 7–9 punti** sui feed a choke e sul
+corrugato; ha senso solo se serve un feed liscio, piccolo (Ø esterno = flangia, 47 mm a 10 GHz) e semplicissimo.
+
+Versione a 30° fisso (consigliata se lo vuoi fare: il cono si fa con la punta da centro a 60°, S11 −23 dB), mm:
+
+| | Ø guida A | Ø bocca B | cono | lunghezza cono | cilindro C | guida d'ingresso | lunghezza totale |
+|---|---|---|---|---|---|---|---|
+| 10.368 GHz | 20.50 | 26.16 | 30° | 4.90 | 20.89 | 51.42 | 77.2 |
+| 24.048 GHz | 8.84 | 11.28 | 30° | 2.11 | 9.01 | 22.17 | 33.3 |
+
+## Quale feed per quale f/D e parabola (grafici)
+
+`fdtd/results/eta_vs_fD_<banda>GHz.png` (tutti i Ø) e `eta_vs_fD_<banda>GHz_<Ø>cm.png` (uno per Ø), dati in
+`eta_vs_fD_<banda>GHz.json`. 21 feed: gli ottimizzati (linea continua) e i progetti pubblicati (puntini), ognuno dal suo
+campo lontano openEMS a 24 celle/λ, rimesso nel centro di fase migliore per ogni f/D, con il blocking del suo Ø esterno
+sulla parabola primo fuoco. 10 e 24 GHz: Ø 100–370 cm; 47 e 76 GHz: Ø 100–240 cm. Valori a f0, senza Ruze né
+perdite ohmiche. Per rifarli: `python fdtd/eta_vs_fD.py --f 10.368`.
+
+Il migliore per f/D (10 GHz, Ø 300 cm; alle bande alte e sulle parabole più grandi vale lo stesso, perché il
+blocking conta meno):
+
+| f/D | 0.30 | 0.35 | 0.40–0.50 | 0.55–0.65 | 0.70 | 0.75–0.90 |
+|---|---|---|---|---|---|---|
+| feed | Chaparral W1GHZ (73.5 %) | Chaparral ott. (78 %) | Corrugato ott. 0.4 (82–84 %) | Corrugato ott. 0.6 (81–82 %) | Corrugato OE2IGL (79.5 %) | Large W2IMU W1GHZ (78–79 %) |
+
+Eccezione: **a 10 GHz su 100 cm** il corrugato (Ø 247 mm) fa troppa ombra. Lì il migliore fra 0.35 e 0.45 è il
+**VE4MA ottimizzato (80 %)** e fra 0.55 e 0.65 il W2IMU ottimizzato (77–78 %). Su 150 cm sono pari (80 %), da 200 cm
+in su vince il corrugato.
 
 ## Quote in produzione (CNC)
 
